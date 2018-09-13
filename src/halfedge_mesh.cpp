@@ -995,7 +995,10 @@ VertexPtr HalfedgeMesh::insertVertex(FacePtr fIn) {
   DynamicFacePtr fInD(fIn, this);
 
   // Create the new center vertex
-  VertexPtr centerVert{getNewVertex()};
+  DynamicVertexPtr centerVertD(getNewVertex(), this);
+
+
+  // Count degree to allocate elements
   size_t faceDegree = 0;
   for (HalfedgePtr he : FacePtr(fInD).adjacentHalfedges()) {
     faceDegree++;
@@ -1004,22 +1007,35 @@ VertexPtr HalfedgeMesh::insertVertex(FacePtr fIn) {
   // == Create new halfedges/edges/faces around the center vertex
 
   // Create all of the new elements first, then hook them up below, as this can invalidate pointers.
+  std::vector<DynamicFacePtr> innerFacesD;
+  std::vector<DynamicHalfedgePtr> leadingHalfedgesD; // the one that points towards the center
+  std::vector<DynamicHalfedgePtr> trailingHalfedgesD;
+  std::vector<DynamicEdgePtr> innerEdgesD; // aligned with leading he
+  for (size_t i = 0; i < faceDegree; i++) {
+    // Re-use first face
+    if (i == 0) {
+      innerFacesD.push_back(fInD);
+    } else {
+      innerFacesD.push_back(DynamicFacePtr(getNewFace(), this));
+    }
+
+    leadingHalfedgesD.push_back(DynamicHalfedgePtr(getNewRealHalfedge(), this));
+    trailingHalfedgesD.push_back(DynamicHalfedgePtr(getNewRealHalfedge(), this));
+    innerEdgesD.push_back(DynamicEdgePtr(getNewEdge(), this));
+  }
+
+  // Copy to raw pointers now that they are allocated
   std::vector<Face*> innerFaces;
   std::vector<Halfedge*> leadingHalfedges; // the one that points towards the center
   std::vector<Halfedge*> trailingHalfedges;
   std::vector<Edge*> innerEdges; // aligned with leading he
   for (size_t i = 0; i < faceDegree; i++) {
-    // Re-use first face
-    if (i == 0) {
-      innerFaces.push_back(FacePtr(fInD).ptr);
-    } else {
-      innerFaces.push_back(getNewFace());
-    }
-
-    leadingHalfedges.push_back(getNewRealHalfedge());
-    trailingHalfedges.push_back(getNewRealHalfedge());
-    innerEdges.push_back(getNewEdge());
+    innerFaces.push_back(FacePtr(innerFacesD[i]).ptr);
+    leadingHalfedges.push_back(HalfedgePtr(leadingHalfedgesD[i]).ptr);
+    trailingHalfedges.push_back(HalfedgePtr(trailingHalfedgesD[i]).ptr);
+    innerEdges.push_back(EdgePtr(innerEdgesD[i]).ptr);
   }
+  VertexPtr centerVert = centerVertD;
 
   // Form this list before we start, because we're about to start breaking pointers
   std::vector<Halfedge*> faceBoundaryHalfedges;
@@ -1034,7 +1050,7 @@ VertexPtr HalfedgeMesh::insertVertex(FacePtr fIn) {
     // Gather pointers
     Face* f = innerFaces[i];
     Edge* e = innerEdges[i];
-    Edge* prevE = innerEdges[(i + faceDegree - 1) & faceDegree];
+    Edge* prevE = innerEdges[(i + faceDegree - 1) % faceDegree];
     Halfedge* leadingHe = leadingHalfedges[i];
     Halfedge* trailingHe = trailingHalfedges[i];
     Halfedge* boundaryHe = faceBoundaryHalfedges[i];
@@ -1061,7 +1077,13 @@ VertexPtr HalfedgeMesh::insertVertex(FacePtr fIn) {
     trailingHe->vertex = centerVert.ptr;
     trailingHe->edge = prevE;
     trailingHe->face = f;
+    
+    // boundary halfedge
+    boundaryHe->next = leadingHe;
+    boundaryHe->face = f;
+
   }
+  centerVert.ptr->halfedge = trailingHalfedges[0];
 
   return centerVert;
 }
@@ -1307,7 +1329,7 @@ Edge* HalfedgeMesh::getNewEdge() {
   }
   // The intesting case, where the vector resizes and we need to update pointers.
   else {
-
+  
     // Create a new halfedge, allowing the list to expand
     Edge* oldStart = &rawEdges.front();
     rawEdges.emplace_back();

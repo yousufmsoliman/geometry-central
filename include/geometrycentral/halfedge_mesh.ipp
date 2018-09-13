@@ -12,6 +12,11 @@ inline size_t HalfedgeMesh::nFaces(void) const { return rawFaces.size(); }
 inline size_t HalfedgeMesh::nBoundaryLoops(void) const { return rawBoundaryLoops.size(); }
 inline size_t HalfedgeMesh::nImaginaryHalfedges(void) const { return rawHalfedges.size() - nRealHalfedges; }
 
+inline size_t HalfedgeMesh::nHalfedgesCapacity(void) const { return rawHalfedges.capacity(); }
+inline size_t HalfedgeMesh::nVerticesCapacity(void) const { return rawVertices.capacity(); }
+inline size_t HalfedgeMesh::nEdgesCapacity(void) const { return rawEdges.capacity(); }
+inline size_t HalfedgeMesh::nFacesCapacity(void) const { return rawFaces.capacity(); }
+
 // Methods for iterating over mesh elements w/ range-based for loops ===========
 
 inline HalfedgePtrSet HalfedgeMesh::realHalfedges(void) {

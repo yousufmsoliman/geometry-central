@@ -18,6 +18,13 @@ template<> inline size_t nElements<EdgePtr    >(HalfedgeMesh* mesh)   { return m
 template<> inline size_t nElements<HalfedgePtr>(HalfedgeMesh* mesh)   { return mesh->nHalfedges() + mesh->nImaginaryHalfedges();  }
 template<> inline size_t nElements<CornerPtr  >(HalfedgeMesh* mesh)   { return mesh->nCorners();    }
 
+template <typename E> size_t elementCapacity(HalfedgeMesh* mesh)            { return std::numeric_limits<size_t>::max(); }
+template<> inline size_t elementCapacity<VertexPtr  >(HalfedgeMesh* mesh)   { return mesh->nVerticesCapacity();   }
+template<> inline size_t elementCapacity<FacePtr    >(HalfedgeMesh* mesh)   { return mesh->nFacesCapacity(); }
+template<> inline size_t elementCapacity<EdgePtr    >(HalfedgeMesh* mesh)   { return mesh->nEdgesCapacity();      }
+template<> inline size_t elementCapacity<HalfedgePtr>(HalfedgeMesh* mesh)   { return mesh->nHalfedgesCapacity();}
+template<> inline size_t elementCapacity<CornerPtr  >(HalfedgeMesh* mesh)   { return mesh->nHalfedgesCapacity();    }
+
 // Index from element
 template <typename E> size_t dataIndexOfElement(HalfedgeMesh* mesh, E e)            { return std::numeric_limits<size_t>::max(); }
 template<> inline size_t dataIndexOfElement<VertexPtr  >(HalfedgeMesh* mesh, VertexPtr e)    { return e - mesh->vertex(0); }
@@ -73,7 +80,7 @@ template<> inline std::list<std::function<void(size_t)>>& getCompressCallbackLis
 template <typename E, typename T>
 MeshData<E, T>::MeshData(HalfedgeMesh* parentMesh) : mesh(parentMesh) {
   if (parentMesh != nullptr) {
-    data.resize(nElements<E>(parentMesh));
+    data.resize(elementCapacity<E>(parentMesh));
     fill(defaultValue);
   }
 
@@ -83,7 +90,7 @@ MeshData<E, T>::MeshData(HalfedgeMesh* parentMesh) : mesh(parentMesh) {
 template <typename E, typename T>
 MeshData<E, T>::MeshData(HalfedgeMesh* parentMesh, T initVal) : mesh(parentMesh), defaultValue(initVal) {
   if (parentMesh != nullptr) {
-    data.resize(nElements<E>(parentMesh));
+    data.resize(elementCapacity<E>(parentMesh));
     fill(defaultValue);
   }
 

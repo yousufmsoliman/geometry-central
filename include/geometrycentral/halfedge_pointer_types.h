@@ -103,9 +103,10 @@ std::ostream& operator<<(std::ostream& output, const HalfedgePtr& he);
 
 class DynamicHalfedgePtr {
 public:
+  DynamicHalfedgePtr(){};
   DynamicHalfedgePtr(Halfedge* ptr, HalfedgeMesh* mesh);
   DynamicHalfedgePtr(HalfedgePtr ptr, HalfedgeMesh* mesh);
-  
+
   DynamicHalfedgePtr twin() const;
   DynamicHalfedgePtr next() const;
   DynamicVertexPtr vertex() const;
@@ -114,7 +115,7 @@ public:
 
   // Despite the name, should not be used as a [0,N) index.
   size_t getInd() const;
-  
+
   // Comparators
   bool operator==(const DynamicHalfedgePtr& other) const;
   bool operator!=(const DynamicHalfedgePtr& other) const;
@@ -122,10 +123,10 @@ public:
   bool operator>=(const DynamicHalfedgePtr& other) const;
   bool operator<(const DynamicHalfedgePtr& other) const;
   bool operator<=(const DynamicHalfedgePtr& other) const;
-  
+
   // The static equivalent
   typedef HalfedgePtr StaticType;
-  
+
 private:
   friend class HalfedgePtr;
   friend class HalfedgeMesh;
@@ -133,7 +134,7 @@ private:
 
   size_t ind = -1;
   HalfedgeMesh* mesh = nullptr;
-  //std::list<DynamicHalfedgePtr*>::iterator listIt;
+  // std::list<DynamicHalfedgePtr*>::iterator listIt;
 };
 
 enum class HalfedgeSetType { Real, Imaginary, All };
@@ -202,7 +203,7 @@ public:
   CornerPtr operator++(int);
   CornerPtr& operator--();
   CornerPtr operator--(int);
-  
+
   // The dynamic equivalent
   // TODO
   typedef DynamicHalfedgePtr DynamicType;
@@ -287,7 +288,7 @@ public:
   VertexPtr operator++(int);
   VertexPtr& operator--();
   VertexPtr operator--(int);
-  
+
   // The dynamic equivalent
   typedef DynamicVertexPtr DynamicType;
 
@@ -303,15 +304,16 @@ std::ostream& operator<<(std::ostream& output, const VertexPtr& v);
 
 class DynamicVertexPtr {
 public:
+  DynamicVertexPtr(){};
   DynamicVertexPtr(Vertex* ptr, HalfedgeMesh* mesh);
   DynamicVertexPtr(VertexPtr ptr, HalfedgeMesh* mesh);
 
   // Connectivity
   DynamicHalfedgePtr halfedge() const;
-  
+
   // Despite the name, should not be used as a [0,N) index.
   size_t getInd() const;
-  
+
   // Comparators
   bool operator==(const DynamicVertexPtr& other) const;
   bool operator!=(const DynamicVertexPtr& other) const;
@@ -319,7 +321,7 @@ public:
   bool operator>=(const DynamicVertexPtr& other) const;
   bool operator<(const DynamicVertexPtr& other) const;
   bool operator<=(const DynamicVertexPtr& other) const;
-  
+
   // The static equivalent
   typedef VertexPtr StaticType;
 
@@ -330,7 +332,7 @@ private:
 
   size_t ind = -1;
   HalfedgeMesh* mesh = nullptr;
-  //std::list<DynamicVertexPtr*>::iterator listIt;
+  // std::list<DynamicVertexPtr*>::iterator listIt;
 };
 
 class VertexPtrRangeIterator {
@@ -399,7 +401,7 @@ public:
   EdgePtr operator++(int);
   EdgePtr& operator--();
   EdgePtr operator--(int);
-  
+
   // The dynamic equivalent
   typedef DynamicEdgePtr DynamicType;
 
@@ -415,15 +417,16 @@ std::ostream& operator<<(std::ostream& output, const EdgePtr& e);
 
 class DynamicEdgePtr {
 public:
+  DynamicEdgePtr(){};
   DynamicEdgePtr(Edge* ptr, HalfedgeMesh* mesh);
   DynamicEdgePtr(EdgePtr ptr, HalfedgeMesh* mesh);
-  
+
   // Connectivity
   DynamicHalfedgePtr halfedge() const;
-  
+
   // Despite the name, should not be used as a [0,N) index.
   size_t getInd() const;
-  
+
   // Comparators
   bool operator==(const DynamicEdgePtr& other) const;
   bool operator!=(const DynamicEdgePtr& other) const;
@@ -431,7 +434,7 @@ public:
   bool operator>=(const DynamicEdgePtr& other) const;
   bool operator<(const DynamicEdgePtr& other) const;
   bool operator<=(const DynamicEdgePtr& other) const;
-  
+
   // The static equivalent
   typedef EdgePtr StaticType;
 
@@ -442,7 +445,7 @@ private:
 
   size_t ind = -1;
   HalfedgeMesh* mesh = nullptr;
-  //std::list<DynamicEdgePtr*>::iterator listIt;
+  // std::list<DynamicEdgePtr*>::iterator listIt;
 };
 
 class EdgePtrRangeIterator {
@@ -529,7 +532,7 @@ public:
   FacePtr operator++(int);
   FacePtr& operator--();
   FacePtr operator--(int);
-  
+
   // The dynamic equivalent
   typedef DynamicFacePtr DynamicType;
 
@@ -545,15 +548,16 @@ std::ostream& operator<<(std::ostream& output, const FacePtr& f);
 
 class DynamicFacePtr {
 public:
+  DynamicFacePtr(){};
   DynamicFacePtr(Face* ptr, HalfedgeMesh* mesh);
   DynamicFacePtr(FacePtr ptr, HalfedgeMesh* mesh);
- 
+
   // Connectivity
   DynamicHalfedgePtr halfedge() const;
-  
+
   // Despite the name, should not be used as a [0,N) index.
   size_t getInd() const;
- 
+
   // Comparators
   bool operator==(const DynamicFacePtr& other) const;
   bool operator!=(const DynamicFacePtr& other) const;
@@ -572,7 +576,7 @@ private:
 
   size_t ind = -1;
   HalfedgeMesh* mesh = nullptr;
-  //std::list<DynamicFacePtr*>::iterator listIt;
+  // std::list<DynamicFacePtr*>::iterator listIt;
 };
 
 class FacePtrRangeIterator {
@@ -603,7 +607,6 @@ typedef Face Boundary;
 typedef FacePtr BoundaryPtr;
 typedef FacePtrSet BoundaryPtrSet;
 typedef FacePtrRangeIterator BoundaryRangeIterator;
-
 
 
 } // namespace geometrycentral
