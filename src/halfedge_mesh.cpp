@@ -19,161 +19,8 @@ using std::endl;
 
 namespace geometrycentral {
 
-// Cache some basic information that may be queried many
-// times, but require O(n) computation to determine.
-void HalfedgeMesh::cacheInfo() {
-  cache_isSimplicial();
-  cache_nFacesTriangulation();
-  cache_longestBoundaryLoop();
-  cache_nInteriorVertices();
-  cache_nConnectedComponents();
-}
 
-// Returns true if and only if all faces are triangles
-bool HalfedgeMesh::isSimplicial() const { return _isSimplicial; }
-
-void HalfedgeMesh::cache_isSimplicial() {
-  _isSimplicial = true;
-  for (FacePtr f : faces()) {
-    if (f.degree() != 3) {
-      _isSimplicial = false;
-      return;
-    }
-  }
-}
-
-void HalfedgeMesh::cache_nConnectedComponents() {
-
-  VertexData<size_t> vertInd = getVertexIndices();
-  DisjointSets dj(nVertices());
-  for (EdgePtr e : edges()) {
-    dj.merge(vertInd[e.halfedge().vertex()], vertInd[e.halfedge().twin().vertex()]);
-  }
-  std::unordered_set<size_t> distinctComponents;
-  for (size_t i = 0; i < nVertices(); i++) {
-    distinctComponents.insert(dj.find(i));
-  }
-  _nConnectedComponents = distinctComponents.size();
-}
-
-void HalfedgeMesh::cache_nInteriorVertices() {
-  _nInteriorVertices = 0;
-  for (const VertexPtr v : vertices()) {
-    if (!v->isBoundary) {
-      _nInteriorVertices++;
-    }
-  }
-}
-
-// Counts the total number of faces in a triangulation of this mesh,
-// corresponding to the triangulation given by Face::triangulate().
-size_t HalfedgeMesh::nFacesTriangulation() const { return _nFacesTriangulation; }
-
-void HalfedgeMesh::cache_nFacesTriangulation() {
-  _nFacesTriangulation = 0;
-  for (FacePtr f : faces()) {
-    _nFacesTriangulation += f.degree() - 2;
-  }
-}
-
-size_t HalfedgeMesh::longestBoundaryLoop() const { return _longestBoundaryLoop; }
-
-int HalfedgeMesh::eulerCharacteristic() const {
-  // be sure to do intermediate arithmetic with large, signed integers
-  return static_cast<int>(static_cast<long long int>(nVertices()) - static_cast<long long int>(nEdges()) +
-                          static_cast<long long int>(nFaces()));
-}
-
-void HalfedgeMesh::cache_longestBoundaryLoop() {
-  int max = 0;
-  for (size_t i = 0; i < nBoundaryLoops(); i++) {
-    // Count halfedges on boundary and check if greater than max
-    int n = 0;
-    HalfedgePtr he = boundaryLoop(i).halfedge();
-    HalfedgePtr h = he;
-    do {
-      n++;
-      h = h.next();
-    } while (h != he);
-
-    if (n > max) {
-      max = n;
-      _longestBoundaryLoop = i;
-    }
-  }
-}
-
-VertexData<size_t> HalfedgeMesh::getVertexIndices() {
-  VertexData<size_t> indices(this);
-  size_t i = 0;
-  for (VertexPtr v : vertices()) {
-    indices[v] = i;
-    i++;
-  }
-  return indices;
-}
-
-VertexData<size_t> HalfedgeMesh::getInteriorVertexIndices() {
-  VertexData<size_t> indices(this);
-  size_t i = 0;
-  for (VertexPtr v : vertices()) {
-    if (v->isBoundary) {
-      indices[v] = -7;
-    } else {
-      indices[v] = i;
-      i++;
-    }
-  }
-  return indices;
-}
-
-FaceData<size_t> HalfedgeMesh::getFaceIndices() {
-  FaceData<size_t> indices(this);
-  size_t i = 0;
-  for (FacePtr f : faces()) {
-    indices[f] = i;
-    i++;
-  }
-  return indices;
-}
-
-EdgeData<size_t> HalfedgeMesh::getEdgeIndices() {
-  EdgeData<size_t> indices(this);
-  size_t i = 0;
-  for (EdgePtr e : edges()) {
-    indices[e] = i;
-    i++;
-  }
-  return indices;
-}
-
-HalfedgeData<size_t> HalfedgeMesh::getHalfedgeIndices() {
-  HalfedgeData<size_t> indices(this);
-  size_t i = 0;
-  for (HalfedgePtr he : allHalfedges()) {
-    indices[he] = i;
-    i++;
-  }
-  return indices;
-}
-
-CornerData<size_t> HalfedgeMesh::getCornerIndices() {
-  CornerData<size_t> indices(this);
-  size_t i = 0;
-  for (CornerPtr c : corners()) {
-    if (c.halfedge().isReal()) {
-      indices[c] = i;
-      i++;
-    }
-  }
-  return indices;
-}
-
-size_t HalfedgeMesh::nInteriorVertices() const { return _nInteriorVertices; }
-
-size_t HalfedgeMesh::nConnectedComponents() const { return _nConnectedComponents; }
-
-HalfedgeMesh::HalfedgeMesh() : _isSimplicial(true), _nFacesTriangulation(0), _longestBoundaryLoop(0) {}
+HalfedgeMesh::HalfedgeMesh() {}
 
 // Helper for below
 size_t halfedgeLookup(const std::vector<size_t>& compressedList, size_t target, size_t start, size_t end) {
@@ -196,12 +43,6 @@ size_t halfedgeLookup(const std::vector<size_t>& compressedList, size_t target, 
     } else {
       return std::numeric_limits<size_t>::max();
     }
-  }
-}
-
-HalfedgeMesh::~HalfedgeMesh() {
-  for (auto& f : meshDeleteCallbackList) {
-    f();
   }
 }
 
@@ -550,7 +391,150 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
   std::cout << "Construction took " << pretty_time(FINISH_TIMING(construction)) << std::endl;
 
   // Compute some basic information about the mesh
-  cacheInfo();
+}
+
+HalfedgeMesh::~HalfedgeMesh() {
+  for (auto& f : meshDeleteCallbackList) {
+    f();
+  }
+}
+
+
+// Returns true if and only if all faces are triangles
+bool HalfedgeMesh::isSimplicial() {
+  for (FacePtr f : faces()) {
+    if (f.degree() != 3) {
+      return false;
+    }
+  }
+  return true;
+}
+
+size_t HalfedgeMesh::nConnectedComponents() {
+  VertexData<size_t> vertInd = getVertexIndices();
+  DisjointSets dj(nVertices());
+  for (EdgePtr e : edges()) {
+    dj.merge(vertInd[e.halfedge().vertex()], vertInd[e.halfedge().twin().vertex()]);
+  }
+  std::unordered_set<size_t> distinctComponents;
+  for (size_t i = 0; i < nVertices(); i++) {
+    distinctComponents.insert(dj.find(i));
+  }
+  return distinctComponents.size();
+}
+
+size_t HalfedgeMesh::nInteriorVertices() {
+  size_t _nInteriorVertices = 0;
+  for (const VertexPtr v : vertices()) {
+    if (!v->isBoundary) {
+      _nInteriorVertices++;
+    }
+  }
+  return _nInteriorVertices;
+}
+
+// Counts the total number of faces in a triangulation of this mesh,
+// corresponding to the triangulation given by Face::triangulate().
+size_t HalfedgeMesh::nFacesTriangulation() {
+  size_t _nFacesTriangulation = 0;
+  for (FacePtr f : faces()) {
+    _nFacesTriangulation += f.degree() - 2;
+  }
+  return _nFacesTriangulation;
+}
+
+
+int HalfedgeMesh::eulerCharacteristic() {
+  // be sure to do intermediate arithmetic with large, signed integers
+  return static_cast<int>(static_cast<long long int>(nVertices()) - static_cast<long long int>(nEdges()) +
+                          static_cast<long long int>(nFaces()));
+}
+
+size_t HalfedgeMesh::longestBoundaryLoop() {
+  int max = 0;
+  size_t _longestBoundaryLoop = 0;
+  for (size_t i = 0; i < nBoundaryLoops(); i++) {
+    // Count halfedges on boundary and check if greater than max
+    int n = 0;
+    HalfedgePtr he = boundaryLoop(i).halfedge();
+    HalfedgePtr h = he;
+    do {
+      n++;
+      h = h.next();
+    } while (h != he);
+
+    if (n > max) {
+      max = n;
+      _longestBoundaryLoop = i;
+    }
+  }
+  return _longestBoundaryLoop;
+}
+
+VertexData<size_t> HalfedgeMesh::getVertexIndices() {
+  VertexData<size_t> indices(this);
+  size_t i = 0;
+  for (VertexPtr v : vertices()) {
+    indices[v] = i;
+    i++;
+  }
+  return indices;
+}
+
+VertexData<size_t> HalfedgeMesh::getInteriorVertexIndices() {
+  VertexData<size_t> indices(this);
+  size_t i = 0;
+  for (VertexPtr v : vertices()) {
+    if (v->isBoundary) {
+      indices[v] = -7;
+    } else {
+      indices[v] = i;
+      i++;
+    }
+  }
+  return indices;
+}
+
+FaceData<size_t> HalfedgeMesh::getFaceIndices() {
+  FaceData<size_t> indices(this);
+  size_t i = 0;
+  for (FacePtr f : faces()) {
+    indices[f] = i;
+    i++;
+  }
+  return indices;
+}
+
+EdgeData<size_t> HalfedgeMesh::getEdgeIndices() {
+  EdgeData<size_t> indices(this);
+  size_t i = 0;
+  for (EdgePtr e : edges()) {
+    indices[e] = i;
+    i++;
+  }
+  return indices;
+}
+
+HalfedgeData<size_t> HalfedgeMesh::getHalfedgeIndices() {
+  HalfedgeData<size_t> indices(this);
+  size_t i = 0;
+  for (HalfedgePtr he : allHalfedges()) {
+    indices[he] = i;
+    i++;
+  }
+  return indices;
+}
+
+CornerData<size_t> HalfedgeMesh::getCornerIndices() {
+  CornerData<size_t> indices(this);
+  size_t i = 0;
+  for (CornerPtr c : corners()) {
+    if (c.halfedge().isReal()) {
+      indices[c] = i;
+      i++;
+    }
+  }
+  return indices;
 }
 
 bool Edge::flip() {
@@ -743,7 +727,6 @@ HalfedgeMesh* HalfedgeMesh::copy(HalfedgeMeshDataTransfer& dataTransfer) {
   }
 #endif
 
-  newMesh->cacheInfo();
   dataTransfer.generateReverseMaps();
 
   return newMesh;
@@ -1077,11 +1060,10 @@ VertexPtr HalfedgeMesh::insertVertex(FacePtr fIn) {
     trailingHe->vertex = centerVert.ptr;
     trailingHe->edge = prevE;
     trailingHe->face = f;
-    
+
     // boundary halfedge
     boundaryHe->next = leadingHe;
     boundaryHe->face = f;
-
   }
   centerVert.ptr->halfedge = trailingHalfedges[0];
 
@@ -1329,7 +1311,7 @@ Edge* HalfedgeMesh::getNewEdge() {
   }
   // The intesting case, where the vector resizes and we need to update pointers.
   else {
-  
+
     // Create a new halfedge, allowing the list to expand
     Edge* oldStart = &rawEdges.front();
     rawEdges.emplace_back();

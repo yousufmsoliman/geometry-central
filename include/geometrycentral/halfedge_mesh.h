@@ -49,7 +49,7 @@ public:
   size_t nHalfedges() const;
   size_t nCorners() const;
   size_t nVertices() const;
-  size_t nInteriorVertices() const;
+  size_t nInteriorVertices();
   size_t nEdges() const;
   size_t nFaces() const;
   size_t nBoundaryLoops() const;
@@ -115,13 +115,13 @@ public:
   CornerData<size_t> getCornerIndices();
 
   // Utility functions
-  bool isSimplicial() const;          // returns true if and only if all faces are triangles
-  size_t nFacesTriangulation() const; // returns the number of triangles in the
+  bool isSimplicial() ;          // returns true if and only if all faces are triangles
+  size_t nFacesTriangulation() ; // returns the number of triangles in the
                                       // triangulation determined by
                                       // Face::triangulate()
-  size_t longestBoundaryLoop() const;
-  int eulerCharacteristic() const;
-  size_t nConnectedComponents() const;
+  size_t longestBoundaryLoop() ;
+  int eulerCharacteristic() ;
+  size_t nConnectedComponents() ;
   std::vector<std::vector<size_t>> getPolygonSoupFaces();
   HalfedgeMesh* copy();                            // returns a deep copy
   HalfedgeMesh* copy(HalfedgeMeshDataTransfer& t); // returns a deep copy
@@ -186,20 +186,6 @@ private:
   Edge* getNewEdge();
   Face* getNewFace();
 
-  // Cache some basic information that may be queried many
-  // times, but require O(n) computation to determine.
-  // FIXME this is now broken with respect to modifications
-  void cacheInfo();
-  void cache_isSimplicial();
-  void cache_nFacesTriangulation();
-  void cache_longestBoundaryLoop();
-  void cache_nInteriorVertices();
-  void cache_nConnectedComponents();
-  bool _isSimplicial;
-  size_t _nFacesTriangulation;
-  size_t _longestBoundaryLoop;
-  size_t _nInteriorVertices;
-  size_t _nConnectedComponents;
 
   size_t indexOf(Halfedge* ptr);
   size_t indexOf(Vertex* ptr);
