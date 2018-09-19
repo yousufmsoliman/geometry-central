@@ -169,7 +169,8 @@ void MeshData<E, T>::registerWithMesh() {
 
   // Callback function on compression
   // TODO
-  std::function<void(size_t)> compressFunc = [this](size_t newSize) { throw std::runtime_error("not implemented"); };
+  //std::function<void(size_t)> compressFunc = [this](size_t newSize) { throw std::runtime_error("not implemented"); };
+  std::function<void(size_t)> compressFunc = [](size_t newSize) { throw std::runtime_error("not implemented"); };
 
 
   // Callback function on mesh delete
