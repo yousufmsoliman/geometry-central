@@ -80,11 +80,16 @@ public:
   // TODOs: support removing elements, support adding boundary
 
   // Adds a vertex along an edge, increasing degree of faces. Returns ptr along the new edge, with he.vertex() as new
-  // vertex
+  // vertex and he.edge().halfedge() == he. Preserves canonical direction of edge.halfedge() for both halves of new edge.
   HalfedgePtr insertVertexAlongEdge(EdgePtr e);
 
   // Split an edge, also splitting adjacent faces. Returns new vertex.
   VertexPtr splitEdge(EdgePtr e);
+
+  // Split an edge, also splitting adjacent faces. Returns new halfedge which points TOWARDS the new vertex, and is the
+  // same direction as e.halfedge() on the original edge. The halfedge direction of the other part of the new split edge
+  // is also preserved, as in insertVertexAlongEdge().
+  HalfedgePtr splitEdgeReturnHalfedge(EdgePtr e);
 
   // Add vertex inside face and triangulate. Returns new vertex.
   VertexPtr insertVertex(FacePtr f);
@@ -149,14 +154,14 @@ public:
   // (this unfortunately seems to be necessary; objects which have registered their callbacks above
   // need to know not to try to de-register them if the mesh has been deleted)
   std::list<std::function<void()>> meshDeleteCallbackList;
-  
-  // Check capacity. Needed when implementing expandable containers for mutable meshes to ensure the contain can 
+
+  // Check capacity. Needed when implementing expandable containers for mutable meshes to ensure the contain can
   // hold a sufficient number of elements before the next resize event.
   size_t nHalfedgesCapacity() const;
   size_t nVerticesCapacity() const;
   size_t nEdgesCapacity() const;
   size_t nFacesCapacity() const;
-  
+
   // Performs a sanity checks on halfedge structure; throws on fail
   void validateConnectivity();
 

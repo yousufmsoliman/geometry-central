@@ -845,6 +845,38 @@ VertexPtr HalfedgeMesh::splitEdge(EdgePtr e) {
   return newV;
 }
 
+HalfedgePtr HalfedgeMesh::splitEdgeReturnHalfedge(EdgePtr e) {
+
+  // Validate that faces are triangular and real
+  if (e.isBoundary() || e.halfedge().face().degree() != 3 || e.halfedge().twin().face().degree() != 3 ||
+      e.halfedge().face() == e.halfedge().twin().face()) {
+    throw std::logic_error("Can only split non-boundary edge which borders two distinct triangular faces");
+    // note: if removing boundary restriction, need to fix return value below
+  }
+  
+  // Save this
+  DynamicHalfedgePtr heIn(e.halfedge(), this);
+
+  // First operation: insert a new vertex along the edge
+  VertexPtr newV = insertVertexAlongEdge(e).vertex();
+
+
+  // Second operation: connect both of the new faces
+  DynamicFacePtr fOppA(newV.halfedge().face(), this);
+  DynamicVertexPtr vOppA(newV.halfedge().next().next().vertex(), this);
+  DynamicFacePtr fOppB(newV.halfedge().twin().face(), this);
+  DynamicVertexPtr vOppB(newV.halfedge().twin().next().next().next().vertex(), this);
+
+  connectVertices(fOppA, vOppA, newV);
+  connectVertices(fOppB, vOppB, newV);
+
+  // Find the useful halfedge pointer to return using from the halfedge we saved
+  HalfedgePtr toReturn = HalfedgePtr(heIn).twin().next().twin().next().twin();
+
+  return toReturn;
+}
+
+
 HalfedgePtr HalfedgeMesh::connectVertices(VertexPtr vA, VertexPtr vB) {
 
   // Find the shared face and call the main version
