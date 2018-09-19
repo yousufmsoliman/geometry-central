@@ -8,6 +8,13 @@
 
 namespace geometrycentral {
 
+// Loads a halfedge mesh from file, automatically detecting type 
+// Specify a type like "ply" or "obj".
+// If no type is specified, attempts to infer from extension.
+Geometry<Euclidean>* loadMesh(std::string filename, std::string type = "");
+Geometry<Euclidean>* loadMesh_OBJ(std::string filename);
+Geometry<Euclidean>* loadMesh_PLY(std::string filename);
+
 class WavefrontOBJ {
  public:
   static bool write(std::string filename, Geometry<Euclidean>& geometry);
@@ -29,6 +36,7 @@ class PLY {
   static bool write(std::string filename, Geometry<Euclidean>& geometry,
                     VertexData<Vector3> colors);
 };
+
 
 // TODO write halfedge mesh as a permutation, in binary format (for quicker
 // loading/smaller files)

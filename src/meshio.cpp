@@ -2,10 +2,89 @@
 #include <limits>
 
 #include "geometrycentral/meshio.h"
+#include "geometrycentral/geometry.h"
+#include "geometrycentral/polygon_soup_mesh.h"
+
+#include "happly.h"
 
 using namespace std;
 
 namespace geometrycentral {
+
+// ======= Input =======
+
+Geometry<Euclidean>* loadMesh_PLY(std::string filename) {
+
+  happly::PLYData plyData(filename);
+
+  // === Get vertex positions
+  std::vector<std::array<double, 3>> rawPos = plyData.getVertexPositions();
+  std::vector<Vector3> vertexPositions(rawPos.size());
+  for (size_t i = 0; i < rawPos.size(); i++) {
+    vertexPositions[i][0] = rawPos[i][0];
+    vertexPositions[i][1] = rawPos[i][1];
+    vertexPositions[i][2] = rawPos[i][2];
+  }
+
+  // Get face list
+  std::vector<std::vector<size_t>> faceIndices = plyData.getFaceIndices();
+
+  // === Build the mesh objects
+  Geometry<Euclidean>* geometry = nullptr;
+  HalfedgeMesh* mesh = new HalfedgeMesh(PolygonSoupMesh(faceIndices, vertexPositions), geometry);
+
+  return geometry;
+}
+
+Geometry<Euclidean>* loadMesh_OBJ(std::string filename) {
+
+  Geometry<Euclidean>* geometry = nullptr;
+  HalfedgeMesh* mesh = new HalfedgeMesh(PolygonSoupMesh(filename), geometry);
+
+  return geometry;
+}
+
+Geometry<Euclidean>* loadMesh(std::string filename, std::string type) {
+
+  // Check if file exists
+  std::ifstream testStream(filename);
+  if (!testStream) {
+    throw std::runtime_error("Could not load mesh; file does not exist: " + filename);
+  }
+  testStream.close();
+
+  // Attempt to detect filename
+  bool typeGiven = type != "";
+  std::string::size_type sepInd = filename.rfind('.');
+  if (!typeGiven) {
+    if (sepInd != std::string::npos) {
+      std::string extension;
+      extension = filename.substr(sepInd + 1);
+
+      // Convert to all lowercase
+      std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+      type = extension;
+    }
+  }
+
+
+  if (type == "obj") {
+    return loadMesh_OBJ(filename);
+  } else if (type == "ply") {
+    return loadMesh_PLY(filename);
+  } else {
+    if(typeGiven) {
+      throw std::runtime_error("Did not recognize mesh file type " + type);
+    } else {
+      throw std::runtime_error("Could not detect file type to load mesh from " + filename);
+    }
+  }
+
+  return nullptr;
+}
+
+
+// ======= Output =======
 
 bool WavefrontOBJ::write(string filename, Geometry<Euclidean>& geometry) {
   ofstream out;
