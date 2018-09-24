@@ -20,6 +20,26 @@ PlyHalfedgeMeshData::PlyHalfedgeMeshData(std::string filename_, bool verbose_)
   plyData = new happly::PLYData(filename, verbose);
 }
 
+PlyHalfedgeMeshData::PlyHalfedgeMeshData(Geometry<Euclidean>* geometry_)
+    : mesh(geometry_->getMesh()), geometry(geometry_) {
+  
+  plyData = new happly::PLYData();
+
+  // Vertex positions. Need to convert type for happly.
+  std::vector<Vector3> vertexPositions = geometry->getVertexPositionList();
+  std::vector<std::array<double, 3>> vertexPositionsA(vertexPositions.size());
+  for (size_t v = 0; v < vertexPositions.size(); v++) {
+    for (size_t i = 0; i < 3; i++) {
+      vertexPositionsA[v][i] = vertexPositions[v][i];
+    }
+  }
+  plyData->addVertexPositions(vertexPositionsA);
+
+  // Face indices
+  std::vector<std::vector<size_t>> faceIndices = mesh->getPolygonSoupFaces();
+  plyData->addFaceIndices(faceIndices);
+}
+
 PlyHalfedgeMeshData::~PlyHalfedgeMeshData() { safeDelete(plyData); }
 
 
@@ -87,8 +107,5 @@ VertexData<Vector3> PlyHalfedgeMeshData::getVertexColors() {
   }
 }
 
-void PlyHalfedgeMeshData::write(std::string filename) {
-  plyData->write(filename);
-}
-
+void PlyHalfedgeMeshData::write(std::string filename) { plyData->write(filename, happly::DataFormat::Binary); }
 }

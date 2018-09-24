@@ -17,7 +17,11 @@ namespace geometrycentral {
 class PlyHalfedgeMeshData {
 
 public:
+  // Construct by reading from file
   PlyHalfedgeMeshData(std::string filename, bool verbose = false);
+
+  // Construct from an existing mesh
+  PlyHalfedgeMeshData(Geometry<Euclidean>* geometry);
   ~PlyHalfedgeMeshData();
 
   Geometry<Euclidean>* getMesh();
@@ -42,15 +46,16 @@ public:
   template <class T>
   void addFaceProperty(std::string propertyName, FaceData<T>& fData);
 
-
-  // TODO implement creating one of these from a HalfedgeMesh/geometry object
-
+  // Write this object out to file
   void write(std::string filename);
+
+
+  // Users can directly modify the record, if they wish.
+  happly::PLYData* plyData = nullptr;
 
 private:
   // File data
   std::string filename;
-  happly::PLYData* plyData = nullptr;
 
   bool isBinary;
   float version;
@@ -78,7 +83,7 @@ VertexData<T> PlyHalfedgeMeshData::getVertexProperty(std::string propertyName) {
     getMesh();
   }
 
-  std::vector<T> rawData = plyData->getProperty<T>(vertexName, propertyName);
+  std::vector<T> rawData = plyData->getElement(vertexName).getProperty<T>(propertyName);
 
   if (rawData.size() != mesh->nVertices()) {
     throw std::runtime_error("Property " + propertyName + " does not have size equal to number of vertices");
@@ -99,7 +104,7 @@ FaceData<T> PlyHalfedgeMeshData::getFaceProperty(std::string propertyName) {
     getMesh();
   }
 
-  std::vector<T> rawData = plyData->getProperty<T>(faceName, propertyName);
+  std::vector<T> rawData = plyData->getElement(faceName).getProperty<T>(propertyName);
 
   if (rawData.size() != mesh->nVertices()) {
     throw std::runtime_error("Property " + propertyName + " does not have size equal to number of vertices");
