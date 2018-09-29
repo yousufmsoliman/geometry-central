@@ -1,6 +1,8 @@
 # Mutating the Halfedge Mesh
 
-The primary `HalfedgeMesh` type in geometry central (as well as the associated `MeshData<T>` types) stores elements in densely packed arrays, which yields significant performance benefits. However, unlike most dense representations, this mesh is also mutable, meaning you can insert/delete mesh elements and the packed representation will be maintained under the hood. These modifications are implemented in O(1) time via amortized resizing of the underlying buffers (a la std::vector), as well as tombstones to represent deleted elements. Most of the complexity is hidden under the hood, but there are a few rules you need to follow as a user-- I'm documenting this system here for now.
+The primary `HalfedgeMesh` type in geometry central (as well as the associated `MeshData<T>` types) stores elements in densely packed arrays, which yields significant performance benefits. However, unlike most dense representations, this mesh is also mutable, meaning you can insert/delete mesh elements and the packed representation will be maintained under the hood. These modifications are implemented in O(1) time via amortized resizing of the underlying buffers (a la std::vector), as well as tombstones to represent deleted elements.
+
+Most of the complexity is hidden under the hood, and the net effect is pretty great: you can utilize almost all of the functionality of geometry-central even while mutating a mesh, and there is no performance penalty compared to an unmodifiable mesh implmentation. However, there are a few rules you need to follow as a user-- I'm documenting these here for now.
 
 Beware: As of Oct 2018, these routines are still recently implemented and not well-tested. They may very well hold obnoxious lurking bugs.
 
@@ -17,7 +19,9 @@ Note that the invalidation rules here are similar to `std::vector`-- the invalid
 
 ### Dynamic Pointers
 
-It's a bit inconvenient that mesh pointers get invalidated after mutation calls. However, there are equivalent _dynamic pointer_ classes (`DynamicVertexPtr` etc), which work just like the usual mesh pointers, except that they are not invalidated by mutation. Of course, dynamic pointers can be converted to traditional pointers, and vice-versa. Use these pointers to keep track of particular elements across mutations. Note that because most mutation routines return a valid, non-dynamic pointer to some useful mesh element after the modifcation, I've found that you can quite often get away without actually needing to preserve any pointers across a call.
+It's a bit inconvenient that mesh pointers get invalidated after mutation calls.  However, the mutation routines return a valid, non-dynamic pointer to some useful mesh element after the modifcation, and with that I've found that you can quite often get away without actually needing to preserve any pointers across a call.
+
+However, there are equivalent _dynamic pointer_ classes (`DynamicVertexPtr` etc), which work just like the usual mesh pointers, except that they are not invalidated by mutation. Of course, dynamic pointers can be converted to traditional pointers, and vice-versa. Use these pointers to keep track of particular elements across mutations.
 
 We don't recommended using dynamic pointers for everything, because they are noticebly more expensive in practice, as they use callbacks to respond to buffer resizes and permutations (though they are still amortized O(1)). 
 
@@ -33,13 +37,13 @@ To compress the mesh, call `mesh->compress()`. The invalidation rules mentioned 
 
 After constructing an initial halfedge mesh from polygon soup, there is a useful canonical structure in the way elements are ordered. That is, the ordering of halfedges is the same as if you traversed the faces in order, and traversed the halfedges within each face. The ordering of the edges corresponds to the first time one of the adjacent halfedges appears in the halfedge ordering (TODO reference some docs on this).
 
-As we modify the mesh, this canonical ordering is not necessarily preserved. The mesh is not "broken" in any sense, but you might like to make use of this canonical ordering in your code. For instance, the visualization library Polyscope uses this ordering to abtract over halfedge mesh data structures.
+As we modify the mesh, this canonical ordering is not necessarily preserved. The mesh is not "broken" in any sense, but you might like to make use of this canonical ordering in your code. For instance, the visualization library Polyscope uses this ordering to abtract over halfedge mesh data structures, so a mesh must be canonical when used with Polyscope.
 
 To permute the elements in to the canonical ordering, call `mesh->canonicalize()`. The invalidation rules mentioned above apply to this operation, and `MeshData<>` containers will be automatically updated.
 
 ## MeshData Objects
 
-`MeshData<T>` contains are automatically updated as their corresponding mesh is modified. They can _always_ be index with a `VertexPtr` (etc), even if the corresponding mesh is not compressed, or is not canonical. This is super useful, because it allows you to write algorithms that track data while modifying a mesh without any extra effort (or storing data on element structs).
+`MeshData<T>` contains are automatically updated as their corresponding mesh is modified. They can _always_ be indexed with a `VertexPtr` (etc), even if the corresponding mesh is not compressed, or is not canonical. This is very useful, because it allows you to write algorithms that track data while modifying a mesh without any extra effort (or storing data on element structs).
 
 Indexing a `MeshData<T>` container with an integer index is only well-defined if the underlying mesh is compressed. Same for calling `MeshData<T>.toVector()`.
 
