@@ -19,9 +19,9 @@ Note that the invalidation rules here are similar to `std::vector`-- the invalid
 
 ### Dynamic Pointers
 
-It's a bit inconvenient that mesh pointers get invalidated after mutation calls.  However, the mutation routines return a valid, non-dynamic pointer to some useful mesh element after the modifcation, and with that I've found that you can quite often get away without actually needing to preserve any pointers across a call.
+It's a bit inconvenient that mesh pointers get invalidated after mutation calls.  However, the mutation routines return a normal, valid pointer to some relevant mesh element after the modifcation, and with that I've found that you can quite often get away without actually needing to preserve any pointers across a call.
 
-However, there are equivalent _dynamic pointer_ classes (`DynamicVertexPtr` etc), which work just like the usual mesh pointers, except that they are not invalidated by mutation. Of course, dynamic pointers can be converted to traditional pointers, and vice-versa. Use these pointers to keep track of particular elements across mutations.
+Nonetheless, sometimes you will need to track mesh elements across mutations. For that purpose, there are equivalent _dynamic pointer_ classes (`DynamicVertexPtr` etc), which work just like the usual mesh pointers, except that they are not invalidated by mutation. Of course, dynamic pointers can be converted to traditional pointers, and vice-versa. Use these pointers to keep track of particular elements across mutations.
 
 We don't recommended using dynamic pointers for everything, because they are noticebly more expensive in practice, as they use callbacks to respond to buffer resizes and permutations (though they are still amortized O(1)). 
 
