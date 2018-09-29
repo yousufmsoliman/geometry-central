@@ -4,13 +4,13 @@ namespace geometrycentral {
 
 // Methods for getting number of mesh elements
 
-inline size_t HalfedgeMesh::nHalfedges(void) const { return nRealHalfedges; }
-inline size_t HalfedgeMesh::nCorners(void) const { return rawHalfedges.size(); }
-inline size_t HalfedgeMesh::nVertices(void) const { return rawVertices.size(); }
-inline size_t HalfedgeMesh::nEdges(void) const { return rawEdges.size(); }
-inline size_t HalfedgeMesh::nFaces(void) const { return rawFaces.size(); }
+inline size_t HalfedgeMesh::nHalfedges(void) const { return nRealHalfedgesCount; }
+inline size_t HalfedgeMesh::nCorners(void) const { return nRealHalfedgesCount; }
+inline size_t HalfedgeMesh::nVertices(void) const { return nVerticesCount; }
+inline size_t HalfedgeMesh::nEdges(void) const { return nEdgesCount; }
+inline size_t HalfedgeMesh::nFaces(void) const { return nFacesCount; }
 inline size_t HalfedgeMesh::nBoundaryLoops(void) const { return rawBoundaryLoops.size(); }
-inline size_t HalfedgeMesh::nImaginaryHalfedges(void) const { return rawHalfedges.size() - nRealHalfedges; }
+inline size_t HalfedgeMesh::nImaginaryHalfedges(void) const { return nImaginaryHalfedgesCount; }
 
 inline size_t HalfedgeMesh::nHalfedgesCapacity(void) const { return rawHalfedges.capacity(); }
 inline size_t HalfedgeMesh::nVerticesCapacity(void) const { return rawVertices.capacity(); }
@@ -77,8 +77,8 @@ inline FacePtrSet HalfedgeMesh::faces(void) {
 
 inline BoundaryPtrSet HalfedgeMesh::boundaryLoops(void) {
   size_t nBL = rawBoundaryLoops.size();
-  BoundaryPtr beginptr{&rawBoundaryLoops[0]};
-  BoundaryPtr endptr{&rawBoundaryLoops[nBL]};
+  BoundaryLoopPtr beginptr{&rawBoundaryLoops[0]};
+  BoundaryLoopPtr endptr{&rawBoundaryLoops[nBL]};
 
   return BoundaryPtrSet(beginptr, endptr);
 }
@@ -96,10 +96,11 @@ inline EdgePtr HalfedgeMesh::edge(size_t index) { return EdgePtr{&rawEdges[index
 
 inline FacePtr HalfedgeMesh::face(size_t index) { return FacePtr{&rawFaces[index]}; }
 
-inline BoundaryPtr HalfedgeMesh::boundaryLoop(size_t index) { return BoundaryPtr{&rawBoundaryLoops[index]}; }
+inline BoundaryLoopPtr HalfedgeMesh::boundaryLoop(size_t index) { return BoundaryLoopPtr{&rawBoundaryLoops[index]}; }
 
 // Misc utility methods =====================================
 
-inline bool HalfedgeMesh::isCompressed() { throw std::logic_error("not implemented"); }
+inline bool HalfedgeMesh::isCompressed() { return isCompressedFlag; }
+inline bool HalfedgeMesh::isCanonical() { return isCanonicalFlag; }
 
 } // namespace geometrycentral

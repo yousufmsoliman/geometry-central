@@ -88,6 +88,7 @@ inline ::std::ostream& operator<<(::std::ostream& output,
   return output;
 }
 
+// FIXME dynamic pointers are currently broken -- need to support permutation callback for on compress()
 inline DynamicHalfedgePtr::DynamicHalfedgePtr(Halfedge* ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_)), mesh(mesh_) { }
 inline DynamicHalfedgePtr::DynamicHalfedgePtr(HalfedgePtr ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_.ptr)), mesh(mesh_) {
 }
@@ -418,7 +419,6 @@ inline EdgePtr::EdgePtr() : ptr(nullptr) {}
 inline EdgePtr::EdgePtr(Edge* ptr_) : ptr(ptr_) {}
 inline EdgePtr::EdgePtr(DynamicEdgePtr ptr_) : EdgePtr(ptr_.mesh->edge(ptr_.ind)) {}
 inline HalfedgePtr EdgePtr::halfedge() const { return ptr->halfedge; }
-inline bool EdgePtr::flip() { return ptr->flip(); }
 inline bool EdgePtr::isBoundary() const { return ptr->isBoundary; }
 inline Edge EdgePtr::operator*() { return *ptr; }
 inline Edge EdgePtr::operator*() const { return *ptr; }

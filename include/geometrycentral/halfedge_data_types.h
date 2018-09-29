@@ -36,7 +36,7 @@ private:
   // Manage a callback on the mesh object used to keep the container valid on resize events. Should be called once on
   // construction and once on destruction, respectively.
   std::list<std::function<void(size_t)>>::iterator expandCallbackIt;
-  std::list<std::function<void(size_t)>>::iterator compressCallbackIt;
+  std::list<std::function<void(const std::vector<size_t>&)>>::iterator permuteCallbackIt;
   std::list<std::function<void()>>::iterator deleteCallbackIt;
   void registerWithMesh();
   void deregisterWithMesh();

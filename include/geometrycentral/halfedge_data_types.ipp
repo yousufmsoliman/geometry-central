@@ -63,13 +63,13 @@ template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<
 template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<HalfedgePtr>(HalfedgeMesh* mesh)   { return mesh->halfedgeExpandCallbackList;   }
 template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<CornerPtr  >(HalfedgeMesh* mesh)   { return mesh->halfedgeExpandCallbackList;   }
 
-// Get the compress callback list
-template <typename E> std::list<std::function<void(size_t)>>& getCompressCallbackList(HalfedgeMesh* mesh)            { return mesh->vertexCompressCallbackList; } // not appropriate, placeholder value
-template<> inline std::list<std::function<void(size_t)>>& getCompressCallbackList<VertexPtr  >(HalfedgeMesh* mesh)   { return mesh->vertexCompressCallbackList;   }
-template<> inline std::list<std::function<void(size_t)>>& getCompressCallbackList<FacePtr    >(HalfedgeMesh* mesh)   { return mesh->faceCompressCallbackList;   }
-template<> inline std::list<std::function<void(size_t)>>& getCompressCallbackList<EdgePtr    >(HalfedgeMesh* mesh)   { return mesh->edgeCompressCallbackList;   }
-template<> inline std::list<std::function<void(size_t)>>& getCompressCallbackList<HalfedgePtr>(HalfedgeMesh* mesh)   { return mesh->halfedgeCompressCallbackList;   }
-template<> inline std::list<std::function<void(size_t)>>& getCompressCallbackList<CornerPtr  >(HalfedgeMesh* mesh)   { return mesh->halfedgeCompressCallbackList;   }
+// Get the permute callback list
+template <typename E> std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList(HalfedgeMesh* mesh)            { return mesh->vertexPermuteCallbackList; } // not appropriate, placeholder value
+template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<VertexPtr  >(HalfedgeMesh* mesh)   { return mesh->vertexPermuteCallbackList;   }
+template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<FacePtr    >(HalfedgeMesh* mesh)   { return mesh->facePermuteCallbackList;   }
+template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<EdgePtr    >(HalfedgeMesh* mesh)   { return mesh->edgePermuteCallbackList;   }
+template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<HalfedgePtr>(HalfedgeMesh* mesh)   { return mesh->halfedgePermuteCallbackList;   }
+template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<CornerPtr  >(HalfedgeMesh* mesh)   { return mesh->halfedgePermuteCallbackList;   }
 
 
 // clang-format on
@@ -168,9 +168,9 @@ void MeshData<E, T>::registerWithMesh() {
 
 
   // Callback function on compression
-  // TODO
-  //std::function<void(size_t)> compressFunc = [this](size_t newSize) { throw std::runtime_error("not implemented"); };
-  std::function<void(size_t)> compressFunc = [](size_t newSize) { throw std::runtime_error("not implemented"); };
+  std::function<void(const std::vector<size_t>&)> permuteFunc = [this](const std::vector<size_t>& perm) {
+    data = applyPermutation(data, perm);
+  };
 
 
   // Callback function on mesh delete
@@ -180,7 +180,7 @@ void MeshData<E, T>::registerWithMesh() {
   };
 
   expandCallbackIt = getExpandCallbackList<E>(mesh).insert(getExpandCallbackList<E>(mesh).begin(), expandFunc);
-  compressCallbackIt = getCompressCallbackList<E>(mesh).insert(getCompressCallbackList<E>(mesh).end(), compressFunc);
+  permuteCallbackIt = getPermuteCallbackList<E>(mesh).insert(getPermuteCallbackList<E>(mesh).end(), permuteFunc);
   deleteCallbackIt = mesh->meshDeleteCallbackList.insert(mesh->meshDeleteCallbackList.end(), deleteFunc);
 }
 
@@ -191,7 +191,7 @@ void MeshData<E, T>::deregisterWithMesh() {
   if (mesh == nullptr) return;
 
   getExpandCallbackList<E>(mesh).erase(expandCallbackIt);
-  getCompressCallbackList<E>(mesh).erase(compressCallbackIt);
+  getPermuteCallbackList<E>(mesh).erase(permuteCallbackIt);
   mesh->meshDeleteCallbackList.erase(deleteCallbackIt);
 }
 

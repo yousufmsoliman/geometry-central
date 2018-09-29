@@ -28,13 +28,11 @@ union uint3 {
 // Complex numbers are useful
 using Complex = ::std::complex<double>;
 const Complex IM_I(0.0, 1.0);
-inline double dot(Complex x, Complex y) {
-  return x.real() * y.real() + x.imag() * y.imag();
-}
+inline double dot(Complex x, Complex y) { return x.real() * y.real() + x.imag() * y.imag(); }
 
 inline Complex inv(Complex c) { return ::std::conj(c) / ::std::norm(c); }
 inline Complex unit(Complex c) { return c / ::std::abs(c); }
-inline double cross(Complex u, Complex v) { return u.real() * v.imag() - u.imag() * v.real();}
+inline double cross(Complex u, Complex v) { return u.real() * v.imag() - u.imag() * v.real(); }
 
 // Various functions
 template <typename T>
@@ -42,7 +40,7 @@ T clamp(T val, T low, T high);
 Vector3 clamp(Vector3 val, Vector3 low, Vector3 high);
 template <typename T>
 bool approxEqualsAbsolute(T a, T b, double eps = 1e-6);
-double regularizeAngle(double theta);  // Map theta in to [0,2pi)
+double regularizeAngle(double theta); // Map theta in to [0,2pi)
 
 template <typename T>
 T sqr(T x) {
@@ -76,8 +74,17 @@ inline bool approxEqualsAbsolute(T a, T b, double eps) {
   }
 }
 
-inline double regularizeAngle(double theta) {
-  return theta - 2 * PI * ::std::floor(theta / (2 * PI));
+inline double regularizeAngle(double theta) { return theta - 2 * PI * ::std::floor(theta / (2 * PI)); }
+
+// Applies a permutation such that d_new[i] = d_old[p[i]].
+// Permutation should be injection to [0,sourceData.size()). Return vector has length permOldToNew.size().
+template <typename T>
+std::vector<T> applyPermutation(const std::vector<T>& sourceData, const std::vector<size_t>& permOldToNew) {
+  std::vector<T> retVal(permOldToNew.size());
+  for(size_t i =0; i < permOldToNew.size(); i++) {
+    retVal[i] = sourceData[permOldToNew[i]]; 
+  }
+  return retVal;
 }
 
 template <typename T>
@@ -127,11 +134,11 @@ inline int randomInt(int lower, int upper) {
 }
 // Generate a random size_t in the range [0, N)
 inline size_t randomIndex(size_t size) {
-  std::uniform_int_distribution<size_t> dist(0, size-1);
+  std::uniform_int_distribution<size_t> dist(0, size - 1);
   return dist(util_mersenne_twister);
 }
 
-inline double randomNormal(double mean=0.0, double stddev=1.0) {
+inline double randomNormal(double mean = 0.0, double stddev = 1.0) {
   std::normal_distribution<double> dist{mean, stddev};
   return dist(util_mersenne_twister);
 }
@@ -154,18 +161,15 @@ inline std::string to_string(std::vector<T> const& v) {
 
 // === Custom error types
 class FunctionalityException : public std::runtime_error {
- public:
-  FunctionalityException(std::string msg)
-      : std::runtime_error("Missing functionaliy: " + msg){};
+public:
+  FunctionalityException(std::string msg) : std::runtime_error("Missing functionaliy: " + msg){};
 };
 
-}  // namespace geometrycentral
+} // namespace geometrycentral
 
 namespace std {
 // NOTE: Technically, the lines below are illegal, because specializing standard
 // library functions is ONLY allowed for user-defined types. That being said, I
 // don't think this will crash any planes.
-inline bool isfinite(const ::std::complex<double> c) {
-  return isfinite(c.real()) && isfinite(c.imag());
-}
+inline bool isfinite(const ::std::complex<double> c) { return isfinite(c.real()) && isfinite(c.imag()); }
 }

@@ -73,14 +73,20 @@ public:
   VertexPtr vertex(size_t index);
   EdgePtr edge(size_t index);
   FacePtr face(size_t index);
-  BoundaryPtr boundaryLoop(size_t index);
+  BoundaryLoopPtr boundaryLoop(size_t index);
 
   // Methods that mutate the mesh. Note that these occasionally trigger a resize, which invaliates
-  // any outstanding VertexPtr or MeshData<> objects.
-  // TODOs: support removing elements, support adding boundary
+  // any outstanding VertexPtr or MeshData<> objects. See the guide (currently in docs/mutable_mesh_docs.md).
+  // TODOs: support adding boundary
+
+
+  // Flip an edge. Unlike all the other mutation routines, this _does not_ invalidate pointers, though it does break the canonical ordering.
+  // Return true if the edge was actually flipped (can't flip boundary or non-triangular edges)
+  bool flip(EdgePtr e);
 
   // Adds a vertex along an edge, increasing degree of faces. Returns ptr along the new edge, with he.vertex() as new
-  // vertex and he.edge().halfedge() == he. Preserves canonical direction of edge.halfedge() for both halves of new edge.
+  // vertex and he.edge().halfedge() == he. Preserves canonical direction of edge.halfedge() for both halves of new
+  // edge.
   HalfedgePtr insertVertexAlongEdge(EdgePtr e);
 
   // Split an edge, also splitting adjacent faces. Returns new vertex.
@@ -105,10 +111,13 @@ public:
   // throwing.
   HalfedgePtr tryConnectVertices(VertexPtr vA, VertexPtr vB);
 
+  // Collapse an edge. Returns the vertex adjacent to that edge which still exists. Returns VertexPtr() if not
+  // collapsible.
+  VertexPtr collapseEdge(EdgePtr e);
+
   // Triangulate in a face, returns all subfaces
   std::vector<FacePtr> triangulate(FacePtr face);
 
-  void permuteToCanonical(); // permute to the same indexing convention as after construction
 
   // Methods for obtaining canonical indices for mesh elements
   // (Note that in some situations, custom indices might instead be needed)
@@ -120,13 +129,13 @@ public:
   CornerData<size_t> getCornerIndices();
 
   // Utility functions
-  bool isSimplicial() ;          // returns true if and only if all faces are triangles
-  size_t nFacesTriangulation() ; // returns the number of triangles in the
-                                      // triangulation determined by
-                                      // Face::triangulate()
-  size_t longestBoundaryLoop() ;
-  int eulerCharacteristic() ;
-  size_t nConnectedComponents() ;
+  bool isSimplicial();          // returns true if and only if all faces are triangles
+  size_t nFacesTriangulation(); // returns the number of triangles in the
+                                // triangulation determined by
+                                // Face::triangulate()
+  size_t longestBoundaryLoop();
+  int eulerCharacteristic();
+  size_t nConnectedComponents();
   std::vector<std::vector<size_t>> getPolygonSoupFaces();
   HalfedgeMesh* copy();                            // returns a deep copy
   HalfedgeMesh* copy(HalfedgeMeshDataTransfer& t); // returns a deep copy
@@ -134,21 +143,27 @@ public:
   // Compress the mesh
   bool isCompressed();
   void compress();
-  void compressIfSparserThan(double ratioThreshold);
-  void compressIfVerySparse();
+ 
+  // Canonicalize the element ordering to be the same indexing convention as after construction from polygon soup.
+  bool isCanonical(); 
+  void canonicalize(); 
 
   // == Callbacks that will be invoked on mutation to keep containers/iterators/etc valid.
   // Expansion callbacks
+  // Argument is the new size of the element list. Elements up to this index (aka offset from base) may now be used (but
+  // _might_ not be)
   std::list<std::function<void(size_t)>> vertexExpandCallbackList;
   std::list<std::function<void(size_t)>> faceExpandCallbackList;
   std::list<std::function<void(size_t)>> edgeExpandCallbackList;
   std::list<std::function<void(size_t)>> halfedgeExpandCallbackList;
 
   // Compression callbacks
-  std::list<std::function<void(size_t)>> vertexCompressCallbackList;
-  std::list<std::function<void(size_t)>> faceCompressCallbackList;
-  std::list<std::function<void(size_t)>> edgeCompressCallbackList;
-  std::list<std::function<void(size_t)>> halfedgeCompressCallbackList;
+  // Argument is a permutation to a apply, such that d_new[i] = d_old[p[i]]. New size may be smaller, in which case
+  // capacity may be shrunk to that size.
+  std::list<std::function<void(const std::vector<size_t>&)>> vertexPermuteCallbackList;
+  std::list<std::function<void(const std::vector<size_t>&)>> facePermuteCallbackList;
+  std::list<std::function<void(const std::vector<size_t>&)>> edgePermuteCallbackList;
+  std::list<std::function<void(const std::vector<size_t>&)>> halfedgePermuteCallbackList;
 
   // Mesh delete callbacks
   // (this unfortunately seems to be necessary; objects which have registered their callbacks above
@@ -167,16 +182,26 @@ public:
 
 
 private:
-  // The contiguous chunks of memory which hold the actual structs.
-  // Don't modify them after construction.
-  size_t nRealHalfedges;
-  std::vector<Halfedge> rawHalfedges; // first real, then imaginary
+  // The contiguous chunks of memory which hold the actual structs. These may change size and even become sparse as
+  // insertions and deletions happen.
+  std::vector<Halfedge> rawHalfedges;
   std::vector<Vertex> rawVertices;
   std::vector<Edge> rawEdges;
   std::vector<Face> rawFaces;
   std::vector<Face> rawBoundaryLoops;
 
+  // Track element counts (can't rely on rawVertices.size() after deletions have made the list sparse). These are the
+  // actual number of elements, not the size of the buffer that holds them.
+  size_t nRealHalfedgesCount = 0;
+  size_t nImaginaryHalfedgesCount = 0;
+  size_t nVerticesCount = 0;
+  size_t nEdgesCount = 0;
+  size_t nFacesCount = 0;
+  size_t nBoundaryLoopsCount = 0;
   size_t nextElemID = 77777; // used to assign unique ID to elements
+  
+  bool isCanonicalFlag = true;
+  bool isCompressedFlag = true;
 
   // Hide copy and move constructors, we don't wanna mess with that
   HalfedgeMesh(const HalfedgeMesh& other) = delete;
@@ -190,6 +215,18 @@ private:
   Vertex* getNewVertex();
   Edge* getNewEdge();
   Face* getNewFace();
+
+  // Deletes leave tombstones, which can be cleaned up with compress()
+  void deleteElement(HalfedgePtr he);
+  void deleteElement(EdgePtr e);
+  void deleteElement(VertexPtr v);
+  void deleteElement(FacePtr f);
+
+  // Compression helpers
+  void compressHalfedges();
+  void compressEdges();
+  void compressFaces();
+  void compressVertices();
 
 
   size_t indexOf(Halfedge* ptr);
@@ -226,6 +263,10 @@ public:
   // exclude it unless debug is enabled.
   HalfedgeMesh* parentMesh;
 #endif
+
+  // Null twin ptr measn this halfedge has been deleted
+  void markDead() { twin = nullptr; };
+  bool isDead() { return twin == nullptr; };
 };
 
 class Vertex {
@@ -249,7 +290,9 @@ public:
   HalfedgeMesh* parentMesh;
 #endif
 
-  Vector3 projectToTangentSpace(Vector3 inVec);
+  // Null halfedge ptr means this vertex has been deleted
+  void markDead() { halfedge = nullptr; };
+  bool isDead() { return halfedge == nullptr; };
 };
 
 class Edge {
@@ -261,8 +304,6 @@ class Edge {
 protected:
   Halfedge* halfedge;
 
-  bool flip(void);
-
   bool isBoundary = false;
   size_t ID; // a unique value useful for hashing (etc). NOT an index
 
@@ -272,6 +313,10 @@ public:
   // exclude it unless debug is enabled.
   HalfedgeMesh* parentMesh;
 #endif
+
+  // Null halfedge ptr means this edge has been deleted
+  void markDead() { halfedge = nullptr; };
+  bool isDead() { return halfedge == nullptr; };
 };
 
 class Face {
@@ -294,6 +339,10 @@ public:
   // exclude it unless debug is enabled.
   HalfedgeMesh* parentMesh;
 #endif
+
+  // Null halfedge ptr means this face has been deleted
+  void markDead() { halfedge = nullptr; };
+  bool isDead() { return halfedge == nullptr; };
 };
 
 } // namespace geometrycentral

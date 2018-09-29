@@ -30,7 +30,6 @@ class CornerPtr;
 class VertexPtr;
 class EdgePtr;
 class FacePtr;
-class BoundaryLoopPtr;
 
 // The dynamic variants are automatically updated when the mesh is mutated, (the standard variants are invalidated).
 class DynamicHalfedgePtr;
@@ -369,10 +368,6 @@ public:
   // Properties
   bool isBoundary() const;
 
-  // Remeshing
-  bool flip(); // flips a triangle pair, returning false if the faces aren't
-               // triangles or the edge is on the boundary
-
   // Accessors
   Edge operator*();
   Edge operator*() const;
@@ -603,8 +598,8 @@ private:
 // Boundary (currently just a renaming of Face---if we wanted
 // stronger type checking we could instead inherit from Face*)
 
-typedef Face Boundary;
-typedef FacePtr BoundaryPtr;
+typedef Face BoundaryLoop;
+typedef FacePtr BoundaryLoopPtr;
 typedef FacePtrSet BoundaryPtrSet;
 typedef FacePtrRangeIterator BoundaryRangeIterator;
 

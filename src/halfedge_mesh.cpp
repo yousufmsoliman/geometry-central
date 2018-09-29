@@ -162,7 +162,6 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
   size_t nTotalEdges = nPairedEdges + nUnpairedEdges;
   size_t nRealHalfedgesToMake =
       2 * nPairedEdges + nUnpairedEdges; // use a temp variable here because this is tracked as part of class state
-  nRealHalfedges = 0;
   size_t nImaginaryHalfedges = nUnpairedEdges;
   size_t nRealFaces = input.polygons.size();
 
@@ -286,7 +285,7 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
     // already been processed while walking a hole)
     if (halfedge(iHe)->twin == nullptr) {
       // Create a boundary loop for this hole
-      BoundaryPtr boundaryLoop{&rawBoundaryLoops[iBoundaryLoop]};
+      BoundaryLoopPtr boundaryLoop{&rawBoundaryLoops[iBoundaryLoop]};
       boundaryLoop->isReal = false;
 
       // Walk around the boundary loop, creating imaginary halfedges
@@ -295,7 +294,7 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
       bool finished = false;
       while (!finished) {
         // Create a new, imaginary halfedge
-        HalfedgePtr newHe{&rawHalfedges[nRealHalfedges + iImaginaryHalfedge]};
+        HalfedgePtr newHe{&rawHalfedges[nRealHalfedgesCount + iImaginaryHalfedge]};
         boundaryLoop->halfedge = newHe.ptr;
         iImaginaryHalfedge++;
 
@@ -537,116 +536,6 @@ CornerData<size_t> HalfedgeMesh::getCornerIndices() {
   return indices;
 }
 
-bool Edge::flip() {
-  //                         b b
-  //                         * *
-  //                        /|\                                                          / \
-//                       / | \                                                        /   \
-//                      /  |  \                                                      /     \
-//                     /   |   \                                                    /       \
-//                    /    |    \          ============ FLIP ==========>           /         \
-//                   /     |     \                                                /           \
-//                  /      |      \                                              /             \
-//                 /       |       \                                            /               \
-//                /  /     |    |\  \                                          /  /          |\  \
-//               /  /      |    | \  \                                        /  /           | \  \
-//              /  /       |       \  \                                      /  /               \  \
-//             /  /        |        \  \                                    /  /                 \  \
-//            /  /         |         \  \                                  /  /        fa         \  \
-//           /  /          |          \  \                                /  /                     \  \
-//          /  / ha2       |       hb3 \  \                              /  / ha2               hb3 \  \
-//         /  /        /|  |  |         \  \                            /  /                         \  \
-//        /  /        / |  |  |          \  \                          /  /                           \  \
-//       /  /           |  |  |           \  \                        /  /___                          \  \
-//      /  /___         |  |  |            \  \                      /                 ha1        \        \
-//     /                |  |  |                \                    /     _________________________\        \
-//    /                 |  |  |                 \                  /                                         \
-// c *      fa      ha1 |  e  | hb1      fb      * d            c *-------------------- e --------------------* d
-  //    \                 |  |  |                 /                  \
-  //    __________________________         /
-  //     \                |  |  |          ___   /                    \     \
-  //     hb1                  /
-  //      \  \            |  |  |            /  /                      \     \
-  //      ___   /
-  //       \  \           |  |  |           /  /                        \ /  /
-  //        \  \          |  |  | /        /  /                          \  \
-  //        /  /
-  //         \  \ ha3     |  |  |/    hb2 /  /                            \  \
-  //         ha3                 hb2 /  /
-  //          \  \           |           /  /                              \  \
-  //          /  /
-  //           \  \          |          /  /                                \  \
-  //           fb          /  /
-  //            \  \         |         /  /                                  \
-  //            \                   /  /
-  //             \  \        |        /  /                                    \
-  //             \                 /  /
-  //              \  \       |       /  /                                      \
-  //              \               /  /
-  //               \  \ |    |      /  / \  \             /  /
-  //                \  \|    |     /  / \  \ |         /  /
-  //                 \       |       / \  \|           /
-  //                  \      |      / \             /
-  //                   \     |     / \           /
-  //                    \    |    / \         /
-  //                     \   |   / \       /
-  //                      \  |  / \     /
-  //                       \ | / \   /
-  //                        \|/ \ /
-  //                         * *
-  //                         a a
-
-  Edge* e = this;
-
-  // Get halfedges of first face
-  Halfedge* ha1 = e->halfedge;
-  if (!ha1->isReal) return false; // don't flip boundary edges
-  Halfedge* ha2 = ha1->next;
-  Halfedge* ha3 = ha2->next;
-  if (ha3->next != ha1) return false; // not a triangle
-
-  // Get halfedges of second face
-  Halfedge* hb1 = ha1->twin;
-  if (!hb1->isReal) return false; // don't flip boundary edges
-  Halfedge* hb2 = hb1->next;
-  Halfedge* hb3 = hb2->next;
-  if (hb3->next != hb1) return false; // not a triangle
-
-  // Get vertices and faces
-  Vertex* va = ha1->vertex;
-  Vertex* vb = hb1->vertex;
-  Vertex* vc = ha3->vertex;
-  Vertex* vd = hb3->vertex;
-  Face* fa = ha1->face;
-  Face* fb = hb1->face;
-
-  // Update vertex pointers
-  if (va->halfedge == ha1) va->halfedge = hb2;
-  if (vb->halfedge == hb1) vb->halfedge = ha2;
-  // (vc and vd can't be invalidated by the flip)
-
-  // Update edge pointers
-  // (e still has the same halfedges)
-
-  // Update face pointers
-  fa->halfedge = ha1;
-  fb->halfedge = hb1;
-
-  // Update halfedge pointers
-  ha1->next = hb3;
-  hb3->next = ha2;
-  ha2->next = ha1;
-  hb1->next = ha3;
-  ha3->next = hb2;
-  hb2->next = hb1;
-  ha1->vertex = vc;
-  hb1->vertex = vd;
-  ha3->face = fb;
-  hb3->face = fa;
-
-  return true;
-}
-
 HalfedgeMesh* HalfedgeMesh::copy() {
 
   HalfedgeMeshDataTransfer t;
@@ -664,7 +553,18 @@ HalfedgeMesh* HalfedgeMesh::copy(HalfedgeMeshDataTransfer& dataTransfer) {
   newMesh->rawEdges = rawEdges;
   newMesh->rawFaces = rawFaces;
   newMesh->rawBoundaryLoops = rawBoundaryLoops;
-  newMesh->nRealHalfedges = nRealHalfedges;
+
+  newMesh->nRealHalfedgesCount = nRealHalfedgesCount;
+  newMesh->nImaginaryHalfedgesCount = nImaginaryHalfedgesCount;
+  newMesh->nVerticesCount = nVerticesCount;
+  newMesh->nEdgesCount = nEdgesCount;
+  newMesh->nFacesCount = nFacesCount;
+  newMesh->nBoundaryLoopsCount = nBoundaryLoopsCount;
+
+  // Copy other values
+  newMesh->nextElemID = nextElemID;
+  newMesh->isCompressedFlag = isCompressedFlag;
+  newMesh->isCanonicalFlag = isCanonicalFlag;
 
   // Create the data transfer object
   dataTransfer = HalfedgeMeshDataTransfer(this, newMesh);
@@ -748,6 +648,60 @@ std::vector<std::vector<size_t>> HalfedgeMesh::getPolygonSoupFaces() {
   return result;
 }
 
+bool HalfedgeMesh::flip(EdgePtr eFlip) {
+
+  Edge* e = eFlip.ptr;
+
+  // Get halfedges of first face
+  Halfedge* ha1 = e->halfedge;
+  if (!ha1->isReal) return false; // don't flip boundary edges
+  Halfedge* ha2 = ha1->next;
+  Halfedge* ha3 = ha2->next;
+  if (ha3->next != ha1) return false; // not a triangle
+
+  // Get halfedges of second face
+  Halfedge* hb1 = ha1->twin;
+  if (!hb1->isReal) return false; // don't flip boundary edges
+  Halfedge* hb2 = hb1->next;
+  Halfedge* hb3 = hb2->next;
+  if (hb3->next != hb1) return false; // not a triangle
+
+  // Get vertices and faces
+  Vertex* va = ha1->vertex;
+  Vertex* vb = hb1->vertex;
+  Vertex* vc = ha3->vertex;
+  Vertex* vd = hb3->vertex;
+  Face* fa = ha1->face;
+  Face* fb = hb1->face;
+
+  // Update vertex pointers
+  if (va->halfedge == ha1) va->halfedge = hb2;
+  if (vb->halfedge == hb1) vb->halfedge = ha2;
+  // (vc and vd can't be invalidated by the flip)
+
+  // Update edge pointers
+  // (e still has the same halfedges)
+
+  // Update face pointers
+  fa->halfedge = ha1;
+  fb->halfedge = hb1;
+
+  // Update halfedge pointers
+  ha1->next = hb3;
+  hb3->next = ha2;
+  ha2->next = ha1;
+  hb1->next = ha3;
+  ha3->next = hb2;
+  hb2->next = hb1;
+  ha1->vertex = vc;
+  hb1->vertex = vd;
+  ha3->face = fb;
+  hb3->face = fa;
+
+  isCanonicalFlag = false;
+  return true;
+}
+
 HalfedgePtr HalfedgeMesh::insertVertexAlongEdge(EdgePtr eIn) {
 
   DynamicEdgePtr eInD(eIn, this);
@@ -800,6 +754,7 @@ HalfedgePtr HalfedgeMesh::insertVertexAlongEdge(EdgePtr eIn) {
   oldVBottom->halfedge = heBNext;
   heACenter->vertex = newV;
 
+  isCanonicalFlag = false;
   return HalfedgePtr{heBNew};
 }
 
@@ -825,6 +780,7 @@ VertexPtr HalfedgeMesh::splitEdge(EdgePtr e) {
   connectVertices(fOppA, vOppA, newV);
   connectVertices(fOppB, vOppB, newV);
 
+  isCanonicalFlag = false;
   return newV;
 }
 
@@ -836,7 +792,7 @@ HalfedgePtr HalfedgeMesh::splitEdgeReturnHalfedge(EdgePtr e) {
     throw std::logic_error("Can only split non-boundary edge which borders two distinct triangular faces");
     // note: if removing boundary restriction, need to fix return value below
   }
-  
+
   // Save this
   DynamicHalfedgePtr heIn(e.halfedge(), this);
 
@@ -856,6 +812,7 @@ HalfedgePtr HalfedgeMesh::splitEdgeReturnHalfedge(EdgePtr e) {
   // Find the useful halfedge pointer to return using from the halfedge we saved
   HalfedgePtr toReturn = HalfedgePtr(heIn).twin().next().twin().next().twin();
 
+  isCanonicalFlag = false;
   return toReturn;
 }
 
@@ -879,6 +836,7 @@ HalfedgePtr HalfedgeMesh::connectVertices(VertexPtr vA, VertexPtr vB) {
     throw std::logic_error("Vertices do not contain shared face");
   }
 
+  isCanonicalFlag = false;
   return connectVertices(sharedFace, vA, vB);
 }
 
@@ -915,6 +873,7 @@ HalfedgePtr HalfedgeMesh::tryConnectVertices(VertexPtr vA, VertexPtr vB) {
     }
   }
 
+  isCanonicalFlag = false;
   return connectVertices(sharedFace, vA, vB);
 }
 
@@ -1001,6 +960,7 @@ HalfedgePtr HalfedgeMesh::connectVertices(FacePtr faceIn, VertexPtr vAIn, Vertex
     currHe = currHe->next;
   }
 
+  isCanonicalFlag = false;
   return heANew;
 }
 
@@ -1099,7 +1059,87 @@ VertexPtr HalfedgeMesh::insertVertex(FacePtr fIn) {
   }
   centerVert.ptr->halfedge = trailingHalfedges[0];
 
+  isCanonicalFlag = false;
   return centerVert;
+}
+
+VertexPtr HalfedgeMesh::collapseEdge(EdgePtr e) {
+
+  // TODO for now only valid on triangle meshes and away from the boundary.
+
+  // === Gather some elements
+
+  Halfedge* heA0 = e.halfedge().ptr;
+  Halfedge* heA1 = heA0->next;
+  Halfedge* heA2 = heA1->next;
+  Face* fA = heA0->face;
+  Edge* eADelete = heA1->edge;
+  Edge* eAKeep = heA2->edge;
+
+  Halfedge* heB0 = e.halfedge().twin().ptr;
+  Halfedge* heB1 = heB0->next;
+  Halfedge* heB2 = heB1->next;
+  Face* fB = heB0->face;
+  Edge* eBDelete = heB2->edge;
+  Edge* eBKeep = heB1->edge;
+
+  Vertex* vKeep = heA0->vertex;
+  Vertex* vDiscard = heA0->twin->vertex;
+
+  // === Check validity
+  for (HalfedgePtr he : VertexPtr(vKeep).outgoingHalfedges()) {
+    // Look for some other edge already connecting these vertices
+    if (he.twin().vertex() == vDiscard && he.edge() != e) {
+      return VertexPtr();
+    }
+  }
+
+
+  // === Update a whole bunch of pointers
+
+  { // Update all of the halfedges around vDiscard (do this loop before we break things
+    Halfedge* currHe = heA1;
+    Halfedge* firstHe = heA1;
+    do {
+      currHe->vertex = vKeep;
+      currHe = currHe->twin->next;
+    } while (currHe != firstHe);
+  }
+
+  // Fix vertices
+  vKeep->halfedge = heA2->twin;
+  heA2->vertex->halfedge = heA1->twin;
+  heB2->vertex->halfedge = heB1->twin;
+
+  // Fix edges
+  eAKeep->halfedge = heA2->twin;
+  eBKeep->halfedge = heB1->twin;
+
+  // Fix halfedges
+  heA1->twin->edge = eAKeep;
+  heA1->twin->twin = heA2->twin;
+  heA2->twin = heA1->twin->twin;
+  heB2->twin->edge = eBKeep;
+  heB2->twin->twin = heB1->twin;
+  heB1->twin = heB2->twin->twin;
+
+
+  // === Delete everything which needs to be deleted
+  deleteElement(e);
+  deleteElement(heA0);
+  deleteElement(heA1);
+  deleteElement(heA2);
+  deleteElement(heB0);
+  deleteElement(heB1);
+  deleteElement(heB2);
+  deleteElement(fA);
+  deleteElement(fB);
+  deleteElement(vDiscard);
+  deleteElement(eADelete);
+  deleteElement(eBDelete);
+
+  isCanonicalFlag = false;
+  return VertexPtr(vKeep);
 }
 
 std::vector<FacePtr> HalfedgeMesh::triangulate(FacePtr f) {
@@ -1129,6 +1169,7 @@ std::vector<FacePtr> HalfedgeMesh::triangulate(FacePtr f) {
     staticFaces.emplace_back(d);
   }
 
+  isCanonicalFlag = false;
   return staticFaces;
 }
 
@@ -1247,7 +1288,6 @@ Halfedge* HalfedgeMesh::getNewRealHalfedge() {
 
   rawHalfedges.back().ID = nextElemID++;
   rawHalfedges.back().isReal = true;
-  nRealHalfedges++;
 #ifndef NDEBUG
   rawHalfedges.back().parentMesh = this;
 #endif
@@ -1296,6 +1336,7 @@ Halfedge* HalfedgeMesh::getNewImaginaryHalfedge() {
 
   rawHalfedges.back().ID = nextElemID++;
   rawHalfedges.back().isReal = false;
+  nImaginaryHalfedgesCount++;
 #ifndef NDEBUG
   rawHalfedges.back().parentMesh = this;
 #endif
@@ -1329,6 +1370,7 @@ Vertex* HalfedgeMesh::getNewVertex() {
   }
 
   rawVertices.back().ID = nextElemID++;
+  nVerticesCount++;
 #ifndef NDEBUG
   rawVertices.back().parentMesh = this;
 #endif
@@ -1362,6 +1404,7 @@ Edge* HalfedgeMesh::getNewEdge() {
   }
 
   rawEdges.back().ID = nextElemID++;
+  nEdgesCount++;
 #ifndef NDEBUG
   rawEdges.back().parentMesh = this;
 #endif
@@ -1396,16 +1439,288 @@ Face* HalfedgeMesh::getNewFace() {
 
   rawFaces.back().ID = nextElemID++;
   rawFaces.back().isReal = true;
+  nFacesCount++;
 #ifndef NDEBUG
   rawFaces.back().parentMesh = this;
 #endif
   return &rawFaces.back();
 }
 
-void HalfedgeMesh::compress() { throw std::logic_error("not implemented"); }
-void HalfedgeMesh::compressIfSparserThan(double ratioThreshold) { throw std::logic_error("not implemented"); }
-void HalfedgeMesh::compressIfVerySparse() { compressIfSparserThan(0.5); }
-void HalfedgeMesh::permuteToCanonical() { throw std::logic_error("not implemented"); }
+void HalfedgeMesh::deleteElement(HalfedgePtr he) {
+  he->markDead();
+  isCompressedFlag = false;
+
+  if (he.isReal()) {
+    nRealHalfedgesCount--;
+  } else {
+    nImaginaryHalfedgesCount--;
+  }
+}
+
+void HalfedgeMesh::deleteElement(EdgePtr e) {
+  e->markDead();
+  isCompressedFlag = false;
+  nEdgesCount--;
+}
+
+void HalfedgeMesh::deleteElement(VertexPtr v) {
+  v->markDead();
+  isCompressedFlag = false;
+  nVerticesCount--;
+}
+
+void HalfedgeMesh::deleteElement(FacePtr f) {
+  f->markDead();
+  isCompressedFlag = false;
+  nFacesCount--;
+}
+
+void HalfedgeMesh::compressHalfedges() {
+
+  // Build the compressing shift
+  std::vector<size_t> newIndMap; // maps new ind -> old ind
+  std::vector<size_t> oldIndMap; // maps new old -> new ind
+  oldIndMap.resize(rawHalfedges.size());
+  for (size_t i = 0; i < rawHalfedges.size(); i++) {
+    if (!rawHalfedges[i].isDead()) {
+      oldIndMap[i] = newIndMap.size();
+      newIndMap.push_back(i);
+    }
+  }
+
+  // Apply the permutation
+  Halfedge* oldStart = &rawHalfedges.front();
+  rawHalfedges = applyPermutation(rawHalfedges, newIndMap);
+  Halfedge* newStart = &rawHalfedges.front();
+
+  // Fix up pointers.
+  for (Halfedge& he : rawHalfedges) {
+    he.twin = newStart + oldIndMap[(he.twin - oldStart)];
+    he.next = newStart + oldIndMap[(he.next - oldStart)];
+  }
+  for (Vertex& v : rawVertices) {
+    v.halfedge = newStart + oldIndMap[(v.halfedge - oldStart)];
+  }
+  for (Edge& e : rawEdges) {
+    e.halfedge = newStart + oldIndMap[(e.halfedge - oldStart)];
+  }
+  for (Face& f : rawFaces) {
+    f.halfedge = newStart + oldIndMap[(f.halfedge - oldStart)];
+  }
+  for (Face& f : rawBoundaryLoops) {
+    f.halfedge = newStart + oldIndMap[(f.halfedge - oldStart)];
+  }
+
+  // Invoke callbacks
+  for (auto& f : halfedgePermuteCallbackList) {
+    f(newIndMap);
+  }
+}
+
+void HalfedgeMesh::compressEdges() {
+
+  // Build the compressing shift
+  std::vector<size_t> newIndMap; // maps new ind -> old ind
+  std::vector<size_t> oldIndMap; // maps new old -> new ind
+  oldIndMap.resize(rawEdges.size());
+  for (size_t i = 0; i < rawEdges.size(); i++) {
+    if (!rawEdges[i].isDead()) {
+      oldIndMap[i] = newIndMap.size();
+      newIndMap.push_back(i);
+    }
+  }
+
+  // Apply the permutation
+  Edge* oldStart = &rawEdges.front();
+  rawEdges = applyPermutation(rawEdges, newIndMap);
+  Edge* newStart = &rawEdges.front();
+
+  // Fix up pointers.
+  for (Halfedge& he : rawHalfedges) {
+    he.edge = newStart + oldIndMap[(he.edge - oldStart)];
+  }
+
+  // Invoke callbacks
+  for (auto& f : edgePermuteCallbackList) {
+    f(newIndMap);
+  }
+}
+
+void HalfedgeMesh::compressFaces() {
+
+  // Build the compressing shift
+  std::vector<size_t> newIndMap; // maps new ind -> old ind
+  std::vector<size_t> oldIndMap; // maps new old -> new ind
+  oldIndMap.resize(rawFaces.size());
+  for (size_t i = 0; i < rawFaces.size(); i++) {
+    if (!rawFaces[i].isDead()) {
+      oldIndMap[i] = newIndMap.size();
+      newIndMap.push_back(i);
+    }
+  }
+
+  // Apply the permutation
+  Face* oldStart = &rawFaces.front();
+  rawFaces = applyPermutation(rawFaces, newIndMap);
+  Face* newStart = &rawFaces.front();
+
+  // Fix up pointers.
+  for (Halfedge& he : rawHalfedges) {
+    he.face = newStart + oldIndMap[(he.face - oldStart)];
+  }
+
+  // Invoke callbacks
+  for (auto& f : facePermuteCallbackList) {
+    f(newIndMap);
+  }
+}
+
+
+void HalfedgeMesh::compressVertices() {
+
+  // Build the compressing shift
+  std::vector<size_t> newIndMap; // maps new ind -> old ind
+  std::vector<size_t> oldIndMap; // maps new old -> new ind
+  oldIndMap.resize(rawVertices.size());
+  for (size_t i = 0; i < rawVertices.size(); i++) {
+    if (!rawVertices[i].isDead()) {
+      oldIndMap[i] = newIndMap.size();
+      newIndMap.push_back(i);
+    }
+  }
+
+  // Apply the permutation
+  Vertex* oldStart = &rawVertices.front();
+  rawVertices = applyPermutation(rawVertices, newIndMap);
+  Vertex* newStart = &rawVertices.front();
+
+  // Fix up pointers.
+  for (Halfedge& he : rawHalfedges) {
+    he.vertex = newStart + oldIndMap[(he.vertex - oldStart)];
+  }
+
+  // Invoke callbacks
+  for (auto& f : vertexPermuteCallbackList) {
+    f(newIndMap);
+  }
+}
+
+void HalfedgeMesh::compress() {
+
+  if (isCompressed()) {
+    return;
+  }
+
+  compressHalfedges();
+  compressEdges();
+  compressFaces();
+  compressVertices();
+  isCompressedFlag = true;
+}
+
+
+void HalfedgeMesh::canonicalize() {
+
+  if (isCanonical()) {
+    return;
+  }
+  compress();
+
+  // Vertices and faces are automatically canonical, nothing to do there.
+
+  { // == Reorder halfedges
+
+    std::vector<size_t> newIndMap(rawHalfedges.size()); // maps new ind -> old ind
+    std::vector<size_t> oldIndMap(rawHalfedges.size()); // maps new old -> new ind
+
+    // Compute the permutation to canonical
+    Halfedge* startPtr = &rawHalfedges.front();
+    size_t nextInd = 0;
+    for (FacePtr f : faces()) {
+      for (HalfedgePtr he : f.adjacentHalfedges()) {
+        size_t currInd = he.ptr - startPtr;
+        size_t newInd = nextInd;
+        newIndMap[newInd] = currInd;
+        oldIndMap[currInd] = newInd;
+        nextInd++;
+      }
+    }
+    for (BoundaryLoopPtr b : boundaryLoops()) {
+      for (HalfedgePtr he : b.adjacentHalfedges()) {
+        size_t currInd = he.ptr - startPtr;
+        size_t newInd = nextInd;
+        newIndMap[newInd] = currInd;
+        oldIndMap[currInd] = newInd;
+        nextInd++;
+      }
+    }
+
+    // Apply the permutation
+    rawHalfedges = applyPermutation(rawHalfedges, newIndMap);
+
+    // Fix up pointers.
+    for (Halfedge& he : rawHalfedges) {
+      he.twin = startPtr + oldIndMap[(he.twin - startPtr)];
+      he.next = startPtr + oldIndMap[(he.next - startPtr)];
+    }
+    for (Vertex& v : rawVertices) {
+      v.halfedge = startPtr + oldIndMap[(v.halfedge - startPtr)];
+    }
+    for (Edge& e : rawEdges) {
+      e.halfedge = startPtr + oldIndMap[(e.halfedge - startPtr)];
+    }
+    for (Face& f : rawFaces) {
+      f.halfedge = startPtr + oldIndMap[(f.halfedge - startPtr)];
+    }
+    for (Face& f : rawBoundaryLoops) {
+      f.halfedge = startPtr + oldIndMap[(f.halfedge - startPtr)];
+    }
+
+    // Invoke callbacks
+    for (auto& f : halfedgePermuteCallbackList) {
+      f(newIndMap);
+    }
+  }
+
+
+  { // == Reorder halfedges
+
+    std::vector<size_t> newIndMap(rawEdges.size()); // maps new ind -> old ind
+    std::vector<size_t> oldIndMap(rawEdges.size()); // maps new old -> new ind
+    EdgeData<char> edgeSeen(this, false);
+
+    // Compute the permutation to canonical
+    Edge* startPtr = &rawEdges.front();
+    size_t nextInd = 0;
+    for (FacePtr f : faces()) {
+      for (HalfedgePtr he : f.adjacentHalfedges()) {
+        if (!edgeSeen[he.edge()]) {
+          size_t currInd = he.edge().ptr - startPtr;
+          size_t newInd = nextInd;
+          newIndMap[newInd] = currInd;
+          oldIndMap[currInd] = newInd;
+          nextInd++;
+          edgeSeen[he.edge()] = true;
+        }
+      }
+    }
+
+
+    rawEdges = applyPermutation(rawEdges, newIndMap);
+
+    // Fix up pointers.
+    for (Halfedge& he : rawHalfedges) {
+      he.edge = startPtr + oldIndMap[(he.edge - startPtr)];
+    }
+
+    // Invoke callbacks
+    for (auto& f : edgePermuteCallbackList) {
+      f(newIndMap);
+    }
+  }
+
+  isCanonicalFlag = true;
+}
 
 size_t HalfedgeMesh::indexOf(Halfedge* ptr) { return (ptr - &rawHalfedges[0]); }
 size_t HalfedgeMesh::indexOf(Vertex* ptr) { return (ptr - &rawVertices[0]); }
