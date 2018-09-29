@@ -29,7 +29,7 @@ TODO as of Sep 29, 2018 dynamic pointers are NOT preserved through compress() ev
 
 ### Compressing the mesh
 
-As deletions occur, the mesh will become sparse. Most outward-facing routines (like `mesh->nVertices()`, or iterating over all elements) handle this internally. However, there are a few operations that require the mesh to be compressed, such as access elements by index, or converting `MeshData<T>.toVector()`. Furthermore, if many, many deletions have been performed, the mesh structure may be occupying significant extra memory.
+As deletions occur, the mesh will become sparse. Most outward-facing routines (like `mesh->nVertices()`, or iterating over all elements) handle this internally. However, there are a few operations that require the mesh to be compressed, such as accessing elements by index, or converting `MeshData<T>.toVector()`. Furthermore, if many, many deletions have been performed, the mesh structure may be occupying significant extra memory.
 
 To compress the mesh, call `mesh->compress()`. The invalidation rules mentioned above apply to this operation, and `MeshData<>` containers will be automatically updated.
 
@@ -37,7 +37,7 @@ To compress the mesh, call `mesh->compress()`. The invalidation rules mentioned 
 
 After constructing an initial halfedge mesh from polygon soup, there is a useful canonical structure in the way elements are ordered. That is, the ordering of halfedges is the same as if you traversed the faces in order, and traversed the halfedges within each face. The ordering of the edges corresponds to the first time one of the adjacent halfedges appears in the halfedge ordering (TODO reference some docs on this).
 
-As we modify the mesh, this canonical ordering is not necessarily preserved. The mesh is not "broken" in any sense, but you might like to make use of this canonical ordering in your code. For instance, the visualization library Polyscope uses this ordering to abtract over halfedge mesh data structures, so a mesh must be canonical when used with Polyscope.
+As we modify the mesh, this canonical ordering is not necessarily preserved. The mesh is not "broken" in any sense, but you might like to make use of this canonical ordering in your code. For instance, the visualization library Polyscope uses this ordering to abstract over halfedge mesh data structures, so a mesh must be canonical when used with Polyscope.
 
 To permute the elements in to the canonical ordering, call `mesh->canonicalize()`. The invalidation rules mentioned above apply to this operation, and `MeshData<>` containers will be automatically updated.
 
