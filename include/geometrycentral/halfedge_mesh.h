@@ -114,6 +114,10 @@ public:
   // Collapse an edge. Returns the vertex adjacent to that edge which still exists. Returns VertexPtr() if not
   // collapsible.
   VertexPtr collapseEdge(EdgePtr e);
+ 
+
+  // Set e.halfedge() == he. he must be adjacent.
+  void setEdgeHalfedge(EdgePtr e, HalfedgePtr he);
 
   // Triangulate in a face, returns all subfaces
   std::vector<FacePtr> triangulate(FacePtr face);
@@ -257,8 +261,8 @@ protected:
   bool isReal = true;
   size_t ID; // a unique value useful for hashing (etc). NOT an index
 
-#ifndef NDEBUG
 public:
+#ifndef NDEBUG
   // The mesh that this is a part of. Should only be used for debugging, so
   // exclude it unless debug is enabled.
   HalfedgeMesh* parentMesh;
@@ -283,8 +287,8 @@ protected:
   bool isBoundary = false;
   size_t ID; // a unique value useful for hashing (etc). NOT an index
 
-#ifndef NDEBUG
 public:
+#ifndef NDEBUG
   // The mesh that this is a part of. Should only be used for debugging, so
   // exclude it unless debug is enabled.
   HalfedgeMesh* parentMesh;
@@ -307,8 +311,8 @@ protected:
   bool isBoundary = false;
   size_t ID; // a unique value useful for hashing (etc). NOT an index
 
-#ifndef NDEBUG
 public:
+#ifndef NDEBUG
   // The mesh that this is a part of. Should only be used for debugging, so
   // exclude it unless debug is enabled.
   HalfedgeMesh* parentMesh;
@@ -333,8 +337,8 @@ protected:
   bool isReal = false;
   size_t ID; // a unique value useful for hashing (etc). NOT an index
 
-#ifndef NDEBUG
 public:
+#ifndef NDEBUG
   // The mesh that this is a part of. Should only be used for debugging, so
   // exclude it unless debug is enabled.
   HalfedgeMesh* parentMesh;

@@ -124,7 +124,8 @@ inline HalfedgePtrRangeIterator::HalfedgePtrRangeIterator(
    // Advance to satisfy the type
    if(currHalfedge != end && 
        ((type == HalfedgeSetType::Real && !currHalfedge.isReal()) || 
-        (type == HalfedgeSetType::Imaginary && currHalfedge.isReal())
+        (type == HalfedgeSetType::Imaginary && currHalfedge.isReal()) ||
+        currHalfedge->isDead()
        )) {
       this->operator++();
     }
@@ -136,19 +137,26 @@ inline const HalfedgePtrRangeIterator& HalfedgePtrRangeIterator::operator++() {
   // Note that we always need to return if we fall off the end of the list, and must not dereference the pointer in that case
  
   // All halfedges
-  if(type == HalfedgeSetType::All || currHalfedge == end) {
+  if(currHalfedge == end) {
+    return *this;
+  }
+
+  if(type == HalfedgeSetType::All) {
+    while(currHalfedge->isDead()) {
+      currHalfedge++;
+    }
     return *this;
   }
   // Real only
   else if(type == HalfedgeSetType::Real) {
-    while(currHalfedge != end && !currHalfedge.isReal()) {
+    while(currHalfedge != end && (!currHalfedge.isReal() || currHalfedge->isDead())) {
       currHalfedge++;
     }
     return *this;
   } 
   // Imaginary only
   else /* imag */ {
-    while(currHalfedge != end && currHalfedge.isReal()) {
+    while(currHalfedge != end && (currHalfedge.isReal() || currHalfedge->isDead())) {
       currHalfedge++;
     }
     return *this;
@@ -240,10 +248,17 @@ inline CornerPtr CornerPtr::operator--(int) {
   return CornerPtr(ptr + 1);
 }
 
-inline CornerPtrRangeIterator::CornerPtrRangeIterator(CornerPtr startingCorner)
-    : currCorner(startingCorner) {}
+inline CornerPtrRangeIterator::CornerPtrRangeIterator(CornerPtr startingCorner, CornerPtr end_)
+    : currCorner(startingCorner), end(end_) {
+  if(currCorner != end && currCorner->isDead()) {
+    this->operator++(); 
+  }
+}
 inline const CornerPtrRangeIterator& CornerPtrRangeIterator::operator++() {
   currCorner++;
+  while(currCorner != end && currCorner->isDead()) {
+    currCorner++;
+  }
   return *this;
 }
 inline bool CornerPtrRangeIterator::operator==(
@@ -261,10 +276,10 @@ inline CornerPtr CornerPtrRangeIterator::operator*() const {
 inline CornerPtrSet::CornerPtrSet(CornerPtr beginptr_, CornerPtr endptr_)
     : beginptr(beginptr_), endptr(endptr_) {}
 inline CornerPtrRangeIterator CornerPtrSet::begin() {
-  return CornerPtrRangeIterator(beginptr);
+  return CornerPtrRangeIterator(beginptr, endptr);
 }
 inline CornerPtrRangeIterator CornerPtrSet::end() {
-  return CornerPtrRangeIterator(endptr);
+  return CornerPtrRangeIterator(endptr, endptr);
 }
 
 // Vertex
@@ -387,10 +402,17 @@ inline bool DynamicVertexPtr::operator<=(const DynamicVertexPtr& other) const {
 
 inline size_t DynamicVertexPtr::getInd() const {return ind;}
 
-inline VertexPtrRangeIterator::VertexPtrRangeIterator(VertexPtr startingVertex)
-    : currVertex(startingVertex) {}
+inline VertexPtrRangeIterator::VertexPtrRangeIterator(VertexPtr startingVertex, VertexPtr end_)
+    : currVertex(startingVertex), end(end_) {
+  if(currVertex != end && currVertex->isDead()) {
+    this->operator++(); 
+  }
+}
 inline const VertexPtrRangeIterator& VertexPtrRangeIterator::operator++() {
   currVertex++;
+  while(currVertex != end && currVertex->isDead()) {
+    currVertex++;
+  }
   return *this;
 }
 inline bool VertexPtrRangeIterator::operator==(
@@ -408,10 +430,10 @@ inline VertexPtr VertexPtrRangeIterator::operator*() const {
 inline VertexPtrSet::VertexPtrSet(VertexPtr beginptr_, VertexPtr endptr_)
     : beginptr(beginptr_), endptr(endptr_) {}
 inline VertexPtrRangeIterator VertexPtrSet::begin() {
-  return VertexPtrRangeIterator(beginptr);
+  return VertexPtrRangeIterator(beginptr, endptr);
 }
 inline VertexPtrRangeIterator VertexPtrSet::end() {
-  return VertexPtrRangeIterator(endptr);
+  return VertexPtrRangeIterator(endptr, endptr);
 }
 
 // Edge
@@ -500,10 +522,13 @@ inline bool DynamicEdgePtr::operator<=(const DynamicEdgePtr& other) const {
 }
 inline size_t DynamicEdgePtr::getInd() const {return ind;}
 
-inline EdgePtrRangeIterator::EdgePtrRangeIterator(EdgePtr startingEdge)
-    : currEdge(startingEdge) {}
+inline EdgePtrRangeIterator::EdgePtrRangeIterator(EdgePtr startingEdge, EdgePtr end_)
+    : currEdge(startingEdge), end(end_) {}
 inline const EdgePtrRangeIterator& EdgePtrRangeIterator::operator++() {
   currEdge++;
+  while(currEdge != end && currEdge->isDead()) {
+    currEdge++;
+  }
   return *this;
 }
 inline bool EdgePtrRangeIterator::operator==(
@@ -519,10 +544,10 @@ inline EdgePtr EdgePtrRangeIterator::operator*() const { return currEdge; }
 inline EdgePtrSet::EdgePtrSet(EdgePtr beginptr_, EdgePtr endptr_)
     : beginptr(beginptr_), endptr(endptr_) {}
 inline EdgePtrRangeIterator EdgePtrSet::begin() {
-  return EdgePtrRangeIterator(beginptr);
+  return EdgePtrRangeIterator(beginptr, endptr);
 }
 inline EdgePtrRangeIterator EdgePtrSet::end() {
-  return EdgePtrRangeIterator(endptr);
+  return EdgePtrRangeIterator(endptr, endptr);
 }
 
 // Face
@@ -635,10 +660,17 @@ inline bool DynamicFacePtr::operator<=(const DynamicFacePtr& other) const {
 }
 inline size_t DynamicFacePtr::getInd() const {return ind;}
 
-inline FacePtrRangeIterator::FacePtrRangeIterator(FacePtr startingFace)
-    : currFace(startingFace) {}
+inline FacePtrRangeIterator::FacePtrRangeIterator(FacePtr startingFace, FacePtr end_)
+    : currFace(startingFace), end(end_) {
+  if(currFace != end && currFace->isDead()) {
+    this->operator++(); 
+  }
+}
 inline const FacePtrRangeIterator& FacePtrRangeIterator::operator++() {
   currFace++;
+  while(currFace != end && currFace->isDead()) {
+    currFace++;
+  }
   return *this;
 }
 inline bool FacePtrRangeIterator::operator==(
@@ -654,10 +686,10 @@ inline FacePtr FacePtrRangeIterator::operator*() const { return currFace; }
 inline FacePtrSet::FacePtrSet(FacePtr beginptr_, FacePtr endptr_)
     : beginptr(beginptr_), endptr(endptr_) {}
 inline FacePtrRangeIterator FacePtrSet::begin() {
-  return FacePtrRangeIterator(beginptr);
+  return FacePtrRangeIterator(beginptr, endptr);
 }
 inline FacePtrRangeIterator FacePtrSet::end() {
-  return FacePtrRangeIterator(endptr);
+  return FacePtrRangeIterator(endptr, endptr);
 }
 
 }  // namespace geometrycentral

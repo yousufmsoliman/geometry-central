@@ -755,7 +755,7 @@ HalfedgePtr HalfedgeMesh::insertVertexAlongEdge(EdgePtr eIn) {
   heACenter->vertex = newV;
 
   isCanonicalFlag = false;
-  return HalfedgePtr{heBNew};
+  return HalfedgePtr{heACenter};
 }
 
 
@@ -1118,10 +1118,10 @@ VertexPtr HalfedgeMesh::collapseEdge(EdgePtr e) {
   // Fix halfedges
   heA1->twin->edge = eAKeep;
   heA1->twin->twin = heA2->twin;
-  heA2->twin = heA1->twin->twin;
+  heA2->twin->twin = heA1->twin;
   heB2->twin->edge = eBKeep;
   heB2->twin->twin = heB1->twin;
-  heB1->twin = heB2->twin->twin;
+  heB1->twin->twin = heB2->twin;
 
 
   // === Delete everything which needs to be deleted
@@ -1139,8 +1139,11 @@ VertexPtr HalfedgeMesh::collapseEdge(EdgePtr e) {
   deleteElement(eBDelete);
 
   isCanonicalFlag = false;
+
   return VertexPtr(vKeep);
 }
+
+void HalfedgeMesh::setEdgeHalfedge(EdgePtr e, HalfedgePtr he) { e.ptr->halfedge = he.ptr; }
 
 std::vector<FacePtr> HalfedgeMesh::triangulate(FacePtr f) {
 
@@ -1179,24 +1182,32 @@ void HalfedgeMesh::validateConnectivity() {
 
   // Check valid pointers
   for (Halfedge& he : rawHalfedges) {
-    if (he.twin == nullptr || !&*he.twin) throw std::logic_error("bad twin pointer");
-    if (he.next == nullptr || !&*he.next) throw std::logic_error("bad next pointer");
-    if (he.vertex == nullptr || !&*he.vertex) throw std::logic_error("bad vertex pointer");
-    if (he.edge == nullptr || !&*he.edge) throw std::logic_error("bad edge pointer");
-    if (he.face == nullptr || !&*he.face) throw std::logic_error("bad face pointer");
+    if (he.isDead()) continue;
+    if (he.twin == nullptr || !&*he.twin || he.twin->isDead()) throw std::logic_error("bad twin pointer");
+    if (he.next == nullptr || !&*he.next || he.next->isDead()) throw std::logic_error("bad next pointer");
+    if (he.vertex == nullptr || !&*he.vertex || he.vertex->isDead()) throw std::logic_error("bad vertex pointer");
+    if (he.edge == nullptr || !&*he.edge || he.edge->isDead()) throw std::logic_error("bad edge pointer");
+    if (he.face == nullptr || !&*he.face || he.face->isDead()) throw std::logic_error("bad face pointer");
   }
   for (Vertex& v : rawVertices) {
-    if (v.halfedge == nullptr || !&*v.halfedge) throw std::logic_error("bad halfedge pointer in vertex");
+    if (v.isDead()) continue;
+    if (v.halfedge == nullptr || !&*v.halfedge || v.halfedge->isDead())
+      throw std::logic_error("bad halfedge pointer in vertex");
   }
   for (Edge& e : rawEdges) {
-    if (e.halfedge == nullptr || !&*e.halfedge) throw std::logic_error("bad halfedge pointer in edge");
+    if (e.isDead()) continue;
+    if (e.halfedge == nullptr || !&*e.halfedge || e.halfedge->isDead())
+      throw std::logic_error("bad halfedge pointer in edge");
   }
   for (Face& f : rawFaces) {
-    if (f.halfedge == nullptr || !&*f.halfedge) throw std::logic_error("bad halfedge pointer in face");
+    if (f.isDead()) continue;
+    if (f.halfedge == nullptr || !&*f.halfedge || f.halfedge->isDead())
+      throw std::logic_error("bad halfedge pointer in face");
   }
 
   // Check edge and twin sanity
   for (Halfedge& he : rawHalfedges) {
+    if (he.isDead()) continue;
     if (&he != he.twin->twin) throw std::logic_error("twins not reflective");
     if (&he != he.edge->halfedge && he.twin != he.edge->halfedge)
       throw std::logic_error("edge.halfedge doesn't match halfedge.edge");
@@ -1204,6 +1215,7 @@ void HalfedgeMesh::validateConnectivity() {
 
   // Check face & next sanity
   for (Face& f : rawFaces) {
+    if (f.isDead()) continue;
     Halfedge* currHe = f.halfedge;
     Halfedge* firstHe = f.halfedge;
     size_t count = 0;
@@ -1218,6 +1230,7 @@ void HalfedgeMesh::validateConnectivity() {
   }
 
   for (Halfedge& he : rawHalfedges) {
+    if (he.isDead()) continue;
     Halfedge* currHe = &he;
     Halfedge* firstHe = &he;
     size_t count = 0;
@@ -1235,6 +1248,7 @@ void HalfedgeMesh::validateConnectivity() {
 
   // Check vertex orbit sanity
   for (Vertex& v : rawVertices) {
+    if (v.isDead()) continue;
     Halfedge* currHe = v.halfedge;
     Halfedge* firstHe = v.halfedge;
     size_t count = 0;
@@ -1499,15 +1513,19 @@ void HalfedgeMesh::compressHalfedges() {
     he.next = newStart + oldIndMap[(he.next - oldStart)];
   }
   for (Vertex& v : rawVertices) {
+    if (v.isDead()) continue;
     v.halfedge = newStart + oldIndMap[(v.halfedge - oldStart)];
   }
   for (Edge& e : rawEdges) {
+    if (e.isDead()) continue;
     e.halfedge = newStart + oldIndMap[(e.halfedge - oldStart)];
   }
   for (Face& f : rawFaces) {
+    if (f.isDead()) continue;
     f.halfedge = newStart + oldIndMap[(f.halfedge - oldStart)];
   }
   for (Face& f : rawBoundaryLoops) {
+    if (f.isDead()) continue;
     f.halfedge = newStart + oldIndMap[(f.halfedge - oldStart)];
   }
 
@@ -1537,6 +1555,7 @@ void HalfedgeMesh::compressEdges() {
 
   // Fix up pointers.
   for (Halfedge& he : rawHalfedges) {
+    if (he.isDead()) continue;
     he.edge = newStart + oldIndMap[(he.edge - oldStart)];
   }
 
@@ -1566,6 +1585,7 @@ void HalfedgeMesh::compressFaces() {
 
   // Fix up pointers.
   for (Halfedge& he : rawHalfedges) {
+    if (he.isDead()) continue;
     he.face = newStart + oldIndMap[(he.face - oldStart)];
   }
 
@@ -1596,6 +1616,7 @@ void HalfedgeMesh::compressVertices() {
 
   // Fix up pointers.
   for (Halfedge& he : rawHalfedges) {
+    if (he.isDead()) continue;
     he.vertex = newStart + oldIndMap[(he.vertex - oldStart)];
   }
 
@@ -1656,7 +1677,11 @@ void HalfedgeMesh::canonicalize() {
     }
 
     // Apply the permutation
-    rawHalfedges = applyPermutation(rawHalfedges, newIndMap);
+    // (can't just assign, need to avoid moving memory)
+    std::vector<Halfedge> pHalfedge = applyPermutation(rawHalfedges, newIndMap);
+    for (size_t i = 0; i < pHalfedge.size(); i++) {
+      rawHalfedges[i] = pHalfedge[i];
+    }
 
     // Fix up pointers.
     for (Halfedge& he : rawHalfedges) {
@@ -1706,7 +1731,12 @@ void HalfedgeMesh::canonicalize() {
     }
 
 
-    rawEdges = applyPermutation(rawEdges, newIndMap);
+    // Apply the permutation
+    // (can't just assign, need to avoid moving memory)
+    std::vector<Edge> pEdge = applyPermutation(rawEdges, newIndMap);
+    for (size_t i = 0; i < pEdge.size(); i++) {
+      rawEdges[i] = pEdge[i];
+    }
 
     // Fix up pointers.
     for (Halfedge& he : rawHalfedges) {

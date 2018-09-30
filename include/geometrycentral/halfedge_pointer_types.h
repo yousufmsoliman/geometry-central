@@ -214,7 +214,7 @@ protected:
 };
 class CornerPtrRangeIterator {
 public:
-  CornerPtrRangeIterator(CornerPtr startingCorner);
+  CornerPtrRangeIterator(CornerPtr startingCorner, CornerPtr end);
   const CornerPtrRangeIterator& operator++();
   bool operator==(const CornerPtrRangeIterator& other) const;
   bool operator!=(const CornerPtrRangeIterator& other) const;
@@ -222,6 +222,7 @@ public:
 
 private:
   CornerPtr currCorner;
+  CornerPtr end;
 };
 class CornerPtrSet {
 public:
@@ -336,7 +337,7 @@ private:
 
 class VertexPtrRangeIterator {
 public:
-  VertexPtrRangeIterator(VertexPtr startingVertex);
+  VertexPtrRangeIterator(VertexPtr startingVertex, VertexPtr end);
   const VertexPtrRangeIterator& operator++();
   bool operator==(const VertexPtrRangeIterator& other) const;
   bool operator!=(const VertexPtrRangeIterator& other) const;
@@ -344,6 +345,7 @@ public:
 
 private:
   VertexPtr currVertex;
+  VertexPtr end;
 };
 class VertexPtrSet {
 public:
@@ -445,7 +447,7 @@ private:
 
 class EdgePtrRangeIterator {
 public:
-  EdgePtrRangeIterator(EdgePtr startingEdge);
+  EdgePtrRangeIterator(EdgePtr startingEdge, EdgePtr end);
   const EdgePtrRangeIterator& operator++();
   bool operator==(const EdgePtrRangeIterator& other) const;
   bool operator!=(const EdgePtrRangeIterator& other) const;
@@ -453,6 +455,7 @@ public:
 
 private:
   EdgePtr currEdge;
+  EdgePtr end;
 };
 class EdgePtrSet {
 public:
@@ -576,7 +579,7 @@ private:
 
 class FacePtrRangeIterator {
 public:
-  FacePtrRangeIterator(FacePtr startingFace);
+  FacePtrRangeIterator(FacePtr startingFace, FacePtr end);
   const FacePtrRangeIterator& operator++();
   bool operator==(const FacePtrRangeIterator& other) const;
   bool operator!=(const FacePtrRangeIterator& other) const;
@@ -584,6 +587,7 @@ public:
 
 private:
   FacePtr currFace;
+  FacePtr end;
 };
 class FacePtrSet {
 public:
