@@ -57,6 +57,54 @@ EdgeData<char> minimalSpanningTree(Geometry<Euclidean>* geometry) {
   return spanningTree;
 }
 
+// Note: Assumes mesh is a single connected component
+EdgeData<char> minimalSpanningTree(EdgeLengthGeometry* geometry) {
+
+  // Preliminaries
+  HalfedgeMesh* mesh = geometry->mesh;
+  geometry->requireEdgeLengths();
+  VertexData<size_t> vInd = mesh->getVertexIndices();
+
+  // Store result here
+  EdgeData<char> spanningTree(mesh, false);
+
+  // Track which vertices have been connected
+  DisjointSets dj(mesh->nVertices());
+  size_t nConnected = 1;
+
+  // Process the edges in order of length
+  std::vector<std::pair<double, EdgePtr>> edgesByLength;
+  for (EdgePtr e : mesh->edges()) {
+    edgesByLength.push_back(std::make_pair(geometry->edgeLengths[e], e));
+  }
+  std::sort(edgesByLength.begin(), edgesByLength.end());
+
+  for (auto& edgePair : edgesByLength) {
+
+    double len = edgePair.first;
+    EdgePtr e = edgePair.second;
+    VertexPtr v1 = e.halfedge().vertex();
+    VertexPtr v2 = e.halfedge().twin().vertex();
+
+    // Pass if already connected
+    if (dj.find(vInd[v1]) == dj.find(vInd[v2])) {
+      continue;
+    }
+
+    // Otherwise, accept the edge and union
+    spanningTree[e] = true;
+    dj.merge(vInd[v1], vInd[v2]);
+    nConnected++;
+
+    // Can early-out once we have connected all vertices
+    if (nConnected == mesh->nVertices()) {
+      break;
+    }
+  }
+
+  return spanningTree;
+}
+
 
 // Note: Assumes mesh is a single connected component
 EdgeData<char> spanningTreeBetweenVertices(Geometry<Euclidean>* geometry,
