@@ -1,6 +1,7 @@
 #pragma once
 
 #include "geometrycentral/geometry.h"
+#include "geometrycentral/edge_length_geometry.h"
 #include "geometrycentral/halfedge_data_types.h"
 
 namespace geometrycentral {
@@ -8,6 +9,7 @@ namespace geometrycentral {
 // Find a subset of edges which connects all vertices
 // Return value holds 'true' for an edge if it is in the tree
 EdgeData<char> minimalSpanningTree(Geometry<Euclidean>* geometry);
+EdgeData<char> minimalSpanningTree(EdgeLengthGeometry* geometry);
 
 // Returns a set of edges which connect all vertices
 // Note: Uses an MST+pruning approach to find short trees in O(N logN), but not guaranteed to be minimal; that's an
