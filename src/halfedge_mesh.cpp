@@ -846,7 +846,10 @@ HalfedgePtr HalfedgeMesh::tryConnectVertices(VertexPtr vA, VertexPtr vB) {
   // TODO much of the connectVertices() logic is O(N_VERTICES_IN_FACE) even though it doesn't really need to be.
 
   // Early-out if same
-  if (vA == vB) return HalfedgePtr();
+  if (vA == vB) {
+    cout << "fail, same" << endl;
+    return HalfedgePtr();
+  }
 
   // Find the shared face and call the main version
   std::unordered_set<FacePtr> aFaces;
@@ -863,12 +866,14 @@ HalfedgePtr HalfedgeMesh::tryConnectVertices(VertexPtr vA, VertexPtr vB) {
 
   // Fail if no shared face
   if (sharedFace == FacePtr()) {
+    cout << "fail, no shared face" << endl;
     return HalfedgePtr();
   }
 
   // Check if adjacent
   for (HalfedgePtr he : sharedFace.adjacentHalfedges()) {
     if ((he.vertex() == vA && he.twin().vertex() == vB) || (he.vertex() == vB && he.twin().vertex() == vA)) {
+      cout << "fail, adjacent" << endl;
       return HalfedgePtr();
     }
   }
@@ -1087,11 +1092,25 @@ VertexPtr HalfedgeMesh::collapseEdge(EdgePtr e) {
   Vertex* vDiscard = heA0->twin->vertex;
 
   // === Check validity
-  for (HalfedgePtr he : VertexPtr(vKeep).outgoingHalfedges()) {
-    // Look for some other edge already connecting these vertices
-    if (he.twin().vertex() == vDiscard && he.edge() != e) {
-      return VertexPtr();
+
+  // collapsing around a degree-2 vertex can be done, but this code does not handle that correctly
+  if (VertexPtr(vKeep).degree() <= 2 || VertexPtr(vDiscard).degree() <= 2) {
+    return VertexPtr();
+  }
+
+  // (should be exactly two vertices, the opposite diamond vertices, in the intersection of the 1-rings)
+  std::unordered_set<VertexPtr> vKeepNeighbors;
+  for (VertexPtr vN : VertexPtr(vKeep).adjacentVertices()) {
+    vKeepNeighbors.insert(vN);
+  }
+  size_t nShared = 0;
+  for (VertexPtr vN : VertexPtr(vDiscard).adjacentVertices()) {
+    if (vKeepNeighbors.find(vN) != vKeepNeighbors.end()) {
+      nShared++;
     }
+  }
+  if (nShared > 2) {
+    return VertexPtr();
   }
 
 
@@ -1278,20 +1297,30 @@ Halfedge* HalfedgeMesh::getNewRealHalfedge() {
 
     // Shift all pointers
     for (Halfedge& he : rawHalfedges) {
-      he.twin += shift;
+      if (he.twin != nullptr) { // preserve implicit dead values
+        he.twin += shift;
+      }
       he.next += shift;
     }
     for (Vertex& v : rawVertices) {
-      v.halfedge += shift;
+      if (v.halfedge != nullptr) {
+        v.halfedge += shift;
+      }
     }
     for (Edge& e : rawEdges) {
-      e.halfedge += shift;
+      if (e.halfedge != nullptr) {
+        e.halfedge += shift;
+      }
     }
     for (Face& f : rawFaces) {
-      f.halfedge += shift;
+      if (f.halfedge != nullptr) {
+        f.halfedge += shift;
+      }
     }
     for (Face& f : rawBoundaryLoops) {
-      f.halfedge += shift;
+      if (f.halfedge != nullptr) {
+        f.halfedge += shift;
+      }
     }
 
     // Invoke relevant callback functions
@@ -1302,6 +1331,7 @@ Halfedge* HalfedgeMesh::getNewRealHalfedge() {
 
   rawHalfedges.back().ID = nextElemID++;
   rawHalfedges.back().isReal = true;
+  nRealHalfedgesCount++;
 #ifndef NDEBUG
   rawHalfedges.back().parentMesh = this;
 #endif
@@ -1326,20 +1356,30 @@ Halfedge* HalfedgeMesh::getNewImaginaryHalfedge() {
 
     // Shift all pointers
     for (Halfedge& he : rawHalfedges) {
-      he.twin += shift;
+      if (he.twin != nullptr) { // preserve implicit dead values
+        he.twin += shift;
+      }
       he.next += shift;
     }
     for (Vertex& v : rawVertices) {
-      v.halfedge += shift;
+      if (v.halfedge != nullptr) {
+        v.halfedge += shift;
+      }
     }
     for (Edge& e : rawEdges) {
-      e.halfedge += shift;
+      if (e.halfedge != nullptr) {
+        e.halfedge += shift;
+      }
     }
     for (Face& f : rawFaces) {
-      f.halfedge += shift;
+      if (f.halfedge != nullptr) {
+        f.halfedge += shift;
+      }
     }
     for (Face& f : rawBoundaryLoops) {
-      f.halfedge += shift;
+      if (f.halfedge != nullptr) {
+        f.halfedge += shift;
+      }
     }
 
     // Invoke relevant callback functions
