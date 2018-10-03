@@ -110,6 +110,9 @@ public:
   // Same as above, but if vertices do not contain shared face or are adajcent returns HalfedgePtr() rather than
   // throwing.
   HalfedgePtr tryConnectVertices(VertexPtr vA, VertexPtr vB);
+  
+  // Same as above, but you can specify a face to work in
+  HalfedgePtr tryConnectVertices(VertexPtr vA, VertexPtr vB, FacePtr face);
 
   // Collapse an edge. Returns the vertex adjacent to that edge which still exists. Returns VertexPtr() if not
   // collapsible.

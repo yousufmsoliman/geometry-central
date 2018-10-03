@@ -882,6 +882,49 @@ HalfedgePtr HalfedgeMesh::tryConnectVertices(VertexPtr vA, VertexPtr vB) {
   return connectVertices(sharedFace, vA, vB);
 }
 
+HalfedgePtr HalfedgeMesh::tryConnectVertices(VertexPtr vA, VertexPtr vB, FacePtr face) {
+
+
+  // TODO much of the connectVertices() logic is O(N_VERTICES_IN_FACE) even though it doesn't really need to be.
+
+  // Early-out if same
+  if (vA == vB) {
+    return HalfedgePtr();
+  }
+
+  // Find the shared face and call the main version
+
+  // Check if adjacent
+  bool foundA = false;
+  bool foundB = false;
+  for (HalfedgePtr he : face.adjacentHalfedges()) {
+    if ((he.vertex() == vA && he.twin().vertex() == vB) || (he.vertex() == vB && he.twin().vertex() == vA)) {
+      cout << "adjacent" << endl;
+      return HalfedgePtr();
+    }
+
+    if (he.vertex() == vA) {
+      foundA = true;
+    }
+    if (he.vertex() == vB) {
+      foundB = true;
+    }
+  }
+
+  // One of the vertices isn't in the face we're supposed to work in
+  if (!foundA) {
+    cout << "didn't find A :(" << endl;
+    return HalfedgePtr();
+  }
+  if (!foundB) {
+    cout << "didn't find B :(" << endl;
+    return HalfedgePtr();
+  }
+
+  isCanonicalFlag = false;
+  return connectVertices(face, vA, vB);
+}
+
 HalfedgePtr HalfedgeMesh::connectVertices(FacePtr faceIn, VertexPtr vAIn, VertexPtr vBIn) {
 
   DynamicFacePtr faceInD(faceIn, this);
