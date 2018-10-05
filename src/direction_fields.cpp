@@ -60,11 +60,11 @@ VertexData<Complex> computeSmoothestVertexDirectionField_noBoundary(Geometry<Euc
       size_t j = gc.vertexIndices[he.vertex()];
       std::complex<double> rBar = std::pow(gc.vertexTransportCoefs[he], nSym);
       double weight = gc.edgeCotanWeights[he.edge()];
-      energyMatrix.insert(i, j) = -weight * rBar;
+      energyMatrix.coeffRef(i, j) = -weight * rBar;
       weightISum += weight;
     }
 
-    energyMatrix.insert(i, i) = weightISum;
+    energyMatrix.coeffRef(i, i) = weightISum;
   }
 
   // Shift to avoid singularity
@@ -107,9 +107,9 @@ VertexData<Complex> computeSmoothestVertexDirectionField_noBoundary(Geometry<Euc
   else {
     std::cout << "Solving smoothest field eigenvalue problem..." << std::endl;
     try {
-      solution = smallestEigenvectorPositiveDefinite(E,hodge0);
+      solution = smallestEigenvectorPositiveDefinite(energyMatrix,massMatrix);
     } catch(std::exception& e) {
-      solution = smallestEigenvectorSquare(E,hodge0);
+      solution = smallestEigenvectorSquare(energyMatrix,massMatrix);
     }
   }
 
