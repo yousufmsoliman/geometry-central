@@ -216,13 +216,14 @@ void ExactPolyhedralGeodesics::propogateWindow(const Window& win) {
   // generate both left and right windows
   else {
     double directDist = norm(v2-src2D);
-    if( directDist + win.pseudoSrcDist > splitInfos[he0].dist
-        && (directDist + win.pseudoSrcDist)/splitInfos[he0].dist - 1. > REL_ERR )
+    // if( directDist + win.pseudoSrcDist > splitInfos[he0].dist
+    //     && (directDist + win.pseudoSrcDist)/splitInfos[he0].dist - 1. > REL_ERR )
+    // {
+    //   hasLeftChild = splitInfos[he0].x < interX;
+    //   hasRightChild = not hasLeftChild;
+    // }
+    // else {
     {
-      hasLeftChild = splitInfos[he0].x < interX;
-      hasRightChild = not hasLeftChild;
-    }
-    else {
       if( directDist + win.pseudoSrcDist < splitInfos[he0].dist ) {
         splitInfos[he0].dist = directDist + win.pseudoSrcDist;
         splitInfos[he0].pseudoSrc = win.pseudoSrc;
