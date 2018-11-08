@@ -305,6 +305,7 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
         newHe->face = boundaryLoop.ptr;
         newHe->edge = currHe->edge;
         newHe->vertex = currHe->next->vertex;
+        currHe->vertex->halfedge = currHe.ptr; // ensure that halfedge for boundary vertex is the one that starts the boundary
 
         // Some pointers need values only visible from the previous iteration of
         // the loop.
@@ -1320,6 +1321,15 @@ void HalfedgeMesh::validateConnectivity() {
       count++;
       if (count > rawHalfedges.size()) throw std::logic_error("twin->next forms non-vertex loop");
     } while (currHe != firstHe);
+  }
+
+  // Verify that for a mesh with boundary, outgoing boundary halfedge is the one that starts the boundary wedge
+  // (aka it's the unique real halfedge along the boundary)
+  for (Vertex& v : rawVertices) {
+    if (v.isDead() || !v.isBoundary) continue;
+
+    if(!v.halfedge->isReal) throw std::logic_error("v.halfedge() is not real");
+    if(v.halfedge->twin->isReal) throw std::logic_error("v.halfedge() is not along boundary");
   }
 }
 

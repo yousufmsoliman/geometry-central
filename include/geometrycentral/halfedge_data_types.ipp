@@ -5,6 +5,10 @@
 // Note: these implementations assuming that the default indexing convention for elements will be the same as the
 // iteration order.
 
+// FIXME right now these do weird this if boundary loop data and face data are both stored in the same container, and
+// that container is adaptively resized. To fix, should break out boundary loop in to a real separate type, and give it
+// its own container type.
+
 namespace geometrycentral {
 
 // === Helpers which will allow us abstract over element access
@@ -20,7 +24,7 @@ template<> inline size_t nElements<CornerPtr  >(HalfedgeMesh* mesh)   { return m
 
 template <typename E> size_t elementCapacity(HalfedgeMesh* mesh)            { return std::numeric_limits<size_t>::max(); }
 template<> inline size_t elementCapacity<VertexPtr  >(HalfedgeMesh* mesh)   { return mesh->nVerticesCapacity();   }
-template<> inline size_t elementCapacity<FacePtr    >(HalfedgeMesh* mesh)   { return mesh->nFacesCapacity(); }
+template<> inline size_t elementCapacity<FacePtr    >(HalfedgeMesh* mesh)   { return mesh->nFacesCapacity() + mesh->nBoundaryLoops(); }
 template<> inline size_t elementCapacity<EdgePtr    >(HalfedgeMesh* mesh)   { return mesh->nEdgesCapacity();      }
 template<> inline size_t elementCapacity<HalfedgePtr>(HalfedgeMesh* mesh)   { return mesh->nHalfedgesCapacity();}
 template<> inline size_t elementCapacity<CornerPtr  >(HalfedgeMesh* mesh)   { return mesh->nHalfedgesCapacity();    }
@@ -32,7 +36,7 @@ template<> inline size_t dataIndexOfElement<FacePtr    >(HalfedgeMesh* mesh, Fac
   if (e.isReal()) {
     return e - mesh->face(0);
   } else {
-    return e - mesh->boundaryLoop(0);
+    return e - mesh->boundaryLoop(0) + mesh->nFaces();
   }
 }
 template<> inline size_t dataIndexOfElement<EdgePtr    >(HalfedgeMesh* mesh, EdgePtr e)      { return e - mesh->edge(0);      }
