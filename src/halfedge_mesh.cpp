@@ -305,7 +305,8 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
         newHe->face = boundaryLoop.ptr;
         newHe->edge = currHe->edge;
         newHe->vertex = currHe->next->vertex;
-        currHe->vertex->halfedge = currHe.ptr; // ensure that halfedge for boundary vertex is the one that starts the boundary
+        currHe->vertex->halfedge =
+            currHe.ptr; // ensure that halfedge for boundary vertex is the one that starts the boundary
 
         // Some pointers need values only visible from the previous iteration of
         // the loop.
@@ -667,6 +668,8 @@ bool HalfedgeMesh::flip(EdgePtr eFlip) {
   Halfedge* hb3 = hb2->next;
   if (hb3->next != hb1) return false; // not a triangle
 
+  if (ha2 == hb1 || hb2 == ha1) return false; // incident on degree 1 vertex
+
   // Get vertices and faces
   Vertex* va = ha1->vertex;
   Vertex* vb = hb1->vertex;
@@ -848,7 +851,6 @@ HalfedgePtr HalfedgeMesh::tryConnectVertices(VertexPtr vA, VertexPtr vB) {
 
   // Early-out if same
   if (vA == vB) {
-    cout << "fail, same" << endl;
     return HalfedgePtr();
   }
 
@@ -867,14 +869,12 @@ HalfedgePtr HalfedgeMesh::tryConnectVertices(VertexPtr vA, VertexPtr vB) {
 
   // Fail if no shared face
   if (sharedFace == FacePtr()) {
-    cout << "fail, no shared face" << endl;
     return HalfedgePtr();
   }
 
   // Check if adjacent
   for (HalfedgePtr he : sharedFace.adjacentHalfedges()) {
     if ((he.vertex() == vA && he.twin().vertex() == vB) || (he.vertex() == vB && he.twin().vertex() == vA)) {
-      cout << "fail, adjacent" << endl;
       return HalfedgePtr();
     }
   }
@@ -900,7 +900,6 @@ HalfedgePtr HalfedgeMesh::tryConnectVertices(VertexPtr vA, VertexPtr vB, FacePtr
   bool foundB = false;
   for (HalfedgePtr he : face.adjacentHalfedges()) {
     if ((he.vertex() == vA && he.twin().vertex() == vB) || (he.vertex() == vB && he.twin().vertex() == vA)) {
-      cout << "adjacent" << endl;
       return HalfedgePtr();
     }
 
@@ -914,11 +913,9 @@ HalfedgePtr HalfedgeMesh::tryConnectVertices(VertexPtr vA, VertexPtr vB, FacePtr
 
   // One of the vertices isn't in the face we're supposed to work in
   if (!foundA) {
-    cout << "didn't find A :(" << endl;
     return HalfedgePtr();
   }
   if (!foundB) {
-    cout << "didn't find B :(" << endl;
     return HalfedgePtr();
   }
 
@@ -1114,18 +1111,29 @@ VertexPtr HalfedgeMesh::insertVertex(FacePtr fIn) {
 
 VertexPtr HalfedgeMesh::collapseEdge(EdgePtr e) {
 
+  if (e.isBoundary()) {
+    return collapseEdgeAlongBoundary(e);
+  }
+
   // TODO for now only valid on triangle meshes and away from the boundary.
 
   // === Gather some elements
 
-  Halfedge* heA0 = e.halfedge().ptr;
+  Halfedge* heA0;
+  // If there's a single boundary vertex, be sure we keep it
+  if (e.halfedge().twin().vertex().isBoundary() && !e.halfedge().vertex().isBoundary()) {
+    heA0 = e.halfedge().twin().ptr;
+  } else {
+    heA0 = e.halfedge().ptr;
+  }
+
   Halfedge* heA1 = heA0->next;
   Halfedge* heA2 = heA1->next;
   Face* fA = heA0->face;
   Edge* eADelete = heA1->edge;
   Edge* eAKeep = heA2->edge;
 
-  Halfedge* heB0 = e.halfedge().twin().ptr;
+  Halfedge* heB0 = heA0->twin;
   Halfedge* heB1 = heB0->next;
   Halfedge* heB2 = heB1->next;
   Face* fB = heB0->face;
@@ -1141,6 +1149,8 @@ VertexPtr HalfedgeMesh::collapseEdge(EdgePtr e) {
   if (VertexPtr(vKeep).degree() <= 2 || VertexPtr(vDiscard).degree() <= 2) {
     return VertexPtr();
   }
+
+  bool vKeepIsBoundary = VertexPtr(vKeep).isBoundary();
 
   // (should be exactly two vertices, the opposite diamond vertices, in the intersection of the 1-rings)
   std::unordered_set<VertexPtr> vKeepNeighbors;
@@ -1170,9 +1180,16 @@ VertexPtr HalfedgeMesh::collapseEdge(EdgePtr e) {
   }
 
   // Fix vertices
-  vKeep->halfedge = heA2->twin;
-  heA2->vertex->halfedge = heA1->twin;
-  heB2->vertex->halfedge = heB1->twin;
+  if (vKeep->halfedge == heA0 || vKeep->halfedge == heB1) {
+    // Only fix if needed, which ensure we don't mess up boundary vertices
+    vKeep->halfedge = heB2->twin;
+  }
+  if (heA2->vertex->halfedge == heA2) {
+    heA2->vertex->halfedge = heA1->twin;
+  }
+  if (heB2->vertex->halfedge == heB2) {
+    heB2->vertex->halfedge = heB2->twin->next;
+  }
 
   // Fix edges
   eAKeep->halfedge = heA2->twin;
@@ -1185,6 +1202,11 @@ VertexPtr HalfedgeMesh::collapseEdge(EdgePtr e) {
   heB2->twin->edge = eBKeep;
   heB2->twin->twin = heB1->twin;
   heB1->twin->twin = heB2->twin;
+
+  if (vKeepIsBoundary) {
+    heA1->edge->isBoundary = true;
+    heB2->edge->isBoundary = true;
+  }
 
 
   // === Delete everything which needs to be deleted
@@ -1204,6 +1226,250 @@ VertexPtr HalfedgeMesh::collapseEdge(EdgePtr e) {
   isCanonicalFlag = false;
 
   return VertexPtr(vKeep);
+}
+
+
+VertexPtr HalfedgeMesh::collapseEdgeAlongBoundary(EdgePtr e) {
+
+  if (!e.isBoundary()) throw std::runtime_error("Called away from boundary");
+
+
+  if (e.halfedge().next().edge().isBoundary() && e.halfedge().next().next().edge().isBoundary()) {
+    throw std::runtime_error("Tried to collapse single face");
+  }
+
+  Halfedge* heA0 = e.halfedge().ptr;
+  Halfedge* heA1 = heA0->next;
+  Halfedge* heA2 = heA1->next;
+  Face* fA = heA0->face;
+  Edge* eADelete = heA1->edge;
+  Edge* eAKeep = heA2->edge;
+
+  Halfedge* heB = heA0->twin;
+  Halfedge* heBNext = heB->next;
+  Halfedge* heBPrev = heA0; // about to change
+  while (heBPrev->next != heB) heBPrev = heBPrev->next->twin;
+  Face* bL = heB->face;
+
+
+  Vertex* vKeep = heA0->vertex;
+  Vertex* vDiscard = heA0->twin->vertex;
+
+  // (should be exactly two vertices, the opposite diamond vertices, in the intersection of the 1-rings)
+  std::unordered_set<VertexPtr> vKeepNeighbors;
+  for (VertexPtr vN : VertexPtr(vKeep).adjacentVertices()) {
+    vKeepNeighbors.insert(vN);
+  }
+  size_t nShared = 0;
+  for (VertexPtr vN : VertexPtr(vDiscard).adjacentVertices()) {
+    if (vKeepNeighbors.find(vN) != vKeepNeighbors.end()) {
+      nShared++;
+    }
+  }
+  if (nShared > 2) {
+    return VertexPtr();
+    cout << "can't collapse: vertex neighborhoods are not distinct" << endl;
+  }
+
+  // === Update pointers
+
+  { // Update all of the halfedges around vDiscard (do this loop before we break things
+    Halfedge* currHe = heA1;
+    Halfedge* firstHe = heA1;
+    do {
+      currHe->vertex = vKeep;
+      currHe = currHe->twin->next;
+    } while (currHe != firstHe);
+  }
+
+
+  if (heA2->vertex->halfedge == heA2) {
+    heA2->vertex->halfedge = heA1->twin;
+  }
+
+  vKeep->halfedge = heBPrev->twin;
+
+  // Fix edges
+  if (heA2->twin->isReal) {
+    eAKeep->halfedge = heA2->twin;
+  } else {
+    eAKeep->halfedge = heA1->twin;
+  }
+
+  // Fix halfedges
+  heA1->twin->edge = eAKeep;
+  heA1->twin->twin = heA2->twin;
+  heA2->twin->twin = heA1->twin;
+  heBPrev->next = heBNext;
+
+  // Fix boundary loop
+  bL->halfedge = heBPrev;
+
+  ensureVertexHasBoundaryHalfedge(heA2->vertex);
+
+  // === Delete everything which needs to be deleted
+  deleteElement(e);
+  deleteElement(heA0);
+  deleteElement(heA1);
+  deleteElement(heA2);
+  deleteElement(heB);
+  deleteElement(fA);
+  deleteElement(vDiscard);
+  deleteElement(eADelete);
+
+  isCanonicalFlag = false;
+
+  return VertexPtr(vKeep);
+}
+
+void HalfedgeMesh::ensureVertexHasBoundaryHalfedge(VertexPtr v) {
+  if (!v.isBoundary()) return;
+  Vertex* rawV = v.ptr;
+  while (rawV->halfedge->twin->isReal) {
+    rawV->halfedge = rawV->halfedge->twin->next;
+  }
+}
+
+bool HalfedgeMesh::removeFaceAlongBoundary(FacePtr f) {
+
+  // Find the boundary halfedge
+  HalfedgePtr heBoundary;
+  int bCount = 0;
+  for (HalfedgePtr he : f.adjacentHalfedges()) {
+    if (!he.twin().isReal()) {
+      bCount++;
+      heBoundary = he;
+    }
+  }
+  if (bCount == 0) {
+    throw std::runtime_error("called on non-boundary face");
+  }
+  if (bCount == 1) {
+    // Remove a non-ear boundary face with one boundary edge
+
+    Halfedge* he0 = heBoundary.ptr;
+    Halfedge* he0T = he0->twin;
+    Halfedge* he1 = he0->next;
+    Halfedge* he2 = he1->next;
+    Vertex* v0 = he0->vertex;
+    Vertex* v1 = he1->vertex;
+    Vertex* v2 = he2->vertex;
+    Face* fRemove = he0->face;
+
+    // Vertex halfedges
+    v0->halfedge = he2->twin;
+    v2->halfedge = he1->twin;
+
+    // Nexts
+    he2->next = he0T->next;
+    v1->halfedge->twin->next = he1;
+
+    // mark boundary
+    v2->isBoundary = true;
+    he1->isReal = false;
+    he2->isReal = false;
+
+    deleteElement(he0->edge);
+    deleteElement(he0);
+    deleteElement(he0T);
+    deleteElement(fRemove);
+
+    isCanonicalFlag = false;
+    return true;
+
+  } else if (bCount == 2) {
+    // Remove an "ear" along the boundary
+
+    // Gather elements
+    Halfedge* he0 = f.halfedge().ptr;
+    while (!he0->twin->isReal) he0 = he0->next;
+    Halfedge* he0T = he0->twin;
+    Halfedge* he1 = he0->next;
+    Halfedge* he1T = he1->twin;
+    Edge* e1 = he1->edge;
+    Halfedge* he2 = he1->next;
+    Halfedge* he2T = he2->twin;
+    Edge* e2 = he2->edge;
+    Vertex* v0 = he0->vertex;
+    Vertex* v1 = he1->vertex;
+    Vertex* v2 = he2->vertex;
+    Face* fRemove = he0->face;
+
+    Halfedge* heNext = he1T->next;
+    Halfedge* hePrev = he0T;
+    while (hePrev->isReal) hePrev = hePrev->next->twin;
+
+    // Vertex halfedges
+    v0->halfedge = hePrev->twin;
+    v1->halfedge = he0T;
+
+    // Nexts
+    hePrev->next = heNext;
+
+    // Boundary loop
+    hePrev->face->halfedge = hePrev;
+
+    // mark boundary
+    he0->isReal = false;
+
+    deleteElement(fRemove);
+    deleteElement(v2);
+    deleteElement(he1);
+    deleteElement(he1T);
+    deleteElement(e1);
+    deleteElement(he2);
+    deleteElement(he2T);
+    deleteElement(e2);
+
+    isCanonicalFlag = false;
+    return true;
+
+  } else {
+    // Remove entire component
+
+    /*
+    Halfedge* he0 = heBoundary.ptr;
+    Halfedge* he0T = he0->twin;
+    Edge* e0 = he0->edge;
+    Halfedge* he1 = he0->next;
+    Halfedge* he1T = he1->twin;
+    Edge* e1 = he1->edge;
+    Halfedge* he2 = he1->next;
+    Halfedge* he2T = he2->twin;
+    Edge* e2 = he2->edge;
+    Vertex* v0 = he0->vertex;
+    Vertex* v1 = he1->vertex;
+    Vertex* v2 = he2->vertex;
+    Face* fFace = he0->face;
+    Face* fBound = he0T->face;
+
+
+    deleteElement(he0);
+    deleteElement(he1);
+    deleteElement(he2);
+
+    deleteElement(he0T);
+    deleteElement(he1T);
+    deleteElement(he2T);
+
+    deleteElement(e0);
+    deleteElement(e1);
+    deleteElement(e2);
+
+    deleteElement(v0);
+    deleteElement(v1);
+    deleteElement(v2);
+
+    deleteElement(fFace);
+    deleteElement(fBound);
+
+    isCanonicalFlag = false;
+    return true;
+    */
+
+    // The removal/insertion code doesn't support changing boundary structure yet
+    return false;
+  }
 }
 
 void HalfedgeMesh::setEdgeHalfedge(EdgePtr e, HalfedgePtr he) { e.ptr->halfedge = he.ptr; }
@@ -1272,6 +1538,7 @@ void HalfedgeMesh::validateConnectivity() {
   for (Halfedge& he : rawHalfedges) {
     if (he.isDead()) continue;
     if (&he != he.twin->twin) throw std::logic_error("twins not reflective");
+    if (&he == he.twin) throw std::logic_error("self-twin");
     if (&he != he.edge->halfedge && he.twin != he.edge->halfedge)
       throw std::logic_error("edge.halfedge doesn't match halfedge.edge");
   }
@@ -1292,6 +1559,21 @@ void HalfedgeMesh::validateConnectivity() {
     if (count < 3) throw std::logic_error("face of degree < 2");
   }
 
+  for (Face& f : rawBoundaryLoops) {
+    if (f.isDead()) continue;
+    Halfedge* currHe = f.halfedge;
+    Halfedge* firstHe = f.halfedge;
+    size_t count = 0;
+    do {
+      if (currHe->face != &f) throw std::logic_error("(boundary loop) face.halfedge doesn't match halfedge.face");
+      currHe = currHe->next;
+      count++;
+      if (count > rawHalfedges.size()) throw std::logic_error("(boundary loop) next forms non-face loop");
+    } while (currHe != firstHe);
+
+    if (count < 3) throw std::logic_error("(boundary loop) face of degree < 2");
+  }
+
   for (Halfedge& he : rawHalfedges) {
     if (he.isDead()) continue;
     Halfedge* currHe = &he;
@@ -1304,7 +1586,8 @@ void HalfedgeMesh::validateConnectivity() {
       if (count > rawHalfedges.size()) throw std::logic_error("next forms non-face loop");
     } while (currHe != firstHe);
 
-    if (he.vertex == he.next->twin->vertex) throw std::logic_error("halfedge face spur");
+    // This can happen in irregular triangulations
+    // if (he.vertex == he.next->twin->vertex) throw std::logic_error("halfedge face spur");
 
     if (he.vertex != he.twin->next->vertex) throw std::logic_error("halfedge vertices don't match");
   }
@@ -1323,13 +1606,29 @@ void HalfedgeMesh::validateConnectivity() {
     } while (currHe != firstHe);
   }
 
+  // Verify isBoundary flag is correct
+  for (Vertex& v : rawVertices) {
+    if (v.isDead()) continue;
+    bool hasBoundaryHe = false;
+    Halfedge* currHe = v.halfedge;
+    Halfedge* firstHe = v.halfedge;
+    do {
+      if (!currHe->isReal) hasBoundaryHe = true;
+      currHe = currHe->twin->next;
+    } while (currHe != firstHe);
+
+    if (hasBoundaryHe != v.isBoundary) {
+      throw std::logic_error("cached v.isBoundary is wrong");
+    }
+  }
+
   // Verify that for a mesh with boundary, outgoing boundary halfedge is the one that starts the boundary wedge
   // (aka it's the unique real halfedge along the boundary)
   for (Vertex& v : rawVertices) {
     if (v.isDead() || !v.isBoundary) continue;
 
-    if(!v.halfedge->isReal) throw std::logic_error("v.halfedge() is not real");
-    if(v.halfedge->twin->isReal) throw std::logic_error("v.halfedge() is not along boundary");
+    if (!v.halfedge->isReal) throw std::logic_error("v.halfedge() is not real");
+    if (v.halfedge->twin->isReal) throw std::logic_error("v.halfedge() is not along boundary");
   }
 }
 
@@ -1526,7 +1825,6 @@ Face* HalfedgeMesh::getNewFace() {
   }
   // The intesting case, where the vector resizes and we need to update pointers.
   else {
-
     // Create a new halfedge, allowing the list to expand
     Face* oldStart = &rawFaces.front();
     rawFaces.emplace_back();
@@ -1535,7 +1833,9 @@ Face* HalfedgeMesh::getNewFace() {
 
     // Shift all pointers
     for (Halfedge& he : rawHalfedges) {
-      he.face += shift;
+      if (!he.isDead() && he.face->isReal) {
+        he.face += shift;
+      }
     }
 
     // Invoke relevant callback functions
@@ -1679,7 +1979,9 @@ void HalfedgeMesh::compressFaces() {
   // Fix up pointers.
   for (Halfedge& he : rawHalfedges) {
     if (he.isDead()) continue;
-    he.face = newStart + oldIndMap[(he.face - oldStart)];
+    if (he.face->isReal) {
+      he.face = newStart + oldIndMap[(he.face - oldStart)];
+    }
   }
 
   // Invoke callbacks
@@ -1744,8 +2046,8 @@ void HalfedgeMesh::canonicalize() {
 
   { // == Reorder halfedges
 
-    std::vector<size_t> newIndMap(rawHalfedges.size()); // maps new ind -> old ind
-    std::vector<size_t> oldIndMap(rawHalfedges.size()); // maps new old -> new ind
+    std::vector<size_t> newIndMap(rawHalfedges.size(), 7777777777777); // maps new ind -> old ind
+    std::vector<size_t> oldIndMap(rawHalfedges.size(), 7777777777777); // maps new old -> new ind
 
     // Compute the permutation to canonical
     Halfedge* startPtr = &rawHalfedges.front();
@@ -1801,10 +2103,10 @@ void HalfedgeMesh::canonicalize() {
   }
 
 
-  { // == Reorder halfedges
+  { // == Reorder edges
 
-    std::vector<size_t> newIndMap(rawEdges.size()); // maps new ind -> old ind
-    std::vector<size_t> oldIndMap(rawEdges.size()); // maps new old -> new ind
+    std::vector<size_t> newIndMap(rawEdges.size(), 7777777777777); // maps new ind -> old ind
+    std::vector<size_t> oldIndMap(rawEdges.size(), 7777777777777); // maps new old -> new ind
     EdgeData<char> edgeSeen(this, false);
 
     // Compute the permutation to canonical

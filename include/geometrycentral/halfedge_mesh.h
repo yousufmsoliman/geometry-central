@@ -80,7 +80,8 @@ public:
   // TODOs: support adding boundary
 
 
-  // Flip an edge. Unlike all the other mutation routines, this _does not_ invalidate pointers, though it does break the canonical ordering.
+  // Flip an edge. Unlike all the other mutation routines, this _does not_ invalidate pointers, though it does break the
+  // canonical ordering.
   // Return true if the edge was actually flipped (can't flip boundary or non-triangular edges)
   bool flip(EdgePtr e);
 
@@ -110,14 +111,19 @@ public:
   // Same as above, but if vertices do not contain shared face or are adajcent returns HalfedgePtr() rather than
   // throwing.
   HalfedgePtr tryConnectVertices(VertexPtr vA, VertexPtr vB);
-  
+
   // Same as above, but you can specify a face to work in
   HalfedgePtr tryConnectVertices(VertexPtr vA, VertexPtr vB, FacePtr face);
 
   // Collapse an edge. Returns the vertex adjacent to that edge which still exists. Returns VertexPtr() if not
   // collapsible.
   VertexPtr collapseEdge(EdgePtr e);
- 
+
+  // Remove a face which is adjacent to the boundary of the mesh (along with its edge on the boundary).
+  // Face must have exactly one boundary edge.
+  // Returns true if could remove
+  bool removeFaceAlongBoundary(FacePtr f);
+
 
   // Set e.halfedge() == he. he must be adjacent.
   void setEdgeHalfedge(EdgePtr e, HalfedgePtr he);
@@ -150,10 +156,10 @@ public:
   // Compress the mesh
   bool isCompressed();
   void compress();
- 
+
   // Canonicalize the element ordering to be the same indexing convention as after construction from polygon soup.
-  bool isCanonical(); 
-  void canonicalize(); 
+  bool isCanonical();
+  void canonicalize();
 
   // == Callbacks that will be invoked on mutation to keep containers/iterators/etc valid.
   // Expansion callbacks
@@ -206,7 +212,7 @@ private:
   size_t nFacesCount = 0;
   size_t nBoundaryLoopsCount = 0;
   size_t nextElemID = 77777; // used to assign unique ID to elements
-  
+
   bool isCanonicalFlag = true;
   bool isCompressedFlag = true;
 
@@ -240,6 +246,10 @@ private:
   size_t indexOf(Vertex* ptr);
   size_t indexOf(Edge* ptr);
   size_t indexOf(Face* ptr);
+
+  // Helpers for mutation methods
+  void ensureVertexHasBoundaryHalfedge(VertexPtr v); // impose invariant that v.halfedge is start of half-disk
+  VertexPtr collapseEdgeAlongBoundary(EdgePtr e);
 
   friend class DynamicHalfedgePtr;
   friend class DynamicVertexPtr;
