@@ -19,7 +19,7 @@ template <typename E> size_t nElements(HalfedgeMesh* mesh)            { return s
 template<> inline size_t nElements<VertexPtr  >(HalfedgeMesh* mesh)   { return mesh->nVertices();   }
 template<> inline size_t nElements<FacePtr    >(HalfedgeMesh* mesh)   { return mesh->nFaces() + mesh->nBoundaryLoops(); }
 template<> inline size_t nElements<EdgePtr    >(HalfedgeMesh* mesh)   { return mesh->nEdges();      }
-template<> inline size_t nElements<HalfedgePtr>(HalfedgeMesh* mesh)   { return mesh->nHalfedges() + mesh->nImaginaryHalfedges();  }
+template<> inline size_t nElements<HalfedgePtr>(HalfedgeMesh* mesh)   { return mesh->nRealHalfedges() + mesh->nImaginaryHalfedges();  }
 template<> inline size_t nElements<CornerPtr  >(HalfedgeMesh* mesh)   { return mesh->nCorners();    }
 
 template <typename E> size_t elementCapacity(HalfedgeMesh* mesh)            { return std::numeric_limits<size_t>::max(); }

@@ -46,7 +46,9 @@ public:
   ~HalfedgeMesh();
 
   // Number of mesh elements of each type
-  size_t nHalfedges() const;
+  // TODO at some point add back in nHalfedges(), which gives real+imaginary. It's gone for now (Dec 2018) b/c I renamed
+  // it to nRealHalfedges(), and want existing code to fail to compile
+  size_t nRealHalfedges() const;
   size_t nCorners() const;
   size_t nVertices() const;
   size_t nInteriorVertices();
@@ -223,8 +225,7 @@ private:
   HalfedgeMesh& operator=(HalfedgeMesh&& other) = delete;
 
   // Used to resize the halfedge mesh. Expands and shifts vectors as necessary.
-  Halfedge* getNewRealHalfedge();
-  Halfedge* getNewImaginaryHalfedge();
+  Halfedge* getNewHalfedge(bool real = true);
   Vertex* getNewVertex();
   Edge* getNewEdge();
   Face* getNewFace();

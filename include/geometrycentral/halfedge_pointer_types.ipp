@@ -142,7 +142,7 @@ inline const HalfedgePtrRangeIterator& HalfedgePtrRangeIterator::operator++() {
   }
 
   if(type == HalfedgeSetType::All) {
-    while(currHalfedge->isDead()) {
+    while(currHalfedge != end && currHalfedge->isDead()) {
       currHalfedge++;
     }
     return *this;

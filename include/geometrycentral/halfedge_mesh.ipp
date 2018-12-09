@@ -4,7 +4,7 @@ namespace geometrycentral {
 
 // Methods for getting number of mesh elements
 
-inline size_t HalfedgeMesh::nHalfedges(void) const { return nRealHalfedgesCount; }
+inline size_t HalfedgeMesh::nRealHalfedges(void) const { return nRealHalfedgesCount; }
 inline size_t HalfedgeMesh::nCorners(void) const { return nRealHalfedgesCount; }
 inline size_t HalfedgeMesh::nVertices(void) const { return nVerticesCount; }
 inline size_t HalfedgeMesh::nEdges(void) const { return nEdgesCount; }

@@ -167,8 +167,8 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
 
   // Allocate space and construct elements
   rawHalfedges.reserve(nRealHalfedgesToMake + nImaginaryHalfedges);
-  for (size_t i = 0; i < nRealHalfedgesToMake; i++) getNewRealHalfedge();
-  for (size_t i = 0; i < nImaginaryHalfedges; i++) getNewImaginaryHalfedge();
+  for (size_t i = 0; i < nRealHalfedgesToMake; i++) getNewHalfedge(true);
+  for (size_t i = 0; i < nImaginaryHalfedges; i++) getNewHalfedge(false);
   rawVertices.reserve(nVerts);
   for (size_t i = 0; i < nVerts; i++) getNewVertex();
   rawEdges.reserve(nTotalEdges);
@@ -250,7 +250,7 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
   // them
   size_t nBoundaryLoops = 0;
   std::set<HalfedgePtr> walkedHalfedges;
-  for (size_t iHe = 0; iHe < nHalfedges(); iHe++) {
+  for (size_t iHe = 0; iHe < nRealHalfedges(); iHe++) {
     if (halfedge(iHe)->twin == nullptr && walkedHalfedges.find(halfedge(iHe)) == walkedHalfedges.end()) {
       nBoundaryLoops++;
       HalfedgePtr currHe = halfedge(iHe);
@@ -261,7 +261,7 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
         while (currHe->twin != nullptr) {
           currHe = currHe->twin->next;
           walkCount++;
-          if (walkCount > nHalfedges()) {
+          if (walkCount > nRealHalfedges()) {
             throw std::runtime_error(
                 "Encountered infinite loop while constructing halfedge mesh. Are you sure the input is manifold?");
           }
@@ -272,10 +272,12 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
   }
   rawBoundaryLoops.resize(nBoundaryLoops);
 
+
   // Now do the actual walk in which we construct and connect objects
   size_t iBoundaryLoop = 0;
   size_t iImaginaryHalfedge = 0;
-  for (size_t iHe = 0; iHe < nHalfedges(); iHe++) {
+  std::vector<char> vertexAppearedInBoundaryLoop(nVerts, false);
+  for (size_t iHe = 0; iHe < nRealHalfedges(); iHe++) {
     // Note: If distinct holes share a given vertex, this algorithm will see
     // them as a single "figure 8-like"
     // hole and connect them with a single imaginary face.
@@ -293,6 +295,14 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
       HalfedgePtr prevHe{nullptr};
       bool finished = false;
       while (!finished) {
+
+        // Check for non-manifoldness via non-disk-like boundary vertex
+        size_t iV = currHe.vertex().ptr - &rawVertices[0];
+        if (vertexAppearedInBoundaryLoop[iV] == true) {
+          throw std::runtime_error("Input mesh is nonmanifold: vertex appears in two distinct boundary loops");
+        }
+        vertexAppearedInBoundaryLoop[iV] = true;
+
         // Create a new, imaginary halfedge
         HalfedgePtr newHe{&rawHalfedges[nRealHalfedgesCount + iImaginaryHalfedge]};
         boundaryLoop->halfedge = newHe.ptr;
@@ -349,6 +359,30 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
     }
   }
 
+  { // Check that the input was manifold in the sense that each vertex has a single connected loop of faces around it.
+    // This is just a sanity check, and can be skipped if the input is trusted. However, if not checked, we could output
+    // a nonmanifold "mesh".
+    std::vector<char> vertexSeen(nVerts, false);
+    std::vector<char> halfedgeSeen(nRealHalfedges() + this->nImaginaryHalfedges(), false);
+    for (size_t iHe = 0; iHe < nRealHalfedges(); iHe++) {
+      if (halfedgeSeen[iHe]) continue;
+
+      Halfedge* firstHe = &rawHalfedges[iHe];
+      Halfedge* currHe = firstHe;
+      size_t iV = firstHe->vertex - &rawVertices[0];
+      if (vertexSeen[iV]) {
+        throw std::runtime_error(
+            "Vertex neighborhood is nonmanifold: >1 distinct ring of triangles incident on vertex.");
+      }
+      vertexSeen[iV] = true;
+      do {
+        size_t currIHe = currHe - &rawHalfedges[0];
+        halfedgeSeen[currIHe] = true;
+        currHe = currHe->twin->next;
+      } while (currHe != firstHe);
+    }
+  }
+
 
 // When in debug mode, mesh elements know what mesh they are a part of so
 // we can do assertions for saftey checks.
@@ -387,9 +421,10 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
   std::cout << "    # verts =  " << nVertices() << std::endl;
   std::cout << "    # edges =  " << nEdges() << std::endl;
   std::cout << "    # faces =  " << nFaces() << std::endl;
-  std::cout << "    # halfedges =  " << nHalfedges() << std::endl;
+  std::cout << "    # halfedges =  " << nRealHalfedges() + this->nImaginaryHalfedges() << std::endl;
   std::cout << "      and " << nBoundaryLoops << " boundary components. " << std::endl;
   std::cout << "Construction took " << pretty_time(FINISH_TIMING(construction)) << std::endl;
+
 
   // Compute some basic information about the mesh
 }
@@ -716,8 +751,8 @@ HalfedgePtr HalfedgeMesh::insertVertexAlongEdge(EdgePtr eIn) {
   // Create first, because getNew() could invalidate pointers
   Vertex* newV = getNewVertex();
   Edge* newE = getNewEdge();
-  Halfedge* heANew = getNewRealHalfedge();
-  Halfedge* heBNew = getNewRealHalfedge();
+  Halfedge* heANew = getNewHalfedge(true);
+  Halfedge* heBNew = getNewHalfedge(true);
 
   EdgePtr e = eInD;
   Halfedge* heACenter = e.halfedge().ptr;
@@ -759,6 +794,7 @@ HalfedgePtr HalfedgeMesh::insertVertexAlongEdge(EdgePtr eIn) {
   heACenter->vertex = newV;
 
   isCanonicalFlag = false;
+
   return HalfedgePtr{heACenter};
 }
 
@@ -930,8 +966,8 @@ HalfedgePtr HalfedgeMesh::connectVertices(FacePtr faceIn, VertexPtr vAIn, Vertex
   DynamicVertexPtr vBInD(vBIn, this);
 
   // == Create new elements
-  Halfedge* heANew = getNewRealHalfedge();
-  Halfedge* heBNew = getNewRealHalfedge();
+  Halfedge* heANew = getNewHalfedge(true);
+  Halfedge* heBNew = getNewHalfedge(true);
   Edge* eNew = getNewEdge();
   Face* fB = getNewFace();
 
@@ -1040,8 +1076,8 @@ VertexPtr HalfedgeMesh::insertVertex(FacePtr fIn) {
       innerFacesD.push_back(DynamicFacePtr(getNewFace(), this));
     }
 
-    leadingHalfedgesD.push_back(DynamicHalfedgePtr(getNewRealHalfedge(), this));
-    trailingHalfedgesD.push_back(DynamicHalfedgePtr(getNewRealHalfedge(), this));
+    leadingHalfedgesD.push_back(DynamicHalfedgePtr(getNewHalfedge(true), this));
+    trailingHalfedgesD.push_back(DynamicHalfedgePtr(getNewHalfedge(true), this));
     innerEdgesD.push_back(DynamicEdgePtr(getNewEdge(), this));
   }
 
@@ -1104,6 +1140,7 @@ VertexPtr HalfedgeMesh::insertVertex(FacePtr fIn) {
     boundaryHe->face = f;
   }
   centerVert.ptr->halfedge = trailingHalfedges[0];
+
 
   isCanonicalFlag = false;
   return centerVert;
@@ -1355,6 +1392,7 @@ bool HalfedgeMesh::removeFaceAlongBoundary(FacePtr f) {
     Vertex* v1 = he1->vertex;
     Vertex* v2 = he2->vertex;
     Face* fRemove = he0->face;
+    Face* bLoop = he0T->face;
 
     // Vertex halfedges
     v0->halfedge = he2->twin;
@@ -1363,6 +1401,10 @@ bool HalfedgeMesh::removeFaceAlongBoundary(FacePtr f) {
     // Nexts
     he2->next = he0T->next;
     v1->halfedge->twin->next = he1;
+
+    // Faces
+    he1->face = bLoop;
+    he2->face = bLoop;
 
     // mark boundary
     v2->isBoundary = true;
@@ -1632,7 +1674,8 @@ void HalfedgeMesh::validateConnectivity() {
   }
 }
 
-Halfedge* HalfedgeMesh::getNewRealHalfedge() {
+
+Halfedge* HalfedgeMesh::getNewHalfedge(bool real) {
 
   // The boring case, when no resize is needed
   if (rawHalfedges.size() < rawHalfedges.capacity()) {
@@ -1641,37 +1684,73 @@ Halfedge* HalfedgeMesh::getNewRealHalfedge() {
   // The intesting case, where the vector resizes and we need to update pointers.
   else {
 
-    // Create a new halfedge, allowing the list to expand
     Halfedge* oldStart = &rawHalfedges.front();
+
+    // === Prep the "before" lists
+    std::vector<std::ptrdiff_t> offsetsTwin(rawHalfedges.size());
+    std::vector<std::ptrdiff_t> offsetsNext(rawHalfedges.size());
+    std::vector<std::ptrdiff_t> offsetsV(rawVertices.size());
+    std::vector<std::ptrdiff_t> offsetsE(rawEdges.size());
+    std::vector<std::ptrdiff_t> offsetsF(rawFaces.size());
+    std::vector<std::ptrdiff_t> offsetsB(rawBoundaryLoops.size());
+
+    for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+      if (!rawHalfedges[iHe].isDead()) {
+        offsetsTwin[iHe] = rawHalfedges[iHe].twin - oldStart;
+        offsetsNext[iHe] = rawHalfedges[iHe].next - oldStart;
+      }
+    }
+    for (size_t iV = 0; iV < rawVertices.size(); iV++) {
+      if (!rawVertices[iV].isDead()) {
+        offsetsV[iV] = rawVertices[iV].halfedge - oldStart;
+      }
+    }
+    for (size_t iE = 0; iE < rawEdges.size(); iE++) {
+      if (!rawEdges[iE].isDead()) {
+        offsetsE[iE] = rawEdges[iE].halfedge - oldStart;
+      }
+    }
+    for (size_t iF = 0; iF < rawFaces.size(); iF++) {
+      if (!rawFaces[iF].isDead()) {
+        offsetsF[iF] = rawFaces[iF].halfedge - oldStart;
+      }
+    }
+    for (size_t iB = 0; iB < rawBoundaryLoops.size(); iB++) {
+      if (!rawBoundaryLoops[iB].isDead()) {
+        offsetsB[iB] = rawBoundaryLoops[iB].halfedge - oldStart;
+      }
+    }
+
+
+    // Create a new halfedge, allowing the list to expand
     rawHalfedges.emplace_back();
     Halfedge* newStart = &rawHalfedges.front();
-    std::ptrdiff_t shift = newStart - oldStart;
 
-    // Shift all pointers
-    for (Halfedge& he : rawHalfedges) {
-      if (he.twin != nullptr) { // preserve implicit dead values
-        he.twin += shift;
-      }
-      he.next += shift;
-    }
-    for (Vertex& v : rawVertices) {
-      if (v.halfedge != nullptr) {
-        v.halfedge += shift;
+    // === Loop back through, shifting all pointers
+    for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+      if (!rawHalfedges[iHe].isDead()) {
+        rawHalfedges[iHe].twin = newStart + offsetsTwin[iHe];
+        rawHalfedges[iHe].next = newStart + offsetsNext[iHe];
       }
     }
-    for (Edge& e : rawEdges) {
-      if (e.halfedge != nullptr) {
-        e.halfedge += shift;
+    for (size_t iV = 0; iV < rawVertices.size(); iV++) {
+      if (!rawVertices[iV].isDead()) {
+        rawVertices[iV].halfedge = newStart + offsetsV[iV];
       }
     }
-    for (Face& f : rawFaces) {
-      if (f.halfedge != nullptr) {
-        f.halfedge += shift;
+    for (size_t iE = 0; iE < rawEdges.size(); iE++) {
+      if (!rawEdges[iE].isDead()) {
+        rawEdges[iE].halfedge = newStart + offsetsE[iE];
       }
     }
-    for (Face& f : rawBoundaryLoops) {
-      if (f.halfedge != nullptr) {
-        f.halfedge += shift;
+    for (size_t iF = 0; iF < rawFaces.size(); iF++) {
+      if (!rawFaces[iF].isDead()) {
+        rawFaces[iF].halfedge = newStart + offsetsF[iF];
+      }
+    }
+    for (size_t iB = 0; iB < rawBoundaryLoops.size(); iB++) {
+      if (!rawBoundaryLoops[iB].isDead()) {
+        rawBoundaryLoops[iB].halfedge = newStart + offsetsB[iB];
       }
     }
 
@@ -1682,67 +1761,13 @@ Halfedge* HalfedgeMesh::getNewRealHalfedge() {
   }
 
   rawHalfedges.back().ID = nextElemID++;
-  rawHalfedges.back().isReal = true;
-  nRealHalfedgesCount++;
-#ifndef NDEBUG
-  rawHalfedges.back().parentMesh = this;
-#endif
-  return &rawHalfedges.back();
-}
-
-
-Halfedge* HalfedgeMesh::getNewImaginaryHalfedge() {
-
-  // The boring case, when no resize is needed
-  if (rawHalfedges.size() < rawHalfedges.capacity()) {
-    rawHalfedges.emplace_back();
+  rawHalfedges.back().isReal = real;
+  rawHalfedges.back().markDead(); // temporarily, to ensure we don't follow pointers
+  if (real) {
+    nRealHalfedgesCount++;
+  } else {
+    nImaginaryHalfedgesCount++;
   }
-  // The intesting case, where the vector resizes and we need to update pointers.
-  else {
-
-    // Create a new halfedge, allowing the list to expand
-    Halfedge* oldStart = &rawHalfedges.front();
-    rawHalfedges.emplace_back();
-    Halfedge* newStart = &rawHalfedges.front();
-    std::ptrdiff_t shift = newStart - oldStart;
-
-    // Shift all pointers
-    for (Halfedge& he : rawHalfedges) {
-      if (he.twin != nullptr) { // preserve implicit dead values
-        he.twin += shift;
-      }
-      he.next += shift;
-    }
-    for (Vertex& v : rawVertices) {
-      if (v.halfedge != nullptr) {
-        v.halfedge += shift;
-      }
-    }
-    for (Edge& e : rawEdges) {
-      if (e.halfedge != nullptr) {
-        e.halfedge += shift;
-      }
-    }
-    for (Face& f : rawFaces) {
-      if (f.halfedge != nullptr) {
-        f.halfedge += shift;
-      }
-    }
-    for (Face& f : rawBoundaryLoops) {
-      if (f.halfedge != nullptr) {
-        f.halfedge += shift;
-      }
-    }
-
-    // Invoke relevant callback functions
-    for (auto& f : halfedgeExpandCallbackList) {
-      f(rawHalfedges.capacity());
-    }
-  }
-
-  rawHalfedges.back().ID = nextElemID++;
-  rawHalfedges.back().isReal = false;
-  nImaginaryHalfedgesCount++;
 #ifndef NDEBUG
   rawHalfedges.back().parentMesh = this;
 #endif
@@ -1758,15 +1783,22 @@ Vertex* HalfedgeMesh::getNewVertex() {
   // The intesting case, where the vector resizes and we need to update pointers.
   else {
 
-    // Create a new halfedge, allowing the list to expand
     Vertex* oldStart = &rawVertices.front();
-    rawVertices.emplace_back();
-    Vertex* newStart = &rawVertices.front();
-    std::ptrdiff_t shift = newStart - oldStart;
+    std::vector<std::ptrdiff_t> offsets(rawHalfedges.size());
+    for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+      if (!rawHalfedges[iHe].isDead()) {
+        offsets[iHe] = rawHalfedges[iHe].vertex - oldStart;
+      }
+    }
 
-    // Shift all pointers
-    for (Halfedge& he : rawHalfedges) {
-      he.vertex += shift;
+    // Create a new element, allowing the list to expand
+    rawVertices.emplace_back();
+
+    Vertex* newStart = &rawVertices.front();
+    for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+      if (!rawHalfedges[iHe].isDead()) {
+        rawHalfedges[iHe].vertex = newStart + offsets[iHe];
+      }
     }
 
     // Invoke relevant callback functions
@@ -1776,6 +1808,7 @@ Vertex* HalfedgeMesh::getNewVertex() {
   }
 
   rawVertices.back().ID = nextElemID++;
+  rawVertices.back().markDead(); // temporarily, to ensure we don't follow pointers
   nVerticesCount++;
 #ifndef NDEBUG
   rawVertices.back().parentMesh = this;
@@ -1792,15 +1825,22 @@ Edge* HalfedgeMesh::getNewEdge() {
   // The intesting case, where the vector resizes and we need to update pointers.
   else {
 
-    // Create a new halfedge, allowing the list to expand
     Edge* oldStart = &rawEdges.front();
-    rawEdges.emplace_back();
-    Edge* newStart = &rawEdges.front();
-    std::ptrdiff_t shift = newStart - oldStart;
+    std::vector<std::ptrdiff_t> offsets(rawHalfedges.size());
+    for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+      if (!rawHalfedges[iHe].isDead()) {
+        offsets[iHe] = rawHalfedges[iHe].edge - oldStart;
+      }
+    }
 
-    // Shift all pointers
-    for (Halfedge& he : rawHalfedges) {
-      he.edge += shift;
+    // Create a new element, allowing the list to expand
+    rawEdges.emplace_back();
+
+    Edge* newStart = &rawEdges.front();
+    for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+      if (!rawHalfedges[iHe].isDead()) {
+        rawHalfedges[iHe].edge = newStart + offsets[iHe];
+      }
     }
 
     // Invoke relevant callback functions
@@ -1810,6 +1850,7 @@ Edge* HalfedgeMesh::getNewEdge() {
   }
 
   rawEdges.back().ID = nextElemID++;
+  rawEdges.back().markDead(); // temporarily, to ensure we don't follow pointers
   nEdgesCount++;
 #ifndef NDEBUG
   rawEdges.back().parentMesh = this;
@@ -1825,16 +1866,21 @@ Face* HalfedgeMesh::getNewFace() {
   }
   // The intesting case, where the vector resizes and we need to update pointers.
   else {
-    // Create a new halfedge, allowing the list to expand
     Face* oldStart = &rawFaces.front();
-    rawFaces.emplace_back();
-    Face* newStart = &rawFaces.front();
-    std::ptrdiff_t shift = newStart - oldStart;
+    std::vector<std::ptrdiff_t> offsets(rawHalfedges.size());
+    for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+      if (!rawHalfedges[iHe].isDead()) {
+        offsets[iHe] = rawHalfedges[iHe].face - oldStart;
+      }
+    }
 
-    // Shift all pointers
-    for (Halfedge& he : rawHalfedges) {
-      if (!he.isDead() && he.face->isReal) {
-        he.face += shift;
+    // Create new element, allowing the list to expand
+    rawFaces.emplace_back();
+
+    Face* newStart = &rawFaces.front();
+    for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+      if (!rawHalfedges[iHe].isDead()) {
+        rawHalfedges[iHe].face = newStart + offsets[iHe];
       }
     }
 
@@ -1846,6 +1892,7 @@ Face* HalfedgeMesh::getNewFace() {
 
   rawFaces.back().ID = nextElemID++;
   rawFaces.back().isReal = true;
+  rawFaces.back().markDead(); // temporarily, to ensure we don't follow pointers
   nFacesCount++;
 #ifndef NDEBUG
   rawFaces.back().parentMesh = this;
@@ -1894,32 +1941,73 @@ void HalfedgeMesh::compressHalfedges() {
       newIndMap.push_back(i);
     }
   }
+  // === Prep the "before" lists
+  Halfedge* oldStart = &rawHalfedges.front();
+  std::vector<size_t> offsetsTwin(rawHalfedges.size());
+  std::vector<size_t> offsetsNext(rawHalfedges.size());
+  std::vector<size_t> offsetsV(rawVertices.size());
+  std::vector<size_t> offsetsE(rawEdges.size());
+  std::vector<size_t> offsetsF(rawFaces.size());
+  std::vector<size_t> offsetsB(rawBoundaryLoops.size());
+
+  for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+    if (!rawHalfedges[iHe].isDead()) {
+      offsetsTwin[iHe] = rawHalfedges[iHe].twin - oldStart;
+      offsetsNext[iHe] = rawHalfedges[iHe].next - oldStart;
+    }
+  }
+  for (size_t iV = 0; iV < rawVertices.size(); iV++) {
+    if (!rawVertices[iV].isDead()) {
+      offsetsV[iV] = rawVertices[iV].halfedge - oldStart;
+    }
+  }
+  for (size_t iE = 0; iE < rawEdges.size(); iE++) {
+    if (!rawEdges[iE].isDead()) {
+      offsetsE[iE] = rawEdges[iE].halfedge - oldStart;
+    }
+  }
+  for (size_t iF = 0; iF < rawFaces.size(); iF++) {
+    if (!rawFaces[iF].isDead()) {
+      offsetsF[iF] = rawFaces[iF].halfedge - oldStart;
+    }
+  }
+  for (size_t iB = 0; iB < rawBoundaryLoops.size(); iB++) {
+    if (!rawBoundaryLoops[iB].isDead()) {
+      offsetsB[iB] = rawBoundaryLoops[iB].halfedge - oldStart;
+    }
+  }
 
   // Apply the permutation
-  Halfedge* oldStart = &rawHalfedges.front();
   rawHalfedges = applyPermutation(rawHalfedges, newIndMap);
   Halfedge* newStart = &rawHalfedges.front();
 
-  // Fix up pointers.
-  for (Halfedge& he : rawHalfedges) {
-    he.twin = newStart + oldIndMap[(he.twin - oldStart)];
-    he.next = newStart + oldIndMap[(he.next - oldStart)];
+  // === Loop back through, shifting all pointers
+  // TODO since this is in compress(), should never be dead, right?
+  for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+    if (!rawHalfedges[iHe].isDead()) {
+      rawHalfedges[iHe].twin = newStart + oldIndMap[offsetsTwin[newIndMap[iHe]]];
+      rawHalfedges[iHe].next = newStart + oldIndMap[offsetsNext[newIndMap[iHe]]];
+    }
   }
-  for (Vertex& v : rawVertices) {
-    if (v.isDead()) continue;
-    v.halfedge = newStart + oldIndMap[(v.halfedge - oldStart)];
+  for (size_t iV = 0; iV < rawVertices.size(); iV++) {
+    if (!rawVertices[iV].isDead()) {
+      rawVertices[iV].halfedge = newStart + oldIndMap[offsetsV[iV]];
+    }
   }
-  for (Edge& e : rawEdges) {
-    if (e.isDead()) continue;
-    e.halfedge = newStart + oldIndMap[(e.halfedge - oldStart)];
+  for (size_t iE = 0; iE < rawEdges.size(); iE++) {
+    if (!rawEdges[iE].isDead()) {
+      rawEdges[iE].halfedge = newStart + oldIndMap[offsetsE[iE]];
+    }
   }
-  for (Face& f : rawFaces) {
-    if (f.isDead()) continue;
-    f.halfedge = newStart + oldIndMap[(f.halfedge - oldStart)];
+  for (size_t iF = 0; iF < rawFaces.size(); iF++) {
+    if (!rawFaces[iF].isDead()) {
+      rawFaces[iF].halfedge = newStart + oldIndMap[offsetsF[iF]];
+    }
   }
-  for (Face& f : rawBoundaryLoops) {
-    if (f.isDead()) continue;
-    f.halfedge = newStart + oldIndMap[(f.halfedge - oldStart)];
+  for (size_t iB = 0; iB < rawBoundaryLoops.size(); iB++) {
+    if (!rawBoundaryLoops[iB].isDead()) {
+      rawBoundaryLoops[iB].halfedge = newStart + oldIndMap[offsetsB[iB]];
+    }
   }
 
   // Invoke callbacks
@@ -1941,15 +2029,23 @@ void HalfedgeMesh::compressEdges() {
     }
   }
 
-  // Apply the permutation
-  Edge* oldStart = &rawEdges.front();
-  rawEdges = applyPermutation(rawEdges, newIndMap);
-  Edge* newStart = &rawEdges.front();
 
-  // Fix up pointers.
-  for (Halfedge& he : rawHalfedges) {
-    if (he.isDead()) continue;
-    he.edge = newStart + oldIndMap[(he.edge - oldStart)];
+  Edge* oldStart = &rawEdges.front();
+  std::vector<size_t> offsets(rawHalfedges.size());
+  for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+    if (!rawHalfedges[iHe].isDead()) {
+      offsets[iHe] = rawHalfedges[iHe].edge - oldStart;
+    }
+  }
+
+  // Apply the permutation
+  rawEdges = applyPermutation(rawEdges, newIndMap);
+
+  Edge* newStart = &rawEdges.front();
+  for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+    if (!rawHalfedges[iHe].isDead()) {
+      rawHalfedges[iHe].edge = newStart + oldIndMap[offsets[iHe]];
+    }
   }
 
   // Invoke callbacks
@@ -1971,16 +2067,21 @@ void HalfedgeMesh::compressFaces() {
     }
   }
 
-  // Apply the permutation
   Face* oldStart = &rawFaces.front();
-  rawFaces = applyPermutation(rawFaces, newIndMap);
-  Face* newStart = &rawFaces.front();
+  std::vector<size_t> offsets(rawHalfedges.size());
+  for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+    if (!rawHalfedges[iHe].isDead()) {
+      offsets[iHe] = rawHalfedges[iHe].face - oldStart;
+    }
+  }
 
-  // Fix up pointers.
-  for (Halfedge& he : rawHalfedges) {
-    if (he.isDead()) continue;
-    if (he.face->isReal) {
-      he.face = newStart + oldIndMap[(he.face - oldStart)];
+  // Apply the permutation
+  rawFaces = applyPermutation(rawFaces, newIndMap);
+
+  Face* newStart = &rawFaces.front();
+  for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+    if (!rawHalfedges[iHe].isDead() && rawHalfedges[iHe].isReal) {
+      rawHalfedges[iHe].face = newStart + oldIndMap[offsets[iHe]];
     }
   }
 
@@ -1995,7 +2096,7 @@ void HalfedgeMesh::compressVertices() {
 
   // Build the compressing shift
   std::vector<size_t> newIndMap; // maps new ind -> old ind
-  std::vector<size_t> oldIndMap; // maps new old -> new ind
+  std::vector<size_t> oldIndMap; // maps old ind -> new ind
   oldIndMap.resize(rawVertices.size());
   for (size_t i = 0; i < rawVertices.size(); i++) {
     if (!rawVertices[i].isDead()) {
@@ -2004,15 +2105,22 @@ void HalfedgeMesh::compressVertices() {
     }
   }
 
-  // Apply the permutation
   Vertex* oldStart = &rawVertices.front();
-  rawVertices = applyPermutation(rawVertices, newIndMap);
-  Vertex* newStart = &rawVertices.front();
+  std::vector<size_t> offsets(rawHalfedges.size());
+  for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+    if (!rawHalfedges[iHe].isDead()) {
+      offsets[iHe] = rawHalfedges[iHe].vertex - oldStart;
+    }
+  }
 
-  // Fix up pointers.
-  for (Halfedge& he : rawHalfedges) {
-    if (he.isDead()) continue;
-    he.vertex = newStart + oldIndMap[(he.vertex - oldStart)];
+  // Apply the permutation
+  rawVertices = applyPermutation(rawVertices, newIndMap);
+
+  Vertex* newStart = &rawVertices.front();
+  for (size_t iHe = 0; iHe < rawHalfedges.size(); iHe++) {
+    if (!rawHalfedges[iHe].isDead()) {
+      rawHalfedges[iHe].vertex = newStart + oldIndMap[offsets[iHe]];
+    }
   }
 
   // Invoke callbacks
