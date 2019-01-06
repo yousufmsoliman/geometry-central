@@ -28,12 +28,26 @@ using Vector = Eigen::Matrix<T, Eigen::Dynamic, 1>;
 namespace geometrycentral {
 
 // Utility solvers, which use the classes below
+
+// Returns smallest nontrivial eigenvector
 template <typename T>
 Vector<T> smallestEigenvectorPositiveDefinite(Eigen::SparseMatrix<T>& energyMatrix, Eigen::SparseMatrix<T>& massMatrix,
                                               size_t nIterations = 50);
+
+template <typename T>
+std::vector<Vector<T>> smallestKEigenvectorsPositiveDefinite(Eigen::SparseMatrix<T>& energyMatrix,
+                                                             Eigen::SparseMatrix<T>& massMatrix, size_t kEigenvalues,
+                                                             size_t nIterations = 50);
+
+// Returns smallest (positive-eigenvalued) nontirivial eigenvector
 template <typename T>
 Vector<T> smallestEigenvectorSquare(Eigen::SparseMatrix<T>& energyMatrix, Eigen::SparseMatrix<T>& massMatrix,
-                                              size_t nIterations = 50);
+                                    size_t nIterations = 50);
+
+// Mass matrix must be positive definite
+template <typename T>
+Vector<T> largestEigenvector(Eigen::SparseMatrix<T>& energyMatrix, Eigen::SparseMatrix<T>& massMatrix,
+                             size_t nIterations = 50);
 
 // Quick and easy solvers which do not retain factorization
 template <typename T>
@@ -143,7 +157,7 @@ public:
 protected:
   void prepare();
 
-  // Implementation-specific quantities
+// Implementation-specific quantities
 #ifdef HAVE_SUITESPARSE
   CholmodContext context;
   cholmod_sparse* cMat = nullptr;
