@@ -26,6 +26,10 @@ public:
   // set mode for Cholesky factorization
   void setSimplicial(void);
   void setSupernodal(void);
+  
+  // set LL vs LDL mode
+  void setLL(void);
+  void setLDL(void);
 
   // allows CholmodContext to be treated as a cholmod_common*
   operator cholmod_common*(void);

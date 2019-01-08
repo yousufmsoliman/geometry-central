@@ -51,6 +51,8 @@ void PositiveDefiniteSolver<T>::prepare() {
   cMat = toCholmod(this->mat, context, SType::SYMMETRIC);
 
   // Factor
+  context.setSimplicial(); // must use simplicial for LDLt
+  context.setLDL(); // ensure we get an LDLt factorization
   factorization = cholmod_l_analyze(cMat, context);
   cholmod_l_factorize(cMat, factorization, context);
 

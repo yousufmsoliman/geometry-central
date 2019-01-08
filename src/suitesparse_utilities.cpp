@@ -17,6 +17,11 @@ void CholmodContext::setSimplicial(void) { context.supernodal = CHOLMOD_SIMPLICI
 
 void CholmodContext::setSupernodal(void) { context.supernodal = CHOLMOD_SUPERNODAL; }
 
+void CholmodContext::setLL(void) { context.final_ll = true; }
+
+void CholmodContext::setLDL(void) { context.final_ll = false; }
+
+
 CholmodContext::operator cholmod_common*(void) { return &context; }
 
 // === Conversion functions
@@ -50,7 +55,8 @@ cholmod_sparse* toCholmod(Eigen::SparseMatrix<double, Eigen::ColMajor>& A, Cholm
   size_t Ncols = A.cols();
   size_t Nrows = A.rows();
 
-  cholmod_sparse* cMat = cholmod_l_allocate_sparse(Nrows, Ncols, Nentries, true, true, flagForStype(stype), CHOLMOD_REAL, context);
+  cholmod_sparse* cMat =
+      cholmod_l_allocate_sparse(Nrows, Ncols, Nentries, true, true, flagForStype(stype), CHOLMOD_REAL, context);
 
   // Pull out useful pointers
   double* values = (double*)cMat->x;
@@ -82,7 +88,8 @@ cholmod_sparse* toCholmod(Eigen::SparseMatrix<float, Eigen::ColMajor>& A, Cholmo
   size_t Ncols = A.cols();
   size_t Nrows = A.rows();
 
-  cholmod_sparse* cMat = cholmod_l_allocate_sparse(Nrows, Ncols, Nentries, true, true, flagForStype(stype), CHOLMOD_REAL, context);
+  cholmod_sparse* cMat =
+      cholmod_l_allocate_sparse(Nrows, Ncols, Nentries, true, true, flagForStype(stype), CHOLMOD_REAL, context);
 
   // Pull out useful pointers
   double* values = (double*)cMat->x;
@@ -113,7 +120,8 @@ cholmod_sparse* toCholmod(Eigen::SparseMatrix<Complex, Eigen::ColMajor>& A, Chol
   size_t Ncols = A.cols();
   size_t Nrows = A.rows();
 
-  cholmod_sparse* cMat = cholmod_l_allocate_sparse(Nrows, Ncols, Nentries, true, true, flagForStype(stype), CHOLMOD_COMPLEX, context);
+  cholmod_sparse* cMat =
+      cholmod_l_allocate_sparse(Nrows, Ncols, Nentries, true, true, flagForStype(stype), CHOLMOD_COMPLEX, context);
 
   // Pull out useful pointers
   Complex* values = (Complex*)cMat->x;

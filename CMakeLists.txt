@@ -121,8 +121,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STR
   if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     message("Setting clang-specific options")
     SET(BASE_CXX_FLAGS "${BASE_CXX_FLAGS} -ferror-limit=5 -fcolor-diagnostics")
-    #SET(CMAKE_CXX_FLAGS_DEBUG          "-fsanitize=address -fno-limit-debug-info") // FIXME
-    SET(CMAKE_CXX_FLAGS_DEBUG          "-fno-limit-debug-info") 
+    SET(CMAKE_CXX_FLAGS_DEBUG          "-fsanitize=address -fno-limit-debug-info")
+    #SET(CMAKE_CXX_FLAGS_DEBUG          "-fno-limit-debug-info") 
   elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     message("Setting gcc-specific options")
     SET(DISABLED_WARNINGS "${DISABLED_WARNINGS} -Wno-maybe-uninitialized -Wno-format-zero-length -Wno-unused-but-set-parameter -Wno-unused-but-set-variable")
@@ -133,8 +133,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STR
   #SET(CMAKE_CXX_FLAGS_DEBUG          "-g3")
   SET(CMAKE_CXX_FLAGS_DEBUG          "-g3")
   SET(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
-  #SET(CMAKE_CXX_FLAGS_RELEASE        "-O2 DNDEBUG") # FIXME
-  SET(CMAKE_CXX_FLAGS_RELEASE        "-O3 -march=native -g") # FIXME
+  SET(CMAKE_CXX_FLAGS_RELEASE        "-O3 -march=native -DNDEBUG")
   SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   # using Visual Studio C++

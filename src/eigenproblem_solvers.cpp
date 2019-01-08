@@ -8,9 +8,18 @@ using namespace Eigen;
 // Helper
 
 namespace {
+
+template <typename T>
+double norm(Vector<T>& x, Eigen::SparseMatrix<T>& massMatrix) {
+  return std::sqrt(std::abs((x.transpose() * massMatrix * x)[0]));
+}
+template double norm(Vector<double>& x, SparseMatrix<double>& massMatrix);
+template double norm(Vector<float>& x, SparseMatrix<float>& massMatrix);
+template double norm(Vector<geometrycentral::Complex>& x, SparseMatrix<geometrycentral::Complex>& massMatrix);
+
 template <typename T>
 void normalize(Vector<T>& x, Eigen::SparseMatrix<T>& massMatrix) {
-  double scale = std::sqrt(std::abs((x.transpose() * massMatrix * x)[0]));
+  double scale = norm(x, massMatrix);
   x /= scale;
 }
 template void normalize(Vector<double>& x, SparseMatrix<double>& massMatrix);
@@ -64,11 +73,11 @@ std::vector<Vector<T>> smallestKEigenvectorsPositiveDefinite(Eigen::SparseMatrix
   };
 
   for (size_t kEig = 0; kEig < kEigenvalues; kEig++) {
+
     Vector<T> u = Vector<T>::Random(N);
     projectOutPreviousVectors(u);
     Vector<T> x = u;
     for (size_t iIter = 0; iIter < nIterations; iIter++) {
-
       // Solve
       solver.solve(x, massMatrix * u);
 
