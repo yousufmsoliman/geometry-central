@@ -126,7 +126,7 @@ void PlyHalfedgeMeshData::addVertexProperty(std::string propertyName, VertexData
     vec.push_back(vData[v]);
   }
 
-  plyData->getElement(vertexName).addProperty(new happly::TypedProperty<T>(propertyName, vec));
+  plyData->getElement(vertexName).addProperty<T>(propertyName, vec);
 }
 
 
@@ -138,6 +138,6 @@ void PlyHalfedgeMeshData::addFaceProperty(std::string propertyName, FaceData<T>&
     vec.push_back(fData[f]);
   }
 
-  plyData->getElement(faceName).addProperty(new happly::TypedProperty<T>(propertyName, vec));
+  plyData->getElement(faceName).addProperty<T>(propertyName, vec);
 }
 }
