@@ -81,8 +81,8 @@ inline double regularizeAngle(double theta) { return theta - 2 * PI * ::std::flo
 template <typename T>
 std::vector<T> applyPermutation(const std::vector<T>& sourceData, const std::vector<size_t>& permOldToNew) {
   std::vector<T> retVal(permOldToNew.size());
-  for(size_t i =0; i < permOldToNew.size(); i++) {
-    retVal[i] = sourceData[permOldToNew[i]]; 
+  for (size_t i = 0; i < permOldToNew.size(); i++) {
+    retVal[i] = sourceData[permOldToNew[i]];
   }
   return retVal;
 }
@@ -172,4 +172,4 @@ namespace std {
 // library functions is ONLY allowed for user-defined types. That being said, I
 // don't think this will crash any planes.
 inline bool isfinite(const ::std::complex<double> c) { return isfinite(c.real()) && isfinite(c.imag()); }
-}
+} // namespace std

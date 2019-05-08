@@ -203,5 +203,4 @@ template Vector<double> solveSquare(const Eigen::SparseMatrix<double>& A, const 
 template Vector<Complex> solveSquare(const Eigen::SparseMatrix<Complex>& A, const Vector<Complex>& rhs);
 
 
-
 } // namespace geometrycentral

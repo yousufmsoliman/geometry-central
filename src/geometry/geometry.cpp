@@ -27,4 +27,4 @@ void Geometry<Euclidean>::normalize() {
   }
 }
 
-}  // namespace geometrycentral
+} // namespace geometrycentral

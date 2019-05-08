@@ -1,10 +1,10 @@
 #pragma once
 
+#include "geometrycentral/geometry/dependent_quantity.h"
 #include "geometrycentral/mesh/halfedge_mesh.h"
 #include "geometrycentral/utilities/unit_vector3.h"
 #include "geometrycentral/utilities/vector2.h"
 #include "geometrycentral/utilities/vector3.h"
-#include "geometrycentral/geometry/dependent_quantity.h"
 
 #include <Eigen/SparseCore>
 
@@ -16,7 +16,6 @@ namespace geometrycentral {
 class IntrinsicGeometry {
 
 public:
-
   // Constructor (doesn't do much)
   IntrinsicGeometry(HalfedgeMesh* mesh_);
 
@@ -39,7 +38,7 @@ public:
   // Edge lengths
   inline void requireEdgeLengths() { edgeLengthsQ.require(); }
   EdgeData<double> edgeLengths;
-  
+
   // Halfedge cotan weights
   inline void requireHalfedgeCotanWeights() { halfedgeCotanWeightsQ.require(); }
   HalfedgeData<double> halfedgeCotanWeights;
@@ -191,7 +190,6 @@ protected:
 
   // Throws an error if mesh is not triangular
   void verifyTriangular(HalfedgeMesh* m);
-
 };
 
 } // namespace geometrycentral

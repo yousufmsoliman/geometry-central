@@ -9,9 +9,9 @@
 #include <unordered_set>
 
 #include "geometrycentral/geometry/geometry.h"
-#include <geometrycentral/utilities/disjoint_sets.h>
 #include <geometrycentral/mesh/halfedge_mesh_data_transfer.h>
 #include <geometrycentral/mesh/polygon_soup_mesh.h>
+#include <geometrycentral/utilities/disjoint_sets.h>
 #include <geometrycentral/utilities/timing.h>
 
 using std::cout;

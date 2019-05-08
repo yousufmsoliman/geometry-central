@@ -2,7 +2,8 @@
 
 #include <vector>
 
-using std::cout; using std::endl;
+using std::cout;
+using std::endl;
 
 namespace geometrycentral {
 
@@ -16,7 +17,7 @@ MeshRayTracer::MeshRayTracer(Geometry<Euclidean>* geometry_) {
 void MeshRayTracer::buildBVH() {
   cout << "Building BVH for mesh..." << endl;
 
-  nanort::BVHBuildOptions<double> options;  // Use default options
+  nanort::BVHBuildOptions<double> options; // Use default options
 
   if (!mesh->isSimplicial()) {
     throw std::runtime_error("Can only trace rays on triangle meshes.");
@@ -42,11 +43,9 @@ void MeshRayTracer::buildBVH() {
   }
 
   // Construct nanort mesh objects
-  nanort::TriangleMesh<double> triangle_mesh(
-      rawPositions.data(), rawFaces.data(), sizeof(double) * 3);
-  nanort::TriangleSAHPred<double> triangle_pred(
-      rawPositions.data(), rawFaces.data(),
-      sizeof(double) * 3);  // still have no idea what this does
+  nanort::TriangleMesh<double> triangle_mesh(rawPositions.data(), rawFaces.data(), sizeof(double) * 3);
+  nanort::TriangleSAHPred<double> triangle_pred(rawPositions.data(), rawFaces.data(),
+                                                sizeof(double) * 3); // still have no idea what this does
   bool ret = accel.Build(mesh->nFaces(), options, triangle_mesh, triangle_pred);
   if (!ret) {
     throw std::runtime_error("BVH construction failed");
@@ -74,8 +73,7 @@ RayHitResult MeshRayTracer::trace(Vector3 start, Vector3 dir) {
 
   // Compute the intersection
   nanort::BVHTraceOptions trace_options;
-  nanort::TriangleIntersector<double> triangle_intersector(
-      rawPositions.data(), rawFaces.data(), sizeof(double) * 3);
+  nanort::TriangleIntersector<double> triangle_intersector(rawPositions.data(), rawFaces.data(), sizeof(double) * 3);
   bool hit = accel.Traverse(ray, trace_options, triangle_intersector);
 
   // Return the result
@@ -92,9 +90,8 @@ RayHitResult MeshRayTracer::trace(Vector3 start, Vector3 dir) {
 
     return result;
   } else {
-    return RayHitResult{false, std::numeric_limits<double>::quiet_NaN(),
-                        FacePtr(), Vector3{-1.0, -1.0, -1.0}};
+    return RayHitResult{false, std::numeric_limits<double>::quiet_NaN(), FacePtr(), Vector3{-1.0, -1.0, -1.0}};
   }
 }
 
-};  // namespace geometrycentral
+}; // namespace geometrycentral

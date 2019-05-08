@@ -52,7 +52,7 @@ void PositiveDefiniteSolver<T>::prepare() {
 
   // Factor
   context.setSimplicial(); // must use simplicial for LDLt
-  context.setLDL(); // ensure we get an LDLt factorization
+  context.setLDL();        // ensure we get an LDLt factorization
   factorization = cholmod_l_analyze(cMat, context);
   cholmod_l_factorize(cMat, factorization, context);
 
@@ -137,7 +137,8 @@ template class PositiveDefiniteSolver<Complex>;
 
 template Vector<float> solvePositiveDefinite<float>(const Eigen::SparseMatrix<float>& A, const Vector<float>& rhs);
 template Vector<double> solvePositiveDefinite<double>(const Eigen::SparseMatrix<double>& A, const Vector<double>& rhs);
-template Vector<Complex> solvePositiveDefinite<Complex>(const Eigen::SparseMatrix<Complex>& A, const Vector<Complex>& rhs);
+template Vector<Complex> solvePositiveDefinite<Complex>(const Eigen::SparseMatrix<Complex>& A,
+                                                        const Vector<Complex>& rhs);
 
 
 } // namespace geometrycentral

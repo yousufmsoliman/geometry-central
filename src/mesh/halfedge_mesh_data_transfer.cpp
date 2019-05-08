@@ -17,31 +17,30 @@ void HalfedgeMeshDataTransfer::generateReverseMaps() {
 
   // Halfedges
   heMapBack = HalfedgeData<HalfedgePtr>(newMesh);
-  for(HalfedgePtr he : oldMesh->allHalfedges()) {
+  for (HalfedgePtr he : oldMesh->allHalfedges()) {
     heMapBack[heMap[he]] = he;
   }
-  
-  // Vertices 
+
+  // Vertices
   vMapBack = VertexData<VertexPtr>(newMesh);
-  for(VertexPtr v : oldMesh->vertices()) {
+  for (VertexPtr v : oldMesh->vertices()) {
     vMapBack[vMap[v]] = v;
   }
 
   // Edges
   eMapBack = EdgeData<EdgePtr>(newMesh);
-  for(EdgePtr e : oldMesh->edges()) {
+  for (EdgePtr e : oldMesh->edges()) {
     eMapBack[eMap[e]] = e;
   }
-  
-  // Faces 
-  fMapBack = FaceData<FacePtr>(newMesh);
-  for(FacePtr f : oldMesh->faces()) {
-    fMapBack[fMap[f]] = f;
-  }
-  for(FacePtr f : oldMesh->boundaryLoops()) {
-    fMapBack[fMap[f]] = f;
-  }
 
+  // Faces
+  fMapBack = FaceData<FacePtr>(newMesh);
+  for (FacePtr f : oldMesh->faces()) {
+    fMapBack[fMap[f]] = f;
+  }
+  for (FacePtr f : oldMesh->boundaryLoops()) {
+    fMapBack[fMap[f]] = f;
+  }
 }
 
 } // namespace geometrycentral

@@ -6,23 +6,21 @@
 using std::cout;
 using std::endl;
 
-ExactPolyhedralGeodesics::ExactPolyhedralGeodesics(EdgeLengthGeometry* geom_):geom(geom_) {
+ExactPolyhedralGeodesics::ExactPolyhedralGeodesics(EdgeLengthGeometry* geom_) : geom(geom_) {
   mesh = geom->mesh;
   clear();
 }
 
-void ExactPolyhedralGeodesics::addSource(VertexPtr v) {
-  srcVerts.push_back(v);
-}
+void ExactPolyhedralGeodesics::addSource(VertexPtr v) { srcVerts.push_back(v); }
 
 void ExactPolyhedralGeodesics::clear() {
-  while(not winQ.empty()) winQ.pop();
-  while(not pseudoSrcQ.empty()) pseudoSrcQ.pop();
+  while (not winQ.empty()) winQ.pop();
+  while (not pseudoSrcQ.empty()) pseudoSrcQ.pop();
 
   splitInfos = HalfedgeData<SplitInfo>(mesh);
-  vertInfos  = VertexData<VertInfo>(mesh);
+  vertInfos = VertexData<VertInfo>(mesh);
 
-  for( HalfedgePtr he : mesh->allHalfedges() ) {
+  for (HalfedgePtr he : mesh->allHalfedges()) {
     splitInfos[he].dist = std::numeric_limits<double>::infinity();
     splitInfos[he].x = std::numeric_limits<double>::infinity();
     splitInfos[he].pseudoSrc = nullptr;
@@ -30,7 +28,7 @@ void ExactPolyhedralGeodesics::clear() {
     splitInfos[he].level = -1;
   }
 
-  for( VertexPtr v : mesh->vertices() ) {
+  for (VertexPtr v : mesh->vertices()) {
     vertInfos[v].birthTime = -1;
     vertInfos[v].dist = std::numeric_limits<double>::infinity();
     vertInfos[v].enterHalfedge = nullptr;
@@ -57,8 +55,8 @@ void ExactPolyhedralGeodesics::clear() {
 // TODO: allow arbitrary surface points as input
 void ExactPolyhedralGeodesics::initialize() {
   // initialize
-  for( auto v : srcVerts ) {
-    for( HalfedgePtr he : v.outgoingHalfedges() ) {
+  for (auto v : srcVerts) {
+    for (HalfedgePtr he : v.outgoingHalfedges()) {
       HalfedgePtr oppHE = he.next();
 
       Window win;
@@ -69,14 +67,15 @@ void ExactPolyhedralGeodesics::initialize() {
       win.d1 = geom->edgeLengths[oppHE.next().edge()];
       win.pseudoSrcDist = 0.;
       win.computeMinDist();
-      win.src = v; win.pseudoSrc = v;
+      win.src = v;
+      win.pseudoSrc = v;
       win.pseudoSrcBirthTime = 0;
       win.level = 0;
       winQ.push(win);
       numOfWinGen += 1;
 
       VertexPtr oppV = he.twin().vertex();
-      if( geom->edgeLengths[he.edge()] < vertInfos[oppV].dist ) {
+      if (geom->edgeLengths[he.edge()] < vertInfos[oppV].dist) {
         vertInfos[oppV].birthTime = 0;
         vertInfos[oppV].dist = geom->edgeLengths[he.edge()];
         vertInfos[oppV].enterHalfedge = he.twin();
@@ -84,12 +83,13 @@ void ExactPolyhedralGeodesics::initialize() {
         vertInfos[oppV].pseudoSrc = v;
 
         // only need to create a new pseudoWin if the vertex is hyperbolic
-        if( geom->vertexAngleDefects[oppV] > 0. ) continue;
+        if (geom->vertexAngleDefects[oppV] > 0.) continue;
 
         PseudoWindow pseudoWin;
         pseudoWin.v = oppV;
         pseudoWin.dist = geom->edgeLengths[he.edge()];
-        pseudoWin.src = v; pseudoWin.pseudoSrc = v;
+        pseudoWin.src = v;
+        pseudoWin.pseudoSrc = v;
         pseudoWin.pseudoSrcBirthTime = vertInfos[oppV].birthTime;
         pseudoWin.level = 0;
         pseudoSrcQ.push(pseudoWin);
@@ -104,8 +104,7 @@ void ExactPolyhedralGeodesics::initialize() {
   }
 }
 
-bool ExactPolyhedralGeodesics::isValidWindow(const Window& win, bool isLeftChild)
-{
+bool ExactPolyhedralGeodesics::isValidWindow(const Window& win, bool isLeftChild) {
   if (win.b1 <= win.b0) return false;
   // apply ICH's filter
   VertexPtr v1 = win.halfedge.vertex();
@@ -116,106 +115,100 @@ bool ExactPolyhedralGeodesics::isValidWindow(const Window& win, bool isLeftChild
   double l2 = geom->edgeLengths[win.halfedge.next().next().edge()];
 
   Vector2 p1{0.0, 0.0}, p2{l0, 0.0}, p3;
-  p3.x = (l2*l2 + l0*l0 - l1*l1) / (2.0 * l0);
-  p3.y = sqrt(fabs(l2*l2 - p3.x*p3.x));
+  p3.x = (l2 * l2 + l0 * l0 - l1 * l1) / (2.0 * l0);
+  p3.y = sqrt(fabs(l2 * l2 - p3.x * p3.x));
 
   Vector2 A{win.b0, 0.0}, B{win.b1, 0.0};
   Vector2 src2D = win.flattenedSrc();
   if (win.pseudoSrcDist + norm(src2D - B) > vertInfos[v1].dist + win.b1 &&
-    (win.pseudoSrcDist + norm(src2D - B)) / (vertInfos[v1].dist + win.b1) - 1.0 > 0.0)
-  {
+      (win.pseudoSrcDist + norm(src2D - B)) / (vertInfos[v1].dist + win.b1) - 1.0 > 0.0) {
     return false;
   }
   if (win.pseudoSrcDist + norm(src2D - A) > vertInfos[v2].dist + l0 - win.b0 &&
-    (win.pseudoSrcDist + norm(src2D - A)) / (vertInfos[v2].dist + l0 - win.b0) - 1.0 > 0.0)
-  {
+      (win.pseudoSrcDist + norm(src2D - A)) / (vertInfos[v2].dist + l0 - win.b0) - 1.0 > 0.0) {
     return false;
   }
-  if (isLeftChild)
-  {
+  if (isLeftChild) {
     if (win.pseudoSrcDist + norm(src2D - A) > vertInfos[v3].dist + norm(p3 - A) &&
-      (win.pseudoSrcDist + norm(src2D - A)) / (vertInfos[v3].dist + norm(p3 - A)) - 1.0 > 0.0)
-    {
+        (win.pseudoSrcDist + norm(src2D - A)) / (vertInfos[v3].dist + norm(p3 - A)) - 1.0 > 0.0) {
       return false;
     }
-  }
-  else
-  {
+  } else {
     if (win.pseudoSrcDist + norm(src2D - B) > vertInfos[v3].dist + norm(p3 - B) &&
-      (win.pseudoSrcDist + norm(src2D - B)) / (vertInfos[v3].dist + norm(p3 - B)) - 1.0 > REL_ERR)
-    {
+        (win.pseudoSrcDist + norm(src2D - B)) / (vertInfos[v3].dist + norm(p3 - B)) - 1.0 > REL_ERR) {
       return false;
     }
   }
   return true;
 }
 
-void ExactPolyhedralGeodesics::buildWindow(const Window& pWin, HalfedgePtr& he, double t0, double t1, const Vector2& v0, const Vector2& v1, Window& win)
-{
+void ExactPolyhedralGeodesics::buildWindow(const Window& pWin, HalfedgePtr& he, double t0, double t1, const Vector2& v0,
+                                           const Vector2& v1, Window& win) {
   Vector2 src2D = pWin.flattenedSrc();
-	win.halfedge = he;
-	win.b0 = (1 - t0)*geom->edgeLengths[he.edge()];
-  win.b1 = (1 - t1)*geom->edgeLengths[he.edge()];
-	win.d0 = norm(src2D - (t0 * v0 + (1 - t0)*v1));
-	win.d1 = norm(src2D - (t1 * v0 + (1 - t1)*v1));
-	win.pseudoSrcDist = pWin.pseudoSrcDist;
-	win.computeMinDist();
-	win.src = pWin.src; win.pseudoSrc = pWin.pseudoSrc;
-	win.pseudoSrcBirthTime = pWin.pseudoSrcBirthTime;
-	win.level = pWin.level + 1;
+  win.halfedge = he;
+  win.b0 = (1 - t0) * geom->edgeLengths[he.edge()];
+  win.b1 = (1 - t1) * geom->edgeLengths[he.edge()];
+  win.d0 = norm(src2D - (t0 * v0 + (1 - t0) * v1));
+  win.d1 = norm(src2D - (t1 * v0 + (1 - t1) * v1));
+  win.pseudoSrcDist = pWin.pseudoSrcDist;
+  win.computeMinDist();
+  win.src = pWin.src;
+  win.pseudoSrc = pWin.pseudoSrc;
+  win.pseudoSrcBirthTime = pWin.pseudoSrcBirthTime;
+  win.level = pWin.level + 1;
 }
 
 double ExactPolyhedralGeodesics::intersect(const Vector2& v0, const Vector2& v1, const Vector2& p0, const Vector2& p1) {
   double a00 = p0.x - p1.x, a01 = v1.x - v0.x, b0 = v1.x - p1.x;
-	double a10 = p0.y - p1.y, a11 = v1.y - v0.y, b1 = v1.y - p1.y;
-	return (b0*a11 - b1*a01) / (a00*a11 - a10*a01);
+  double a10 = p0.y - p1.y, a11 = v1.y - v0.y, b1 = v1.y - p1.y;
+  return (b0 * a11 - b1 * a01) / (a00 * a11 - a10 * a01);
 }
 
 void ExactPolyhedralGeodesics::propogateWindow(const Window& win) {
   HalfedgePtr he0 = win.halfedge.twin();
-  if( he0 == nullptr ) return;
+  if (he0 == nullptr) return;
 
   HalfedgePtr he1 = he0.next();
   HalfedgePtr he2 = he1.next();
 
   VertexPtr oppV = he1.twin().vertex();
   Vector2 src2D = win.flattenedSrc();
-  Vector2 left{win.b0,0.}, right{win.b1,0.};
+  Vector2 left{win.b0, 0.}, right{win.b1, 0.};
 
   double l0 = geom->edgeLengths[he0.edge()];
   double l1 = geom->edgeLengths[he1.edge()];
   double l2 = geom->edgeLengths[he2.edge()];
 
-  Vector2 v0{0.,0.}, v1{l0,0.}, v2;
-  v2.x = (l1*l1+l0*l0-l2*l2)/(2.*l0);
-  v2.y = -sqrt(fabs(l1*l1-v2.x*v2.x));
+  Vector2 v0{0., 0.}, v1{l0, 0.}, v2;
+  v2.x = (l1 * l1 + l0 * l0 - l2 * l2) / (2. * l0);
+  v2.y = -sqrt(fabs(l1 * l1 - v2.x * v2.x));
 
-  double interX = v2.x - v2.y*(v2.x-src2D.x)/(v2.y-src2D.y);
+  double interX = v2.x - v2.y * (v2.x - src2D.x) / (v2.y - src2D.y);
   Window leftChildWin, rightChildWin;
-  bool hasLeftChild=true, hasRightChild=true;
+  bool hasLeftChild = true, hasRightChild = true;
 
   // only generate right window
-  if( interX <= left.x ) {
+  if (interX <= left.x) {
     hasLeftChild = false;
-    double t0 = intersect(src2D,left,v2,v1);
-    double t1 = intersect(src2D,right,v2,v1);
+    double t0 = intersect(src2D, left, v2, v1);
+    double t1 = intersect(src2D, right, v2, v1);
 
-    buildWindow(win,he2,t0,t1,v2,v1,rightChildWin);
-    if( not isValidWindow(rightChildWin,false) ) hasRightChild = false;
+    buildWindow(win, he2, t0, t1, v2, v1, rightChildWin);
+    if (not isValidWindow(rightChildWin, false)) hasRightChild = false;
   }
 
   // only generate left window
-  else if( interX >= right.x ) {
+  else if (interX >= right.x) {
     hasRightChild = false;
-    double t0 = intersect(src2D,left,v0,v2);
-    double t1 = intersect(src2D,right,v0,v2);
-    buildWindow(win,he1,t0,t1,v0,v2,leftChildWin);
-    if( not isValidWindow(leftChildWin,true) ) hasLeftChild = false;
+    double t0 = intersect(src2D, left, v0, v2);
+    double t1 = intersect(src2D, right, v0, v2);
+    buildWindow(win, he1, t0, t1, v0, v2, leftChildWin);
+    if (not isValidWindow(leftChildWin, true)) hasLeftChild = false;
   }
 
   // generate both left and right windows
   else {
-    double directDist = norm(v2-src2D);
+    double directDist = norm(v2 - src2D);
     // if( directDist + win.pseudoSrcDist > splitInfos[he0].dist
     //     && (directDist + win.pseudoSrcDist)/splitInfos[he0].dist - 1. > REL_ERR )
     // {
@@ -224,7 +217,7 @@ void ExactPolyhedralGeodesics::propogateWindow(const Window& win) {
     // }
     // else {
     {
-      if( directDist + win.pseudoSrcDist < splitInfos[he0].dist ) {
+      if (directDist + win.pseudoSrcDist < splitInfos[he0].dist) {
         splitInfos[he0].dist = directDist + win.pseudoSrcDist;
         splitInfos[he0].pseudoSrc = win.pseudoSrc;
         splitInfos[he0].src = win.src;
@@ -232,11 +225,11 @@ void ExactPolyhedralGeodesics::propogateWindow(const Window& win) {
         splitInfos[he0].x = l0 - interX;
       }
 
-      if( directDist + win.pseudoSrcDist < vertInfos[oppV].dist ) {
-        if( vertInfos[oppV].dist == std::numeric_limits<double>::infinity() ) {
+      if (directDist + win.pseudoSrcDist < vertInfos[oppV].dist) {
+        if (vertInfos[oppV].dist == std::numeric_limits<double>::infinity()) {
           ++totalCalcVertNum;
         }
-        if( directDist + win.pseudoSrcDist >= geodesicRadius ) {
+        if (directDist + win.pseudoSrcDist >= geodesicRadius) {
           geodesicRadiusReached = true;
         }
 
@@ -246,34 +239,34 @@ void ExactPolyhedralGeodesics::propogateWindow(const Window& win) {
         vertInfos[oppV].src = win.src;
         vertInfos[oppV].pseudoSrc = win.pseudoSrc;
 
-        if( geom->vertexAngleDefects[oppV] < 0. ) {
+        if (geom->vertexAngleDefects[oppV] < 0.) {
           PseudoWindow pseudoWin;
           pseudoWin.v = oppV;
           pseudoWin.dist = vertInfos[oppV].dist;
           pseudoWin.src = win.src;
           pseudoWin.pseudoSrc = win.pseudoSrc;
           pseudoWin.pseudoSrcBirthTime = vertInfos[oppV].birthTime;
-          pseudoWin.level = win.level+1;
+          pseudoWin.level = win.level + 1;
           pseudoSrcQ.push(pseudoWin);
         }
       }
     }
-    if( hasLeftChild ) {
-      double t0 = intersect(src2D,left,v0,v2);
-      buildWindow(win,he1,t0,0.,v0,v2,leftChildWin);
-      if( not isValidWindow(leftChildWin,true) ) hasLeftChild = false;
+    if (hasLeftChild) {
+      double t0 = intersect(src2D, left, v0, v2);
+      buildWindow(win, he1, t0, 0., v0, v2, leftChildWin);
+      if (not isValidWindow(leftChildWin, true)) hasLeftChild = false;
     }
-    if( hasRightChild ) {
-      double t1 = intersect(src2D,right,v2,v1);
-      buildWindow(win,he2,1.,t1,v2,v1,rightChildWin);
-      if( not isValidWindow(rightChildWin,false) ) hasRightChild = false;
+    if (hasRightChild) {
+      double t1 = intersect(src2D, right, v2, v1);
+      buildWindow(win, he2, 1., t1, v2, v1, rightChildWin);
+      if (not isValidWindow(rightChildWin, false)) hasRightChild = false;
     }
   }
-  if( hasLeftChild ) {
+  if (hasLeftChild) {
     numOfWinGen += 1;
     winQ.push(leftChildWin);
   }
-  if( hasRightChild ) {
+  if (hasRightChild) {
     numOfWinGen += 1;
     winQ.push(rightChildWin);
   }
@@ -282,15 +275,15 @@ void ExactPolyhedralGeodesics::propogateWindow(const Window& win) {
 void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrc(const PseudoWindow& pseudoWin) {
   HalfedgePtr startHe, endHe;
 
-  if( vertInfos[pseudoWin.v].enterHalfedge == nullptr && vertInfos[pseudoWin.v].birthTime != -1 ) {
+  if (vertInfos[pseudoWin.v].enterHalfedge == nullptr && vertInfos[pseudoWin.v].birthTime != -1) {
     startHe = pseudoWin.v.halfedge();
     endHe = startHe;
-  }
-  else if( vertInfos[pseudoWin.v].enterHalfedge.vertex() == pseudoWin.v )
-    generateSubWinsForPseudoSrcFromPseudoSrc(pseudoWin,startHe,endHe);
-  else if( vertInfos[pseudoWin.v].enterHalfedge.next().twin().vertex() == pseudoWin.v )
-    generateSubWinsForPseudoSrcFromWindow(pseudoWin,startHe,endHe);
-  else assert(false);
+  } else if (vertInfos[pseudoWin.v].enterHalfedge.vertex() == pseudoWin.v)
+    generateSubWinsForPseudoSrcFromPseudoSrc(pseudoWin, startHe, endHe);
+  else if (vertInfos[pseudoWin.v].enterHalfedge.next().twin().vertex() == pseudoWin.v)
+    generateSubWinsForPseudoSrcFromWindow(pseudoWin, startHe, endHe);
+  else
+    assert(false);
 
   // generate windows
   do {
@@ -305,25 +298,24 @@ void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrc(const PseudoWindow& p
     win.src = pseudoWin.src;
     win.pseudoSrc = pseudoWin.v;
     win.pseudoSrcBirthTime = pseudoWin.pseudoSrcBirthTime;
-    win.level = pseudoWin.level+1;
+    win.level = pseudoWin.level + 1;
     winQ.push(win);
     numOfWinGen += 1;
 
     startHe = startHe.next().next().twin();
-  } while( startHe != endHe );
+  } while (startHe != endHe);
 
   VertexPtr vx = pseudoWin.v;
-  for( HalfedgePtr he : vx.outgoingHalfedges() ) {
+  for (HalfedgePtr he : vx.outgoingHalfedges()) {
     VertexPtr oppV = he.twin().vertex();
 
     // if( geom->vertexAngleDefects[oppV] > 0. ) continue;
-    if( vertInfos[oppV].dist < pseudoWin.dist+geom->edgeLengths[he.edge()] )
-      continue;
+    if (vertInfos[oppV].dist < pseudoWin.dist + geom->edgeLengths[he.edge()]) continue;
 
-    if( vertInfos[oppV].dist == std::numeric_limits<double>::infinity() ) {
+    if (vertInfos[oppV].dist == std::numeric_limits<double>::infinity()) {
       totalCalcVertNum += 1;
     }
-    if( pseudoWin.dist + geom->edgeLengths[he.edge()] >= geodesicRadius ) {
+    if (pseudoWin.dist + geom->edgeLengths[he.edge()] >= geodesicRadius) {
       geodesicRadiusReached = true;
     }
 
@@ -344,8 +336,8 @@ void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrc(const PseudoWindow& p
   }
 }
 
-void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrcFromWindow(const PseudoWindow& pseudoWin, HalfedgePtr& startHe, HalfedgePtr& endHe)
-{
+void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrcFromWindow(const PseudoWindow& pseudoWin,
+                                                                     HalfedgePtr& startHe, HalfedgePtr& endHe) {
   HalfedgePtr he0 = vertInfos[pseudoWin.v].enterHalfedge;
   HalfedgePtr he1 = he0.next();
   HalfedgePtr he2 = he1.next();
@@ -356,86 +348,106 @@ void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrcFromWindow(const Pseud
 
   VertexPtr pseudoSrc = pseudoWin.src;
   Vector2 enterPt;
-  enterPt.x = l0-splitInfos[he0].x;
+  enterPt.x = l0 - splitInfos[he0].x;
   enterPt.y = 0.;
 
-  Vector2 v0{0.,0.}, v1{l0,0.}, v2;
-  v2.x = (l1*l1+l0*l0-l2*l2)/(2.*l0);
-  v2.y = -sqrt(fabs(l1*l1-v2.x*v2.x));
+  Vector2 v0{0., 0.}, v1{l0, 0.}, v2;
+  v2.x = (l1 * l1 + l0 * l0 - l2 * l2) / (2. * l0);
+  v2.y = -sqrt(fabs(l1 * l1 - v2.x * v2.x));
 
-  double angleFromLeft = dot(enterPt-v2,v0-v2)/norm(enterPt-v2)/l1;
-  double angleFromRight = dot(enterPt-v2,v1-v2)/norm(enterPt-v2)/l2;
-  if( angleFromLeft > 1. ) angleFromLeft = 1.; else if( angleFromLeft < -1. ) angleFromLeft = -1.;
-  if( angleFromRight > 1. ) angleFromRight = 1.; else if( angleFromRight < -1. ) angleFromRight = -1.;
+  double angleFromLeft = dot(enterPt - v2, v0 - v2) / norm(enterPt - v2) / l1;
+  double angleFromRight = dot(enterPt - v2, v1 - v2) / norm(enterPt - v2) / l2;
+  if (angleFromLeft > 1.)
+    angleFromLeft = 1.;
+  else if (angleFromLeft < -1.)
+    angleFromLeft = -1.;
+  if (angleFromRight > 1.)
+    angleFromRight = 1.;
+  else if (angleFromRight < -1.)
+    angleFromRight = -1.;
   angleFromLeft = acos(angleFromLeft);
   angleFromRight = acos(angleFromRight);
 
-  startHe = nullptr; endHe = nullptr;
+  startHe = nullptr;
+  endHe = nullptr;
   HalfedgePtr currHe = he1.twin();
-  while( angleFromLeft < M_PI && currHe != nullptr ) {
+  while (angleFromLeft < M_PI && currHe != nullptr) {
     HalfedgePtr oppHe = currHe.next();
     HalfedgePtr nextHe = oppHe.next();
     double L0 = geom->edgeLengths[currHe.edge()];
     double L1 = geom->edgeLengths[nextHe.edge()];
     double L2 = geom->edgeLengths[oppHe.edge()];
-    double currAngle = (L0*L0+L1*L1-L2*L2)/(2.*L0*L1);
-    if( currAngle > 1. ) currAngle = 1.; else if( currAngle < -1. ) currAngle = -1.;
+    double currAngle = (L0 * L0 + L1 * L1 - L2 * L2) / (2. * L0 * L1);
+    if (currAngle > 1.)
+      currAngle = 1.;
+    else if (currAngle < -1.)
+      currAngle = -1.;
     currAngle = acos(currAngle);
     angleFromLeft += currAngle;
     currHe = nextHe.twin();
   }
-  if( currHe != nullptr ) startHe = currHe.twin().next();
+  if (currHe != nullptr) startHe = currHe.twin().next();
 
   currHe = he2.twin();
-  while( angleFromRight < M_PI && currHe != nullptr ) {
+  while (angleFromRight < M_PI && currHe != nullptr) {
     HalfedgePtr nextHe = currHe.next();
     HalfedgePtr oppHe = nextHe.next();
     double L0 = geom->edgeLengths[currHe.edge()];
     double L1 = geom->edgeLengths[nextHe.edge()];
     double L2 = geom->edgeLengths[oppHe.edge()];
-    double currAngle = (L0*L0+L1*L1-L2*L2)/(2.*L0*L1);
-    if( currAngle > 1. ) currAngle = 1.; else if( currAngle < -1. ) currAngle = -1.;
+    double currAngle = (L0 * L0 + L1 * L1 - L2 * L2) / (2. * L0 * L1);
+    if (currAngle > 1.)
+      currAngle = 1.;
+    else if (currAngle < -1.)
+      currAngle = -1.;
     currAngle = acos(currAngle);
     angleFromRight += currAngle;
     currHe = nextHe.twin();
   }
-  if( currHe != nullptr ) endHe = currHe.twin().next().next().twin();
+  if (currHe != nullptr) endHe = currHe.twin().next().next().twin();
 }
 
-void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrcFromPseudoSrc(const PseudoWindow& pseudoWin, HalfedgePtr& startHe, HalfedgePtr& endHe)
-{
+void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrcFromPseudoSrc(const PseudoWindow& pseudoWin,
+                                                                        HalfedgePtr& startHe, HalfedgePtr& endHe) {
   VertexPtr pseudoSrc = pseudoWin.v;
   double angleFromLeft = 0., angleFromRight = 0.;
-  startHe = nullptr; endHe = nullptr;
+  startHe = nullptr;
+  endHe = nullptr;
   HalfedgePtr currHe = vertInfos[pseudoWin.v].enterHalfedge;
-  while( angleFromLeft < M_PI && currHe != nullptr ) {
+  while (angleFromLeft < M_PI && currHe != nullptr) {
     HalfedgePtr oppHe = currHe.next();
     HalfedgePtr nextHe = oppHe.next();
     double L0 = geom->edgeLengths[currHe.edge()];
     double L1 = geom->edgeLengths[nextHe.edge()];
     double L2 = geom->edgeLengths[oppHe.edge()];
-    double currAngle = (L0*L0+L1*L1-L2*L2)/(2.*L0*L1);
-    if( currAngle > 1. ) currAngle = 1.; else if( currAngle < -1. ) currAngle = -1.;
+    double currAngle = (L0 * L0 + L1 * L1 - L2 * L2) / (2. * L0 * L1);
+    if (currAngle > 1.)
+      currAngle = 1.;
+    else if (currAngle < -1.)
+      currAngle = -1.;
     currAngle = acos(currAngle);
     angleFromLeft += currAngle;
     currHe = nextHe.twin();
   }
-  if( currHe != nullptr ) startHe = currHe.twin().next();
+  if (currHe != nullptr) startHe = currHe.twin().next();
 
   currHe = vertInfos[pseudoWin.v].enterHalfedge.twin();
-  while( angleFromRight < M_PI && currHe != nullptr ) {
+  while (angleFromRight < M_PI && currHe != nullptr) {
     HalfedgePtr nextHe = currHe.next();
     HalfedgePtr oppHe = nextHe.next();
     double L0 = geom->edgeLengths[currHe.edge()];
     double L1 = geom->edgeLengths[nextHe.edge()];
     double L2 = geom->edgeLengths[oppHe.edge()];
-    double currAngle = (L0*L0+L1*L1-L2*L2)/(2.*L0*L1);
-    if( currAngle > 1. ) currAngle = 1.; else if( currAngle < -1. ) currAngle = -1.;
+    double currAngle = (L0 * L0 + L1 * L1 - L2 * L2) / (2. * L0 * L1);
+    if (currAngle > 1.)
+      currAngle = 1.;
+    else if (currAngle < -1.)
+      currAngle = -1.;
     currAngle = acos(currAngle);
     angleFromRight += currAngle;
     currHe = nextHe.twin();
   }
-  if( currHe != nullptr ) endHe = currHe.twin().next().next().twin();
+  if (currHe != nullptr) endHe = currHe.twin().next().next().twin();
 }
 
 VertexData<double> ExactPolyhedralGeodesics::computeDistance() {
@@ -445,40 +457,37 @@ VertexData<double> ExactPolyhedralGeodesics::computeDistance() {
 
   initialize();
 
-  while( not winQ.empty() || not pseudoSrcQ.empty() ) {
-    maxWinQSize = fmax(maxWinQSize,winQ.size());
-    maxPseudoQSize = fmax(maxPseudoQSize,pseudoSrcQ.size());
+  while (not winQ.empty() || not pseudoSrcQ.empty()) {
+    maxWinQSize = fmax(maxWinQSize, winQ.size());
+    maxPseudoQSize = fmax(maxPseudoQSize, pseudoSrcQ.size());
 
-    while( not winQ.empty() && winQ.top().pseudoSrc != nullptr
-           && winQ.top().pseudoSrcBirthTime != vertInfos[winQ.top().pseudoSrc].birthTime )
-            winQ.pop();
+    while (not winQ.empty() && winQ.top().pseudoSrc != nullptr &&
+           winQ.top().pseudoSrcBirthTime != vertInfos[winQ.top().pseudoSrc].birthTime)
+      winQ.pop();
 
-    while( not pseudoSrcQ.empty() && winQ.top().pseudoSrc != nullptr
-           && (int)pseudoSrcQ.top().pseudoSrcBirthTime != vertInfos[pseudoSrcQ.top().v].birthTime )
-           pseudoSrcQ.pop();
+    while (not pseudoSrcQ.empty() && winQ.top().pseudoSrc != nullptr &&
+           (int)pseudoSrcQ.top().pseudoSrcBirthTime != vertInfos[pseudoSrcQ.top().v].birthTime)
+      pseudoSrcQ.pop();
 
-    if( not winQ.empty()
-        && (pseudoSrcQ.empty() || winQ.top().minDist < pseudoSrcQ.top().dist) )
-    {
-      Window win = winQ.top(); winQ.pop();
-      if( win.level > (int)mesh->nFaces() ) continue;
+    if (not winQ.empty() && (pseudoSrcQ.empty() || winQ.top().minDist < pseudoSrcQ.top().dist)) {
+      Window win = winQ.top();
+      winQ.pop();
+      if (win.level > (int)mesh->nFaces()) continue;
 
       HalfedgePtr twin = win.halfedge.twin();
       propogateWindow(win);
-    }
-    else if( not pseudoSrcQ.empty()
-             && (winQ.empty() || winQ.top().minDist >= pseudoSrcQ.top().dist) )
-    {
-      PseudoWindow pseudoWin = pseudoSrcQ.top(); pseudoSrcQ.pop();
-      if( pseudoWin.level >= (unsigned)mesh->nFaces() ) continue;
+    } else if (not pseudoSrcQ.empty() && (winQ.empty() || winQ.top().minDist >= pseudoSrcQ.top().dist)) {
+      PseudoWindow pseudoWin = pseudoSrcQ.top();
+      pseudoSrcQ.pop();
+      if (pseudoWin.level >= (unsigned)mesh->nFaces()) continue;
       generateSubWinsForPseudoSrc(pseudoWin);
     }
 
-    if( geodesicRadiusReached ) break;
+    if (geodesicRadiusReached) break;
   }
 
   VertexData<double> dists(mesh);
-  for( VertexPtr v : mesh->vertices() ) {
+  for (VertexPtr v : mesh->vertices()) {
     dists[v] = vertInfos[v].dist;
   }
   return dists;

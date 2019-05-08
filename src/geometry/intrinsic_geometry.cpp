@@ -7,13 +7,13 @@
 
 namespace geometrycentral {
 
- IntrinsicGeometry::IntrinsicGeometry(HalfedgeMesh* mesh_) : mesh(mesh_) {}
+IntrinsicGeometry::IntrinsicGeometry(HalfedgeMesh* mesh_) : mesh(mesh_) {}
 
- void IntrinsicGeometry::buildDependencies() {
+void IntrinsicGeometry::buildDependencies() {
 
   // Helper to add a quantity, binding this instance to its compute function and adding it to the list of all quantities
   auto addQuantity = [&](DependentQuantity& q, std::vector<DependentQuantity*> deps,
-                         std::function< void(IntrinsicGeometry*)> func) {
+                         std::function<void(IntrinsicGeometry*)> func) {
     q = DependentQuantity(deps, std::bind(func, this));
     allQuantities.push_back(&q);
   };
@@ -69,7 +69,7 @@ void IntrinsicGeometry::verifyTriangular(HalfedgeMesh* m) {
 
 // === Quantity implementations
 
- void IntrinsicGeometry::computeFaceAreas() {
+void IntrinsicGeometry::computeFaceAreas() {
   verifyTriangular(mesh);
 
   // TODO try these for better accuracy in near-degenerate triangles?
@@ -92,7 +92,7 @@ void IntrinsicGeometry::verifyTriangular(HalfedgeMesh* m) {
 }
 
 
- void IntrinsicGeometry::computeVertexDualAreas() {
+void IntrinsicGeometry::computeVertexDualAreas() {
   vertexDualAreas = VertexData<double>(mesh);
   for (VertexPtr v : mesh->vertices()) {
     double A = 0;
@@ -103,7 +103,7 @@ void IntrinsicGeometry::verifyTriangular(HalfedgeMesh* m) {
   }
 }
 
- void IntrinsicGeometry::computeHalfedgeFaceCoords() {
+void IntrinsicGeometry::computeHalfedgeFaceCoords() {
   verifyTriangular(mesh);
   halfedgeFaceCoords = HalfedgeData<Complex>(mesh);
 
@@ -132,7 +132,7 @@ void IntrinsicGeometry::verifyTriangular(HalfedgeMesh* m) {
 }
 
 
- void IntrinsicGeometry::computeFaceTransportCoefs() {
+void IntrinsicGeometry::computeFaceTransportCoefs() {
 
   faceTransportCoefs = HalfedgeData<Complex>(mesh);
 
@@ -145,7 +145,7 @@ void IntrinsicGeometry::verifyTriangular(HalfedgeMesh* m) {
   }
 }
 
- void IntrinsicGeometry::computeVertexTransportCoefs() {
+void IntrinsicGeometry::computeVertexTransportCoefs() {
 
   vertexTransportCoefs = HalfedgeData<Complex>(mesh);
 
@@ -157,7 +157,7 @@ void IntrinsicGeometry::verifyTriangular(HalfedgeMesh* m) {
 }
 
 
- void IntrinsicGeometry::computeHalfedgeOppositeAngles() {
+void IntrinsicGeometry::computeHalfedgeOppositeAngles() {
   verifyTriangular(mesh);
 
   halfedgeOppositeAngles = HalfedgeData<double>(mesh);
@@ -180,7 +180,7 @@ void IntrinsicGeometry::verifyTriangular(HalfedgeMesh* m) {
 }
 
 
- void IntrinsicGeometry::computeHalfedgeCotanWeights() {
+void IntrinsicGeometry::computeHalfedgeCotanWeights() {
   halfedgeCotanWeights = HalfedgeData<double>(mesh);
   for (HalfedgePtr he : mesh->realHalfedges()) {
     // halfedgeCotanWeights[he] = 1.0 / std::tan(halfedgeOppositeAngles[he]);
@@ -192,19 +192,19 @@ void IntrinsicGeometry::verifyTriangular(HalfedgeMesh* m) {
 }
 
 
- void IntrinsicGeometry::computeEdgeCotanWeights() {
+void IntrinsicGeometry::computeEdgeCotanWeights() {
   edgeCotanWeights = EdgeData<double>(mesh);
   for (EdgePtr e : mesh->edges()) {
     double weight = halfedgeCotanWeights[e.halfedge()];
     if (e.halfedge().twin().isReal()) {
       weight += halfedgeCotanWeights[e.halfedge().twin()];
     }
-    edgeCotanWeights[e] = 0.5*weight;
+    edgeCotanWeights[e] = 0.5 * weight;
   }
 }
 
 
- void IntrinsicGeometry::computeVertexAngleDefects() {
+void IntrinsicGeometry::computeVertexAngleDefects() {
   verifyTriangular(mesh);
 
   vertexAngleDefects = VertexData<double>(mesh);
@@ -223,7 +223,7 @@ void IntrinsicGeometry::verifyTriangular(HalfedgeMesh* m) {
 }
 
 
- void IntrinsicGeometry::computeHalfedgeRescaledOppositeAngles() {
+void IntrinsicGeometry::computeHalfedgeRescaledOppositeAngles() {
   halfedgeRescaledOppositeAngles = HalfedgeData<double>(mesh);
   for (HalfedgePtr he : mesh->realHalfedges()) {
     double origSum = 2. * PI - vertexAngleDefects[he.next().next().vertex()];
@@ -232,7 +232,7 @@ void IntrinsicGeometry::verifyTriangular(HalfedgeMesh* m) {
 }
 
 
- void IntrinsicGeometry::computeHalfedgeVertexCoords() {
+void IntrinsicGeometry::computeHalfedgeVertexCoords() {
   verifyTriangular(mesh);
 
   halfedgeVertexCoords = HalfedgeData<Complex>(mesh);
@@ -288,21 +288,19 @@ void IntrinsicGeometry::verifyTriangular(HalfedgeMesh* m) {
   }
 }
 
- void IntrinsicGeometry::computeVertexIndices() { vertexIndices = mesh->getVertexIndices(); }
+void IntrinsicGeometry::computeVertexIndices() { vertexIndices = mesh->getVertexIndices(); }
 
- void IntrinsicGeometry::computeInteriorVertexIndices() {
-  interiorVertexIndices = mesh->getInteriorVertexIndices();
-}
+void IntrinsicGeometry::computeInteriorVertexIndices() { interiorVertexIndices = mesh->getInteriorVertexIndices(); }
 
- void IntrinsicGeometry::computeFaceIndices() { faceIndices = mesh->getFaceIndices(); }
+void IntrinsicGeometry::computeFaceIndices() { faceIndices = mesh->getFaceIndices(); }
 
- void IntrinsicGeometry::computeEdgeIndices() { edgeIndices = mesh->getEdgeIndices(); }
+void IntrinsicGeometry::computeEdgeIndices() { edgeIndices = mesh->getEdgeIndices(); }
 
 
- void IntrinsicGeometry::computeHalfedgeIndices() { halfedgeIndices = mesh->getHalfedgeIndices(); }
+void IntrinsicGeometry::computeHalfedgeIndices() { halfedgeIndices = mesh->getHalfedgeIndices(); }
 
 
- void IntrinsicGeometry::computeBasicDECOperators() {
+void IntrinsicGeometry::computeBasicDECOperators() {
 
   { // Hodge 0
     size_t nVerts = mesh->nVertices();
@@ -354,9 +352,7 @@ void IntrinsicGeometry::verifyTriangular(HalfedgeMesh* m) {
 }
 
 
- void IntrinsicGeometry::computeZeroFormWeakLaplacian() {
-  zeroFormWeakLaplacian = d0.transpose() * hodge1 * d0;
-}
+void IntrinsicGeometry::computeZeroFormWeakLaplacian() { zeroFormWeakLaplacian = d0.transpose() * hodge1 * d0; }
 
 
 } // namespace geometrycentral

@@ -44,4 +44,4 @@ Eigen::SparseMatrix<double> buildDerivative0(HalfedgeMesh* mesh);
 Eigen::SparseMatrix<double> buildDerivative1(HalfedgeMesh* mesh);
 
 
-}  // namespace geometrycentral
+} // namespace geometrycentral

@@ -12,7 +12,8 @@
 
 // Convenience typedef
 namespace {
-template <typename T> using Vector = Eigen::Matrix<T, Eigen::Dynamic, 1>;
+template <typename T>
+using Vector = Eigen::Matrix<T, Eigen::Dynamic, 1>;
 }
 
 namespace geometrycentral {
@@ -61,7 +62,7 @@ struct BlockDecompositionResult {
   // The index of each element of A (resp. B) in the original system
   Vector<size_t> origIndsA;
   Vector<size_t> origIndsB;
- 
+
   // Index of each orignal element in the new system  (either in the A system or B)
   Vector<size_t> newInds;
   Vector<bool> isA;
@@ -73,7 +74,8 @@ struct BlockDecompositionResult {
   Eigen::SparseMatrix<T> BB;
 };
 template <typename T>
-BlockDecompositionResult<T> blockDecomposeSquare(const Eigen::SparseMatrix<T>& m, const Vector<bool>& Aset, bool buildBuildBside=true);
+BlockDecompositionResult<T> blockDecomposeSquare(const Eigen::SparseMatrix<T>& m, const Vector<bool>& Aset,
+                                                 bool buildBuildBside = true);
 
 // Apply a decomposition to a vector
 template <typename T>

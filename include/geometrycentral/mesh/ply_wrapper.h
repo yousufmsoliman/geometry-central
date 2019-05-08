@@ -140,4 +140,4 @@ void PlyHalfedgeMeshData::addFaceProperty(std::string propertyName, FaceData<T>&
 
   plyData->getElement(faceName).addProperty<T>(propertyName, vec);
 }
-}
+} // namespace geometrycentral

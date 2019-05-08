@@ -1,9 +1,9 @@
 #pragma once
 
+#include <array>
 #include <cmath>
 #include <iostream>
 #include <limits>
-#include <array>
 
 #include "glm/vec3.hpp"
 
@@ -50,9 +50,7 @@ struct Vector3 {
   }
 
   inline std::array<float, 3> toFloatArray() const {
-    return {{static_cast<float>(x),
-             static_cast<float>(y),
-             static_cast<float>(z)}};
+    return {{static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)}};
   }
 
   bool isFinite() const;
@@ -77,13 +75,13 @@ Vector3 componentwiseMax(const Vector3& u, const Vector3& v);
 Vector3 fromGLM(const glm::vec3& v);
 
 
-}  // namespace geometrycentral
+} // namespace geometrycentral
 
 namespace std {
 template <>
 struct hash<geometrycentral::Vector3> {
   std::size_t operator()(const geometrycentral::Vector3& v) const;
 };
-}  // namespace std
+} // namespace std
 
 #include "vector3.ipp"

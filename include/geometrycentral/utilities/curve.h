@@ -41,7 +41,7 @@ namespace geometrycentral {
 
 template <typename T>
 class Curve {
- public:
+public:
   // Evaluate the curve at time t
   virtual T value(double t) const = 0;
   T operator()(double t) const;
@@ -76,7 +76,7 @@ class HermiteCurve;
 
 template <typename T>
 struct HermiteNode {
- public:
+public:
   HermiteNode();
   HermiteNode(const T& value, const T& derivative);
 
@@ -86,7 +86,7 @@ struct HermiteNode {
 
 template <typename T>
 class HermiteCurve : public Curve<T> {
- public:
+public:
   virtual T value(double t) const override;
   virtual T derivative(double t, unsigned int k) const override;
   virtual double length() const override;
@@ -102,7 +102,7 @@ class HermiteCurve : public Curve<T> {
 
 template <typename T>
 class BezierCurve : public Curve<T> {
- public:
+public:
   virtual T value(double t) const override;
   virtual T derivative(double t, unsigned int k) const override;
   virtual double length() const override;
@@ -112,7 +112,7 @@ class BezierCurve : public Curve<T> {
   std::vector<T> nodes;
 };
 
-}  // namespace geometrycentral
+} // namespace geometrycentral
 
 // Implementation
 #include <curve.ipp>

@@ -26,42 +26,21 @@ inline Halfedge HalfedgePtr::operator*() { return *ptr; }
 inline Halfedge HalfedgePtr::operator*() const { return *ptr; }
 inline Halfedge* HalfedgePtr::operator->() { return ptr; }
 inline const Halfedge* HalfedgePtr::operator->() const { return ptr; }
-inline bool HalfedgePtr::operator==(const HalfedgePtr& other) const {
-  return ptr == other.ptr;
-}
-inline bool HalfedgePtr::operator!=(const HalfedgePtr& other) const {
-  return !(*this == other);
-}
-inline bool HalfedgePtr::operator>(const HalfedgePtr& other) const {
-  return ptr > other.ptr;
-}
-inline bool HalfedgePtr::operator>=(const HalfedgePtr& other) const {
-  return ptr >= other.ptr;
-}
-inline bool HalfedgePtr::operator<(const HalfedgePtr& other) const {
-  return ptr < other.ptr;
-}
-inline bool HalfedgePtr::operator<=(const HalfedgePtr& other) const {
-  return ptr <= other.ptr;
-}
-inline bool HalfedgePtr::operator==(void* n) const {
-  return ptr == n;
-}
-inline bool HalfedgePtr::operator!=(void* n) const {
-  return ptr != n;
-}
+inline bool HalfedgePtr::operator==(const HalfedgePtr& other) const { return ptr == other.ptr; }
+inline bool HalfedgePtr::operator!=(const HalfedgePtr& other) const { return !(*this == other); }
+inline bool HalfedgePtr::operator>(const HalfedgePtr& other) const { return ptr > other.ptr; }
+inline bool HalfedgePtr::operator>=(const HalfedgePtr& other) const { return ptr >= other.ptr; }
+inline bool HalfedgePtr::operator<(const HalfedgePtr& other) const { return ptr < other.ptr; }
+inline bool HalfedgePtr::operator<=(const HalfedgePtr& other) const { return ptr <= other.ptr; }
+inline bool HalfedgePtr::operator==(void* n) const { return ptr == n; }
+inline bool HalfedgePtr::operator!=(void* n) const { return ptr != n; }
 inline bool HalfedgePtr::operator>(void* n) const { return ptr > n; }
-inline bool HalfedgePtr::operator>=(void* n) const {
-  return ptr >= n;
-}
+inline bool HalfedgePtr::operator>=(void* n) const { return ptr >= n; }
 inline bool HalfedgePtr::operator<(void* n) const { return ptr < n; }
-inline bool HalfedgePtr::operator<=(void* n) const {
-  return ptr <= n;
-}
+inline bool HalfedgePtr::operator<=(void* n) const { return ptr <= n; }
 inline unsigned int HalfedgePtr::operator-(const HalfedgePtr& other) const {
 #ifndef NDEBUG
-  assert(ptr >= other.ptr &&
-         "Pointer subtraction must yield a nonnegative result");
+  assert(ptr >= other.ptr && "Pointer subtraction must yield a nonnegative result");
 #endif
   return ptr - other.ptr;
 }
@@ -82,108 +61,91 @@ inline HalfedgePtr HalfedgePtr::operator--(int) {
   return HalfedgePtr(ptr + 1);
 }
 
-inline ::std::ostream& operator<<(::std::ostream& output,
-                                  const HalfedgePtr& he) {
+inline ::std::ostream& operator<<(::std::ostream& output, const HalfedgePtr& he) {
   output << "he_" << he.ptr;
   return output;
 }
 
 // FIXME dynamic pointers are currently broken -- need to support permutation callback for on compress()
-inline DynamicHalfedgePtr::DynamicHalfedgePtr(Halfedge* ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_)), mesh(mesh_) { }
-inline DynamicHalfedgePtr::DynamicHalfedgePtr(HalfedgePtr ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_.ptr)), mesh(mesh_) {
+inline DynamicHalfedgePtr::DynamicHalfedgePtr(Halfedge* ptr_, HalfedgeMesh* mesh_)
+    : ind(mesh_->indexOf(ptr_)), mesh(mesh_) {}
+inline DynamicHalfedgePtr::DynamicHalfedgePtr(HalfedgePtr ptr_, HalfedgeMesh* mesh_)
+    : ind(mesh_->indexOf(ptr_.ptr)), mesh(mesh_) {}
+inline DynamicHalfedgePtr DynamicHalfedgePtr::twin() const {
+  return DynamicHalfedgePtr(HalfedgePtr(*this).twin(), mesh);
 }
-inline DynamicHalfedgePtr DynamicHalfedgePtr::twin() const { return DynamicHalfedgePtr(HalfedgePtr(*this).twin(), mesh); }
-inline DynamicHalfedgePtr DynamicHalfedgePtr::next() const { return DynamicHalfedgePtr(HalfedgePtr(*this).next(), mesh); }
-inline DynamicVertexPtr DynamicHalfedgePtr::vertex() const { return DynamicVertexPtr(HalfedgePtr(*this).vertex(), mesh); }
-inline DynamicEdgePtr DynamicHalfedgePtr::edge() const {return DynamicEdgePtr(HalfedgePtr(*this).edge(), mesh); }
-inline DynamicFacePtr DynamicHalfedgePtr::face() const {return DynamicFacePtr(HalfedgePtr(*this).face(), mesh); }
+inline DynamicHalfedgePtr DynamicHalfedgePtr::next() const {
+  return DynamicHalfedgePtr(HalfedgePtr(*this).next(), mesh);
+}
+inline DynamicVertexPtr DynamicHalfedgePtr::vertex() const {
+  return DynamicVertexPtr(HalfedgePtr(*this).vertex(), mesh);
+}
+inline DynamicEdgePtr DynamicHalfedgePtr::edge() const { return DynamicEdgePtr(HalfedgePtr(*this).edge(), mesh); }
+inline DynamicFacePtr DynamicHalfedgePtr::face() const { return DynamicFacePtr(HalfedgePtr(*this).face(), mesh); }
 
-inline bool DynamicHalfedgePtr::operator==(const DynamicHalfedgePtr& other) const {
-  return ind == other.ind;
-}
-inline bool DynamicHalfedgePtr::operator!=(const DynamicHalfedgePtr& other) const {
-  return !(*this == other);
-}
-inline bool DynamicHalfedgePtr::operator>(const DynamicHalfedgePtr& other) const {
-  return ind > other.ind;
-}
-inline bool DynamicHalfedgePtr::operator>=(const DynamicHalfedgePtr& other) const {
-  return ind >= other.ind;
-}
-inline bool DynamicHalfedgePtr::operator<(const DynamicHalfedgePtr& other) const {
-  return ind < other.ind;
-}
-inline bool DynamicHalfedgePtr::operator<=(const DynamicHalfedgePtr& other) const {
-  return ind <= other.ind;
-}
-inline size_t DynamicHalfedgePtr::getInd() const {return ind;}
+inline bool DynamicHalfedgePtr::operator==(const DynamicHalfedgePtr& other) const { return ind == other.ind; }
+inline bool DynamicHalfedgePtr::operator!=(const DynamicHalfedgePtr& other) const { return !(*this == other); }
+inline bool DynamicHalfedgePtr::operator>(const DynamicHalfedgePtr& other) const { return ind > other.ind; }
+inline bool DynamicHalfedgePtr::operator>=(const DynamicHalfedgePtr& other) const { return ind >= other.ind; }
+inline bool DynamicHalfedgePtr::operator<(const DynamicHalfedgePtr& other) const { return ind < other.ind; }
+inline bool DynamicHalfedgePtr::operator<=(const DynamicHalfedgePtr& other) const { return ind <= other.ind; }
+inline size_t DynamicHalfedgePtr::getInd() const { return ind; }
 
-inline HalfedgePtrRangeIterator::HalfedgePtrRangeIterator(
-    HalfedgePtr startingHalfedge, HalfedgeSetType type_, HalfedgePtr end_)
+inline HalfedgePtrRangeIterator::HalfedgePtrRangeIterator(HalfedgePtr startingHalfedge, HalfedgeSetType type_,
+                                                          HalfedgePtr end_)
     : currHalfedge(startingHalfedge), type(type_), end(end_) {
-   // Advance to satisfy the type
-   if(currHalfedge != end && 
-       ((type == HalfedgeSetType::Real && !currHalfedge.isReal()) || 
-        (type == HalfedgeSetType::Imaginary && currHalfedge.isReal()) ||
-        currHalfedge->isDead()
-       )) {
-      this->operator++();
-    }
+  // Advance to satisfy the type
+  if (currHalfedge != end &&
+      ((type == HalfedgeSetType::Real && !currHalfedge.isReal()) ||
+       (type == HalfedgeSetType::Imaginary && currHalfedge.isReal()) || currHalfedge->isDead())) {
+    this->operator++();
+  }
 }
 inline const HalfedgePtrRangeIterator& HalfedgePtrRangeIterator::operator++() {
   currHalfedge++;
 
   // = Respect the 'type' option
-  // Note that we always need to return if we fall off the end of the list, and must not dereference the pointer in that case
- 
+  // Note that we always need to return if we fall off the end of the list, and must not dereference the pointer in that
+  // case
+
   // All halfedges
-  if(currHalfedge == end) {
+  if (currHalfedge == end) {
     return *this;
   }
 
-  if(type == HalfedgeSetType::All) {
-    while(currHalfedge != end && currHalfedge->isDead()) {
+  if (type == HalfedgeSetType::All) {
+    while (currHalfedge != end && currHalfedge->isDead()) {
       currHalfedge++;
     }
     return *this;
   }
   // Real only
-  else if(type == HalfedgeSetType::Real) {
-    while(currHalfedge != end && (!currHalfedge.isReal() || currHalfedge->isDead())) {
-      currHalfedge++;
-    }
-    return *this;
-  } 
-  // Imaginary only
-  else /* imag */ {
-    while(currHalfedge != end && (currHalfedge.isReal() || currHalfedge->isDead())) {
+  else if (type == HalfedgeSetType::Real) {
+    while (currHalfedge != end && (!currHalfedge.isReal() || currHalfedge->isDead())) {
       currHalfedge++;
     }
     return *this;
   }
-
+  // Imaginary only
+  else /* imag */ {
+    while (currHalfedge != end && (currHalfedge.isReal() || currHalfedge->isDead())) {
+      currHalfedge++;
+    }
+    return *this;
+  }
 }
-inline bool HalfedgePtrRangeIterator::operator==(
-    const HalfedgePtrRangeIterator& other) const {
+inline bool HalfedgePtrRangeIterator::operator==(const HalfedgePtrRangeIterator& other) const {
   return currHalfedge == other.currHalfedge;
 }
-inline bool HalfedgePtrRangeIterator::operator!=(
-    const HalfedgePtrRangeIterator& other) const {
+inline bool HalfedgePtrRangeIterator::operator!=(const HalfedgePtrRangeIterator& other) const {
   return currHalfedge != other.currHalfedge;
 }
-inline HalfedgePtr HalfedgePtrRangeIterator::operator*() const {
-  return currHalfedge;
-}
+inline HalfedgePtr HalfedgePtrRangeIterator::operator*() const { return currHalfedge; }
 
-inline HalfedgePtrSet::HalfedgePtrSet(HalfedgePtr beginptr_,
-                                      HalfedgePtr endptr_, HalfedgeSetType type_)
+inline HalfedgePtrSet::HalfedgePtrSet(HalfedgePtr beginptr_, HalfedgePtr endptr_, HalfedgeSetType type_)
     : beginptr(beginptr_), endptr(endptr_), type(type_) {}
-inline HalfedgePtrRangeIterator HalfedgePtrSet::begin() {
-  return HalfedgePtrRangeIterator(beginptr, type, endptr);
-}
-inline HalfedgePtrRangeIterator HalfedgePtrSet::end() {
-  return HalfedgePtrRangeIterator(endptr, type, endptr);
-}
+inline HalfedgePtrRangeIterator HalfedgePtrSet::begin() { return HalfedgePtrRangeIterator(beginptr, type, endptr); }
+inline HalfedgePtrRangeIterator HalfedgePtrSet::end() { return HalfedgePtrRangeIterator(endptr, type, endptr); }
 
 
 // Corner
@@ -192,32 +154,18 @@ inline CornerPtr::CornerPtr(Halfedge* ptr_) : ptr(ptr_) {}
 inline CornerPtr CornerPtr::next() const { return halfedge().next().corner(); }
 inline CornerPtr CornerPtr::prev() const { return halfedge().prev().corner(); }
 inline HalfedgePtr CornerPtr::halfedge() const { return HalfedgePtr{ptr}; }
-inline VertexPtr CornerPtr::vertex() const {
-  return halfedge().prev().vertex();
-}
+inline VertexPtr CornerPtr::vertex() const { return halfedge().prev().vertex(); }
 inline FacePtr CornerPtr::face() const { return halfedge().face(); }
 inline Halfedge CornerPtr::operator*() { return *ptr; }
 inline Halfedge CornerPtr::operator*() const { return *ptr; }
 inline Halfedge* CornerPtr::operator->() { return ptr; }
 inline const Halfedge* CornerPtr::operator->() const { return ptr; }
-inline bool CornerPtr::operator==(const CornerPtr& other) const {
-  return ptr == other.ptr;
-}
-inline bool CornerPtr::operator!=(const CornerPtr& other) const {
-  return !(*this == other);
-}
-inline bool CornerPtr::operator>(const CornerPtr& other) const {
-  return ptr > other.ptr;
-}
-inline bool CornerPtr::operator>=(const CornerPtr& other) const {
-  return ptr >= other.ptr;
-}
-inline bool CornerPtr::operator<(const CornerPtr& other) const {
-  return ptr < other.ptr;
-}
-inline bool CornerPtr::operator<=(const CornerPtr& other) const {
-  return ptr <= other.ptr;
-}
+inline bool CornerPtr::operator==(const CornerPtr& other) const { return ptr == other.ptr; }
+inline bool CornerPtr::operator!=(const CornerPtr& other) const { return !(*this == other); }
+inline bool CornerPtr::operator>(const CornerPtr& other) const { return ptr > other.ptr; }
+inline bool CornerPtr::operator>=(const CornerPtr& other) const { return ptr >= other.ptr; }
+inline bool CornerPtr::operator<(const CornerPtr& other) const { return ptr < other.ptr; }
+inline bool CornerPtr::operator<=(const CornerPtr& other) const { return ptr <= other.ptr; }
 inline bool CornerPtr::operator==(void* n) const { return ptr == n; }
 inline bool CornerPtr::operator!=(void* n) const { return ptr != n; }
 inline bool CornerPtr::operator>(void* n) const { return ptr > n; }
@@ -226,8 +174,7 @@ inline bool CornerPtr::operator<(void* n) const { return ptr < n; }
 inline bool CornerPtr::operator<=(void* n) const { return ptr <= n; }
 inline unsigned int CornerPtr::operator-(const CornerPtr& other) const {
 #ifndef NDEBUG
-  assert(ptr >= other.ptr &&
-         "Pointer subtraction must yield a nonnegative result");
+  assert(ptr >= other.ptr && "Pointer subtraction must yield a nonnegative result");
 #endif
   return ptr - other.ptr;
 }
@@ -250,37 +197,28 @@ inline CornerPtr CornerPtr::operator--(int) {
 
 inline CornerPtrRangeIterator::CornerPtrRangeIterator(CornerPtr startingCorner, CornerPtr end_)
     : currCorner(startingCorner), end(end_) {
-  if(currCorner != end && currCorner->isDead()) {
-    this->operator++(); 
+  if (currCorner != end && currCorner->isDead()) {
+    this->operator++();
   }
 }
 inline const CornerPtrRangeIterator& CornerPtrRangeIterator::operator++() {
   currCorner++;
-  while(currCorner != end && currCorner->isDead()) {
+  while (currCorner != end && currCorner->isDead()) {
     currCorner++;
   }
   return *this;
 }
-inline bool CornerPtrRangeIterator::operator==(
-    const CornerPtrRangeIterator& other) const {
+inline bool CornerPtrRangeIterator::operator==(const CornerPtrRangeIterator& other) const {
   return currCorner == other.currCorner;
 }
-inline bool CornerPtrRangeIterator::operator!=(
-    const CornerPtrRangeIterator& other) const {
+inline bool CornerPtrRangeIterator::operator!=(const CornerPtrRangeIterator& other) const {
   return currCorner != other.currCorner;
 }
-inline CornerPtr CornerPtrRangeIterator::operator*() const {
-  return currCorner;
-}
+inline CornerPtr CornerPtrRangeIterator::operator*() const { return currCorner; }
 
-inline CornerPtrSet::CornerPtrSet(CornerPtr beginptr_, CornerPtr endptr_)
-    : beginptr(beginptr_), endptr(endptr_) {}
-inline CornerPtrRangeIterator CornerPtrSet::begin() {
-  return CornerPtrRangeIterator(beginptr, endptr);
-}
-inline CornerPtrRangeIterator CornerPtrSet::end() {
-  return CornerPtrRangeIterator(endptr, endptr);
-}
+inline CornerPtrSet::CornerPtrSet(CornerPtr beginptr_, CornerPtr endptr_) : beginptr(beginptr_), endptr(endptr_) {}
+inline CornerPtrRangeIterator CornerPtrSet::begin() { return CornerPtrRangeIterator(beginptr, endptr); }
+inline CornerPtrRangeIterator CornerPtrSet::end() { return CornerPtrRangeIterator(endptr, endptr); }
 
 // Vertex
 inline VertexPtr::VertexPtr() : ptr(nullptr) {}
@@ -293,29 +231,17 @@ inline CornerPtr VertexPtr::corner() const {
   return h.next().corner();
 }
 inline bool VertexPtr::isBoundary() const { return ptr->isBoundary; }
-inline VertexIncomingHalfedgeSet VertexPtr::incomingHalfedges() {
-  return VertexIncomingHalfedgeSet(halfedge().twin());
-}
-inline VertexOutgoingHalfedgeSet VertexPtr::outgoingHalfedges() {
-  return VertexOutgoingHalfedgeSet(halfedge());
-}
-inline VertexIncomingInteriorHalfedgeSet
-VertexPtr::incomingInteriorHalfedges() {
+inline VertexIncomingHalfedgeSet VertexPtr::incomingHalfedges() { return VertexIncomingHalfedgeSet(halfedge().twin()); }
+inline VertexOutgoingHalfedgeSet VertexPtr::outgoingHalfedges() { return VertexOutgoingHalfedgeSet(halfedge()); }
+inline VertexIncomingInteriorHalfedgeSet VertexPtr::incomingInteriorHalfedges() {
   return VertexIncomingInteriorHalfedgeSet(halfedge().twin());
 }
-inline VertexOutgoingInteriorHalfedgeSet
-VertexPtr::outgoingInteriorHalfedges() {
+inline VertexOutgoingInteriorHalfedgeSet VertexPtr::outgoingInteriorHalfedges() {
   return VertexOutgoingInteriorHalfedgeSet(halfedge());
 }
-inline VertexAdjacentVertexSet VertexPtr::adjacentVertices() {
-  return VertexAdjacentVertexSet(halfedge().twin());
-}
-inline VertexAdjacentFaceSet VertexPtr::adjacentFaces() {
-  return VertexAdjacentFaceSet(halfedge());
-}
-inline VertexAdjacentEdgeSet VertexPtr::adjacentEdges() {
-  return VertexAdjacentEdgeSet(halfedge());
-}
+inline VertexAdjacentVertexSet VertexPtr::adjacentVertices() { return VertexAdjacentVertexSet(halfedge().twin()); }
+inline VertexAdjacentFaceSet VertexPtr::adjacentFaces() { return VertexAdjacentFaceSet(halfedge()); }
+inline VertexAdjacentEdgeSet VertexPtr::adjacentEdges() { return VertexAdjacentEdgeSet(halfedge()); }
 inline VertexAdjacentCornerSet VertexPtr::adjacentCorners() {
   HalfedgePtr h = halfedge();
   if (!h.isReal()) h = h.twin().next();
@@ -325,24 +251,12 @@ inline Vertex VertexPtr::operator*() { return *ptr; }
 inline Vertex VertexPtr::operator*() const { return *ptr; }
 inline Vertex* VertexPtr::operator->() { return ptr; }
 inline const Vertex* VertexPtr::operator->() const { return ptr; }
-inline bool VertexPtr::operator==(const VertexPtr& other) const {
-  return ptr == other.ptr;
-}
-inline bool VertexPtr::operator!=(const VertexPtr& other) const {
-  return !(*this == other);
-}
-inline bool VertexPtr::operator>(const VertexPtr& other) const {
-  return ptr > other.ptr;
-}
-inline bool VertexPtr::operator>=(const VertexPtr& other) const {
-  return ptr >= other.ptr;
-}
-inline bool VertexPtr::operator<(const VertexPtr& other) const {
-  return ptr < other.ptr;
-}
-inline bool VertexPtr::operator<=(const VertexPtr& other) const {
-  return ptr <= other.ptr;
-}
+inline bool VertexPtr::operator==(const VertexPtr& other) const { return ptr == other.ptr; }
+inline bool VertexPtr::operator!=(const VertexPtr& other) const { return !(*this == other); }
+inline bool VertexPtr::operator>(const VertexPtr& other) const { return ptr > other.ptr; }
+inline bool VertexPtr::operator>=(const VertexPtr& other) const { return ptr >= other.ptr; }
+inline bool VertexPtr::operator<(const VertexPtr& other) const { return ptr < other.ptr; }
+inline bool VertexPtr::operator<=(const VertexPtr& other) const { return ptr <= other.ptr; }
 inline bool VertexPtr::operator==(void* n) const { return ptr == n; }
 inline bool VertexPtr::operator!=(void* n) const { return ptr != n; }
 inline bool VertexPtr::operator>(void* n) const { return ptr > n; }
@@ -351,8 +265,7 @@ inline bool VertexPtr::operator<(void* n) const { return ptr < n; }
 inline bool VertexPtr::operator<=(void* n) const { return ptr <= n; }
 inline unsigned int VertexPtr::operator-(const VertexPtr& other) const {
 #ifndef NDEBUG
-  assert(ptr >= other.ptr &&
-         "Pointer subtraction must yield a nonnegative result");
+  assert(ptr >= other.ptr && "Pointer subtraction must yield a nonnegative result");
 #endif
   return ptr - other.ptr;
 }
@@ -378,63 +291,45 @@ inline ::std::ostream& operator<<(::std::ostream& output, const VertexPtr& v) {
   return output;
 }
 
-inline DynamicVertexPtr::DynamicVertexPtr(Vertex* ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_)), mesh(mesh_) { } 
-inline DynamicVertexPtr::DynamicVertexPtr(VertexPtr ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_.ptr)), mesh(mesh_) { }
-inline DynamicHalfedgePtr DynamicVertexPtr::halfedge() const { return DynamicHalfedgePtr(VertexPtr(*this).halfedge(), mesh); }
-inline bool DynamicVertexPtr::operator==(const DynamicVertexPtr& other) const {
-  return ind == other.ind;
+inline DynamicVertexPtr::DynamicVertexPtr(Vertex* ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_)), mesh(mesh_) {}
+inline DynamicVertexPtr::DynamicVertexPtr(VertexPtr ptr_, HalfedgeMesh* mesh_)
+    : ind(mesh_->indexOf(ptr_.ptr)), mesh(mesh_) {}
+inline DynamicHalfedgePtr DynamicVertexPtr::halfedge() const {
+  return DynamicHalfedgePtr(VertexPtr(*this).halfedge(), mesh);
 }
-inline bool DynamicVertexPtr::operator!=(const DynamicVertexPtr& other) const {
-  return !(*this == other);
-}
-inline bool DynamicVertexPtr::operator>(const DynamicVertexPtr& other) const {
-  return ind > other.ind;
-}
-inline bool DynamicVertexPtr::operator>=(const DynamicVertexPtr& other) const {
-  return ind >= other.ind;
-}
-inline bool DynamicVertexPtr::operator<(const DynamicVertexPtr& other) const {
-  return ind < other.ind;
-}
-inline bool DynamicVertexPtr::operator<=(const DynamicVertexPtr& other) const {
-  return ind <= other.ind;
-}
+inline bool DynamicVertexPtr::operator==(const DynamicVertexPtr& other) const { return ind == other.ind; }
+inline bool DynamicVertexPtr::operator!=(const DynamicVertexPtr& other) const { return !(*this == other); }
+inline bool DynamicVertexPtr::operator>(const DynamicVertexPtr& other) const { return ind > other.ind; }
+inline bool DynamicVertexPtr::operator>=(const DynamicVertexPtr& other) const { return ind >= other.ind; }
+inline bool DynamicVertexPtr::operator<(const DynamicVertexPtr& other) const { return ind < other.ind; }
+inline bool DynamicVertexPtr::operator<=(const DynamicVertexPtr& other) const { return ind <= other.ind; }
 
-inline size_t DynamicVertexPtr::getInd() const {return ind;}
+inline size_t DynamicVertexPtr::getInd() const { return ind; }
 
 inline VertexPtrRangeIterator::VertexPtrRangeIterator(VertexPtr startingVertex, VertexPtr end_)
     : currVertex(startingVertex), end(end_) {
-  if(currVertex != end && currVertex->isDead()) {
-    this->operator++(); 
+  if (currVertex != end && currVertex->isDead()) {
+    this->operator++();
   }
 }
 inline const VertexPtrRangeIterator& VertexPtrRangeIterator::operator++() {
   currVertex++;
-  while(currVertex != end && currVertex->isDead()) {
+  while (currVertex != end && currVertex->isDead()) {
     currVertex++;
   }
   return *this;
 }
-inline bool VertexPtrRangeIterator::operator==(
-    const VertexPtrRangeIterator& other) const {
+inline bool VertexPtrRangeIterator::operator==(const VertexPtrRangeIterator& other) const {
   return currVertex == other.currVertex;
 }
-inline bool VertexPtrRangeIterator::operator!=(
-    const VertexPtrRangeIterator& other) const {
+inline bool VertexPtrRangeIterator::operator!=(const VertexPtrRangeIterator& other) const {
   return currVertex != other.currVertex;
 }
-inline VertexPtr VertexPtrRangeIterator::operator*() const {
-  return currVertex;
-}
+inline VertexPtr VertexPtrRangeIterator::operator*() const { return currVertex; }
 
-inline VertexPtrSet::VertexPtrSet(VertexPtr beginptr_, VertexPtr endptr_)
-    : beginptr(beginptr_), endptr(endptr_) {}
-inline VertexPtrRangeIterator VertexPtrSet::begin() {
-  return VertexPtrRangeIterator(beginptr, endptr);
-}
-inline VertexPtrRangeIterator VertexPtrSet::end() {
-  return VertexPtrRangeIterator(endptr, endptr);
-}
+inline VertexPtrSet::VertexPtrSet(VertexPtr beginptr_, VertexPtr endptr_) : beginptr(beginptr_), endptr(endptr_) {}
+inline VertexPtrRangeIterator VertexPtrSet::begin() { return VertexPtrRangeIterator(beginptr, endptr); }
+inline VertexPtrRangeIterator VertexPtrSet::end() { return VertexPtrRangeIterator(endptr, endptr); }
 
 // Edge
 inline EdgePtr::EdgePtr() : ptr(nullptr) {}
@@ -446,24 +341,12 @@ inline Edge EdgePtr::operator*() { return *ptr; }
 inline Edge EdgePtr::operator*() const { return *ptr; }
 inline Edge* EdgePtr::operator->() { return ptr; }
 inline const Edge* EdgePtr::operator->() const { return ptr; }
-inline bool EdgePtr::operator==(const EdgePtr& other) const {
-  return ptr == other.ptr;
-}
-inline bool EdgePtr::operator!=(const EdgePtr& other) const {
-  return !(*this == other);
-}
-inline bool EdgePtr::operator>(const EdgePtr& other) const {
-  return ptr > other.ptr;
-}
-inline bool EdgePtr::operator>=(const EdgePtr& other) const {
-  return ptr >= other.ptr;
-}
-inline bool EdgePtr::operator<(const EdgePtr& other) const {
-  return ptr < other.ptr;
-}
-inline bool EdgePtr::operator<=(const EdgePtr& other) const {
-  return ptr <= other.ptr;
-}
+inline bool EdgePtr::operator==(const EdgePtr& other) const { return ptr == other.ptr; }
+inline bool EdgePtr::operator!=(const EdgePtr& other) const { return !(*this == other); }
+inline bool EdgePtr::operator>(const EdgePtr& other) const { return ptr > other.ptr; }
+inline bool EdgePtr::operator>=(const EdgePtr& other) const { return ptr >= other.ptr; }
+inline bool EdgePtr::operator<(const EdgePtr& other) const { return ptr < other.ptr; }
+inline bool EdgePtr::operator<=(const EdgePtr& other) const { return ptr <= other.ptr; }
 inline bool EdgePtr::operator==(void* n) const { return ptr == n; }
 inline bool EdgePtr::operator!=(void* n) const { return ptr != n; }
 inline bool EdgePtr::operator>(void* n) const { return ptr > n; }
@@ -472,8 +355,7 @@ inline bool EdgePtr::operator<(void* n) const { return ptr < n; }
 inline bool EdgePtr::operator<=(void* n) const { return ptr <= n; }
 inline unsigned int EdgePtr::operator-(const EdgePtr& other) const {
 #ifndef NDEBUG
-  assert(ptr >= other.ptr &&
-         "Pointer subtraction must yield a nonnegative result");
+  assert(ptr >= other.ptr && "Pointer subtraction must yield a nonnegative result");
 #endif
   return ptr - other.ptr;
 }
@@ -499,56 +381,39 @@ inline ::std::ostream& operator<<(::std::ostream& output, const EdgePtr& e) {
   return output;
 }
 
-inline DynamicEdgePtr::DynamicEdgePtr(Edge* ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_)), mesh(mesh_) { }
-inline DynamicEdgePtr::DynamicEdgePtr(EdgePtr ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_.ptr)), mesh(mesh_) { }
-inline DynamicHalfedgePtr DynamicEdgePtr::halfedge() const { return DynamicHalfedgePtr(EdgePtr(*this).halfedge(), mesh); }
-inline bool DynamicEdgePtr::operator==(const DynamicEdgePtr& other) const {
-  return ind == other.ind;
+inline DynamicEdgePtr::DynamicEdgePtr(Edge* ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_)), mesh(mesh_) {}
+inline DynamicEdgePtr::DynamicEdgePtr(EdgePtr ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_.ptr)), mesh(mesh_) {}
+inline DynamicHalfedgePtr DynamicEdgePtr::halfedge() const {
+  return DynamicHalfedgePtr(EdgePtr(*this).halfedge(), mesh);
 }
-inline bool DynamicEdgePtr::operator!=(const DynamicEdgePtr& other) const {
-  return !(*this == other);
-}
-inline bool DynamicEdgePtr::operator>(const DynamicEdgePtr& other) const {
-  return ind > other.ind;
-}
-inline bool DynamicEdgePtr::operator>=(const DynamicEdgePtr& other) const {
-  return ind >= other.ind;
-}
-inline bool DynamicEdgePtr::operator<(const DynamicEdgePtr& other) const {
-  return ind < other.ind;
-}
-inline bool DynamicEdgePtr::operator<=(const DynamicEdgePtr& other) const {
-  return ind <= other.ind;
-}
-inline size_t DynamicEdgePtr::getInd() const {return ind;}
+inline bool DynamicEdgePtr::operator==(const DynamicEdgePtr& other) const { return ind == other.ind; }
+inline bool DynamicEdgePtr::operator!=(const DynamicEdgePtr& other) const { return !(*this == other); }
+inline bool DynamicEdgePtr::operator>(const DynamicEdgePtr& other) const { return ind > other.ind; }
+inline bool DynamicEdgePtr::operator>=(const DynamicEdgePtr& other) const { return ind >= other.ind; }
+inline bool DynamicEdgePtr::operator<(const DynamicEdgePtr& other) const { return ind < other.ind; }
+inline bool DynamicEdgePtr::operator<=(const DynamicEdgePtr& other) const { return ind <= other.ind; }
+inline size_t DynamicEdgePtr::getInd() const { return ind; }
 
 inline EdgePtrRangeIterator::EdgePtrRangeIterator(EdgePtr startingEdge, EdgePtr end_)
     : currEdge(startingEdge), end(end_) {}
 inline const EdgePtrRangeIterator& EdgePtrRangeIterator::operator++() {
   currEdge++;
-  while(currEdge != end && currEdge->isDead()) {
+  while (currEdge != end && currEdge->isDead()) {
     currEdge++;
   }
   return *this;
 }
-inline bool EdgePtrRangeIterator::operator==(
-    const EdgePtrRangeIterator& other) const {
+inline bool EdgePtrRangeIterator::operator==(const EdgePtrRangeIterator& other) const {
   return currEdge == other.currEdge;
 }
-inline bool EdgePtrRangeIterator::operator!=(
-    const EdgePtrRangeIterator& other) const {
+inline bool EdgePtrRangeIterator::operator!=(const EdgePtrRangeIterator& other) const {
   return currEdge != other.currEdge;
 }
 inline EdgePtr EdgePtrRangeIterator::operator*() const { return currEdge; }
 
-inline EdgePtrSet::EdgePtrSet(EdgePtr beginptr_, EdgePtr endptr_)
-    : beginptr(beginptr_), endptr(endptr_) {}
-inline EdgePtrRangeIterator EdgePtrSet::begin() {
-  return EdgePtrRangeIterator(beginptr, endptr);
-}
-inline EdgePtrRangeIterator EdgePtrSet::end() {
-  return EdgePtrRangeIterator(endptr, endptr);
-}
+inline EdgePtrSet::EdgePtrSet(EdgePtr beginptr_, EdgePtr endptr_) : beginptr(beginptr_), endptr(endptr_) {}
+inline EdgePtrRangeIterator EdgePtrSet::begin() { return EdgePtrRangeIterator(beginptr, endptr); }
+inline EdgePtrRangeIterator EdgePtrSet::end() { return EdgePtrRangeIterator(endptr, endptr); }
 
 // Face
 inline FacePtr::FacePtr() : ptr(nullptr) {}
@@ -565,43 +430,21 @@ inline unsigned int FacePtr::degree() {
 }
 inline bool FacePtr::isBoundary() const { return ptr->isBoundary; }
 inline bool FacePtr::isReal() const { return ptr->isReal; }
-inline FaceAdjacentHalfedgeSet FacePtr::adjacentHalfedges() {
-  return FaceAdjacentHalfedgeSet(halfedge());
-}
-inline FaceAdjacentVertexSet FacePtr::adjacentVertices() {
-  return FaceAdjacentVertexSet(halfedge());
-}
-inline FaceAdjacentFaceSet FacePtr::adjacentFaces() {
-  return FaceAdjacentFaceSet(halfedge());
-}
-inline FaceAdjacentEdgeSet FacePtr::adjacentEdges() {
-  return FaceAdjacentEdgeSet(halfedge());
-}
-inline FaceAdjacentCornerSet FacePtr::adjacentCorners() {
-  return FaceAdjacentCornerSet(halfedge());
-}
+inline FaceAdjacentHalfedgeSet FacePtr::adjacentHalfedges() { return FaceAdjacentHalfedgeSet(halfedge()); }
+inline FaceAdjacentVertexSet FacePtr::adjacentVertices() { return FaceAdjacentVertexSet(halfedge()); }
+inline FaceAdjacentFaceSet FacePtr::adjacentFaces() { return FaceAdjacentFaceSet(halfedge()); }
+inline FaceAdjacentEdgeSet FacePtr::adjacentEdges() { return FaceAdjacentEdgeSet(halfedge()); }
+inline FaceAdjacentCornerSet FacePtr::adjacentCorners() { return FaceAdjacentCornerSet(halfedge()); }
 inline Face FacePtr::operator*() { return *ptr; }
 inline Face FacePtr::operator*() const { return *ptr; }
 inline Face* FacePtr::operator->() { return ptr; }
 inline const Face* FacePtr::operator->() const { return ptr; }
-inline bool FacePtr::operator==(const FacePtr& other) const {
-  return ptr == other.ptr;
-}
-inline bool FacePtr::operator!=(const FacePtr& other) const {
-  return !(*this == other);
-}
-inline bool FacePtr::operator>(const FacePtr& other) const {
-  return ptr > other.ptr;
-}
-inline bool FacePtr::operator>=(const FacePtr& other) const {
-  return ptr >= other.ptr;
-}
-inline bool FacePtr::operator<(const FacePtr& other) const {
-  return ptr < other.ptr;
-}
-inline bool FacePtr::operator<=(const FacePtr& other) const {
-  return ptr <= other.ptr;
-}
+inline bool FacePtr::operator==(const FacePtr& other) const { return ptr == other.ptr; }
+inline bool FacePtr::operator!=(const FacePtr& other) const { return !(*this == other); }
+inline bool FacePtr::operator>(const FacePtr& other) const { return ptr > other.ptr; }
+inline bool FacePtr::operator>=(const FacePtr& other) const { return ptr >= other.ptr; }
+inline bool FacePtr::operator<(const FacePtr& other) const { return ptr < other.ptr; }
+inline bool FacePtr::operator<=(const FacePtr& other) const { return ptr <= other.ptr; }
 inline bool FacePtr::operator==(void* n) const { return ptr == n; }
 inline bool FacePtr::operator!=(void* n) const { return ptr != n; }
 inline bool FacePtr::operator>(void* n) const { return ptr > n; }
@@ -610,8 +453,7 @@ inline bool FacePtr::operator<(void* n) const { return ptr < n; }
 inline bool FacePtr::operator<=(void* n) const { return ptr <= n; }
 inline unsigned int FacePtr::operator-(const FacePtr& other) const {
 #ifndef NDEBUG
-  assert(ptr >= other.ptr &&
-         "Pointer subtraction must yield a nonnegative result");
+  assert(ptr >= other.ptr && "Pointer subtraction must yield a nonnegative result");
 #endif
   return ptr - other.ptr;
 }
@@ -637,62 +479,45 @@ inline ::std::ostream& operator<<(::std::ostream& output, const FacePtr& f) {
   return output;
 }
 
-inline DynamicFacePtr::DynamicFacePtr(Face* ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_)), mesh(mesh_) { }
-inline DynamicFacePtr::DynamicFacePtr(FacePtr ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_.ptr)), mesh(mesh_) { }
-inline DynamicHalfedgePtr DynamicFacePtr::halfedge() const { return DynamicHalfedgePtr(FacePtr(*this).halfedge(), mesh); }
-inline bool DynamicFacePtr::operator==(const DynamicFacePtr& other) const {
-  return ind == other.ind;
+inline DynamicFacePtr::DynamicFacePtr(Face* ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_)), mesh(mesh_) {}
+inline DynamicFacePtr::DynamicFacePtr(FacePtr ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_.ptr)), mesh(mesh_) {}
+inline DynamicHalfedgePtr DynamicFacePtr::halfedge() const {
+  return DynamicHalfedgePtr(FacePtr(*this).halfedge(), mesh);
 }
-inline bool DynamicFacePtr::operator!=(const DynamicFacePtr& other) const {
-  return !(*this == other);
-}
-inline bool DynamicFacePtr::operator>(const DynamicFacePtr& other) const {
-  return ind > other.ind;
-}
-inline bool DynamicFacePtr::operator>=(const DynamicFacePtr& other) const {
-  return ind >= other.ind;
-}
-inline bool DynamicFacePtr::operator<(const DynamicFacePtr& other) const {
-  return ind < other.ind;
-}
-inline bool DynamicFacePtr::operator<=(const DynamicFacePtr& other) const {
-  return ind <= other.ind;
-}
-inline size_t DynamicFacePtr::getInd() const {return ind;}
+inline bool DynamicFacePtr::operator==(const DynamicFacePtr& other) const { return ind == other.ind; }
+inline bool DynamicFacePtr::operator!=(const DynamicFacePtr& other) const { return !(*this == other); }
+inline bool DynamicFacePtr::operator>(const DynamicFacePtr& other) const { return ind > other.ind; }
+inline bool DynamicFacePtr::operator>=(const DynamicFacePtr& other) const { return ind >= other.ind; }
+inline bool DynamicFacePtr::operator<(const DynamicFacePtr& other) const { return ind < other.ind; }
+inline bool DynamicFacePtr::operator<=(const DynamicFacePtr& other) const { return ind <= other.ind; }
+inline size_t DynamicFacePtr::getInd() const { return ind; }
 
 inline FacePtrRangeIterator::FacePtrRangeIterator(FacePtr startingFace, FacePtr end_)
     : currFace(startingFace), end(end_) {
-  if(currFace != end && currFace->isDead()) {
-    this->operator++(); 
+  if (currFace != end && currFace->isDead()) {
+    this->operator++();
   }
 }
 inline const FacePtrRangeIterator& FacePtrRangeIterator::operator++() {
   currFace++;
-  while(currFace != end && currFace->isDead()) {
+  while (currFace != end && currFace->isDead()) {
     currFace++;
   }
   return *this;
 }
-inline bool FacePtrRangeIterator::operator==(
-    const FacePtrRangeIterator& other) const {
+inline bool FacePtrRangeIterator::operator==(const FacePtrRangeIterator& other) const {
   return currFace == other.currFace;
 }
-inline bool FacePtrRangeIterator::operator!=(
-    const FacePtrRangeIterator& other) const {
+inline bool FacePtrRangeIterator::operator!=(const FacePtrRangeIterator& other) const {
   return currFace != other.currFace;
 }
 inline FacePtr FacePtrRangeIterator::operator*() const { return currFace; }
 
-inline FacePtrSet::FacePtrSet(FacePtr beginptr_, FacePtr endptr_)
-    : beginptr(beginptr_), endptr(endptr_) {}
-inline FacePtrRangeIterator FacePtrSet::begin() {
-  return FacePtrRangeIterator(beginptr, endptr);
-}
-inline FacePtrRangeIterator FacePtrSet::end() {
-  return FacePtrRangeIterator(endptr, endptr);
-}
+inline FacePtrSet::FacePtrSet(FacePtr beginptr_, FacePtr endptr_) : beginptr(beginptr_), endptr(endptr_) {}
+inline FacePtrRangeIterator FacePtrSet::begin() { return FacePtrRangeIterator(beginptr, endptr); }
+inline FacePtrRangeIterator FacePtrSet::end() { return FacePtrRangeIterator(endptr, endptr); }
 
-}  // namespace geometrycentral
+} // namespace geometrycentral
 
 namespace std {
 
@@ -700,59 +525,43 @@ namespace std {
 
 template <>
 struct hash<geometrycentral::HalfedgePtr> {
-  std::size_t operator()(const geometrycentral::HalfedgePtr& he) const {
-    return std::hash<size_t>{}(he.ptr->ID);
-  }
+  std::size_t operator()(const geometrycentral::HalfedgePtr& he) const { return std::hash<size_t>{}(he.ptr->ID); }
 };
 
 template <>
 struct hash<geometrycentral::VertexPtr> {
-  std::size_t operator()(const geometrycentral::VertexPtr& v) const {
-    return std::hash<size_t>{}(v.ptr->ID);
-  }
+  std::size_t operator()(const geometrycentral::VertexPtr& v) const { return std::hash<size_t>{}(v.ptr->ID); }
 };
 
 template <>
 struct hash<geometrycentral::EdgePtr> {
-  std::size_t operator()(const geometrycentral::EdgePtr& e) const {
-    return std::hash<size_t>{}(e.ptr->ID);
-  }
+  std::size_t operator()(const geometrycentral::EdgePtr& e) const { return std::hash<size_t>{}(e.ptr->ID); }
 };
 
 template <>
 struct hash<geometrycentral::FacePtr> {
-  std::size_t operator()(const geometrycentral::FacePtr& f) const {
-    return std::hash<size_t>{}(f.ptr->ID);
-  }
+  std::size_t operator()(const geometrycentral::FacePtr& f) const { return std::hash<size_t>{}(f.ptr->ID); }
 };
 
 // == Hash dynamic pointers
 
 template <>
 struct hash<geometrycentral::DynamicHalfedgePtr> {
-  std::size_t operator()(const geometrycentral::DynamicHalfedgePtr& he) const {
-    return std::hash<size_t>{}(he.ind);
-  }
+  std::size_t operator()(const geometrycentral::DynamicHalfedgePtr& he) const { return std::hash<size_t>{}(he.ind); }
 };
 
 template <>
 struct hash<geometrycentral::DynamicVertexPtr> {
-  std::size_t operator()(const geometrycentral::DynamicVertexPtr& v) const {
-    return std::hash<size_t>{}(v.ind);
-  }
+  std::size_t operator()(const geometrycentral::DynamicVertexPtr& v) const { return std::hash<size_t>{}(v.ind); }
 };
 
 template <>
 struct hash<geometrycentral::DynamicEdgePtr> {
-  std::size_t operator()(const geometrycentral::DynamicEdgePtr& e) const {
-    return std::hash<size_t>{}(e.ind);
-  }
+  std::size_t operator()(const geometrycentral::DynamicEdgePtr& e) const { return std::hash<size_t>{}(e.ind); }
 };
 
 template <>
 struct hash<geometrycentral::DynamicFacePtr> {
-  std::size_t operator()(const geometrycentral::DynamicFacePtr& f) const {
-    return std::hash<size_t>{}(f.ind);
-  }
+  std::size_t operator()(const geometrycentral::DynamicFacePtr& f) const { return std::hash<size_t>{}(f.ind); }
 };
-}
+} // namespace std

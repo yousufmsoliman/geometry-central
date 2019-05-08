@@ -10,19 +10,15 @@ namespace geometrycentral {
 
 PolygonSoupMesh::PolygonSoupMesh() {}
 
-PolygonSoupMesh::PolygonSoupMesh(std::string meshFilename) {
-  readMeshFromFile(meshFilename);
-}
+PolygonSoupMesh::PolygonSoupMesh(std::string meshFilename) { readMeshFromFile(meshFilename); }
 
-PolygonSoupMesh::PolygonSoupMesh(
-    const std::vector<std::vector<size_t>>& polygons_,
-    const std::vector<Vector3>& vertexCoordinates_)
+PolygonSoupMesh::PolygonSoupMesh(const std::vector<std::vector<size_t>>& polygons_,
+                                 const std::vector<Vector3>& vertexCoordinates_)
     : polygons(polygons_), vertexCoordinates(vertexCoordinates_) {}
 
 // String manipulation helpers to parse .obj files
 // See http://stackoverflow.com/a/236803
-std::vector<std::string>& split(const std::string& s, char delim,
-                                std::vector<std::string>& elems) {
+std::vector<std::string>& split(const std::string& s, char delim, std::vector<std::string>& elems) {
   std::stringstream ss(s);
   std::string item;
   while (std::getline(ss, item, delim)) {
@@ -37,7 +33,7 @@ std::vector<std::string> split(const std::string& s, char delim) {
 }
 
 class Index {
- public:
+public:
   Index() {}
 
   Index(int v, int vt, int vn) : position(v), uv(vt), normal(vn) {}
@@ -141,4 +137,4 @@ void PolygonSoupMesh::triangulate() {
   polygons = newPolygons;
 }
 
-}  // namespace geometrycentral
+} // namespace geometrycentral

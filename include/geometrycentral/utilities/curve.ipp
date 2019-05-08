@@ -1,7 +1,7 @@
 #pragma once
 
-#include <curve.h>
 #include <cmath>
+#include <curve.h>
 #include <iostream>
 
 namespace geometrycentral {
@@ -24,8 +24,7 @@ template <typename T>
 HermiteNode<T>::HermiteNode() : value(T::zero()), derivative(T::zero()) {}
 
 template <typename T>
-HermiteNode<T>::HermiteNode(const T& value_, const T& derivative_)
-    : value(value_), derivative(derivative_) {}
+HermiteNode<T>::HermiteNode(const T& value_, const T& derivative_) : value(value_), derivative(derivative_) {}
 
 template <typename T>
 T HermiteCurve<T>::value(double t) const {
@@ -36,9 +35,7 @@ T HermiteCurve<T>::value(double t) const {
 
   double L = length();
   if (t < 0.) return nodes[0].value + t * nodes[0].derivative;
-  if (t > L)
-    return nodes[n - 1].value +
-           (t - static_cast<double>(n - 1)) * nodes[n - 1].derivative;
+  if (t > L) return nodes[n - 1].value + (t - static_cast<double>(n - 1)) * nodes[n - 1].derivative;
 
   double t0 = floor(t);
   size_t i = static_cast<size_t>(t0);
@@ -53,8 +50,7 @@ T HermiteCurve<T>::value(double t) const {
   double u2 = u * u;
   double u3 = u * u * u;
 
-  return (2. * u3 - 3. * u2 + 1.) * p0 + (u3 - 2. * u2 + u) * m0 +
-         (3. * u2 - 2. * u3) * p1 + (u3 - u2) * m1;
+  return (2. * u3 - 3. * u2 + 1.) * p0 + (u3 - 2. * u2 + u) * m0 + (3. * u2 - 2. * u3) * p1 + (u3 - u2) * m1;
 }
 
 template <typename T>
@@ -101,20 +97,18 @@ T HermiteCurve<T>::derivative(double t, unsigned int k) const {
   T dk;
 
   switch (k) {
-    case 1:
-      dk = (6. * u2 - 6. * u) * p0 + (3. * u2 - 4. * u + 1.) * m0 +
-           (6. * u - 6. * u2) * p1 + (3. * u2 - 2. * u) * m1;
-      break;
-    case 2:
-      dk = (12. * u - 6.) * p0 + (6. * u - 4.) * m0 + (6. - 12. * u) * p1 +
-           (6. * u - 2.) * m1;
-      break;
-    case 3:
-      dk = 12. * p0 + 6. * m0 + -12. * p1 + 6. * m1;
-      break;
-    default:
-      dk = T::zero();
-      break;
+  case 1:
+    dk = (6. * u2 - 6. * u) * p0 + (3. * u2 - 4. * u + 1.) * m0 + (6. * u - 6. * u2) * p1 + (3. * u2 - 2. * u) * m1;
+    break;
+  case 2:
+    dk = (12. * u - 6.) * p0 + (6. * u - 4.) * m0 + (6. - 12. * u) * p1 + (6. * u - 2.) * m1;
+    break;
+  case 3:
+    dk = 12. * p0 + 6. * m0 + -12. * p1 + 6. * m1;
+    break;
+  default:
+    dk = T::zero();
+    break;
   }
 
   return dk;
@@ -132,12 +126,11 @@ void HermiteCurve<T>::addNode(const T& value, const T& derivative) {
 
 template <typename T>
 BezierCurve<T> HermiteCurve<T>::toBezier() const {
-  throw std::invalid_argument(
-      "Hermite to Bezier conversion not yet implemented!");
+  throw std::invalid_argument("Hermite to Bezier conversion not yet implemented!");
 }
 
 // BezierCurve =================================================================
 
 // TODO
 
-}  // namespace geometrycentral
+} // namespace geometrycentral

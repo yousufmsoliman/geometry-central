@@ -7,7 +7,7 @@
 
 namespace geometrycentral {
 
-std::ostream &operator<<(std::ostream &output, const Vector3 &v) {
+std::ostream& operator<<(std::ostream& output, const Vector3& v) {
   output << "<" << v.x << ", " << v.y << ", " << v.z << ">";
   return output;
 }
@@ -33,4 +33,4 @@ Vector3 Vector3::rotate_around(Vector3 axis, double theta) const {
   }
 }
 
-}  // namespace geometrycentral
+} // namespace geometrycentral

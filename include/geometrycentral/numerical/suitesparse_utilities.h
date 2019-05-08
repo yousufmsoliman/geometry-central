@@ -12,7 +12,7 @@
 namespace geometrycentral {
 
 
-enum class SType { UNSYMMETRIC = 0, SYMMETRIC};
+enum class SType { UNSYMMETRIC = 0, SYMMETRIC };
 
 // Suitesparse context class
 class CholmodContext {
@@ -26,7 +26,7 @@ public:
   // set mode for Cholesky factorization
   void setSimplicial(void);
   void setSupernodal(void);
-  
+
   // set LL vs LDL mode
   void setLL(void);
   void setLDL(void);
@@ -43,7 +43,8 @@ protected:
 
 // Convert a sparse matrix. Always returns a "full" matrix (stype=0, ie not triangular)
 template <typename T>
-cholmod_sparse* toCholmod(Eigen::SparseMatrix<T, Eigen::ColMajor>& A, CholmodContext& context, SType stype=SType::UNSYMMETRIC);
+cholmod_sparse* toCholmod(Eigen::SparseMatrix<T, Eigen::ColMajor>& A, CholmodContext& context,
+                          SType stype = SType::UNSYMMETRIC);
 
 // Convert a vector
 template <typename T>

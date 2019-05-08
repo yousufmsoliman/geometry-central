@@ -49,7 +49,7 @@ void Solver<T>::prepare() {
   // Is the system underdetermined?
   if (Nrows < Ncols) {
     underdetermined = true;
-     throw std::logic_error("is not well tested, be careful");
+    throw std::logic_error("is not well tested, be careful");
   } else {
     underdetermined = false;
   }

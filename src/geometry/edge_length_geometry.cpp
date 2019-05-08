@@ -19,13 +19,14 @@ EdgeLengthGeometry::EdgeLengthGeometry(HalfedgeMesh* mesh_, VertexData<Vector3>&
 
   geodesicEdgeLengths = EdgeData<double>(mesh);
   for (EdgePtr e : mesh->edges()) {
-    geodesicEdgeLengths[e] = norm(vertexPositions[e.halfedge().vertex()] - vertexPositions[e.halfedge().twin().vertex()]);
+    geodesicEdgeLengths[e] =
+        norm(vertexPositions[e.halfedge().vertex()] - vertexPositions[e.halfedge().twin().vertex()]);
   }
 
   buildDependencies();
 }
-  
-EdgeLengthGeometry::~EdgeLengthGeometry() {};
+
+EdgeLengthGeometry::~EdgeLengthGeometry(){};
 
 // Set new edgelengths to define the geometry, immediately recalculating any quantities that have been required.
 void EdgeLengthGeometry::update(EdgeData<double> edgeLengths) {
@@ -35,8 +36,6 @@ void EdgeLengthGeometry::update(EdgeData<double> edgeLengths) {
 
 // === Quantity implementations
 
-void EdgeLengthGeometry::computeEdgeLengths() { 
-  edgeLengths = geodesicEdgeLengths; 
-}
+void EdgeLengthGeometry::computeEdgeLengths() { edgeLengths = geodesicEdgeLengths; }
 
 } // namespace geometrycentral

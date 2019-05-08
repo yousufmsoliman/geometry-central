@@ -107,9 +107,9 @@ VertexData<Complex> computeSmoothestVertexDirectionField_noBoundary(Geometry<Euc
   else {
     std::cout << "Solving smoothest field eigenvalue problem..." << std::endl;
     try {
-      solution = smallestEigenvectorPositiveDefinite(energyMatrix,massMatrix);
-    } catch(std::exception& e) {
-      solution = smallestEigenvectorSquare(energyMatrix,massMatrix);
+      solution = smallestEigenvectorPositiveDefinite(energyMatrix, massMatrix);
+    } catch (std::exception& e) {
+      solution = smallestEigenvectorSquare(energyMatrix, massMatrix);
     }
   }
 
@@ -552,9 +552,9 @@ FaceData<Complex> computeSmoothestFaceDirectionField_boundary(Geometry<Euclidean
     }
 
 
-    double t = 0.1;  // this is something of a magical constant, see "Globally
-                     // Optimal Direction Fields", eqn 9
-                     // NOTE: This value is different from the one used for vertex fields; seems to work better?
+    double t = 0.1; // this is something of a magical constant, see "Globally
+                    // Optimal Direction Fields", eqn 9
+                    // NOTE: This value is different from the one used for vertex fields; seems to work better?
 
     std::cout << "Solving smoothest field dirichlet problem with curvature term..." << std::endl;
     Eigen::VectorXcd RHS = massMatrix * (t * dirVec + b);

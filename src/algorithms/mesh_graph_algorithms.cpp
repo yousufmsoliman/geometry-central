@@ -157,7 +157,7 @@ EdgeData<char> spanningTreeBetweenVertices(Geometry<Euclidean>* geometry,
     degree1Verts.pop_back();
 
     // Keep needed vertices
-    if(vertexNeeded[currV]) {
+    if (vertexNeeded[currV]) {
       continue;
     }
 

@@ -13,7 +13,7 @@ struct RayHitResult {
 };
 
 class MeshRayTracer {
- public:
+public:
   // Creates a new tracer and builds the acceleration structure
   MeshRayTracer(Geometry<Euclidean>* geometry);
 
@@ -24,19 +24,18 @@ class MeshRayTracer {
   // Trace a ray. Note: geometry should be identical to when BVH was constructed
   RayHitResult trace(Vector3 start, Vector3 dir);
 
- private:
+private:
   HalfedgeMesh* mesh;
   Geometry<Euclidean>* geometry;
 
   // Data for the BVH
   std::vector<double> rawPositions;
   std::vector<unsigned int> rawFaces;
-  nanort::BVHAccel<double, nanort::TriangleMesh<double>,
-                   nanort::TriangleSAHPred<double>,
+  nanort::BVHAccel<double, nanort::TriangleMesh<double>, nanort::TriangleSAHPred<double>,
                    nanort::TriangleIntersector<double>>
       accel;
 
   double tFar;
 };
 
-};  // namespace geometrycentral
+}; // namespace geometrycentral

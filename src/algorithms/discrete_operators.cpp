@@ -50,7 +50,7 @@ Eigen::DiagonalMatrix<double, Eigen::Dynamic> buildHodge2(Geometry<Euclidean>* g
   HalfedgeMesh* mesh = geometry->getMesh();
   FaceData<size_t> fInd = mesh->getFaceIndices();
   size_t nFaces = mesh->nFaces();
-  
+
   GeometryCache<Euclidean>& gc = geometry->cache;
   gc.requireFaceAreas();
 

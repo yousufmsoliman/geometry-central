@@ -6,7 +6,7 @@
 namespace geometrycentral {
 
 class DisjointSets {
- public:
+public:
   // Constructor
   DisjointSets(size_t n_);
 
@@ -16,7 +16,7 @@ class DisjointSets {
   // Union by rank
   void merge(size_t x, size_t y);
 
- private:
+private:
   // Member variables
   size_t n;
   std::vector<size_t> parent;
@@ -25,7 +25,7 @@ class DisjointSets {
 
 // Slight generalization of a disjoint set, which can track "marked" sets.
 class MarkedDisjointSets {
- public:
+public:
   // Constructor
   MarkedDisjointSets(size_t n_);
 
@@ -43,7 +43,7 @@ class MarkedDisjointSets {
   // Check if a set is marked
   bool isMarked(size_t x);
 
- private:
+private:
   // Member variables
   size_t n;
   std::vector<size_t> parent;
@@ -51,4 +51,4 @@ class MarkedDisjointSets {
   std::vector<bool> marked;
 };
 
-}  // namespace geometrycentral
+} // namespace geometrycentral

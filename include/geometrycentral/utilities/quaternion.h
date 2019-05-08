@@ -35,7 +35,7 @@
 namespace geometrycentral {
 
 class Quaternion {
- public:
+public:
   Quaternion(void);
   // initializes all components to zero
 
@@ -141,7 +141,7 @@ class Quaternion {
   void normalize(void);
   // divides by Euclidean length
 
- protected:
+protected:
   double s;
   // scalar (double) part
 
@@ -161,4 +161,4 @@ Quaternion operator*(double c, const Quaternion& q);
 std::ostream& operator<<(std::ostream& os, const Quaternion& q);
 // prints components
 
-}  // namespace geometrycentral
+} // namespace geometrycentral

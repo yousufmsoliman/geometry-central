@@ -7,8 +7,8 @@
 #include <iostream>
 
 
-using std::cout;
 using std::cerr;
+using std::cout;
 using std::endl;
 
 namespace geometrycentral {
@@ -22,7 +22,7 @@ PlyHalfedgeMeshData::PlyHalfedgeMeshData(std::string filename_, bool verbose_)
 
 PlyHalfedgeMeshData::PlyHalfedgeMeshData(Geometry<Euclidean>* geometry_)
     : mesh(geometry_->getMesh()), geometry(geometry_) {
-  
+
   plyData = new happly::PLYData();
 
   // Vertex positions. Need to convert type for happly.
@@ -108,4 +108,4 @@ VertexData<Vector3> PlyHalfedgeMeshData::getVertexColors() {
 }
 
 void PlyHalfedgeMeshData::write(std::string filename) { plyData->write(filename, happly::DataFormat::Binary); }
-}
+} // namespace geometrycentral

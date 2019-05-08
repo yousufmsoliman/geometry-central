@@ -9,21 +9,20 @@
 // Interal implementations that hide the NN lookup while allowing it to be
 // shared
 
-using std::cout; using std::endl;
+using std::cout;
+using std::endl;
 
 namespace geometrycentral {
 
 namespace {
 
 // Stupid nanoflann wrapper
-typedef KDTreeVectorOfVectorsAdaptor<std::vector<std::vector<double>>, double>
-    KdTree;
+typedef KDTreeVectorOfVectorsAdaptor<std::vector<std::vector<double>>, double> KdTree;
 KdTree* buildKDTree(Geometry<Euclidean>* geom) {
   HalfedgeMesh* mesh = geom->getMesh();
 
   // Pack data in a vector of vectors
-  std::vector<std::vector<double>>* pts =
-      new std::vector<std::vector<double>>(mesh->nVertices());
+  std::vector<std::vector<double>>* pts = new std::vector<std::vector<double>>(mesh->nVertices());
   for (size_t i = 0; i < mesh->nVertices(); i++) {
     Vector3 p = geom->position(mesh->vertex(i));
     (*pts)[i] = {p.x, p.y, p.z};
@@ -35,8 +34,7 @@ KdTree* buildKDTree(Geometry<Euclidean>* geom) {
   return tree;
 }
 
-bool findPoint(KdTree* tree, Vector3 target, double toleranceRadius,
-               size_t& result) {
+bool findPoint(KdTree* tree, Vector3 target, double toleranceRadius, size_t& result) {
   std::vector<size_t> ret_indexes(1);
   std::vector<double> out_dists_sqr(1);
   nanoflann::KNNResultSet<double> resultSet(1);
@@ -44,23 +42,20 @@ bool findPoint(KdTree* tree, Vector3 target, double toleranceRadius,
 
   std::vector<double> query = {target.x, target.y, target.z};
 
-  bool success = tree->index->findNeighbors(resultSet, &query[0],
-                                            nanoflann::SearchParams());
+  bool success = tree->index->findNeighbors(resultSet, &query[0], nanoflann::SearchParams());
 
   // Nothing found
   if (!success) return false;
 
   double dist = std::sqrt(out_dists_sqr[0]);
-  if (dist > toleranceRadius) return false;  // too far
+  if (dist > toleranceRadius) return false; // too far
 
   // Point found
   result = ret_indexes[0];
   return true;
 }
 
-SymmetryResult detectSymmetryMirror(Geometry<Euclidean>* geom,
-                                    Vector3 planeNormal, Vector3 planePoint,
-                                    KdTree* tree) {
+SymmetryResult detectSymmetryMirror(Geometry<Euclidean>* geom, Vector3 planeNormal, Vector3 planePoint, KdTree* tree) {
   HalfedgeMesh* mesh = geom->getMesh();
   planeNormal = unit(planeNormal);
   double toleranceRadius = geom->lengthScale() * 1e-5;
@@ -76,8 +71,7 @@ SymmetryResult detectSymmetryMirror(Geometry<Euclidean>* geom,
     Vector3 mirrorPos = pos + 2 * vecToPlane;
 
     // If this point is on the positive side of the plane, it's canonical
-    bool isCanonical = dot(planeNormal, pos - planePoint) >
-                       -toleranceRadius;  // small tolerance for points on plane
+    bool isCanonical = dot(planeNormal, pos - planePoint) > -toleranceRadius; // small tolerance for points on plane
     if (isCanonical) {
       result.canonicalVertices.push_back(v);
     }
@@ -103,17 +97,15 @@ SymmetryResult detectSymmetryMirror(Geometry<Euclidean>* geom,
   return result;
 }
 
-SymmetryResult detectSymmetryRotation(Geometry<Euclidean>* geom,
-                                      Vector3 rotAxis, Vector3 rotPoint,
-                                      int nSym, KdTree* tree) {
+SymmetryResult detectSymmetryRotation(Geometry<Euclidean>* geom, Vector3 rotAxis, Vector3 rotPoint, int nSym,
+                                      KdTree* tree) {
   HalfedgeMesh* mesh = geom->getMesh();
   rotAxis = unit(rotAxis);
   double toleranceRadius = geom->lengthScale() * 1e-5;
   double deltaTheta = 2 * PI / nSym;
 
   // Any axis orthogonal to the rotation axis
-  Vector3 castAxis =
-      Vector3{0.12345623, -.883034723, 0.54457119};  // provably random
+  Vector3 castAxis = Vector3{0.12345623, -.883034723, 0.54457119}; // provably random
   Vector3 orthAxis = unit(cross(rotAxis, castAxis));
 
   SymmetryResult result;
@@ -127,16 +119,14 @@ SymmetryResult detectSymmetryRotation(Geometry<Euclidean>* geom,
     // Test if canonical
     Vector3 vPlane = (pos - rotPoint) - dot(rotAxis, pos - rotPoint) * rotAxis;
     double canonicalAngle = angleInPlane(orthAxis, vPlane, rotAxis);
-    bool isCanonical = norm(vPlane) < toleranceRadius ||
-                       (canonicalAngle >= 0 && canonicalAngle < deltaTheta);
+    bool isCanonical = norm(vPlane) < toleranceRadius || (canonicalAngle >= 0 && canonicalAngle < deltaTheta);
     if (isCanonical) {
       result.canonicalVertices.push_back(v);
     }
 
     for (int iRot = 1; iRot < nSym; iRot++) {
       double theta = iRot * deltaTheta;
-      Vector3 rotPos =
-          (pos - rotPoint).rotate_around(rotAxis, theta) + rotPoint;
+      Vector3 rotPos = (pos - rotPoint).rotate_around(rotAxis, theta) + rotPoint;
 
       // If this point is its own pair, there's no mirror to look for (assumes
       // no duplicate verts)
@@ -160,8 +150,7 @@ SymmetryResult detectSymmetryRotation(Geometry<Euclidean>* geom,
   return result;
 }
 
-SymmetryResult detectSymmetryDoubleMirror(Geometry<Euclidean>* geom,
-                                          KdTree* tree) {
+SymmetryResult detectSymmetryDoubleMirror(Geometry<Euclidean>* geom, KdTree* tree) {
   HalfedgeMesh* mesh = geom->getMesh();
   double toleranceRadius = geom->lengthScale() * 1e-5;
 
@@ -211,22 +200,18 @@ SymmetryResult detectSymmetryDoubleMirror(Geometry<Euclidean>* geom,
   return result;
 }
 
-} /* anonymous name space */
+} // namespace
 
-SymmetryResult detectSymmetryMirror(Geometry<Euclidean>* geom,
-                                    Vector3 planeNormal, Vector3 planePoint) {
+SymmetryResult detectSymmetryMirror(Geometry<Euclidean>* geom, Vector3 planeNormal, Vector3 planePoint) {
   KdTree* tree = buildKDTree(geom);
   SymmetryResult r = detectSymmetryMirror(geom, planeNormal, planePoint, tree);
   delete tree;
   return r;
 }
 
-SymmetryResult detectSymmetryRotation(Geometry<Euclidean>* geom,
-                                      Vector3 rotAxis, Vector3 rotPoint,
-                                      int nSym) {
+SymmetryResult detectSymmetryRotation(Geometry<Euclidean>* geom, Vector3 rotAxis, Vector3 rotPoint, int nSym) {
   KdTree* tree = buildKDTree(geom);
-  SymmetryResult r =
-      detectSymmetryRotation(geom, rotAxis, rotPoint, nSym, tree);
+  SymmetryResult r = detectSymmetryRotation(geom, rotAxis, rotPoint, nSym, tree);
   delete tree;
   return r;
 }
@@ -240,8 +225,7 @@ SymmetryResult detectSymmetryAuto(Geometry<Euclidean>* geom) {
 
   // == Mirror symmetry across coordinate axes, about center
   {
-    SymmetryResult res =
-        detectSymmetryMirror(geom, Vector3{1.0, 0.0, 0.0}, center, tree);
+    SymmetryResult res = detectSymmetryMirror(geom, Vector3{1.0, 0.0, 0.0}, center, tree);
     if (res.symmetryFound) {
       cout << "  ... symmetry found across x-axis!" << endl;
       delete tree;
@@ -249,8 +233,7 @@ SymmetryResult detectSymmetryAuto(Geometry<Euclidean>* geom) {
     }
   }
   {
-    SymmetryResult res =
-        detectSymmetryMirror(geom, Vector3{0.0, 1.0, 0.0}, center, tree);
+    SymmetryResult res = detectSymmetryMirror(geom, Vector3{0.0, 1.0, 0.0}, center, tree);
     if (res.symmetryFound) {
       cout << "  ... symmetry found across y-axis!" << endl;
       delete tree;
@@ -258,8 +241,7 @@ SymmetryResult detectSymmetryAuto(Geometry<Euclidean>* geom) {
     }
   }
   {
-    SymmetryResult res =
-        detectSymmetryMirror(geom, Vector3{0.0, 0.0, 1.0}, center, tree);
+    SymmetryResult res = detectSymmetryMirror(geom, Vector3{0.0, 0.0, 1.0}, center, tree);
     if (res.symmetryFound) {
       cout << "  ... symmetry found across z-axis!" << endl;
       delete tree;
@@ -271,33 +253,27 @@ SymmetryResult detectSymmetryAuto(Geometry<Euclidean>* geom) {
   // (higher order symmetries are cooler)
   for (int nSym = 8; nSym >= 2; nSym--) {
     {
-      SymmetryResult res = detectSymmetryRotation(geom, Vector3{1.0, 0.0, 0.0},
-                                                  center, nSym, tree);
+      SymmetryResult res = detectSymmetryRotation(geom, Vector3{1.0, 0.0, 0.0}, center, nSym, tree);
       if (res.symmetryFound) {
-        cout << "  ... rotational symmetry found about x-axis with index "
-             << nSym << "!" << endl;
+        cout << "  ... rotational symmetry found about x-axis with index " << nSym << "!" << endl;
         delete tree;
         return res;
       }
     }
 
     {
-      SymmetryResult res = detectSymmetryRotation(geom, Vector3{0.0, 1.0, 0.0},
-                                                  center, nSym, tree);
+      SymmetryResult res = detectSymmetryRotation(geom, Vector3{0.0, 1.0, 0.0}, center, nSym, tree);
       if (res.symmetryFound) {
-        cout << "  ... rotational symmetry found about y-axis with index "
-             << nSym << "!" << endl;
+        cout << "  ... rotational symmetry found about y-axis with index " << nSym << "!" << endl;
         delete tree;
         return res;
       }
     }
 
     {
-      SymmetryResult res = detectSymmetryRotation(geom, Vector3{0.0, 0.0, 1.0},
-                                                  center, nSym, tree);
+      SymmetryResult res = detectSymmetryRotation(geom, Vector3{0.0, 0.0, 1.0}, center, nSym, tree);
       if (res.symmetryFound) {
-        cout << "  ... rotational symmetry found about z-axis with index "
-             << nSym << "!" << endl;
+        cout << "  ... rotational symmetry found about z-axis with index " << nSym << "!" << endl;
         delete tree;
         return res;
       }
@@ -320,8 +296,7 @@ SymmetryResult detectSymmetryAutoMirror(Geometry<Euclidean>* geom) {
 
   // == Mirror symmetry across coordinate axes, about center
   {
-    SymmetryResult res =
-        detectSymmetryMirror(geom, Vector3{1.0, 0.0, 0.0}, center, tree);
+    SymmetryResult res = detectSymmetryMirror(geom, Vector3{1.0, 0.0, 0.0}, center, tree);
     if (res.symmetryFound) {
       cout << "  ... symmetry found across x-axis!" << endl;
       delete tree;
@@ -329,8 +304,7 @@ SymmetryResult detectSymmetryAutoMirror(Geometry<Euclidean>* geom) {
     }
   }
   {
-    SymmetryResult res =
-        detectSymmetryMirror(geom, Vector3{0.0, 1.0, 0.0}, center, tree);
+    SymmetryResult res = detectSymmetryMirror(geom, Vector3{0.0, 1.0, 0.0}, center, tree);
     if (res.symmetryFound) {
       cout << "  ... symmetry found across y-axis!" << endl;
       delete tree;
@@ -338,8 +312,7 @@ SymmetryResult detectSymmetryAutoMirror(Geometry<Euclidean>* geom) {
     }
   }
   {
-    SymmetryResult res =
-        detectSymmetryMirror(geom, Vector3{0.0, 0.0, 1.0}, center, tree);
+    SymmetryResult res = detectSymmetryMirror(geom, Vector3{0.0, 0.0, 1.0}, center, tree);
     if (res.symmetryFound) {
       cout << "  ... symmetry found across z-axis!" << endl;
       delete tree;
@@ -365,33 +338,27 @@ SymmetryResult detectSymmetryAutoRotation(Geometry<Euclidean>* geom) {
   // (higher order symmetries are cooler)
   for (int nSym = 8; nSym >= 2; nSym--) {
     {
-      SymmetryResult res = detectSymmetryRotation(geom, Vector3{1.0, 0.0, 0.0},
-                                                  center, nSym, tree);
+      SymmetryResult res = detectSymmetryRotation(geom, Vector3{1.0, 0.0, 0.0}, center, nSym, tree);
       if (res.symmetryFound) {
-        cout << "  ... rotational symmetry found about x-axis with index "
-             << nSym << "!" << endl;
+        cout << "  ... rotational symmetry found about x-axis with index " << nSym << "!" << endl;
         delete tree;
         return res;
       }
     }
 
     {
-      SymmetryResult res = detectSymmetryRotation(geom, Vector3{0.0, 1.0, 0.0},
-                                                  center, nSym, tree);
+      SymmetryResult res = detectSymmetryRotation(geom, Vector3{0.0, 1.0, 0.0}, center, nSym, tree);
       if (res.symmetryFound) {
-        cout << "  ... rotational symmetry found about y-axis with index "
-             << nSym << "!" << endl;
+        cout << "  ... rotational symmetry found about y-axis with index " << nSym << "!" << endl;
         delete tree;
         return res;
       }
     }
 
     {
-      SymmetryResult res = detectSymmetryRotation(geom, Vector3{0.0, 0.0, 1.0},
-                                                  center, nSym, tree);
+      SymmetryResult res = detectSymmetryRotation(geom, Vector3{0.0, 0.0, 1.0}, center, nSym, tree);
       if (res.symmetryFound) {
-        cout << "  ... rotational symmetry found about z-axis with index "
-             << nSym << "!" << endl;
+        cout << "  ... rotational symmetry found about z-axis with index " << nSym << "!" << endl;
         delete tree;
         return res;
       }
@@ -412,4 +379,4 @@ SymmetryResult detectSymmetryDoubleMirror(Geometry<Euclidean>* geom) {
   return r;
 }
 
-}  // namespace geometrycentral
+} // namespace geometrycentral

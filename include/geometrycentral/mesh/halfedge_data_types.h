@@ -48,13 +48,13 @@ public:
   MeshData(HalfedgeMesh* parentMesh, const Eigen::Matrix<T, Eigen::Dynamic, 1>& vector);
   MeshData(HalfedgeMesh* parentMesh, const Eigen::Matrix<T, Eigen::Dynamic, 1>& vector,
            const MeshData<E, size_t>& indexer);
-  
-  // Rule of 5 
-  MeshData(const MeshData<E,T>& other);                     // copy constructor
-  MeshData(MeshData<E,T>&& other) noexcept;                 // move constructor
-  MeshData<E,T>& operator=(const MeshData<E,T>& other);     // copy assignment
-  MeshData<E,T>& operator=(MeshData<E,T>&& other) noexcept; // move assignment
-  ~MeshData();                                              // destructor
+
+  // Rule of 5
+  MeshData(const MeshData<E, T>& other);                      // copy constructor
+  MeshData(MeshData<E, T>&& other) noexcept;                  // move constructor
+  MeshData<E, T>& operator=(const MeshData<E, T>& other);     // copy assignment
+  MeshData<E, T>& operator=(MeshData<E, T>&& other) noexcept; // move assignment
+  ~MeshData();                                                // destructor
 
   // Access with an element pointer
   T& operator[](E e);

@@ -29,7 +29,7 @@ namespace geometrycentral {
 // Iterate around all incoming halfedges (both on the interior and the boundary
 // of the domain)
 class VertexIncomingHalfedgeIterator {
- public:
+public:
   VertexIncomingHalfedgeIterator(HalfedgePtr startingEdge, bool justStarted);
   const VertexIncomingHalfedgeIterator& operator++();
   bool operator==(const VertexIncomingHalfedgeIterator& other) const;
@@ -37,50 +37,49 @@ class VertexIncomingHalfedgeIterator {
   HalfedgePtr operator*() const;
   // HalfedgePtr operator-> () const;
 
- private:
+private:
   HalfedgePtr currHe;
   bool justStarted;
 };
 class VertexIncomingHalfedgeSet {
- public:
+public:
   VertexIncomingHalfedgeSet(HalfedgePtr he);
   VertexIncomingHalfedgeIterator begin();
   VertexIncomingHalfedgeIterator end();
 
- private:
+private:
   HalfedgePtr firstHe;
 };
 
 // Iterate around all incoming halfedges that are strictly on the interior of
 // the domain
 class VertexIncomingInteriorHalfedgeIterator {
- public:
-  VertexIncomingInteriorHalfedgeIterator(HalfedgePtr startingEdge,
-                                         bool justStarted);
+public:
+  VertexIncomingInteriorHalfedgeIterator(HalfedgePtr startingEdge, bool justStarted);
   const VertexIncomingInteriorHalfedgeIterator& operator++();
   bool operator==(const VertexIncomingInteriorHalfedgeIterator& other) const;
   bool operator!=(const VertexIncomingInteriorHalfedgeIterator& other) const;
   HalfedgePtr operator*() const;
   // HalfedgePtr operator-> () const;
 
- private:
+private:
   HalfedgePtr currHe;
   bool justStarted;
 };
 class VertexIncomingInteriorHalfedgeSet {
- public:
+public:
   VertexIncomingInteriorHalfedgeSet(HalfedgePtr he);
   VertexIncomingInteriorHalfedgeIterator begin();
   VertexIncomingInteriorHalfedgeIterator end();
 
- private:
+private:
   HalfedgePtr firstHe;
 };
 
 // Iterate around all outgoing halfedges (both on the interior and the boundary
 // of the domain)
 class VertexOutgoingHalfedgeIterator {
- public:
+public:
   VertexOutgoingHalfedgeIterator(HalfedgePtr startingEdge, bool justStarted);
   const VertexOutgoingHalfedgeIterator& operator++();
   bool operator==(const VertexOutgoingHalfedgeIterator& other) const;
@@ -88,49 +87,48 @@ class VertexOutgoingHalfedgeIterator {
   HalfedgePtr operator*() const;
   // HalfedgePtr operator-> () const;
 
- private:
+private:
   HalfedgePtr currHe;
   bool justStarted;
 };
 class VertexOutgoingHalfedgeSet {
- public:
+public:
   VertexOutgoingHalfedgeSet(HalfedgePtr he);
   VertexOutgoingHalfedgeIterator begin();
   VertexOutgoingHalfedgeIterator end();
 
- private:
+private:
   HalfedgePtr firstHe;
 };
 
 // Iterate around all outgoing halfedges that are strictly on the interior of
 // the domain
 class VertexOutgoingInteriorHalfedgeIterator {
- public:
-  VertexOutgoingInteriorHalfedgeIterator(HalfedgePtr startingEdge,
-                                         bool justStarted);
+public:
+  VertexOutgoingInteriorHalfedgeIterator(HalfedgePtr startingEdge, bool justStarted);
   const VertexOutgoingInteriorHalfedgeIterator& operator++();
   bool operator==(const VertexOutgoingInteriorHalfedgeIterator& other) const;
   bool operator!=(const VertexOutgoingInteriorHalfedgeIterator& other) const;
   HalfedgePtr operator*() const;
   // HalfedgePtr operator-> () const;
 
- private:
+private:
   HalfedgePtr currHe;
   bool justStarted;
 };
 class VertexOutgoingInteriorHalfedgeSet {
- public:
+public:
   VertexOutgoingInteriorHalfedgeSet(HalfedgePtr he);
   VertexOutgoingInteriorHalfedgeIterator begin();
   VertexOutgoingInteriorHalfedgeIterator end();
 
- private:
+private:
   HalfedgePtr firstHe;
 };
 
 // Iterate around adjacent vertices
 class VertexAdjacentVertexIterator {
- public:
+public:
   VertexAdjacentVertexIterator(HalfedgePtr startingEdge, bool justStarted);
   const VertexAdjacentVertexIterator& operator++();
   bool operator==(const VertexAdjacentVertexIterator& other) const;
@@ -138,23 +136,23 @@ class VertexAdjacentVertexIterator {
   VertexPtr operator*() const;
   // VertexPtr operator-> () const;
 
- private:
+private:
   HalfedgePtr currHe;
   bool justStarted;
 };
 class VertexAdjacentVertexSet {
- public:
+public:
   VertexAdjacentVertexSet(HalfedgePtr he);
   VertexAdjacentVertexIterator begin();
   VertexAdjacentVertexIterator end();
 
- private:
+private:
   HalfedgePtr firstHe;
 };
 
 // Iterate around adjacent (real) faces
 class VertexAdjacentFaceIterator {
- public:
+public:
   VertexAdjacentFaceIterator(HalfedgePtr startingEdge, bool justStarted);
   const VertexAdjacentFaceIterator& operator++();
   bool operator==(const VertexAdjacentFaceIterator& other) const;
@@ -162,23 +160,23 @@ class VertexAdjacentFaceIterator {
   FacePtr operator*() const;
   // FacePtr operator-> () const;
 
- private:
+private:
   HalfedgePtr currHe;
   bool justStarted;
 };
 class VertexAdjacentFaceSet {
- public:
+public:
   VertexAdjacentFaceSet(HalfedgePtr he);
   VertexAdjacentFaceIterator begin();
   VertexAdjacentFaceIterator end();
 
- private:
+private:
   HalfedgePtr firstHe;
 };
 
 // Iterate around adjacent edges
 class VertexAdjacentEdgeIterator {
- public:
+public:
   VertexAdjacentEdgeIterator(HalfedgePtr startingEdge, bool justStarted);
   const VertexAdjacentEdgeIterator& operator++();
   bool operator==(const VertexAdjacentEdgeIterator& other) const;
@@ -186,23 +184,23 @@ class VertexAdjacentEdgeIterator {
   EdgePtr operator*() const;
   // EdgePtr operator-> () const;
 
- private:
+private:
   HalfedgePtr currHe;
   bool justStarted;
 };
 class VertexAdjacentEdgeSet {
- public:
+public:
   VertexAdjacentEdgeSet(HalfedgePtr he);
   VertexAdjacentEdgeIterator begin();
   VertexAdjacentEdgeIterator end();
 
- private:
+private:
   HalfedgePtr firstHe;
 };
 
 // Iterate around all adjacent corners
 class VertexAdjacentCornerIterator {
- public:
+public:
   VertexAdjacentCornerIterator(HalfedgePtr startingEdge, bool justStarted);
   const VertexAdjacentCornerIterator& operator++();
   bool operator==(const VertexAdjacentCornerIterator& other) const;
@@ -210,17 +208,17 @@ class VertexAdjacentCornerIterator {
   CornerPtr operator*() const;
   // HalfedgePtr operator-> () const;
 
- private:
+private:
   HalfedgePtr currHe;
   bool justStarted;
 };
 class VertexAdjacentCornerSet {
- public:
+public:
   VertexAdjacentCornerSet(HalfedgePtr he);
   VertexAdjacentCornerIterator begin();
   VertexAdjacentCornerIterator end();
 
- private:
+private:
   HalfedgePtr firstHe;
 };
 
@@ -230,99 +228,99 @@ class VertexAdjacentCornerSet {
 
 // Iterate around adjacent halfedges
 class FaceAdjacentHalfedgeIterator {
- public:
+public:
   FaceAdjacentHalfedgeIterator(HalfedgePtr startingEdge, bool justStarted);
   const FaceAdjacentHalfedgeIterator& operator++();
   bool operator==(const FaceAdjacentHalfedgeIterator& other) const;
   bool operator!=(const FaceAdjacentHalfedgeIterator& other) const;
   HalfedgePtr operator*() const;
 
- private:
+private:
   HalfedgePtr currHe;
   bool justStarted;
 };
 class FaceAdjacentHalfedgeSet {
- public:
+public:
   FaceAdjacentHalfedgeSet(HalfedgePtr he);
   FaceAdjacentHalfedgeIterator begin();
   FaceAdjacentHalfedgeIterator end();
 
- private:
+private:
   HalfedgePtr firstHe;
 };
 
 // Iterate around adjacent vertices
 class FaceAdjacentVertexIterator {
- public:
+public:
   FaceAdjacentVertexIterator(HalfedgePtr startingEdge, bool justStarted);
   const FaceAdjacentVertexIterator& operator++();
   bool operator==(const FaceAdjacentVertexIterator& other) const;
   bool operator!=(const FaceAdjacentVertexIterator& other) const;
   VertexPtr operator*() const;
 
- private:
+private:
   HalfedgePtr currHe;
   bool justStarted;
 };
 class FaceAdjacentVertexSet {
- public:
+public:
   FaceAdjacentVertexSet(HalfedgePtr he);
   FaceAdjacentVertexIterator begin();
   FaceAdjacentVertexIterator end();
 
- private:
+private:
   HalfedgePtr firstHe;
 };
 
 // Iterate around adjacent edges
 class FaceAdjacentEdgeIterator {
- public:
+public:
   FaceAdjacentEdgeIterator(HalfedgePtr startingEdge, bool justStarted);
   const FaceAdjacentEdgeIterator& operator++();
   bool operator==(const FaceAdjacentEdgeIterator& other) const;
   bool operator!=(const FaceAdjacentEdgeIterator& other) const;
   EdgePtr operator*() const;
 
- private:
+private:
   HalfedgePtr currHe;
   bool justStarted;
 };
 class FaceAdjacentEdgeSet {
- public:
+public:
   FaceAdjacentEdgeSet(HalfedgePtr he);
   FaceAdjacentEdgeIterator begin();
   FaceAdjacentEdgeIterator end();
 
- private:
+private:
   HalfedgePtr firstHe;
 };
 
 // Iterate around adjacent (real) faces
 class FaceAdjacentFaceIterator {
- public:
+public:
   FaceAdjacentFaceIterator(HalfedgePtr startingEdge, bool justStarted);
   const FaceAdjacentFaceIterator& operator++();
   bool operator==(const FaceAdjacentFaceIterator& other) const;
   bool operator!=(const FaceAdjacentFaceIterator& other) const;
   FacePtr operator*() const;
 
- private:
+private:
   HalfedgePtr currHe;
   bool justStarted;
 };
 class FaceAdjacentFaceSet {
- public:
+public:
   FaceAdjacentFaceSet(HalfedgePtr he);
   FaceAdjacentFaceIterator begin();
   FaceAdjacentFaceIterator end();
 
- private:
+private:
   HalfedgePtr firstHe;
 };
 
 // Iterate around all adjacent corners
 class FaceAdjacentCornerIterator {
- public:
+public:
   FaceAdjacentCornerIterator(HalfedgePtr startingEdge, bool justStarted_);
   const FaceAdjacentCornerIterator& operator++();
   bool operator==(const FaceAdjacentCornerIterator& other) const;
@@ -330,18 +328,18 @@ class FaceAdjacentCornerIterator {
   CornerPtr operator*() const;
   // HalfedgePtr operator-> () const;
 
- private:
+private:
   HalfedgePtr currHe;
   bool justStarted;
 };
 class FaceAdjacentCornerSet {
- public:
+public:
   FaceAdjacentCornerSet(HalfedgePtr he);
   FaceAdjacentCornerIterator begin();
   FaceAdjacentCornerIterator end();
 
- private:
+private:
   HalfedgePtr firstHe;
 };
 
-}  // namespace geometrycentral
+} // namespace geometrycentral

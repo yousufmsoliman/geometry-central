@@ -121,9 +121,8 @@ MeshData<E, T>::MeshData(const MeshData<E, T>& other)
 }
 
 template <typename E, typename T>
-MeshData<E, T>::MeshData(MeshData<E, T>&& other) noexcept : mesh(other.mesh),
-                                                            defaultValue(other.defaultValue),
-                                                            data(std::move(other.data)) {
+MeshData<E, T>::MeshData(MeshData<E, T>&& other) noexcept
+    : mesh(other.mesh), defaultValue(other.defaultValue), data(std::move(other.data)) {
   registerWithMesh();
 }
 

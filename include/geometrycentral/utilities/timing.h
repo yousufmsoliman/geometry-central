@@ -1,22 +1,18 @@
 #pragma once
 
-#include <stdio.h>
 #include <chrono>
+#include <stdio.h>
 #include <string>
 
 #define NOW (std::chrono::steady_clock::now())
 #define START_TIMING(name) auto generated_timer_777_##name = NOW;
-#define FINISH_TIMING_PRINT(name)                                  \
-  auto generated_timer_777_elapsed_##name =                        \
-      std::chrono::duration_cast<std::chrono::milliseconds>(       \
-          NOW - generated_timer_777_##name);                       \
-  std::cout << "--- TIMER RESULT: section " << #name << " took "   \
-            << generated_timer_777_elapsed_##name.count() << " ms" \
-            << std::endl;
-#define FINISH_TIMING(name)                               \
-  (std::chrono::duration_cast<std::chrono::microseconds>( \
-       NOW - generated_timer_777_##name)                  \
-       .count())
+#define FINISH_TIMING_PRINT(name)                                                                                      \
+  auto generated_timer_777_elapsed_##name =                                                                            \
+      std::chrono::duration_cast<std::chrono::milliseconds>(NOW - generated_timer_777_##name);                         \
+  std::cout << "--- TIMER RESULT: section " << #name << " took " << generated_timer_777_elapsed_##name.count()         \
+            << " ms" << std::endl;
+#define FINISH_TIMING(name)                                                                                            \
+  (std::chrono::duration_cast<std::chrono::microseconds>(NOW - generated_timer_777_##name).count())
 
 inline std::string pretty_time(long long microsec) {
   // Useful constants
@@ -71,9 +67,9 @@ inline std::string pretty_time(long long microsec) {
   else {
     double micros = microsec;
 
-    sprintf(buffer, "%.2f µs", micros);  // note the nifty unicode \mu. I
-                                         // apologize when this breaks something
-                                         // later.
+    sprintf(buffer, "%.2f µs", micros); // note the nifty unicode \mu. I
+                                        // apologize when this breaks something
+                                        // later.
 
     return std::string(buffer);
   }

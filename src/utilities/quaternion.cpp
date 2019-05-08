@@ -11,35 +11,29 @@ namespace geometrycentral {
 
 Quaternion::Quaternion(void)
     // initializes all components to zero
-    : s(0.),
-      v{0., 0., 0.} {}
+    : s(0.), v{0., 0., 0.} {}
 
 Quaternion::Quaternion(const Quaternion& q)
     // initializes from existing quaternion
-    : s(q.s),
-      v(q.v) {}
+    : s(q.s), v(q.v) {}
 
 Quaternion::Quaternion(double s_, double vi, double vj, double vk)
     // initializes with specified double (s) and imaginary (v) components
-    : s(s_),
-      v{vi, vj, vk} {}
+    : s(s_), v{vi, vj, vk} {}
 
 Quaternion::Quaternion(double s_, const Vector3& v_)
     // initializes with specified double(s) and imaginary (v) components
-    : s(s_),
-      v(v_) {}
+    : s(s_), v(v_) {}
 
 Quaternion::Quaternion(double s_)
     // initializes purely real quaternion with specified real (s) component
     // (imaginary part is zero)
-    : s(s_),
-      v{0., 0., 0.} {}
+    : s(s_), v{0., 0., 0.} {}
 
 Quaternion::Quaternion(const Vector3& v_)
     // initializes purely imaginary quaternion with specified imaginary (v)
     // component (real part is zero)
-    : s(0.),
-      v(v_) {}
+    : s(0.), v(v_) {}
 
 // ASSIGNMENT OPERATORS --------------------------------------------------
 
@@ -284,4 +278,4 @@ std::ostream& operator<<(std::ostream& os, const Quaternion& q)
   return os;
 }
 
-}  // namespace geometrycentral
+} // namespace geometrycentral

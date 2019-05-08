@@ -88,14 +88,14 @@ public:
   bool isClosed();
   std::vector<CurveSegment> getCurveSegments();
   std::vector<SegmentEndpoint> getCurveSegmentPoints();
-  FacePtr endingFace(bool reportForClosed=false);
-  FacePtr startingFace(bool reportForClosed=false);
+  FacePtr endingFace(bool reportForClosed = false);
+  FacePtr startingFace(bool reportForClosed = false);
   double computeLength();
   size_t nSegments();
   Vector3 positionOfSegmentEndpoint(SegmentEndpoint& p);
   FacePtr faceBefore(SegmentEndpoint& p);
   FacePtr faceAfter(SegmentEndpoint& p);
-  
+
   bool crossesFace(FacePtr f);
 
   // Throws an error if this is not a valid closed or open curve. Does not check self-intersection.
@@ -120,4 +120,4 @@ private:
   double crossingPointAlongEdge(HalfedgePtr sharedHe, Vector3 bCoord1, Vector3 bCoord2);
   double scalarFunctionZeroPoint(double f0, double f1);
 };
-}
+} // namespace geometrycentral

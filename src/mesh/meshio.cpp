@@ -1,8 +1,8 @@
 #include <iostream>
 #include <limits>
 
-#include "geometrycentral/mesh/meshio.h"
 #include "geometrycentral/geometry/geometry.h"
+#include "geometrycentral/mesh/meshio.h"
 #include "geometrycentral/mesh/polygon_soup_mesh.h"
 
 #include "happly.h"
@@ -73,7 +73,7 @@ Geometry<Euclidean>* loadMesh(std::string filename, std::string type) {
   } else if (type == "ply") {
     return loadMesh_PLY(filename);
   } else {
-    if(typeGiven) {
+    if (typeGiven) {
       throw std::runtime_error("Did not recognize mesh file type " + type);
     } else {
       throw std::runtime_error("Could not detect file type to load mesh from " + filename);

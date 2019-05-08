@@ -25,7 +25,7 @@ void normalize(Vector<T>& x, Eigen::SparseMatrix<T>& massMatrix) {
 template void normalize(Vector<double>& x, SparseMatrix<double>& massMatrix);
 template void normalize(Vector<float>& x, SparseMatrix<float>& massMatrix);
 template void normalize(Vector<geometrycentral::Complex>& x, SparseMatrix<geometrycentral::Complex>& massMatrix);
-}
+} // namespace
 
 namespace geometrycentral {
 

@@ -7,17 +7,16 @@
 #include <vector>
 
 #include "geometrycentral/geometry/geometry.h"
-#include <geometrycentral/utilities/utilities.h>
 #include "geometrycentral/utilities/vector3.h"
+#include <geometrycentral/utilities/utilities.h>
 
 namespace geometrycentral {
 
 class PolygonSoupMesh {
- public:
+public:
   PolygonSoupMesh();
   PolygonSoupMesh(std::string meshFilename);
-  PolygonSoupMesh(const std::vector<std::vector<size_t>>& polygons_,
-                  const std::vector<Vector3>& vertexCoordinates_);
+  PolygonSoupMesh(const std::vector<std::vector<size_t>>& polygons_, const std::vector<Vector3>& vertexCoordinates_);
 
   // Mutate this mesh and by naively triangulating polygons
   void triangulate();
@@ -26,8 +25,8 @@ class PolygonSoupMesh {
   std::vector<std::vector<size_t>> polygons;
   std::vector<Vector3> vertexCoordinates;
 
- private:
+private:
   void readMeshFromFile(std::string filename);
 };
 
-}  // namespace geometrycentral
+} // namespace geometrycentral

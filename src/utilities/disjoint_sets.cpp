@@ -34,8 +34,7 @@ void DisjointSets::merge(size_t x, size_t y) {
 }
 
 // Constructor
-MarkedDisjointSets::MarkedDisjointSets(size_t n_)
-    : n(n_), parent(n + 1), rank(n + 1), marked(n + 1) {
+MarkedDisjointSets::MarkedDisjointSets(size_t n_) : n(n_), parent(n + 1), rank(n + 1), marked(n + 1) {
   // Initialize all elements to be in different sets and to have rank 0
   for (size_t i = 0; i <= n; i++) {
     rank[i] = 0;
@@ -85,4 +84,4 @@ void MarkedDisjointSets::merge(size_t x, size_t y) {
   }
 }
 
-}  // namespace geometrycentral
+} // namespace geometrycentral
