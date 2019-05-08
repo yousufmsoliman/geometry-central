@@ -1,0 +1,36 @@
+site_name: Geometry Central
+theme:
+  name: 'material'
+  palette:
+    primary: 'yellow'
+    accent: 'yellow'
+markdown_extensions:
+  - codehilite
+  - admonition
+
+repo_name: 'nmwsharp/geometry-central'
+repo_url: 'https://github.com/nmwsharp/geometry-central'
+
+pages:
+  - Home: 'index.md'
+  - Build: 
+    - 'Building' : 'build/build.md'
+    - 'Tests' : 'build/tests.md'
+  - Halfedge Mesh: 
+    - 'Basics' : 'halfedge_mesh/basics.md'
+    - 'Navigation' : 'halfedge_mesh/navigation.md'
+    - 'I/O' : 'halfedge_mesh/io.md'
+    - 'Containers' : 'halfedge_mesh/containers.md'
+    - 'Mutation' : 'halfedge_mesh/mutation.md'
+  - Geometry: 'geometry.md'
+  - Linear Algebra: 
+      - 'Matrix Types' : 'linear_algebra/matrix_types.md'
+      - 'Utilities' : 'linear_algebra/utilities.md'
+      - 'Solvers' : 'linear_algebra/solvers.md'
+  - Algorithms: 
+      - 'Direction Fields' : 'algorithms/direction_fields.md'
+      - 'Distance' : 'algorithms/distance.md'
+      - 'Mesh Graph Algorithms' : 'algorithms/mesh_graph_algorithms.md'
+  - Utilities: 
+      - 'Vector Types' : 'utilities/vector_types.md'
+
