@@ -1,6 +1,6 @@
-#include "geometrycentral/ply_wrapper.h"
+#include "geometrycentral/mesh/ply_wrapper.h"
 
-#include "geometrycentral/polygon_soup_mesh.h"
+#include "geometrycentral/mesh/polygon_soup_mesh.h"
 
 #include <cstring>
 #include <fstream>

@@ -1,6 +1,6 @@
-#include "geometrycentral/vector3.h"
+#include "geometrycentral/utilities/vector3.h"
 
-#include <geometrycentral/utilities.h>
+#include <geometrycentral/utilities/utilities.h>
 
 #include <cmath>
 #include <iostream>

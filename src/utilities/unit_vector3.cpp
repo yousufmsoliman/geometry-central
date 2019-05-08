@@ -1,4 +1,4 @@
-#include "geometrycentral/unit_vector3.h"
+#include "geometrycentral/utilities/unit_vector3.h"
 
 namespace geometrycentral {
 

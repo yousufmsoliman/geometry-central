@@ -1,10 +1,10 @@
 #pragma once
 
-#include "geometrycentral/dependent_quantity.h"
-#include "geometrycentral/halfedge_mesh.h"
-#include "geometrycentral/unit_vector3.h"
-#include "geometrycentral/vector2.h"
-#include "geometrycentral/vector3.h"
+#include "geometrycentral/geometry/dependent_quantity.h"
+#include "geometrycentral/mesh/halfedge_mesh.h"
+#include "geometrycentral/utilities/unit_vector3.h"
+#include "geometrycentral/utilities/vector2.h"
+#include "geometrycentral/utilities/vector3.h"
 
 #include <functional>
 #include <vector>

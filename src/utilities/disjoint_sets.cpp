@@ -1,4 +1,4 @@
-#include "geometrycentral/disjoint_sets.h"
+#include "geometrycentral/utilities/disjoint_sets.h"
 
 using std::vector;
 

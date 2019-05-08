@@ -1,4 +1,4 @@
-#include "geometrycentral/fast_marching_method.h"
+#include "geometrycentral/algorithms/fast_marching_method.h"
 
 #include <queue>
 #include <tuple>

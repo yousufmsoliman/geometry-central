@@ -1,7 +1,7 @@
 #pragma once
 
-#include "geometrycentral/geometry.h"
-#include "geometrycentral/halfedge_mesh.h"
+#include "geometrycentral/geometry/geometry.h"
+#include "geometrycentral/mesh/halfedge_mesh.h"
 
 #include <deque>
 #include <vector>

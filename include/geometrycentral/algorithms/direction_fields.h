@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "geometrycentral/geometry.h"
+#include "geometrycentral/geometry/geometry.h"
 
 // Compute useful geometric quantities relating to optimal (Levi-Civita)
 // transport

@@ -5,9 +5,9 @@
 #include <queue>
 #include <vector>
 
-#include "geometry.h"
-#include "edge_length_geometry.h"
-#include "utilities.h"
+#include "geometrycentral/geometry/geometry.h"
+#include "geometrycentral/geometry/edge_length_geometry.h"
+#include "geometrycentral/utilities/utilities.h"
 
 using namespace geometrycentral;
 

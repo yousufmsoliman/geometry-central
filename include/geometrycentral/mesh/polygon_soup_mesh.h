@@ -6,9 +6,9 @@
 #include <stdexcept>
 #include <vector>
 
-#include "geometrycentral/geometry.h"
-#include <geometrycentral/utilities.h>
-#include "geometrycentral/vector3.h"
+#include "geometrycentral/geometry/geometry.h"
+#include <geometrycentral/utilities/utilities.h>
+#include "geometrycentral/utilities/vector3.h"
 
 namespace geometrycentral {
 

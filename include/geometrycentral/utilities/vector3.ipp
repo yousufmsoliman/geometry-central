@@ -1,4 +1,4 @@
-#include <geometrycentral/utilities.h>
+#include <geometrycentral/utilities/utilities.h>
 
 #include <cmath>
 #include <iostream>

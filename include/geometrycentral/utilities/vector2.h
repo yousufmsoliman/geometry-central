@@ -1,6 +1,6 @@
 #pragma once
 
-#include "geometrycentral/vector3.h"
+#include "geometrycentral/utilities/vector3.h"
 #include <cmath>
 #include <iostream>
 
@@ -65,4 +65,4 @@ Vector2 componentwiseMax(const Vector2& u, const Vector2& v);
 
 } // namespace geometrycentral
 
-#include "geometrycentral/vector2.ipp"
+#include "geometrycentral/utilities/vector2.ipp"

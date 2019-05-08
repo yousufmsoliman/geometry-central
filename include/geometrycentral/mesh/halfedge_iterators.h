@@ -2,7 +2,7 @@
 
 #include <iterator>
 
-#include "geometrycentral/halfedge_mesh.h"
+#include "geometrycentral/mesh/halfedge_mesh.h"
 
 namespace geometrycentral {
 

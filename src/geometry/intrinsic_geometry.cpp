@@ -1,6 +1,6 @@
-#include "geometrycentral/intrinsic_geometry.h"
+#include "geometrycentral/geometry/intrinsic_geometry.h"
 
-#include "geometrycentral/discrete_operators.h"
+#include "geometrycentral/algorithms/discrete_operators.h"
 
 #include <fstream>
 #include <limits>

@@ -49,11 +49,11 @@
 
 #include <iostream>
 
-#include "geometrycentral/geometry_cache.h"
-#include "geometrycentral/halfedge_mesh.h"
-#include "geometrycentral/unit_vector3.h"
-#include "geometrycentral/vector2.h"
-#include "geometrycentral/vector3.h"
+#include "geometrycentral/geometry/geometry_cache.h"
+#include "geometrycentral/mesh/halfedge_mesh.h"
+#include "geometrycentral/utilities/unit_vector3.h"
+#include "geometrycentral/utilities/vector2.h"
+#include "geometrycentral/utilities/vector3.h"
 
 namespace geometrycentral {
 
@@ -160,4 +160,4 @@ protected:
 
 } // namespace geometrycentral
 
-#include "geometrycentral/geometry.ipp"
+#include "geometrycentral/geometry/geometry.ipp"

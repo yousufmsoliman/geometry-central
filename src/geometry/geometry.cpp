@@ -1,4 +1,4 @@
-#include "geometrycentral/geometry.h"
+#include "geometrycentral/geometry/geometry.h"
 #include <fstream>
 #include <limits>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "geometrycentral/linear_algebra_utilities.h"
+#include "geometrycentral/numerical/linear_algebra_utilities.h"
 
 #include "Eigen/Sparse"
 

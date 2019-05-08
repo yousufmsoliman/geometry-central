@@ -1,9 +1,9 @@
 #include <iostream>
 #include <limits>
 
-#include "geometrycentral/meshio.h"
-#include "geometrycentral/geometry.h"
-#include "geometrycentral/polygon_soup_mesh.h"
+#include "geometrycentral/mesh/meshio.h"
+#include "geometrycentral/geometry/geometry.h"
+#include "geometrycentral/mesh/polygon_soup_mesh.h"
 
 #include "happly.h"
 

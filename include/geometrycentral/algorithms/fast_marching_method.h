@@ -4,8 +4,8 @@
 #include <utility>
 #include <vector>
 
-#include "geometry.h"
-#include "utilities.h"
+#include "geometrycentral/geometry/geometry.h"
+#include "geometrycentral/utilities/utilities.h"
 
 // TODO: Split obtuse triangles instead of being wrong.
 namespace geometrycentral {

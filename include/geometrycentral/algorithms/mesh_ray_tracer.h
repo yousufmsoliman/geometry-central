@@ -1,6 +1,6 @@
 #pragma once
 
-#include "geometry.h"
+#include "geometrycentral/geometry/geometry.h"
 #include "nanort/nanort.h"
 
 namespace geometrycentral {

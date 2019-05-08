@@ -1,6 +1,6 @@
-#include "geometrycentral/linear_solvers.h"
+#include "geometrycentral/numerical/linear_solvers.h"
 
-#include "geometrycentral/linear_algebra_utilities.h"
+#include "geometrycentral/numerical/linear_algebra_utilities.h"
 
 
 using namespace Eigen;

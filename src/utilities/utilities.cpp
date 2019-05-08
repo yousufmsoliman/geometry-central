@@ -1,4 +1,4 @@
-#include <geometrycentral/utilities.h>
+#include <geometrycentral/utilities/utilities.h>
 
 namespace geometrycentral {
 

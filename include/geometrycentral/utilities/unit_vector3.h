@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <cmath>
 
-#include <geometrycentral/utilities.h>
-#include "geometrycentral/vector3.h"
+#include <geometrycentral/utilities/utilities.h>
+#include "geometrycentral/utilities/vector3.h"
 
 namespace geometrycentral {
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "geometrycentral/geometry.h"
-#include "geometrycentral/edge_length_geometry.h"
-#include "geometrycentral/halfedge_data_types.h"
+#include "geometrycentral/geometry/geometry.h"
+#include "geometrycentral/geometry/edge_length_geometry.h"
+#include "geometrycentral/mesh/halfedge_data_types.h"
 
 namespace geometrycentral {
 

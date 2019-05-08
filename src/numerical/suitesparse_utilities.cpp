@@ -1,7 +1,7 @@
 #ifdef HAVE_SUITESPARSE
 #include "geometrycentral/suitesparse_utilities.h"
 
-#include "geometrycentral/utilities.h"
+#include "geometrycentral/utilities/utilities.h"
 
 using std::cout;
 using std::endl;

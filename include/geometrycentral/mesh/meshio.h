@@ -2,7 +2,7 @@
 
 // The MeshIO class provides a variety of methods for mesh input/output.
 
-#include "geometrycentral/geometry.h"
+#include "geometrycentral/geometry/geometry.h"
 #include <fstream>
 #include <string>
 

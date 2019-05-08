@@ -1,7 +1,7 @@
-#include "geometrycentral/geometry_cache.h"
+#include "geometrycentral/geometry/geometry_cache.h"
 
-#include "geometrycentral/discrete_operators.h"
-#include "geometrycentral/geometry.h"
+#include "geometrycentral/algorithms/discrete_operators.h"
+#include "geometrycentral/geometry/geometry.h"
 
 using std::cout;
 using std::endl;

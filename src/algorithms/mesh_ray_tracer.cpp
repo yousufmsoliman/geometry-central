@@ -1,4 +1,4 @@
-#include "geometrycentral/mesh_ray_tracer.h"
+#include "geometrycentral/algorithms/mesh_ray_tracer.h"
 
 #include <vector>
 

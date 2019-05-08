@@ -1,4 +1,4 @@
-#include "geometrycentral/mesh_embedded_curve.h"
+#include "geometrycentral/mesh/mesh_embedded_curve.h"
 
 using namespace geometrycentral;
 

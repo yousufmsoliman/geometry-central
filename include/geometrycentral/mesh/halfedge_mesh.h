@@ -3,8 +3,8 @@
 #include <list>
 #include <vector>
 
-#include "geometrycentral/vector3.h"
-#include <geometrycentral/utilities.h>
+#include "geometrycentral/utilities/vector3.h"
+#include <geometrycentral/utilities/utilities.h>
 // NOTE: More includes at bottom of file
 
 namespace geometrycentral {
@@ -28,12 +28,12 @@ class Geometry;
 
 // Order MATTERS for these includes
 // 1
-#include "geometrycentral/halfedge_pointer_types.h"
+#include "geometrycentral/mesh/halfedge_pointer_types.h"
 // 3
-#include "geometrycentral/halfedge_data_types.h"
-#include "geometrycentral/halfedge_iterators.h"
+#include "geometrycentral/mesh/halfedge_data_types.h"
+#include "geometrycentral/mesh/halfedge_iterators.h"
 // 4
-#include "geometrycentral/halfedge_mesh_data_transfer.h"
+#include "geometrycentral/mesh/halfedge_mesh_data_transfer.h"
 
 namespace geometrycentral {
 
@@ -365,8 +365,8 @@ public:
 
 } // namespace geometrycentral
 
-#include "geometrycentral/halfedge_data_types.ipp"
-#include "geometrycentral/halfedge_iterators.ipp"
-#include "geometrycentral/halfedge_mesh.ipp"
-#include "geometrycentral/halfedge_mesh_data_transfer.ipp"
-#include "geometrycentral/halfedge_pointer_types.ipp"
+#include "geometrycentral/mesh/halfedge_data_types.ipp"
+#include "geometrycentral/mesh/halfedge_iterators.ipp"
+#include "geometrycentral/mesh/halfedge_mesh.ipp"
+#include "geometrycentral/mesh/halfedge_mesh_data_transfer.ipp"
+#include "geometrycentral/mesh/halfedge_pointer_types.ipp"

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "geometrycentral/dependent_quantity.h"
-#include "geometrycentral/halfedge_mesh.h"
-#include "geometrycentral/intrinsic_geometry.h"
-#include "geometrycentral/unit_vector3.h"
-#include "geometrycentral/vector2.h"
-#include "geometrycentral/vector3.h"
+#include "geometrycentral/geometry/dependent_quantity.h"
+#include "geometrycentral/mesh/halfedge_mesh.h"
+#include "geometrycentral/geometry/intrinsic_geometry.h"
+#include "geometrycentral/utilities/unit_vector3.h"
+#include "geometrycentral/utilities/vector2.h"
+#include "geometrycentral/utilities/vector3.h"
 
 #include <Eigen/SparseCore>
 

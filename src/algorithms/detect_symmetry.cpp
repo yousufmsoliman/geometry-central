@@ -1,4 +1,4 @@
-#include "geometrycentral/detect_symmetry.h"
+#include "geometrycentral/algorithms/detect_symmetry.h"
 
 #include "nanoflann/KDTreeVectorOfVectorsAdaptor.h"
 #include "nanoflann/nanoflann.hpp"

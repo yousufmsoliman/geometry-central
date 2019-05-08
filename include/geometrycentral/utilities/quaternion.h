@@ -29,7 +29,7 @@
 //   double bk = q[3];
 //
 
-#include "geometrycentral/vector3.h"
+#include "geometrycentral/utilities/vector3.h"
 #include <ostream>
 
 namespace geometrycentral {

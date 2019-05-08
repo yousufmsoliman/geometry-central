@@ -3,8 +3,8 @@
 #include <sstream>
 #include <string>
 
-#include "geometrycentral/halfedge_mesh.h"
-#include "geometrycentral/polygon_soup_mesh.h"
+#include "geometrycentral/mesh/halfedge_mesh.h"
+#include "geometrycentral/mesh/polygon_soup_mesh.h"
 
 namespace geometrycentral {
 

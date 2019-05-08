@@ -1,4 +1,4 @@
-#include "geometrycentral/quaternion.h"
+#include "geometrycentral/utilities/quaternion.h"
 
 #include <cmath>
 #include <iostream>

@@ -1,6 +1,6 @@
-#include <geometrycentral/direction_fields.h>
+#include <geometrycentral/algorithms/direction_fields.h>
 
-#include "geometrycentral/linear_solvers.h"
+#include "geometrycentral/numerical/linear_solvers.h"
 
 #include <Eigen/Core>
 #include <Eigen/Dense>

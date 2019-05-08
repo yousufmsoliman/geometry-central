@@ -1,4 +1,4 @@
-#include "geometrycentral/discrete_operators.h"
+#include "geometrycentral/algorithms/discrete_operators.h"
 
 using namespace Eigen;
 

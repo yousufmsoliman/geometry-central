@@ -1,4 +1,4 @@
-#include "geometrycentral/exact_polyhedral_geodesics.h"
+#include "geometrycentral/algorithms/exact_polyhedral_geodesics.h"
 
 #include <queue>
 #include <tuple>

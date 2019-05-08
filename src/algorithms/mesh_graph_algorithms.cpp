@@ -1,6 +1,6 @@
-#include "geometrycentral/mesh_graph_algorithms.h"
+#include "geometrycentral/algorithms/mesh_graph_algorithms.h"
 
-#include "geometrycentral/disjoint_sets.h"
+#include "geometrycentral/utilities/disjoint_sets.h"
 
 #include <algorithm>
 #include <utility>

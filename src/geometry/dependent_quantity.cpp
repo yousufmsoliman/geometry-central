@@ -1,4 +1,4 @@
-#include "geometrycentral/dependent_quantity.h"
+#include "geometrycentral/geometry/dependent_quantity.h"
 
 namespace geometrycentral {
 

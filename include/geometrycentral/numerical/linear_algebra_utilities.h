@@ -1,6 +1,6 @@
 #pragma once
 
-#include "geometrycentral/utilities.h"
+#include "geometrycentral/utilities/utilities.h"
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -81,6 +81,6 @@ void decomposeVector(BlockDecompositionResult<T>& decomp, const Vector<T>& vec, 
 template <typename T>
 Vector<T> reassembleVector(BlockDecompositionResult<T>& decomp, const Vector<T>& vecA, const Vector<T>& vecB);
 
-#include "geometrycentral/linear_algebra_utilities.ipp"
+#include "geometrycentral/numerical/linear_algebra_utilities.ipp"
 
 } // namespace geometrycentral
