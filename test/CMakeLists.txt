@@ -80,12 +80,14 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 set_property(TARGET gtest PROPERTY CXX_STANDARD 11)
 
 
-
 # Build the tests
 set(TEST_SRCS 
   src/main_test.cpp
+  src/load_test_meshes.cpp
+  src/halfedge_mesh_test.cpp
 )
 
 add_executable(geometry-central-test "${TEST_SRCS}")
 target_include_directories(geometry-central-test PUBLIC "${gtest_SOURCE_DIR}/include")
+target_include_directories(geometry-central-test PRIVATE "include/")
 target_link_libraries(geometry-central-test gtest_main geometry-central)

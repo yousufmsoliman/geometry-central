@@ -3,8 +3,6 @@
 
 #include "gtest/gtest.h"
 
-#include "geometrycentral/mesh/halfedge_mesh.h"
-
 using std::cout;
 using std::endl;
 
