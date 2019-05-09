@@ -83,7 +83,7 @@ set_property(TARGET gtest PROPERTY CXX_STANDARD 11)
 
 # Build the tests
 set(TEST_SRCS 
-  main_test.cpp
+  src/main_test.cpp
 )
 
 add_executable(geometry-central-test "${TEST_SRCS}")
