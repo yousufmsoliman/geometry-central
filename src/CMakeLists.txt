@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 3.10.0)
 
 # Maybe stop from CMAKEing in the wrong place
 if (CMAKE_BINARY_DIR STREQUAL CMAKE_SOURCE_DIR)
@@ -45,8 +45,6 @@ SET(SRCS
   geometry/geometry_cache.cpp 
 )
 
-file(GLOB_RECURSE SRCS *.cpp)
-# file(GLOB_RECURSE HEADS *.h *.hpp *.ipp)
 
 # Create a single library for the project
 add_library(
@@ -68,3 +66,7 @@ endif()
 if(HAVE_SUITESPARSE)
     target_link_libraries(geometry-central ${SUITESPARSE_LIBRARIES})
 endif(HAVE_SUITESPARSE)
+
+
+# Set compiler properties for the library
+set_property(TARGET geometry-central PROPERTY CXX_STANDARD 11)
