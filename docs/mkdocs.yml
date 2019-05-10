@@ -7,6 +7,15 @@ theme:
 markdown_extensions:
   - codehilite
   - admonition
+  - pymdownx.superfences
+  - pymdownx.details
+
+extra:
+  search:
+    tokenizer: '[\s\-\.::]+'
+
+extra_css:
+  - extras.css
 
 repo_name: 'nmwsharp/geometry-central'
 repo_url: 'https://github.com/nmwsharp/geometry-central'
