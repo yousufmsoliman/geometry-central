@@ -3,6 +3,7 @@
 Geometry Central is a modern C++ codebase, providing the low-level tools to implement algorithms in geometry processing, scientific computing, and computer graphics/vision, with a particular focus on the geometry of surfaces.
 
 Features include:
+
 - A polished *halfedge mesh* class, and a system of containers for associating data with mesh elements.
 - Implementations of canonical *geometric quantities* on surfaces, such as normals and curvatures.
 - Tools for generating and manipulating *surface parameterizations*.
@@ -12,17 +13,11 @@ Features include:
 
 ## What is it not?
 - **A user interface**. Geometry Central does not include any facilities for user interaction; it is an algorithms and data structures library on which you might build user-facing tools. This philosphy keeps the library lightweight, and avoids dependencies on rendering and windowing systems. For a UI built on top of Geometry Central, see [Polyscope](https://github.com/nmwsharp/polyscope).
-- **A research code dump**. Geometry Central was built by researchers, and is used in many prototype research projects. However, we strive to ensure that this library contains only polished, broadly useful algorithms, rather than a mashup of one-off research ideas. See the list below for projects built on Geometry Central.
+- **A research code dump**. Geometry Central was built by researchers, and is used in many prototype research projects. However, we strive to ensure that this library contains only polished, broadly useful algorithms, rather than a mashup of one-off research ideas. See the list below for projects built on Geometry Central 
 
 ## Examples
 
 TODO
-
-## Building
-This library uses git submodules to manage dependencies, so after cloning you should run `git submodule update --init --recursive` to pull down dependencies. The only (**optional**) dependency which is not included as a submodule is Suitesparse, which can be installed via a package manager on Linux/MacOS, or manually with significant effort on Windows.
-
-Geometry-central itself does not build any excutables, it is a library upon which you create other programs. For a simple example program and build system using geometry-central, see TODO.
-
 ## Authors:
 - [Nick Sharp](http://nmwsharp.com)
 - [Keenan Crane](http://keenan.is/here)

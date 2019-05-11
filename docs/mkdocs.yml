@@ -9,6 +9,8 @@ markdown_extensions:
   - admonition
   - pymdownx.superfences
   - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.arithmatex
 
 extra:
   search:
@@ -16,6 +18,9 @@ extra:
 
 extra_css:
   - extras.css
+
+extra_javascript:
+  - 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'
 
 repo_name: 'nmwsharp/geometry-central'
 repo_url: 'https://github.com/nmwsharp/geometry-central'
@@ -27,10 +32,11 @@ pages:
     - 'Tests' : 'build/tests.md'
   - Halfedge Mesh: 
     - 'Basics' : 'halfedge_mesh/basics.md'
-    - 'Navigation' : 'halfedge_mesh/navigation.md'
+    - 'Navigation and Iteration' : 'halfedge_mesh/navigation.md'
     - 'I/O' : 'halfedge_mesh/io.md'
     - 'Containers' : 'halfedge_mesh/containers.md'
     - 'Mutation' : 'halfedge_mesh/mutation.md'
+    - 'Delta Complexes' : 'halfedge_mesh/delta_complex.md'
     - 'Internals' : 'halfedge_mesh/internals.md'
   - Geometry: 'geometry.md'
   - Linear Algebra: 

@@ -38,6 +38,10 @@ These properties are invariants which always hold for any meaningful halfedge me
 
 Note that our halfedge mesh _does not_ require that faces be triangles or quads; arbitrary faces with degree >= 3 are supported. However, many operations are only defined for triangle meshes and will throw errors if invoked on other meshes.
 
+## Boundaries
+
+
+
 ## Basic API
 
 
@@ -45,14 +49,52 @@ Note that our halfedge mesh _does not_ require that faces be triangles or quads;
 
 ### Element counts
 
-??? func "`size_t HalfedgeMesh::nVertices()`"
+??? func "`#!cpp size_t HalfedgeMesh::nVertices()`"
     Returns the number of vertices. 
 
-??? func "`size_t HalfedgeMesh::nEdges()`"
+??? func "`#!cpp size_t HalfedgeMesh::nInteriorVertices()`"
+    Returns the number of vertices not incident on the boundary.
+
+??? func "`#!cpp size_t HalfedgeMesh::nBoundaryVertices()`"
+    Returns the number of vertices incident on the boundary.
+
+??? func "`#!cpp size_t HalfedgeMesh::nEdges()`"
     Returns the number of edges. 
+
+??? func "`#!cpp size_t HalfedgeMesh::nFaces()`"
+    Returns the number of faces. Does not include imaginary "faces" created around boundaries.
+
+??? func "`#!cpp size_t HalfedgeMesh::nHalfedges()`"
+    Returns the number of halfedges, including both real and halfedges and any imaginary halfedges incident on boundary loops. Always exactly twice the number of edges.
+
+??? func "`#!cpp size_t HalfedgeMesh::nRealHalfedges()`"
+    Returns the number of real halfedges, which are incident on faces of the mesh. Always equal to the sum of the number of sides of all faces.
+
+??? func "`#!cpp size_t HalfedgeMesh::nImaginaryHalfedges()`"
+    Returns the number of imaginary halfedges, which are opposite boundary faces. 
+
+??? func "`#!cpp size_t HalfedgeMesh::nBoundaryLoops()`"
+    Returns the number of distinct boundary loops in the mesh, each identified as an "imaginary" face closing a boundary loop in the mesh.
+
 
 ### Properties
 
+??? func "`#!cpp int HalfedgeMesh::eulerCharacteristic()`"
+    Returns the Euler characteristic of the surface. Computed in O(1) from element counts. Warning: assumes the mesh is a single connected component.
+
+??? func "`#!cpp int HalfedgeMesh::genus()`"
+    Returns the genus of the surface. Computed in O(1) from element counts. Warning: assumes the mesh is a single connected component.
+
+??? func "`#!cpp bool HalfedgeMesh::isTriangular()`"
+    Returns true if all faces in the mesh have 3 sides. Complexity O(n), do not call in a tight loop.
+
+??? func "`#!cpp size_t HalfedgeMesh::nConnectedComponents()`"
+    Returns the number of distinct connected components of the . Complexity O(n), do not call in a tight loop.
 
 
 ### Utility functions   
+
+??? func "`#!cpp std::unique_ptr<Halfedgemesh> copy()`"
+    Constructs a copy of the mesh.
+
+
