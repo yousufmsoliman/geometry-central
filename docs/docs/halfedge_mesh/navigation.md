@@ -3,7 +3,7 @@
 Use these routines to iterate over all of the elements in the mesh.
 
 !!! note 
-    Conveniently, these routines will work as expected if elements are _added_ to the mesh during iteration.
+    Conveniently, these routines will work as expected if elements are _added_ to the mesh during iteration: the new elements will be iterated over after all pre-existing elements.
 
     However, _removing_ elements from the mesh in the midst of iteration, or calling `compress()` is not supported.
 
@@ -182,24 +182,17 @@ Use these routines to access elements of the mesh by their index.
 ??? func "`#!cpp HalfedgePtr HalfedgeMesh::halfedge(size_t index)`"
     Constructs a reference to the i'th halfedge in the mesh. `0 <= index < nHalfedges()`.
     
-    Warning: only valid when the mesh is _compressed_.
-
 ??? func "`#!cpp VertexPtr HalfedgeMesh::vertex(size_t index)`"
     Constructs a reference to the i'th vertex in the mesh. `0 <= index < nVertices()`.
     
-    Warning: only valid when the mesh is _compressed_.
-
 ??? func "`#!cpp FacePtr HalfedgeMesh::face(size_t index)`"
     Constructs a reference to the i'th face in the mesh. `0 <= index < nFaces()`.
     
-    Warning: only valid when the mesh is _compressed_.
-
 ??? func "`#!cpp EdgePtr HalfedgeMesh::edge(size_t index)`"
     Constructs a reference to the i'th edge in the mesh. `0 <= index < nEdges()`.
     
-    Warning: only valid when the mesh is _compressed_.
-
 ??? func "`#!cpp FacePtr HalfedgeMesh::face(size_t index)`"
     Constructs a reference to the i'th face in the mesh. `0 <= index < nFaces()`.
-    
-    Warning: only valid when the mesh is _compressed_.
+
+??? func "`#!cpp FacePtr HalfedgeMesh::boundaryLoop(size_t index)`"
+    Constructs a reference to the i'th boundary loop in the mesh. `0 <= index < nBoundaryLoops()`.

@@ -36,7 +36,7 @@ Furthermore the halfedge mesh implies a combinatorial _orientation_ of the surfa
 
 These properties are invariants which always hold for any meaningful halfedge mesh; in practice we check them during construction and ensure that all operations preserve them.
 
-Note that our halfedge mesh _does not_ require that faces be triangles or quads; arbitrary faces with degree >= 3 are supported. However, many operations are only defined for triangle meshes and will throw errors if invoked on other meshes.
+Note that our halfedge mesh _does not_ require that faces be triangles or quads; arbitrary faces with degree >= 3 are supported, and faces of different degree may be intermingled. However, many operations are only defined for triangle meshes and will throw errors if invoked on other meshes.
 
 ## Boundaries
 
