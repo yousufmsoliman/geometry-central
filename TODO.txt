@@ -1,0 +1,7 @@
+Things to not forget about:
+
+- Destruction order of MeshData and halfedge mesh. Can we support either being destructed first? Current MeshData must die first (I think). If not, add note to docs.
+
+- #defines to manage safety checks. Docs mention NGC_SAFETY_CHECKS.
+
+- Seems to be no reason we can't re-use delete elements for future allocations. This will reduce sparsification (though invalidate the property that iteration works through insertion) 

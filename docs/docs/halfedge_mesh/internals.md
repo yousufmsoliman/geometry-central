@@ -1,4 +1,4 @@
-# Halfedge Mesh Internals
+# Halfedge mesh internals
 
 This section contains details about the internal implementation of the halfedge mesh data structure. Typical users should not need to care about these details, but they may be useful for extension and debugging.
 
@@ -9,7 +9,7 @@ The halfedge mesh structure is designed to simultaneously satisfy two core princ
 
 The solution to these two requirements is a dynamically-resizing, array-based mesh. Like a `std::vector`, elements are stored in contiguous buffers of memory, which are transparently expanded and copied sporadically. Of course, this expansion is largely hidden from the user.
 
-## Permutation Halfedge Mesh
+## Permutation halfedge mesh
 
 Here's a neat fact: a halfedge mesh can be represented by a single [permutation](https://en.wikipedia.org/wiki/Permutation) of length `nHalfedges`. 
 
@@ -17,7 +17,7 @@ How? First, consider an enumeration of the halfedges. We can implicitly encode t
 
 This idea of a permutation is essentially the representation used for our halfedge mesh data structure: a single permutation array encodes the `next()` map, while the `twin()`, `edge()`, and `edge.halfedge()` maps are implicitly defined. However, although vertices and faces _could_ be represented implicitly by an enumeration of orbits, doing so is inconvenient and expensive to update. Instead, we include additional arrays storing the `he.vertex()`, `he.face()`, `v.halfedge()` and `f.halfedge()` maps which are explicitly maintained.
 
-## Basic Structures
+## Basic structures
 
 Our halfedge mesh is index-based. Each {halfedge,edge,vertex,face} is identified by a 0-based index. The `HalfedgeMesh` class then holds the following explicit arrays encoding the connectivity (the remaining relationships are implicitly defined).
 
@@ -58,7 +58,7 @@ class HalfedgePtr {
 
     Ultimately, the index-based design seems preferrable.
 
-## Resizing and Deleting
+## Resizing and deleting
 
 To enable (amortized) O(1) mutation, the buffers containing mesh data are lazily reallocated like a `std::vector` when needed. As such the actual buffers like `mesh.heNext` might be larger than the current number of elements in the mesh; we separately track the count of real, valid elements to avoid accessing the extra regions of the array. The special index value `INVALID_IND` (which happens to be `std::numeric_limits<size_t>::max()`) is used to fill index values that have no meaning.
 
@@ -66,16 +66,18 @@ A similar issues arises with deletion. When a mesh element is deleted, it would 
 
 Thus at any point in time, some indices may be invalid elements, left from previous deletions, and other array entries might correspond to extra elements allocated during the last resizing, waiting to be used. In all iterators and counts, explicit logic ensures that invalid elements are skipped. Traversal functions do not need any such logic, as it should be impossible to traverse from a valid element to an invalid element. The `HalfedgeMesh::compress()` function is provided to re-index all mesh elements, and ensure a dense packing with no deleted elements.
 
-## Imaginary Boundary Elements
-
-One complexity in our implementation is the existence of imaginary boundary elements. Recall that boundaries of our mesh are represented by filling each boundary loop with a single, many-sided "imaginary" face; the halfedges incident on this face are also "imaginary". This definition is convenient because it saves us from constantly special-casing elements on the boundary, but introduces some complexity because the user probably doesn't want to think about these imaginary faces most of the time.
-
-Imaginary faces and halfedges are enumerated alongside their real counterparts, with the caveat that they are always stored at the _back_ of the index space. In general, the layout of the allocated index space will consist of first real halfedges, then any extra not-yet-used space, and finally imaginary halfedges. In both the real and imaginary regions, some elements may be deleted. Real and imaginary faces follow an analogous strategy; vertices and edges are similar but no imaginary region is needed.
-
 The following diagram lays out what this index space might look like.
 
 ![halfedge index diagram](../media/halfedge_index_diagram.svg)
 
+### Exterior boundary elements
+
+One complexity in our implementation is the existence of exterior boundary elements. Recall that boundaries of our mesh are represented by filling each hole with a single, many-sided boundary loop; the halfedges incident on this face are "exterior". This definition is convenient because it saves us from constantly special-casing elements on the boundary, but introduces some complexity because the user probably doesn't want to think about these boundary loops as faces most of the time.
+
+Exterior halfedges are enumerated alongside their interior counterparts, and generally are treated just like normal interior halfedges; most routines do not distinguish between the two.
+
+
+In contrast, although boundary loops are just faces internally, the API provides the illusion that they are a distinct type from the faces of the mesh. To enable this treatment, boundary loops are always stored at the _back_ of the face index space. In general, the layout of the allocated index space will consist of first actual mesh faces, then any extra not-yet-used space, and finally boundary loops. 
 
 ## Resize callbacks
 

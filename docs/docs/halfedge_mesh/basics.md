@@ -2,7 +2,7 @@
 
 The halfedge mesh is a powerful and flexible data structure for representing oriented, manifold polygonal meshes, and is the core data structure in geometry-central.
 
-The halfedge mesh has several key advantages over other data structures, most notably that all adjacent-neighborhood traversals can be implemented in constant time, without the use of any variably-sized neighbor lists. Furthermore, common mutation operations like edge splits and vertex insertions can be performed in constant time.
+The halfedge mesh has several key advantages over other data structures, most notably that all adjacent-neighborhood traversals can be implemented in constant time, without the use of any variably-sized neighbor lists. Furthermore, common mutation operations like edge splits and vertex insertions can be performed in constant time.  This halfedge mesh implementation furthermore stores all elements in contiguous buffers of memory, which makes it fast (see [internals](internals.md) for implementation details).
 
 As the name suggests, the primary type in a halfedge mesh is a _halfedge_, in addition to the usual _vertex_, _edge_ and _face_ types. A halfedge is a directed edge incident on a face, as shown below. Two halfedges, oriented in opposite directions, make up each edge in the mesh. Each halfedge has relationships with five adjacent elements: 
 
@@ -62,19 +62,19 @@ Note that our halfedge mesh _does not_ require that faces be triangles or quads;
     Returns the number of edges. 
 
 ??? func "`#!cpp size_t HalfedgeMesh::nFaces()`"
-    Returns the number of faces. Does not include imaginary "faces" created around boundaries.
+    Returns the number of faces in the mesh.
 
 ??? func "`#!cpp size_t HalfedgeMesh::nHalfedges()`"
-    Returns the number of halfedges, including both real and halfedges and any imaginary halfedges incident on boundary loops. Always exactly twice the number of edges.
+    Returns the number of halfedges, including both interior halfedges and any exterior halfedges incident on boundary loops. Always exactly twice the number of edges.
 
-??? func "`#!cpp size_t HalfedgeMesh::nRealHalfedges()`"
-    Returns the number of real halfedges, which are incident on faces of the mesh. Always equal to the sum of the number of sides of all faces.
+??? func "`#!cpp size_t HalfedgeMesh::nInterioHalfedges()`"
+    Returns the number of interior halfedges, which are incident on faces of the mesh. Always equal to the sum of the number of sides of all faces.
 
-??? func "`#!cpp size_t HalfedgeMesh::nImaginaryHalfedges()`"
-    Returns the number of imaginary halfedges, which are opposite boundary faces. 
+??? func "`#!cpp size_t HalfedgeMesh::nExteriorHalfedges()`"
+    Returns the number of exterior halfedges, which are opposite boundary faces. 
 
 ??? func "`#!cpp size_t HalfedgeMesh::nBoundaryLoops()`"
-    Returns the number of distinct boundary loops in the mesh, each identified as an "imaginary" face closing a boundary loop in the mesh.
+    Returns the number of distinct boundary loops in the mesh, each identified as an fictional face closing a boundary loop in the mesh.
 
 
 ### Properties
