@@ -10,7 +10,7 @@
 namespace geometrycentral {
 
 // Geneneric datatype, specialized as VertexData (etc) below
-// E is the element pointer type (eg VertexPtr)
+// E is the element pointer type (eg Vertex)
 // T is the data type that it holds (eg double)
 template <typename E, typename T>
 class MeshData {
@@ -85,15 +85,15 @@ public:
 
 // === Typdefs for the usual VertexData<> etc
 template <typename T>
-using VertexData = MeshData<VertexPtr, T>;
+using VertexData = MeshData<Vertex, T>;
 
 template <typename T>
-using FaceData = MeshData<FacePtr, T>;
+using FaceData = MeshData<Face, T>;
 
 template <typename T>
-using EdgeData = MeshData<EdgePtr, T>;
+using EdgeData = MeshData<Edge, T>;
 
 template <typename T>
-using HalfedgeData = MeshData<HalfedgePtr, T>;
+using HalfedgeData = MeshData<Halfedge, T>;
 
 } // namespace geometrycentral

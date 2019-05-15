@@ -14,12 +14,12 @@ using namespace geometrycentral;
 const double REL_ERR = 1e-8;
 
 struct Window {
-  HalfedgePtr halfedge;
+  Halfedge halfedge;
   double b0, b1;
   double d0, d1;
 
   double pseudoSrcDist, minDist;
-  VertexPtr src, pseudoSrc;
+  Vertex src, pseudoSrc;
   int pseudoSrcBirthTime;
   int level;
 
@@ -45,9 +45,9 @@ struct Window {
 };
 
 struct PseudoWindow {
-  VertexPtr v;
+  Vertex v;
   double dist;
-  VertexPtr src, pseudoSrc;
+  Vertex src, pseudoSrc;
   unsigned pseudoSrcBirthTime;
   unsigned level;
 
@@ -56,7 +56,7 @@ struct PseudoWindow {
 
 struct SplitInfo {
   double dist;
-  VertexPtr pseudoSrc, src;
+  Vertex pseudoSrc, src;
   unsigned level;
   double x;
 
@@ -73,8 +73,8 @@ struct VertInfo {
   int birthTime;
   double dist;
   bool isSource;
-  HalfedgePtr enterHalfedge;
-  VertexPtr pseudoSrc, src;
+  Halfedge enterHalfedge;
+  Vertex pseudoSrc, src;
 
   VertInfo() {
     birthTime = -1;
@@ -97,22 +97,22 @@ class ExactPolyhedralGeodesics {
 public:
   ExactPolyhedralGeodesics(EdgeLengthGeometry* geom_);
 
-  void addSource(VertexPtr v);
-  VertexData<double> computeDistance(VertexPtr v);
+  void addSource(Vertex v);
+  VertexData<double> computeDistance(Vertex v);
   VertexData<double> computeDistance();
 
 private:
   HalfedgeMesh* mesh;
   EdgeLengthGeometry* geom;
 
-  std::vector<VertexPtr> srcVerts;
+  std::vector<Vertex> srcVerts;
   HalfedgeData<SplitInfo> splitInfos;
   VertexData<VertInfo> vertInfos;
   std::priority_queue<Window> winQ;
   std::priority_queue<PseudoWindow> pseudoSrcQ;
 
   std::vector<Window> storedWindows;
-  std::vector<FacePtr> keptFaces;
+  std::vector<Face> keptFaces;
   HalfedgeData<std::list<Window>> allWindows;
   bool keptAllWindows = false;
 
@@ -127,10 +127,10 @@ private:
   void initialize();
   void propogateWindow(const Window& win);
   void generateSubWinsForPseudoSrc(const PseudoWindow& pseudoWin);
-  void generateSubWinsForPseudoSrcFromWindow(const PseudoWindow& pseudoWin, HalfedgePtr& startHe, HalfedgePtr& endHe);
-  void generateSubWinsForPseudoSrcFromPseudoSrc(const PseudoWindow& pseudoWin, HalfedgePtr& startHe,
-                                                HalfedgePtr& endHe);
-  void buildWindow(const Window& pWin, HalfedgePtr& he, double t0, double t1, const Vector2& v0, const Vector2& v1,
+  void generateSubWinsForPseudoSrcFromWindow(const PseudoWindow& pseudoWin, Halfedge& startHe, Halfedge& endHe);
+  void generateSubWinsForPseudoSrcFromPseudoSrc(const PseudoWindow& pseudoWin, Halfedge& startHe,
+                                                Halfedge& endHe);
+  void buildWindow(const Window& pWin, Halfedge& he, double t0, double t1, const Vector2& v0, const Vector2& v1,
                    Window& win);
   bool isValidWindow(const Window& win, bool isLeftChild);
   double intersect(const Vector2& v0, const Vector2& v1, const Vector2& p0, const Vector2& p1);

@@ -2,21 +2,21 @@
 
 namespace geometrycentral {
 
-unsigned int VertexPtr::degree() {
+unsigned int Vertex::degree() {
   unsigned int k = 0;
 
-  for (EdgePtr e : adjacentEdges()) {
+  for (Edge e : adjacentEdges()) {
     k++;
   }
 
   return k;
 }
 
-std::vector<Triangle> FacePtr::triangulation() {
+std::vector<Triangle> Face::triangulation() {
   // Get list of vertices
-  std::vector<VertexPtr> vertices;
+  std::vector<Vertex> vertices;
   unsigned int k = 0;
-  for (VertexPtr v : adjacentVertices()) {
+  for (Vertex v : adjacentVertices()) {
     vertices.push_back(v);
     k++;
   }

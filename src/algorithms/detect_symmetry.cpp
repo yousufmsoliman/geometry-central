@@ -62,9 +62,9 @@ SymmetryResult detectSymmetryMirror(Geometry<Euclidean>* geom, Vector3 planeNorm
 
   SymmetryResult result;
   result.symmetryFound = false;
-  result.symmetrySet = VertexData<std::vector<VertexPtr>>(mesh, std::vector<VertexPtr>());
+  result.symmetrySet = VertexData<std::vector<Vertex>>(mesh, std::vector<Vertex>());
 
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     // Compute the symmetric point
     Vector3 pos = geom->position(v);
     Vector3 vecToPlane = dot(planeNormal, planePoint - pos) * planeNormal;
@@ -110,9 +110,9 @@ SymmetryResult detectSymmetryRotation(Geometry<Euclidean>* geom, Vector3 rotAxis
 
   SymmetryResult result;
   result.symmetryFound = false;
-  result.symmetrySet = VertexData<std::vector<VertexPtr>>(mesh, std::vector<VertexPtr>());
+  result.symmetrySet = VertexData<std::vector<Vertex>>(mesh, std::vector<Vertex>());
 
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     // Compute the symmetric point
     Vector3 pos = geom->position(v);
 
@@ -156,9 +156,9 @@ SymmetryResult detectSymmetryDoubleMirror(Geometry<Euclidean>* geom, KdTree* tre
 
   SymmetryResult result;
   result.symmetryFound = false;
-  result.symmetrySet = VertexData<std::vector<VertexPtr>>(mesh, std::vector<VertexPtr>());
+  result.symmetrySet = VertexData<std::vector<Vertex>>(mesh, std::vector<Vertex>());
 
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     // Compute the symmetric point
     Vector3 pos = geom->position(v);
 

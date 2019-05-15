@@ -6,23 +6,23 @@ The halfedge mesh has several key advantages over other data structures, most no
 
 As the name suggests, the primary type in a halfedge mesh is a _halfedge_, in addition to the usual _vertex_, _edge_ and _face_ types. A halfedge is a directed edge incident on a face, as shown below. Two halfedges, oriented in opposite directions, make up each edge in the mesh. Each halfedge has relationships with five adjacent elements: 
 
-- `HalfedgePtr::twin()` the other halfedge across the incident edge
-- `HalfedgePtr::next()` the next halfedge in clockwise order around the incident face
-- `HalfedgePtr::vertex()` the vertex at the tail (back) of the halfedge
-- `HalfedgePtr::edge()` the incident edge
-- `HalfedgePtr::face()` the incident face
+- `Halfedge::twin()` the other halfedge across the incident edge
+- `Halfedge::next()` the next halfedge in clockwise order around the incident face
+- `Halfedge::vertex()` the vertex at the tail (back) of the halfedge
+- `Halfedge::edge()` the incident edge
+- `Halfedge::face()` the incident face
 
 ![halfedge pointers](../media/halfedge_pointers.png)
 
 Each vertex, edge, and face need just one relationship:
 
-- `VertexPtr::halfedge()` _any_ of the incident halfedges (which point outward from the vertex)
-- `EdgePtr::halfedge()` _any_ of the incident halfedges
-- `FacePtr::halfedge()` _any_ of the incident halfedges
+- `Vertex::halfedge()` _any_ of the incident halfedges (which point outward from the vertex)
+- `Edge::halfedge()` _any_ of the incident halfedges
+- `Face::halfedge()` _any_ of the incident halfedges
 
 Notice how this fixed set of relationships can be used implement local traversals. For instance, the neighboring face across an edge can be accessed with `face.halfedge().twin().face()`, and we can iterate around the neighbors of a vertex by advancing `currHe = currHe.twin().next()` and examining `currHe.vertex()`. See [navigation](navigation.md) for more information on traversals, and convenience iterators.
 
-You many notice in the above examples that the primary type we use to interact with halfedge mesh elements is the lightweight `HalfedgePtr` (etc) types. These types logically refer to a mesh element, and offer routines to access their neighbors. There is no explicit `Halfedge` class in our API, only references to logical halfedges.
+You many notice in the above examples that the primary type we use to interact with halfedge mesh elements is the lightweight `Halfedge` (etc) types. These types logically refer to a mesh element, and offer routines to access their neighbors. There is no explicit `Halfedge` class in our API, only references to logical halfedges.
 
 ## Manifold, Oriented Surfaces
 
@@ -80,16 +80,24 @@ Note that our halfedge mesh _does not_ require that faces be triangles or quads;
 ### Properties
 
 ??? func "`#!cpp int HalfedgeMesh::eulerCharacteristic()`"
-    Returns the Euler characteristic of the surface. Computed in O(1) from element counts. Warning: assumes the mesh is a single connected component.
+    Returns the Euler characteristic of the surface. Computed in O(1) from element counts. 
+    
+    **Warning:** assumes the mesh is a single connected component.
 
 ??? func "`#!cpp int HalfedgeMesh::genus()`"
-    Returns the genus of the surface. Computed in O(1) from element counts. Warning: assumes the mesh is a single connected component.
+    Returns the genus of the surface. Computed in O(1) from element counts.
+    
+    **Warning:** assumes the mesh is a single connected component.
 
 ??? func "`#!cpp bool HalfedgeMesh::isTriangular()`"
-    Returns true if all faces in the mesh have 3 sides. Complexity O(n), do not call in a tight loop.
+    Returns true if all faces in the mesh have 3 sides. 
+    
+    Complexity $\mathcal{O}(n)$, do not call in a tight loop.
 
 ??? func "`#!cpp size_t HalfedgeMesh::nConnectedComponents()`"
-    Returns the number of distinct connected components of the . Complexity O(n), do not call in a tight loop.
+    Returns the number of distinct connected components of the mesh. 
+    
+    Complexity $\mathcal{O}(n)$, do not call in a tight loop.
 
 
 ### Utility functions   

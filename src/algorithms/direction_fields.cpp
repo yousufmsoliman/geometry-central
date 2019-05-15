@@ -34,7 +34,7 @@ VertexData<Complex> computeSmoothestVertexDirectionField_noBoundary(Geometry<Euc
   // Supposedly reserving space in the matrix makes construction real zippy
   // below
   Eigen::VectorXi nEntries(N);
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     nEntries[gc.vertexIndices[v]] = v.degree() + 1;
   }
   energyMatrix.reserve(nEntries);
@@ -46,17 +46,17 @@ VertexData<Complex> computeSmoothestVertexDirectionField_noBoundary(Geometry<Euc
   // === Build matrices
 
   // Build the mass matrix
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     size_t i = gc.vertexIndices[v];
     massMatrix.insert(i, i) = gc.vertexDualAreas[v];
   }
 
   // Build the energy matrix
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     size_t i = gc.vertexIndices[v];
 
     std::complex<double> weightISum = 0;
-    for (HalfedgePtr he : v.incomingHalfedges()) {
+    for (Halfedge he : v.incomingHalfedges()) {
       size_t j = gc.vertexIndices[he.vertex()];
       std::complex<double> rBar = std::pow(gc.vertexTransportCoefs[he], nSym);
       double weight = gc.edgeCotanWeights[he.edge()];
@@ -82,11 +82,11 @@ VertexData<Complex> computeSmoothestVertexDirectionField_noBoundary(Geometry<Euc
 
     Eigen::VectorXcd dirVec(N);
     if (nSym == 2) {
-      for (VertexPtr v : mesh->vertices()) {
+      for (Vertex v : mesh->vertices()) {
         dirVec[gc.vertexIndices[v]] = gc.principalDirections[v];
       }
     } else if (nSym == 4) {
-      for (VertexPtr v : mesh->vertices()) {
+      for (Vertex v : mesh->vertices()) {
         dirVec[gc.vertexIndices[v]] = std::pow(gc.principalDirections[v], 2);
       }
     }
@@ -115,7 +115,7 @@ VertexData<Complex> computeSmoothestVertexDirectionField_noBoundary(Geometry<Euc
 
   // Copy the result to a VertexData vector
   VertexData<Complex> toReturn(mesh);
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     toReturn[v] = solution[gc.vertexIndices[v]] / std::abs(solution[gc.vertexIndices[v]]);
   }
 
@@ -136,7 +136,7 @@ VertexData<Complex> computeSmoothestVertexDirectionField_boundary(Geometry<Eucli
 
   // Compute the boundary values
   VertexData<std::complex<double>> boundaryValues(mesh);
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     if (v.isBoundary()) {
       Vector3 b = geometry->boundaryNormal(v);
       Complex bC(dot(gc.vertexBases[v][0], b), dot(gc.vertexBases[v][1], b)); // TODO can do better
@@ -153,7 +153,7 @@ VertexData<Complex> computeSmoothestVertexDirectionField_boundary(Geometry<Eucli
   Eigen::SparseMatrix<std::complex<double>, Eigen::ColMajor> energyMatrix(nInterior, nInterior);
 
   Eigen::VectorXi nEntries(nInterior);
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     if (v.isBoundary()) {
       continue;
     }
@@ -171,7 +171,7 @@ VertexData<Complex> computeSmoothestVertexDirectionField_boundary(Geometry<Eucli
   // === Build matrices
 
   // Build the mass matrix and zero b
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     if (v.isBoundary()) {
       continue;
     }
@@ -181,14 +181,14 @@ VertexData<Complex> computeSmoothestVertexDirectionField_boundary(Geometry<Eucli
   }
 
   // Build the energy matrix
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     if (v.isBoundary()) {
       continue;
     }
     size_t i = gc.interiorVertexIndices[v];
 
     std::complex<double> weightISum = 0;
-    for (HalfedgePtr he : v.incomingHalfedges()) {
+    for (Halfedge he : v.incomingHalfedges()) {
       std::complex<double> rBar = std::pow(gc.vertexTransportCoefs[he], nSym);
       double w = gc.edgeCotanWeights[he.edge()];
 
@@ -223,7 +223,7 @@ VertexData<Complex> computeSmoothestVertexDirectionField_boundary(Geometry<Eucli
     gc.requirePrincipalDirections();
 
     Eigen::VectorXcd dirVec(nInterior);
-    for (VertexPtr v : mesh->vertices()) {
+    for (Vertex v : mesh->vertices()) {
       if (v.isBoundary()) {
         continue;
       }
@@ -257,7 +257,7 @@ VertexData<Complex> computeSmoothestVertexDirectionField_boundary(Geometry<Eucli
 
   // Copy the result to a VertexData vector for both the boudary and interior
   VertexData<Complex> toReturn(mesh);
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     if (v.isBoundary()) {
       toReturn[v] = boundaryValues[v];
     } else {
@@ -280,7 +280,7 @@ VertexData<Complex> computeSmoothestVertexDirectionField(Geometry<Euclidean>* ge
   // Dispatch to either the boundary of no boundary variant depending on the
   // mesh type
   bool hasBoundary = false;
-  for (VertexPtr v : geometry->getMesh()->vertices()) {
+  for (Vertex v : geometry->getMesh()->vertices()) {
     hasBoundary |= v.isBoundary();
   }
 
@@ -322,23 +322,23 @@ FaceData<Complex> computeSmoothestFaceDirectionField_noBoundary(Geometry<Euclide
   // === Build matrices
 
   // Build the mass matrix
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     size_t i = gc.faceIndices[f];
     massMatrix.insert(i, i) = gc.faceAreas[f];
   }
 
   // Build the energy matrix
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     size_t i = gc.faceIndices[f];
 
     std::complex<double> weightISum = 0;
-    for (HalfedgePtr he : f.adjacentHalfedges()) {
+    for (Halfedge he : f.adjacentHalfedges()) {
 
       if (!he.twin().isReal()) {
         continue;
       }
 
-      FacePtr neighFace = he.twin().face();
+      Face neighFace = he.twin().face();
       unsigned int j = gc.faceIndices[neighFace];
 
       // LC connection between the faces
@@ -364,13 +364,13 @@ FaceData<Complex> computeSmoothestFaceDirectionField_noBoundary(Geometry<Euclide
   if (alignCurvature) {
 
     Eigen::VectorXcd dirVec(N);
-    for (FacePtr f : mesh->faces()) {
+    for (Face f : mesh->faces()) {
 
       // Compute something like the principal directions
       double weightSum = 0;
       Complex sum = 0;
 
-      for (HalfedgePtr he : f.adjacentHalfedges()) {
+      for (Halfedge he : f.adjacentHalfedges()) {
 
         double dihedralAngle = std::abs(gc.dihedralAngles[he.edge()]);
         double weight = norm(geometry->vector(he));
@@ -408,7 +408,7 @@ FaceData<Complex> computeSmoothestFaceDirectionField_noBoundary(Geometry<Euclide
 
   // Copy the result to a FaceData object
   FaceData<Complex> field(mesh);
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     field[f] = solution[gc.faceIndices[f]] / std::abs(solution[gc.faceIndices[f]]);
   }
 
@@ -431,9 +431,9 @@ FaceData<Complex> computeSmoothestFaceDirectionField_boundary(Geometry<Euclidean
   size_t nInteriorFace = 0;
   FaceData<size_t> interiorFaceInd(mesh, -77);
   FaceData<char> isInterior(mesh);
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     bool isBoundary = false;
-    for (EdgePtr e : f.adjacentEdges()) {
+    for (Edge e : f.adjacentEdges()) {
       isBoundary |= e.isBoundary();
     }
     isInterior[f] = !isBoundary;
@@ -444,12 +444,12 @@ FaceData<Complex> computeSmoothestFaceDirectionField_boundary(Geometry<Euclidean
 
   // Compute boundary values
   FaceData<Complex> boundaryValues(mesh);
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     if (isInterior[f]) {
       boundaryValues[f] = 0;
     } else {
       Vector3 bVec = Vector3::zero();
-      for (HalfedgePtr he : f.adjacentHalfedges()) {
+      for (Halfedge he : f.adjacentHalfedges()) {
         if (he.edge().isBoundary()) {
           bVec += geometry->vector(he).rotate_around(gc.faceNormals[f], -PI / 2.0);
         }
@@ -476,7 +476,7 @@ FaceData<Complex> computeSmoothestFaceDirectionField_boundary(Geometry<Euclidean
   // === Build matrices
 
   // Build the mass matrix
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     if (isInterior[f]) {
       size_t i = interiorFaceInd[f];
       massMatrix.insert(i, i) = gc.faceAreas[f];
@@ -484,14 +484,14 @@ FaceData<Complex> computeSmoothestFaceDirectionField_boundary(Geometry<Euclidean
   }
 
   // Build the energy matrix
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     if (isInterior[f]) {
       size_t i = interiorFaceInd[f];
 
       std::complex<double> weightISum = 0;
-      for (HalfedgePtr he : f.adjacentHalfedges()) {
+      for (Halfedge he : f.adjacentHalfedges()) {
 
-        FacePtr neighFace = he.twin().face();
+        Face neighFace = he.twin().face();
         double weight = 1; // FIXME TODO figure out weights
         Complex rBar = std::pow(gc.faceTransportCoefs[he.twin()], nSym);
 
@@ -522,14 +522,14 @@ FaceData<Complex> computeSmoothestFaceDirectionField_boundary(Geometry<Euclidean
   if (alignCurvature) {
 
     Eigen::VectorXcd dirVec(nInteriorFace);
-    for (FacePtr f : mesh->faces()) {
+    for (Face f : mesh->faces()) {
       if (isInterior[f]) {
 
         // Compute something like the principal directions
         double weightSum = 0;
         Complex sum = 0;
 
-        for (HalfedgePtr he : f.adjacentHalfedges()) {
+        for (Halfedge he : f.adjacentHalfedges()) {
 
           double dihedralAngle = std::abs(gc.dihedralAngles[he.edge()]);
           double weight = norm(geometry->vector(he));
@@ -573,7 +573,7 @@ FaceData<Complex> computeSmoothestFaceDirectionField_boundary(Geometry<Euclidean
 
   // Copy the result to a FaceData object
   FaceData<Complex> field(mesh);
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     if (isInterior[f]) {
       field[f] = unit(solution[interiorFaceInd[f]]);
     } else {
@@ -597,7 +597,7 @@ FaceData<Complex> computeSmoothestFaceDirectionField(Geometry<Euclidean>* geomet
 
   // Dispatch to either the boundary of no boundary variant depending on the mesh type
   bool hasBoundary = false;
-  for (VertexPtr v : geometry->getMesh()->vertices()) {
+  for (Vertex v : geometry->getMesh()->vertices()) {
     hasBoundary |= v.isBoundary();
   }
 
@@ -624,12 +624,12 @@ FaceData<int> computeFaceIndex(Geometry<Euclidean>* geometry, VertexData<Complex
   // TODO haven't tested that this correctly reports the index when it is larger
   // than +-1
 
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     // Trace the direction field around the face and see how many times it
     // spins!
     double totalRot = 0;
 
-    for (HalfedgePtr he : f.adjacentHalfedges()) {
+    for (Halfedge he : f.adjacentHalfedges()) {
       // Compute the rotation along the halfedge implied by the field
       Complex x0 = directionField[he.vertex()];
       Complex x1 = directionField[he.twin().vertex()];
@@ -664,13 +664,13 @@ VertexData<int> computeVertexIndex(Geometry<Euclidean>* geometry, FaceData<Compl
   // TODO haven't tested that this correctly reports the index when it is larger
   // than +-1
 
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
 
     // Trace the direction field around the face and see how many times it
     // spins!
     double totalRot = 0;
 
-    for (HalfedgePtr he : v.incomingHalfedges()) {
+    for (Halfedge he : v.incomingHalfedges()) {
       // Compute the rotation along the halfedge implied by the field
       Complex x0 = directionField[he.face()];
       Complex x1 = directionField[he.twin().face()];

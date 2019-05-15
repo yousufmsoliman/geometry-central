@@ -19,84 +19,84 @@ inline size_t HalfedgeMesh::nFacesCapacity(void) const { return rawFaces.capacit
 
 // Methods for iterating over mesh elements w/ range-based for loops ===========
 
-inline HalfedgePtrSet HalfedgeMesh::realHalfedges(void) {
+inline HalfedgeSet HalfedgeMesh::realHalfedges(void) {
   size_t nH = rawHalfedges.size();
-  HalfedgePtr beginptr(&rawHalfedges[0]);
-  HalfedgePtr endptr(&rawHalfedges[nH]);
+  Halfedge beginptr(&rawHalfedges[0]);
+  Halfedge endptr(&rawHalfedges[nH]);
 
-  return HalfedgePtrSet(beginptr, endptr, HalfedgeSetType::Real);
+  return HalfedgeSet(beginptr, endptr, HalfedgeSetType::Real);
 }
 
-inline HalfedgePtrSet HalfedgeMesh::imaginaryHalfedges(void) {
+inline HalfedgeSet HalfedgeMesh::imaginaryHalfedges(void) {
   size_t nH = rawHalfedges.size();
-  HalfedgePtr beginptr(&rawHalfedges[0]);
-  HalfedgePtr endptr(&rawHalfedges[nH]);
+  Halfedge beginptr(&rawHalfedges[0]);
+  Halfedge endptr(&rawHalfedges[nH]);
 
-  return HalfedgePtrSet(beginptr, endptr, HalfedgeSetType::Imaginary);
+  return HalfedgeSet(beginptr, endptr, HalfedgeSetType::Imaginary);
 }
 
-inline HalfedgePtrSet HalfedgeMesh::allHalfedges(void) {
+inline HalfedgeSet HalfedgeMesh::allHalfedges(void) {
   size_t nH = rawHalfedges.size();
-  HalfedgePtr beginptr(&rawHalfedges[0]);
-  HalfedgePtr endptr(&rawHalfedges[nH]);
+  Halfedge beginptr(&rawHalfedges[0]);
+  Halfedge endptr(&rawHalfedges[nH]);
 
-  return HalfedgePtrSet(beginptr, endptr, HalfedgeSetType::All);
+  return HalfedgeSet(beginptr, endptr, HalfedgeSetType::All);
 }
 
-inline CornerPtrSet HalfedgeMesh::corners(void) {
+inline CornerSet HalfedgeMesh::corners(void) {
   size_t nC = rawHalfedges.size();
-  CornerPtr beginptr(&rawHalfedges[0]);
-  CornerPtr endptr(&rawHalfedges[nC]);
+  Corner beginptr(&rawHalfedges[0]);
+  Corner endptr(&rawHalfedges[nC]);
 
-  return CornerPtrSet(beginptr, endptr);
+  return CornerSet(beginptr, endptr);
 }
 
-inline VertexPtrSet HalfedgeMesh::vertices(void) {
+inline VertexSet HalfedgeMesh::vertices(void) {
   size_t nV = rawVertices.size();
-  VertexPtr beginptr{&rawVertices[0]};
-  VertexPtr endptr{&rawVertices[nV]};
+  Vertex beginptr{&rawVertices[0]};
+  Vertex endptr{&rawVertices[nV]};
 
-  return VertexPtrSet(beginptr, endptr);
+  return VertexSet(beginptr, endptr);
 }
 
-inline EdgePtrSet HalfedgeMesh::edges(void) {
+inline EdgeSet HalfedgeMesh::edges(void) {
   size_t nE = rawEdges.size();
-  EdgePtr beginptr{&rawEdges[0]};
-  EdgePtr endptr{&rawEdges[nE]};
+  Edge beginptr{&rawEdges[0]};
+  Edge endptr{&rawEdges[nE]};
 
-  return EdgePtrSet(beginptr, endptr);
+  return EdgeSet(beginptr, endptr);
 }
 
-inline FacePtrSet HalfedgeMesh::faces(void) {
+inline FaceSet HalfedgeMesh::faces(void) {
   size_t nF = rawFaces.size();
-  FacePtr beginptr{&rawFaces[0]};
-  FacePtr endptr{&rawFaces[nF]};
+  Face beginptr{&rawFaces[0]};
+  Face endptr{&rawFaces[nF]};
 
-  return FacePtrSet(beginptr, endptr);
+  return FaceSet(beginptr, endptr);
 }
 
-inline BoundaryPtrSet HalfedgeMesh::boundaryLoops(void) {
+inline BoundarySet HalfedgeMesh::boundaryLoops(void) {
   size_t nBL = rawBoundaryLoops.size();
-  BoundaryLoopPtr beginptr{&rawBoundaryLoops[0]};
-  BoundaryLoopPtr endptr{&rawBoundaryLoops[nBL]};
+  BoundaryLoop beginptr{&rawBoundaryLoops[0]};
+  BoundaryLoop endptr{&rawBoundaryLoops[nBL]};
 
-  return BoundaryPtrSet(beginptr, endptr);
+  return BoundarySet(beginptr, endptr);
 }
 
 // Methods for accessing elements by index =====================================
 // Note that these are only valid when the mesh is compressed.
 
-inline HalfedgePtr HalfedgeMesh::halfedge(size_t index) { return HalfedgePtr{&rawHalfedges[index]}; }
+inline Halfedge HalfedgeMesh::halfedge(size_t index) { return Halfedge{&rawHalfedges[index]}; }
 
-inline CornerPtr HalfedgeMesh::corner(size_t index) { return CornerPtr{&rawHalfedges[index]}; }
+inline Corner HalfedgeMesh::corner(size_t index) { return Corner{&rawHalfedges[index]}; }
 
-inline VertexPtr HalfedgeMesh::vertex(size_t index) { return VertexPtr{&rawVertices[index]}; }
+inline Vertex HalfedgeMesh::vertex(size_t index) { return Vertex{&rawVertices[index]}; }
 
-inline EdgePtr HalfedgeMesh::edge(size_t index) { return EdgePtr{&rawEdges[index]}; }
+inline Edge HalfedgeMesh::edge(size_t index) { return Edge{&rawEdges[index]}; }
 
-inline FacePtr HalfedgeMesh::face(size_t index) { return FacePtr{&rawFaces[index]}; }
+inline Face HalfedgeMesh::face(size_t index) { return Face{&rawFaces[index]}; }
 
-inline BoundaryLoopPtr HalfedgeMesh::boundaryLoop(size_t index) { return BoundaryLoopPtr{&rawBoundaryLoops[index]}; }
+inline BoundaryLoop HalfedgeMesh::boundaryLoop(size_t index) { return BoundaryLoop{&rawBoundaryLoops[index]}; }
 
 // Misc utility methods =====================================
 

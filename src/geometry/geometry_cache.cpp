@@ -90,9 +90,9 @@ void verifyTriangular(HalfedgeMesh* m) {
 template <>
 void GeometryCache<Euclidean>::computeFaceAreaNormals() {
   faceAreaNormals = FaceData<Vector3>(mesh);
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     Vector3 AN{0., 0., 0.};
-    for (HalfedgePtr h : f.adjacentHalfedges()) {
+    for (Halfedge h : f.adjacentHalfedges()) {
       Vector3 pi = geometry->position(h.vertex());
       Vector3 pj = geometry->position(h.twin().vertex());
       AN += cross(pi, pj);
@@ -104,7 +104,7 @@ void GeometryCache<Euclidean>::computeFaceAreaNormals() {
 template <>
 void GeometryCache<Euclidean>::computeFaceAreas() {
   faceAreas = FaceData<double>(mesh);
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     faceAreas[f] = norm(faceAreaNormals[f]);
   }
 }
@@ -112,7 +112,7 @@ void GeometryCache<Euclidean>::computeFaceAreas() {
 template <>
 void GeometryCache<Euclidean>::computeFaceNormals() {
   faceNormals = FaceData<Vector3>(mesh);
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     faceNormals[f] = unit(faceAreaNormals[f]);
   }
 }
@@ -121,9 +121,9 @@ void GeometryCache<Euclidean>::computeFaceNormals() {
 template <>
 void GeometryCache<Euclidean>::computeVertexNormals() {
   vertexNormals = VertexData<Vector3>(mesh);
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     Vector3 n{0., 0., 0.};
-    for (FacePtr f : v.adjacentFaces()) {
+    for (Face f : v.adjacentFaces()) {
       n += faceAreaNormals[f];
     }
     vertexNormals[v] = unit(n);
@@ -133,9 +133,9 @@ void GeometryCache<Euclidean>::computeVertexNormals() {
 template <>
 void GeometryCache<Euclidean>::computeVertexDualAreas() {
   vertexDualAreas = VertexData<double>(mesh);
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     double A = 0;
-    for (FacePtr f : v.adjacentFaces()) {
+    for (Face f : v.adjacentFaces()) {
       A += faceAreas[f];
     }
     vertexDualAreas[v] = A / 3.0;
@@ -145,7 +145,7 @@ void GeometryCache<Euclidean>::computeVertexDualAreas() {
 template <>
 void GeometryCache<Euclidean>::computeHalfedgeVectors() {
   halfedgeVectors = HalfedgeData<Vector3>(mesh);
-  for (HalfedgePtr he : mesh->allHalfedges()) {
+  for (Halfedge he : mesh->allHalfedges()) {
     halfedgeVectors[he] = geometry->vector(he);
   }
 }
@@ -153,7 +153,7 @@ void GeometryCache<Euclidean>::computeHalfedgeVectors() {
 template <>
 void GeometryCache<Euclidean>::computeEdgeLengths() {
   edgeLengths = EdgeData<double>(mesh);
-  for (EdgePtr e : mesh->edges()) {
+  for (Edge e : mesh->edges()) {
     edgeLengths[e] = norm(geometry->vector(e.halfedge()));
   }
 }
@@ -161,7 +161,7 @@ void GeometryCache<Euclidean>::computeEdgeLengths() {
 template <>
 void GeometryCache<Euclidean>::computeFaceBases() {
   faceBases = FaceData<std::array<Vector3, 2>>(mesh);
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     Vector3 basisX = unit(geometry->vector(f.halfedge()));
     Vector3 basisY = basisX.rotate_around(faceNormals[f], PI / 2.0);
     faceBases[f][0] = basisX;
@@ -173,7 +173,7 @@ template <>
 void GeometryCache<Euclidean>::computeVertexBases() {
   vertexBases = VertexData<std::array<Vector3, 2>>(mesh);
 
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
 
     // Chose any edge (projected in to tangent plane) as one component of basis
     Vector3 basisX = unit(geometry->vector(v.halfedge()));
@@ -189,8 +189,8 @@ template <>
 void GeometryCache<Euclidean>::computeHalfedgeFaceCoords() {
   halfedgeFaceCoords = HalfedgeData<Complex>(mesh);
 
-  for (HalfedgePtr he : mesh->realHalfedges()) {
-    FacePtr f = he.face();
+  for (Halfedge he : mesh->realHalfedges()) {
+    Face f = he.face();
 
     if (f.isReal()) {
       Vector3 heVec = geometry->vector(he);
@@ -208,7 +208,7 @@ void GeometryCache<Euclidean>::computeFaceTransportCoefs() {
 
   faceTransportCoefs = HalfedgeData<Complex>(mesh);
 
-  for (HalfedgePtr he : mesh->realHalfedges()) {
+  for (Halfedge he : mesh->realHalfedges()) {
     if (he.twin().isReal()) {
       Complex angleInSource = halfedgeFaceCoords[he];
       Complex desiredAngleInTarget = -halfedgeFaceCoords[he.twin()];
@@ -223,7 +223,7 @@ void GeometryCache<Euclidean>::computeVertexTransportCoefs() {
 
   vertexTransportCoefs = HalfedgeData<Complex>(mesh);
 
-  for (HalfedgePtr he : mesh->allHalfedges()) {
+  for (Halfedge he : mesh->allHalfedges()) {
     Complex angleInSource = halfedgeVertexCoords[he];
     Complex desiredAngleInTarget = -halfedgeVertexCoords[he.twin()];
     vertexTransportCoefs[he] = desiredAngleInTarget / angleInSource;
@@ -235,7 +235,7 @@ void GeometryCache<Euclidean>::computeVertexFaceTransportCoefs() {
 
   vertexFaceTransportCoefs = HalfedgeData<Complex>(mesh);
 
-  for (HalfedgePtr he : mesh->realHalfedges()) {
+  for (Halfedge he : mesh->realHalfedges()) {
     Complex angleInSource = halfedgeVertexCoords[he];
     Complex desiredAngleInTarget = halfedgeFaceCoords[he];
     vertexFaceTransportCoefs[he] = desiredAngleInTarget / angleInSource;
@@ -247,9 +247,9 @@ void GeometryCache<Euclidean>::computePrincipalDirections() {
 
   principalDirections = VertexData<Complex>(mesh);
 
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     Complex principalDir{0.0, 0.0};
-    for (HalfedgePtr he : v.outgoingHalfedges()) {
+    for (Halfedge he : v.outgoingHalfedges()) {
       double len = edgeLengths[he.edge()];
       double alpha = dihedralAngles[he.edge()];
       Complex vec = halfedgeVertexCoords[he];
@@ -262,7 +262,7 @@ void GeometryCache<Euclidean>::computePrincipalDirections() {
 template <>
 void GeometryCache<Euclidean>::computeDihedralAngles() {
   dihedralAngles = EdgeData<double>(mesh);
-  for (EdgePtr e : mesh->edges()) {
+  for (Edge e : mesh->edges()) {
     dihedralAngles[e] = geometry->dihedralAngle(e);
   }
 }
@@ -272,7 +272,7 @@ void GeometryCache<Euclidean>::computeHalfedgeOppositeAngles() {
   verifyTriangular(mesh);
 
   halfedgeOppositeAngles = HalfedgeData<double>(mesh);
-  for (HalfedgePtr he : mesh->allHalfedges()) {
+  for (Halfedge he : mesh->allHalfedges()) {
     if (he.isReal()) {
       halfedgeOppositeAngles[he] = angle(-geometry->vector(he.next()), geometry->vector(he.next().next()));
     } else {
@@ -284,7 +284,7 @@ void GeometryCache<Euclidean>::computeHalfedgeOppositeAngles() {
 template <>
 void GeometryCache<Euclidean>::computeHalfedgeCotanWeights() {
   halfedgeCotanWeights = HalfedgeData<double>(mesh);
-  for (HalfedgePtr he : mesh->realHalfedges()) {
+  for (Halfedge he : mesh->realHalfedges()) {
     halfedgeCotanWeights[he] = geometry->cotan(he);
   }
 }
@@ -292,7 +292,7 @@ void GeometryCache<Euclidean>::computeHalfedgeCotanWeights() {
 template <>
 void GeometryCache<Euclidean>::computeEdgeCotanWeights() {
   edgeCotanWeights = EdgeData<double>(mesh);
-  for (EdgePtr e : mesh->edges()) {
+  for (Edge e : mesh->edges()) {
     edgeCotanWeights[e] = geometry->cotanWeight(e);
   }
 }
@@ -302,13 +302,13 @@ void GeometryCache<Euclidean>::computeVertexAngleDefects() {
   verifyTriangular(mesh);
 
   vertexAngleDefects = VertexData<double>(mesh);
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     if (v.isBoundary()) {
       // Convention: no curvature at boundary
       vertexAngleDefects[v] = 0;
     } else {
       double sum = 0;
-      for (HalfedgePtr he : v.outgoingHalfedges()) {
+      for (Halfedge he : v.outgoingHalfedges()) {
         sum += halfedgeOppositeAngles[he.next()];
       }
       vertexAngleDefects[v] = 2. * PI - sum;
@@ -319,7 +319,7 @@ void GeometryCache<Euclidean>::computeVertexAngleDefects() {
 template <>
 void GeometryCache<Euclidean>::computeHalfedgeRescaledOppositeAngles() {
   halfedgeRescaledOppositeAngles = HalfedgeData<double>(mesh);
-  for (HalfedgePtr he : mesh->realHalfedges()) {
+  for (Halfedge he : mesh->realHalfedges()) {
     double origSum = 2. * PI - vertexAngleDefects[he.next().next().vertex()];
     halfedgeRescaledOppositeAngles[he] = halfedgeOppositeAngles[he] * 2. * PI / origSum;
   }
@@ -331,15 +331,15 @@ void GeometryCache<Euclidean>::computeHalfedgeVertexCoords() {
 
   halfedgeVertexCoords = HalfedgeData<Complex>(mesh);
 
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
 
     if (v.isBoundary()) {
 
       // First, check what angle we associated with the boundary wedge
       // (recall that in a manifold triangle mesh, there can be at most one boundary wedge)
       double angleSum = 0;
-      HalfedgePtr afterBoundaryHe;
-      for (HalfedgePtr he : v.outgoingHalfedges()) {
+      Halfedge afterBoundaryHe;
+      for (Halfedge he : v.outgoingHalfedges()) {
         if (he.isReal()) {
           angleSum += halfedgeRescaledOppositeAngles[he.next()];
         }
@@ -353,8 +353,8 @@ void GeometryCache<Euclidean>::computeHalfedgeVertexCoords() {
       double coordSum = 0.0;
 
       // Custom loop to orbit CCW
-      HalfedgePtr firstHe = v.halfedge();
-      HalfedgePtr currHe = firstHe;
+      Halfedge firstHe = v.halfedge();
+      Halfedge currHe = firstHe;
       do {
         halfedgeVertexCoords[currHe] = std::exp(coordSum * IM_I);
         if (currHe.isReal()) {
@@ -371,8 +371,8 @@ void GeometryCache<Euclidean>::computeHalfedgeVertexCoords() {
       double coordSum = 0.0;
 
       // Custom loop to orbit CCW
-      HalfedgePtr firstHe = v.halfedge();
-      HalfedgePtr currHe = firstHe;
+      Halfedge firstHe = v.halfedge();
+      Halfedge currHe = firstHe;
       do {
         halfedgeVertexCoords[currHe] = std::exp(coordSum * IM_I);
         coordSum += halfedgeRescaledOppositeAngles[currHe.next()];

@@ -16,7 +16,7 @@ Eigen::DiagonalMatrix<double, Eigen::Dynamic> buildHodge0(Geometry<Euclidean>* g
   // Reserve space in the sparse matrix
   Eigen::VectorXd hodge0(nVerts);
 
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     double primalArea = 1.0;
     double dualArea = gc.vertexDualAreas[v];
     double ratio = dualArea / primalArea;
@@ -37,7 +37,7 @@ Eigen::DiagonalMatrix<double, Eigen::Dynamic> buildHodge1(Geometry<Euclidean>* g
 
   Eigen::VectorXd hodge1(nEdges);
 
-  for (EdgePtr e : mesh->edges()) {
+  for (Edge e : mesh->edges()) {
     double ratio = gc.edgeCotanWeights[e];
     size_t iE = eInd[e];
     hodge1[iE] = ratio;
@@ -56,7 +56,7 @@ Eigen::DiagonalMatrix<double, Eigen::Dynamic> buildHodge2(Geometry<Euclidean>* g
 
   Eigen::VectorXd hodge2(nFaces);
 
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     double primalArea = gc.faceAreas[f];
     double dualArea = 1.0;
     double ratio = dualArea / primalArea;
@@ -77,11 +77,11 @@ Eigen::SparseMatrix<double> buildDerivative0(HalfedgeMesh* mesh) {
   Eigen::SparseMatrix<double> d0 = Eigen::SparseMatrix<double>(nEdges, nVerts);
   std::vector<Eigen::Triplet<double>> tripletList;
 
-  for (EdgePtr e : mesh->edges()) {
+  for (Edge e : mesh->edges()) {
     size_t iEdge = eInd[e];
-    HalfedgePtr he = e.halfedge();
-    VertexPtr vTail = he.vertex();
-    VertexPtr vHead = he.twin().vertex();
+    Halfedge he = e.halfedge();
+    Vertex vTail = he.vertex();
+    Vertex vHead = he.twin().vertex();
 
     size_t iVHead = vInd[vHead];
     tripletList.emplace_back(iEdge, iVHead, 1.0);
@@ -103,10 +103,10 @@ Eigen::SparseMatrix<double> buildDerivative1(HalfedgeMesh* mesh) {
   Eigen::SparseMatrix<double> d1 = Eigen::SparseMatrix<double>(nFaces, nEdges);
   std::vector<Eigen::Triplet<double>> tripletList;
 
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     size_t iFace = fInd[f];
 
-    for (HalfedgePtr he : f.adjacentHalfedges()) {
+    for (Halfedge he : f.adjacentHalfedges()) {
       size_t iEdge = eInd[he.edge()];
       double sign = (he == he.edge().halfedge()) ? (1.0) : (-1.0);
       tripletList.emplace_back(iFace, iEdge, sign);

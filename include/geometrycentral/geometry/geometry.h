@@ -25,7 +25,7 @@
 //
 //    // compute the total surface area directly
 //    double sum = 0.;
-//    for(FacePtr f : mesh->faces)
+//    for(Face f : mesh->faces)
 //    {
 //       sum += geometry->area(f);
 //    }
@@ -34,7 +34,7 @@
 //    FaceData<double> area;
 //    geometry->getFaceAreas(area); // fill the cache
 //    double sum = 0.;
-//    for(FacePtr f : mesh->faces())
+//    for(Face f : mesh->faces())
 //    {
 //       sum += area[f];
 //    }
@@ -78,45 +78,45 @@ public:
   Geometry<T>* copyUsingTransfer(HalfedgeMeshDataTransfer& transfer);
 
   // Vertex attributes
-  T& position(VertexPtr p); // TODO get rid of this method; all write access
+  T& position(Vertex p); // TODO get rid of this method; all write access
                             // should be done through operator[], to
                             // distinguish it from all other named accessors
                             // (which are read-only)
-  T position(VertexPtr p) const;
-  double dualArea(VertexPtr v);
-  double volume(VertexPtr v);          // always equal to 1
-  double angleDefect(VertexPtr v);     // 2π minus sum of incident angles
-  Vector3 normal(VertexPtr v);         // area-weighted average of incident face normals
-  Vector3 boundaryNormal(VertexPtr v); // length-weighted normal vector to the
+  T position(Vertex p) const;
+  double dualArea(Vertex v);
+  double volume(Vertex v);          // always equal to 1
+  double angleDefect(Vertex v);     // 2π minus sum of incident angles
+  Vector3 normal(Vertex v);         // area-weighted average of incident face normals
+  Vector3 boundaryNormal(Vertex v); // length-weighted normal vector to the
                                        // two neighboring edges
-  Vector3 projectToTangentSpace(VertexPtr v, const Vector3& inVec);
-  Complex tangentVectorToComplexAngle(VertexPtr v, const Vector3& inVec);
-  Vector3 complexAngleToTangentVector(VertexPtr v, Complex inAngle);
-  Complex principalDirection(VertexPtr v); // the 2-symmetric complex vector aligned with k1
+  Vector3 projectToTangentSpace(Vertex v, const Vector3& inVec);
+  Complex tangentVectorToComplexAngle(Vertex v, const Vector3& inVec);
+  Vector3 complexAngleToTangentVector(Vertex v, Complex inAngle);
+  Complex principalDirection(Vertex v); // the 2-symmetric complex vector aligned with k1
 
   // Edge attributes
   // --- Primal ---
-  T midpoint(EdgePtr e);
-  double length(EdgePtr e);
-  double cotanWeight(EdgePtr e); // **triangles only**
-  double dihedralAngle(EdgePtr e);
+  T midpoint(Edge e);
+  double length(Edge e);
+  double cotanWeight(Edge e); // **triangles only**
+  double dihedralAngle(Edge e);
 
   // Face attributes
   // --- Primal ---
-  double area(FacePtr f);
-  Vector3 normal(FacePtr f);
-  Vector3 areaVector(FacePtr f);
-  T barycenter(FacePtr f);
-  T circumcenter(FacePtr f);
+  double area(Face f);
+  Vector3 normal(Face f);
+  Vector3 areaVector(Face f);
+  T barycenter(Face f);
+  T circumcenter(Face f);
 
   // Halfedge attributes
-  T vector(HalfedgePtr h);
-  double angle(HalfedgePtr h);             // **triangles only**
-  double angle(CornerPtr c);               // **triangles only**
-  double angularCoordinate(HalfedgePtr h); // **triangles only** Measured CCW
+  T vector(Halfedge h);
+  double angle(Halfedge h);             // **triangles only**
+  double angle(Corner c);               // **triangles only**
+  double angularCoordinate(Halfedge h); // **triangles only** Measured CCW
                                            // against the tail vertex's
                                            // arbitrary halfedge
-  double cotan(HalfedgePtr h);             // **triangles only**
+  double cotan(Halfedge h);             // **triangles only**
 
   // Global attributes
   double totalArea(void); // Total surface area (assuming all triangles)

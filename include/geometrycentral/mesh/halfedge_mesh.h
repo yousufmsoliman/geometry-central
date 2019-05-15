@@ -58,79 +58,79 @@ public:
   size_t nImaginaryHalfedges() const;
 
   // Methods for range-based for loops
-  // Example: for(VertexPtr v : mesh.vertices()) { ... }
-  HalfedgePtrSet realHalfedges();
-  HalfedgePtrSet imaginaryHalfedges();
-  HalfedgePtrSet allHalfedges();
-  VertexPtrSet vertices();
-  EdgePtrSet edges();
-  FacePtrSet faces();
-  BoundaryPtrSet boundaryLoops();
+  // Example: for(Vertex v : mesh.vertices()) { ... }
+  HalfedgeSet realHalfedges();
+  HalfedgeSet imaginaryHalfedges();
+  HalfedgeSet allHalfedges();
+  VertexSet vertices();
+  EdgeSet edges();
+  FaceSet faces();
+  BoundarySet boundaryLoops();
 
   // Methods for accessing elements by index
-  // Example: VertexPtr v = mesh.vertex(123);
-  HalfedgePtr halfedge(size_t index);
-  CornerPtr corner(size_t index);
-  VertexPtr vertex(size_t index);
-  EdgePtr edge(size_t index);
-  FacePtr face(size_t index);
-  BoundaryLoopPtr boundaryLoop(size_t index);
+  // Example: Vertex v = mesh.vertex(123);
+  Halfedge halfedge(size_t index);
+  Corner corner(size_t index);
+  Vertex vertex(size_t index);
+  Edge edge(size_t index);
+  Face face(size_t index);
+  BoundaryLoop boundaryLoop(size_t index);
 
   // Methods that mutate the mesh. Note that these occasionally trigger a resize, which invaliates
-  // any outstanding VertexPtr or MeshData<> objects. See the guide (currently in docs/mutable_mesh_docs.md).
+  // any outstanding Vertex or MeshData<> objects. See the guide (currently in docs/mutable_mesh_docs.md).
   // TODOs: support adding boundary
 
 
   // Flip an edge. Unlike all the other mutation routines, this _does not_ invalidate pointers, though it does break the
   // canonical ordering.
   // Return true if the edge was actually flipped (can't flip boundary or non-triangular edges)
-  bool flip(EdgePtr e);
+  bool flip(Edge e);
 
   // Adds a vertex along an edge, increasing degree of faces. Returns ptr along the new edge, with he.vertex() as new
   // vertex and he.edge().halfedge() == he. Preserves canonical direction of edge.halfedge() for both halves of new
   // edge.
-  HalfedgePtr insertVertexAlongEdge(EdgePtr e);
+  Halfedge insertVertexAlongEdge(Edge e);
 
   // Split an edge, also splitting adjacent faces. Returns new vertex.
-  VertexPtr splitEdge(EdgePtr e);
+  Vertex splitEdge(Edge e);
 
   // Split an edge, also splitting adjacent faces. Returns new halfedge which points TOWARDS the new vertex, and is the
   // same direction as e.halfedge() on the original edge. The halfedge direction of the other part of the new split edge
   // is also preserved, as in insertVertexAlongEdge().
-  HalfedgePtr splitEdgeReturnHalfedge(EdgePtr e);
+  Halfedge splitEdgeReturnHalfedge(Edge e);
 
   // Add vertex inside face and triangulate. Returns new vertex.
-  VertexPtr insertVertex(FacePtr f);
+  Vertex insertVertex(Face f);
 
   // Add an edge connecting two vertices inside the same face. Returns new halfedge with vA at tail. he.twin().face() is
   // the new face.
-  HalfedgePtr connectVertices(VertexPtr vA, VertexPtr vB);
+  Halfedge connectVertices(Vertex vA, Vertex vB);
 
   // Same as above. Faster if you know the face.
-  HalfedgePtr connectVertices(FacePtr face, VertexPtr vA, VertexPtr vB);
+  Halfedge connectVertices(Face face, Vertex vA, Vertex vB);
 
-  // Same as above, but if vertices do not contain shared face or are adajcent returns HalfedgePtr() rather than
+  // Same as above, but if vertices do not contain shared face or are adajcent returns Halfedge() rather than
   // throwing.
-  HalfedgePtr tryConnectVertices(VertexPtr vA, VertexPtr vB);
+  Halfedge tryConnectVertices(Vertex vA, Vertex vB);
 
   // Same as above, but you can specify a face to work in
-  HalfedgePtr tryConnectVertices(VertexPtr vA, VertexPtr vB, FacePtr face);
+  Halfedge tryConnectVertices(Vertex vA, Vertex vB, Face face);
 
-  // Collapse an edge. Returns the vertex adjacent to that edge which still exists. Returns VertexPtr() if not
+  // Collapse an edge. Returns the vertex adjacent to that edge which still exists. Returns Vertex() if not
   // collapsible.
-  VertexPtr collapseEdge(EdgePtr e);
+  Vertex collapseEdge(Edge e);
 
   // Remove a face which is adjacent to the boundary of the mesh (along with its edge on the boundary).
   // Face must have exactly one boundary edge.
   // Returns true if could remove
-  bool removeFaceAlongBoundary(FacePtr f);
+  bool removeFaceAlongBoundary(Face f);
 
 
   // Set e.halfedge() == he. he must be adjacent.
-  void setEdgeHalfedge(EdgePtr e, HalfedgePtr he);
+  void setEdgeHalfedge(Edge e, Halfedge he);
 
   // Triangulate in a face, returns all subfaces
-  std::vector<FacePtr> triangulate(FacePtr face);
+  std::vector<Face> triangulate(Face face);
 
 
   // Methods for obtaining canonical indices for mesh elements
@@ -232,10 +232,10 @@ private:
   Face* getNewFace();
 
   // Deletes leave tombstones, which can be cleaned up with compress()
-  void deleteElement(HalfedgePtr he);
-  void deleteElement(EdgePtr e);
-  void deleteElement(VertexPtr v);
-  void deleteElement(FacePtr f);
+  void deleteElement(Halfedge he);
+  void deleteElement(Edge e);
+  void deleteElement(Vertex v);
+  void deleteElement(Face f);
 
   // Compression helpers
   void compressHalfedges();
@@ -250,21 +250,21 @@ private:
   size_t indexOf(Face* ptr);
 
   // Helpers for mutation methods
-  void ensureVertexHasBoundaryHalfedge(VertexPtr v); // impose invariant that v.halfedge is start of half-disk
-  VertexPtr collapseEdgeAlongBoundary(EdgePtr e);
+  void ensureVertexHasBoundaryHalfedge(Vertex v); // impose invariant that v.halfedge is start of half-disk
+  Vertex collapseEdgeAlongBoundary(Edge e);
 
-  friend class DynamicHalfedgePtr;
-  friend class DynamicVertexPtr;
-  friend class DynamicEdgePtr;
-  friend class DynamicFacePtr;
+  friend class DynamicHalfedge;
+  friend class DynamicVertex;
+  friend class DynamicEdge;
+  friend class DynamicFace;
 };
 
 class Halfedge {
   friend class Edge;
   friend class HalfedgeMesh;
-  friend class HalfedgePtr;
-  friend struct std::hash<HalfedgePtr>;
-  friend struct std::hash<DynamicHalfedgePtr>;
+  friend class Halfedge;
+  friend struct std::hash<Halfedge>;
+  friend struct std::hash<DynamicHalfedge>;
 
 protected:
   Halfedge* twin;
@@ -291,9 +291,9 @@ public:
 class Vertex {
   friend class Edge;
   friend class HalfedgeMesh;
-  friend class VertexPtr;
-  friend struct std::hash<VertexPtr>;
-  friend struct std::hash<DynamicVertexPtr>;
+  friend class Vertex;
+  friend struct std::hash<Vertex>;
+  friend struct std::hash<DynamicVertex>;
 
 protected:
   // Data structure
@@ -316,9 +316,9 @@ public:
 
 class Edge {
   friend class HalfedgeMesh;
-  friend class EdgePtr;
-  friend struct std::hash<EdgePtr>;
-  friend struct std::hash<DynamicEdgePtr>;
+  friend class Edge;
+  friend struct std::hash<Edge>;
+  friend struct std::hash<DynamicEdge>;
 
 protected:
   Halfedge* halfedge;
@@ -341,9 +341,9 @@ public:
 class Face {
   friend class Edge;
   friend class HalfedgeMesh;
-  friend class FacePtr;
-  friend struct std::hash<FacePtr>;
-  friend struct std::hash<DynamicFacePtr>;
+  friend class Face;
+  friend struct std::hash<Face>;
+  friend struct std::hash<DynamicFace>;
 
 protected:
   Halfedge* halfedge;

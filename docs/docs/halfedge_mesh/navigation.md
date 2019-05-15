@@ -12,7 +12,7 @@ Use these routines to iterate over all of the elements in the mesh.
 ??? func "`#!cpp HalfedgeMesh::vertices()`"
     Iterate over the vertices in a mesh.
     ```cpp
-    for(VertexPtr v : mesh.vertices()) {
+    for(Vertex v : mesh.vertices()) {
       // do science here
     }
     ```
@@ -20,7 +20,7 @@ Use these routines to iterate over all of the elements in the mesh.
 ??? func "`#!cpp HalfedgeMesh::halfedges()`"
     Iterate over all of the halfedges in a mesh (both real and imaginary, if the mesh has boundary).
     ```cpp
-    for(HalfedgePtr he : mesh.halfedges()) {
+    for(Halfedge he : mesh.halfedges()) {
       // do science here
     }
     ```
@@ -28,7 +28,7 @@ Use these routines to iterate over all of the elements in the mesh.
 ??? func "`#!cpp HalfedgeMesh::realHalfedges()`"
     Iterate over the real halfedges in a mesh.
     ```cpp
-    for(HalfedgePtr he : mesh.realHalfedges()) {
+    for(Halfedge he : mesh.realHalfedges()) {
       // do science here
     }
     ```
@@ -37,7 +37,7 @@ Use these routines to iterate over all of the elements in the mesh.
 ??? func "`#!cpp HalfedgeMesh::imaginaryHalfedges()`"
     Iterate over the imaginary halfedges in a mesh.
     ```cpp
-    for(HalfedgePtr he : mesh.imaginaryHalfedges()) {
+    for(Halfedge he : mesh.imaginaryHalfedges()) {
       // do science here
     }
     ```
@@ -46,7 +46,7 @@ Use these routines to iterate over all of the elements in the mesh.
 ??? func "`#!cpp HalfedgeMesh::edges()`"
     Iterate over the edges in a mesh.
     ```cpp
-    for(EdgePtr e : mesh.edges()) {
+    for(Edge e : mesh.edges()) {
       // do science here
     }
     ```
@@ -54,7 +54,7 @@ Use these routines to iterate over all of the elements in the mesh.
 ??? func "`#!cpp HalfedgeMesh::faces()`"
     Iterate over the faces in a mesh.
     ```cpp
-    for(FacePtr f : mesh.faces()) {
+    for(Face f : mesh.faces()) {
       // do science here
     }
     ```
@@ -71,101 +71,101 @@ Use these routines to iterate over the neighbors of a mesh element.
 
 ### Around a vertex
 
-??? func "`#!cpp VertexPtr::outgoingHalfedges()`"
+??? func "`#!cpp Vertex::outgoingHalfedges()`"
     Iterate over the halfedges which point outward from a vertex.
     ```cpp
-    for(HalfedgePtr he : vert.outgoingHalfedges()) {
+    for(Halfedge he : vert.outgoingHalfedges()) {
       assert(he.vertex() == vert); // true
       // do science here
     }
     ```
 
-??? func "`#!cpp VertexPtr::incomingHalfedges()`"
+??? func "`#!cpp Vertex::incomingHalfedges()`"
     Iterate over the halfedges which point inward at a vertex.
     ```cpp
-    for(HalfedgePtr he : vert.incomingHalfedges()) {
+    for(Halfedge he : vert.incomingHalfedges()) {
       assert(he.twin().vertex() == vert); // true
       // do science here
     }
     ```
 
-??? func "`#!cpp VertexPtr::adjacentVertices()`"
+??? func "`#!cpp Vertex::adjacentVertices()`"
 
     Iterate over the vertices edge-connected to this vertex.
     ```cpp
-    for(VertexPtr v : vert.adjacentVertices()) {
+    for(Vertex v : vert.adjacentVertices()) {
       // do science here
     }
     ```
 
-??? func "`#!cpp VertexPtr::adjacentEdges()`"
+??? func "`#!cpp Vertex::adjacentEdges()`"
 
     Iterate over the edges incident on this vertex.
     ```cpp
-    for(EdgePtr e : vert.adjacentEdges()) {
+    for(Edge e : vert.adjacentEdges()) {
       // do science here
     }
     ```
 
-??? func "`#!cpp VertexPtr::adjacentFaces()`"
+??? func "`#!cpp Vertex::adjacentFaces()`"
 
     Iterate over the faces incident on this vertex.
     ```cpp
-    for(FacePtr f : vert.adjacentFaces()) {
+    for(Face f : vert.adjacentFaces()) {
       // do science here
     }
     ```
 
 ### Around an edge
 
-??? func "`#!cpp EdgePtr::adjacentHalfedges()`"
+??? func "`#!cpp Edge::adjacentHalfedges()`"
 
     Iterate over the two halfedges incident on this edge.
     ```cpp
-    for(HalfedgePtr he : edge.adjacentHalfedges()) {
+    for(Halfedge he : edge.adjacentHalfedges()) {
       // do science here
     }
     ```
 
-??? func "`#!cpp EdgePtr::adjacentFaces()`"
+??? func "`#!cpp Edge::adjacentFaces()`"
 
     Iterate over the (one or two) faces incident on this edge.
     ```cpp
-    for(FacePtr f : edge.adjacentFaces()) {
+    for(Face f : edge.adjacentFaces()) {
       // do science here
     }
     ```
 
 ### Around a face
 
-??? func "`#!cpp FacePtr::adjacentVertices()`"
+??? func "`#!cpp Face::adjacentVertices()`"
     Iterate over the vertices adjacent to a face.
     ```cpp
-    for(VertexPtr v : face.adjacentVertices()) {
+    for(Vertex v : face.adjacentVertices()) {
       // do science here
     }
     ```
 
-??? func "`#!cpp FacePtr::adjacentHalfedges()`"
+??? func "`#!cpp Face::adjacentHalfedges()`"
     Iterate over the halfedges incident on a face.
     ```cpp
-    for(HalfedgePtr he : face.adjacentHalfedges()) {
+    for(Halfedge he : face.adjacentHalfedges()) {
       // do science here
     }
     ```
 
-??? func "`#!cpp FacePtr::adjacentEdges()`"
+??? func "`#!cpp Face::adjacentEdges()`"
     Iterate over the edges on the boundary of a face.
     ```cpp
-    for(EdgePtr e : face.adjacentEdges()) {
+    for(Edge e : face.adjacentEdges()) {
       // do science here
     }
     ```
 
-??? func "`#!cpp FacePtr::adjacentFaces()`"
+??? func "`#!cpp Face::adjacentFaces()`"
     Iterate over the faces adjacent to a face, across each edge.
     ```cpp
-    for(FacePtr f : face.adjacentFaces()) {
+    for(Face f : face.adjacentFaces()) {
       // do science here
     }
     ```
@@ -179,20 +179,20 @@ Use these routines to access elements of the mesh by their index.
 
 ---
 
-??? func "`#!cpp HalfedgePtr HalfedgeMesh::halfedge(size_t index)`"
+??? func "`#!cpp Halfedge HalfedgeMesh::halfedge(size_t index)`"
     Constructs a reference to the i'th halfedge in the mesh. `0 <= index < nHalfedges()`.
     
-??? func "`#!cpp VertexPtr HalfedgeMesh::vertex(size_t index)`"
+??? func "`#!cpp Vertex HalfedgeMesh::vertex(size_t index)`"
     Constructs a reference to the i'th vertex in the mesh. `0 <= index < nVertices()`.
     
-??? func "`#!cpp FacePtr HalfedgeMesh::face(size_t index)`"
+??? func "`#!cpp Face HalfedgeMesh::face(size_t index)`"
     Constructs a reference to the i'th face in the mesh. `0 <= index < nFaces()`.
     
-??? func "`#!cpp EdgePtr HalfedgeMesh::edge(size_t index)`"
+??? func "`#!cpp Edge HalfedgeMesh::edge(size_t index)`"
     Constructs a reference to the i'th edge in the mesh. `0 <= index < nEdges()`.
     
-??? func "`#!cpp FacePtr HalfedgeMesh::face(size_t index)`"
+??? func "`#!cpp Face HalfedgeMesh::face(size_t index)`"
     Constructs a reference to the i'th face in the mesh. `0 <= index < nFaces()`.
 
-??? func "`#!cpp FacePtr HalfedgeMesh::boundaryLoop(size_t index)`"
+??? func "`#!cpp Face HalfedgeMesh::boundaryLoop(size_t index)`"
     Constructs a reference to the i'th boundary loop in the mesh. `0 <= index < nBoundaryLoops()`.

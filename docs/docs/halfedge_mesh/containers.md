@@ -3,12 +3,12 @@ The halfedge mesh class is equipped with a system of containers for associating 
 ```cpp
 // on vertices
 VertexData<double> myVertexScalar(mesh);
-VertexPtr v = /* some vertex */;
+Vertex v = /* some vertex */;
 myVertexScalar[v] = 42.;
 
 // on faces
 FaceData<Vector3> myFaceVector(mesh);
-FacePtr f = /* some face */;
+Face f = /* some face */;
 myFaceVector[f] = Vector3{1., 2., 3.};
 ```
 and so on.
@@ -19,7 +19,7 @@ A key feature of the `MeshData<>` containers is that they **automatically adapt 
 
 ## Mesh data types
 
-The mesh data types are all templated on a common base class: `MeshData<E,T>`, where `E` is an element pointer type (such as `VertexPtr`) and `T` is a scalar type (such as `double`). The first template argument should usually be omitted in user code; the various element containers are all typedef'd with concise names as follows:
+The mesh data types are all templated on a common base class: `MeshData<E,T>`, where `E` is an element pointer type (such as `Vertex`) and `T` is a scalar type (such as `double`). The first template argument should usually be omitted in user code; the various element containers are all typedef'd with concise names as follows:
 
 - `VertexData<T>` data at vertices
 - `HalfedgeData<T>` data at (interior and exterior) halfedges 
@@ -53,7 +53,7 @@ Additionally, see the vector-based initializers in [vector interop](containers.m
     ```cpp
     // on vertices
     VertexData<double> myVertexScalar(mesh);
-    VertexPtr v = /* some vertex */;
+    Vertex v = /* some vertex */;
     myVertexScalar[v] = 42.;
     double val = myVertexScalar[v];
     ```
@@ -160,14 +160,14 @@ Scalar values on edges often carry meaning with respect to some oriented directi
 
 `EdgeData<T>` containers offer a pair of special additional accessors for oriented data, which handle the sign flips automatically. Note that they cannot be instantiated unless the scalar type `T` supports a unary `-` operator.
 
-??? func "`#!cpp T EdgeData<T>::getOriented(HalfedgePtr he)`"
+??? func "`#!cpp T EdgeData<T>::getOriented(Halfedge he)`"
 
     Access edge-valued data with sign determined by canonical halfedge orientation.
 
     Returns `edgeData[he.edge()]` if `he == he.edge().halfedge()`, or `-edgeData[he.edge()]` otherwise.
 
 
-??? func "`#!cpp void EdgeData<T>::setOriented(HalfedgePtr he, T val)`"
+??? func "`#!cpp void EdgeData<T>::setOriented(Halfedge he, T val)`"
     
     Access edge-valued data with sign determined by canonical halfedge orientation.
 

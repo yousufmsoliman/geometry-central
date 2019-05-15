@@ -78,7 +78,7 @@ VertexData<Vector3> PlyHalfedgeMeshData::getVertexColors() {
     VertexData<unsigned char> r = getVertexProperty<unsigned char>("red");
     VertexData<unsigned char> g = getVertexProperty<unsigned char>("green");
     VertexData<unsigned char> b = getVertexProperty<unsigned char>("blue");
-    for (VertexPtr v : mesh->vertices()) {
+    for (Vertex v : mesh->vertices()) {
       color[v][0] = r[v] / 255.0;
       color[v][1] = g[v] / 255.0;
       color[v][2] = b[v] / 255.0;
@@ -93,7 +93,7 @@ VertexData<Vector3> PlyHalfedgeMeshData::getVertexColors() {
       VertexData<double> r = getVertexProperty<double>("red");
       VertexData<double> g = getVertexProperty<double>("green");
       VertexData<double> b = getVertexProperty<double>("blue");
-      for (VertexPtr v : mesh->vertices()) {
+      for (Vertex v : mesh->vertices()) {
         color[v][0] = r[v];
         color[v][1] = g[v];
         color[v][2] = b[v];

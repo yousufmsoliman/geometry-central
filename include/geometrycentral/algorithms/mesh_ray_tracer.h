@@ -8,7 +8,7 @@ namespace geometrycentral {
 struct RayHitResult {
   bool hit;
   double tHit;
-  FacePtr face;
+  Face face;
   Vector3 baryCoords;
 };
 

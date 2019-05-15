@@ -15,10 +15,10 @@ MeshEmbeddedCurve::MeshEmbeddedCurve(Geometry<Euclidean>* geometry_) : geometry(
 
 
 // Helper utilities
-Vector3 MeshEmbeddedCurve::barycoordsForHalfedgePoint(HalfedgePtr he, double t) {
+Vector3 MeshEmbeddedCurve::barycoordsForHalfedgePoint(Halfedge he, double t) {
 
   Vector3 bCoord{0.0, 0.0, 0.0};
-  HalfedgePtr currHe = he.face().halfedge();
+  Halfedge currHe = he.face().halfedge();
   for (size_t i = 0; i < 3; i++) {
     if (currHe == he) {
       bCoord[i] = 1.0 - t;
@@ -37,7 +37,7 @@ Vector3 MeshEmbeddedCurve::positionOfSegmentEndpoint(SegmentEndpoint& p) {
     return geometry->position(p.halfedge.vertex()) + p.tCross * geometry->vector(p.halfedge);
   } else {
     Vector3 pos{0.0, 0.0, 0.0};
-    HalfedgePtr currHe = p.face.halfedge();
+    Halfedge currHe = p.face.halfedge();
     for (size_t i = 0; i < 3; i++) {
       pos += geometry->position(currHe.vertex()) * p.faceCoords[i];
       currHe = currHe.next();
@@ -46,7 +46,7 @@ Vector3 MeshEmbeddedCurve::positionOfSegmentEndpoint(SegmentEndpoint& p) {
   }
 }
 
-FacePtr MeshEmbeddedCurve::faceBefore(SegmentEndpoint& p) {
+Face MeshEmbeddedCurve::faceBefore(SegmentEndpoint& p) {
   if (p.isEdgeCrossing) {
     return p.halfedge.face();
   } else {
@@ -54,7 +54,7 @@ FacePtr MeshEmbeddedCurve::faceBefore(SegmentEndpoint& p) {
   }
 }
 
-FacePtr MeshEmbeddedCurve::faceAfter(SegmentEndpoint& p) {
+Face MeshEmbeddedCurve::faceAfter(SegmentEndpoint& p) {
   if (p.isEdgeCrossing) {
     return p.halfedge.twin().face();
   } else {
@@ -62,8 +62,8 @@ FacePtr MeshEmbeddedCurve::faceAfter(SegmentEndpoint& p) {
   }
 }
 
-HalfedgePtr MeshEmbeddedCurve::connectingHalfedge(FacePtr f1, FacePtr f2) {
-  for (HalfedgePtr he : f1.adjacentHalfedges()) {
+Halfedge MeshEmbeddedCurve::connectingHalfedge(Face f1, Face f2) {
+  for (Halfedge he : f1.adjacentHalfedges()) {
     if (he.twin().face() == f2) {
       return he;
     }
@@ -71,9 +71,9 @@ HalfedgePtr MeshEmbeddedCurve::connectingHalfedge(FacePtr f1, FacePtr f2) {
   throw std::runtime_error("Faces do not share an adjacent halfedge");
 }
 
-bool MeshEmbeddedCurve::facesAreAdjacentOrEqual(FacePtr f1, FacePtr f2) {
+bool MeshEmbeddedCurve::facesAreAdjacentOrEqual(Face f1, Face f2) {
   if (f1 == f2) return true;
-  for (HalfedgePtr he : f1.adjacentHalfedges()) {
+  for (Halfedge he : f1.adjacentHalfedges()) {
     if (he.twin().face() == f2) {
       return true;
     }
@@ -81,7 +81,7 @@ bool MeshEmbeddedCurve::facesAreAdjacentOrEqual(FacePtr f1, FacePtr f2) {
   return false;
 }
 
-double MeshEmbeddedCurve::crossingPointAlongEdge(HalfedgePtr sharedHe, Vector3 bCoord1, Vector3 bCoord2) {
+double MeshEmbeddedCurve::crossingPointAlongEdge(Halfedge sharedHe, Vector3 bCoord1, Vector3 bCoord2) {
 
 
   // Build a coordinate space with the shared edge as the y coordinate
@@ -93,7 +93,7 @@ double MeshEmbeddedCurve::crossingPointAlongEdge(HalfedgePtr sharedHe, Vector3 b
   // Coordinates in first face
   Vector2 p1{0.0, 0.0};
   Vector3 basisX1 = cross(basisY, geometry->normal(sharedHe.face()));
-  HalfedgePtr currHe = sharedHe.face().halfedge();
+  Halfedge currHe = sharedHe.face().halfedge();
   for (size_t i = 0; i < 3; i++) {
     Vector3 pv = geometry->position(currHe.vertex()) - rootP;
     p1 += Vector2{dot(basisX1, pv), dot(basisY, pv)} * bCoord1[i];
@@ -127,13 +127,13 @@ double MeshEmbeddedCurve::scalarFunctionZeroPoint(double f0, double f1) {
 }
 
 
-void MeshEmbeddedCurve::tryExtendBack(FacePtr f, Vector3 bCoord) {
+void MeshEmbeddedCurve::tryExtendBack(Face f, Vector3 bCoord) {
   if (segmentPoints.size() == 0 || facesAreAdjacentOrEqual(f, faceAfter(segmentPoints.back()))) {
     extendBack(f, bCoord);
   }
 }
 
-void MeshEmbeddedCurve::extendBack(FacePtr f, Vector3 bCoord) {
+void MeshEmbeddedCurve::extendBack(Face f, Vector3 bCoord) {
 
   // Special case if this is the start of the curve
   if (segmentPoints.size() == 0) {
@@ -160,7 +160,7 @@ void MeshEmbeddedCurve::extendBack(FacePtr f, Vector3 bCoord) {
     }
 
     // Create a new crossing
-    HalfedgePtr sharedHe = connectingHalfedge(faceAfter(oldEnd), f);
+    Halfedge sharedHe = connectingHalfedge(faceAfter(oldEnd), f);
     double t = crossingPointAlongEdge(sharedHe, oldEnd.faceCoords, bCoord);
     segmentPoints.push_back(SegmentEndpoint(sharedHe, t));
 
@@ -287,18 +287,18 @@ void MeshEmbeddedCurve::setFromZeroLevelset(VertexData<double>& implicitF) {
 
   clearCurve();
 
-  auto isForwardCrossingHalfedge = [&](HalfedgePtr he) {
+  auto isForwardCrossingHalfedge = [&](Halfedge he) {
     return (implicitF[he.vertex()] <= 0 && implicitF[he.twin().vertex()] > 0);
   };
 
   // = Find any halfedge crossing the from negative to positive
-  HalfedgePtr startingHe;
+  Halfedge startingHe;
 
   // Check boundary halfedges first
-  for (HalfedgePtr he : mesh->realHalfedges()) {
+  for (Halfedge he : mesh->realHalfedges()) {
     if (!he.twin().isReal()) {
-      VertexPtr vTail = he.vertex();
-      VertexPtr vTip = he.twin().vertex();
+      Vertex vTail = he.vertex();
+      Vertex vTip = he.twin().vertex();
 
       if (isForwardCrossingHalfedge(he)) {
         startingHe = he;
@@ -307,10 +307,10 @@ void MeshEmbeddedCurve::setFromZeroLevelset(VertexData<double>& implicitF) {
     }
   }
   // Check all halfedges now
-  if (startingHe == HalfedgePtr()) {
-    for (HalfedgePtr he : mesh->realHalfedges()) {
-      VertexPtr vTail = he.vertex();
-      VertexPtr vTip = he.twin().vertex();
+  if (startingHe == Halfedge()) {
+    for (Halfedge he : mesh->realHalfedges()) {
+      Vertex vTail = he.vertex();
+      Vertex vTip = he.twin().vertex();
 
       if (isForwardCrossingHalfedge(he)) {
         startingHe = he;
@@ -318,7 +318,7 @@ void MeshEmbeddedCurve::setFromZeroLevelset(VertexData<double>& implicitF) {
       }
     }
   }
-  if (startingHe == HalfedgePtr()) {
+  if (startingHe == Halfedge()) {
     cout << "WARNING: Could not construct curve; implicit function has no zero level set" << endl;
     return;
   }
@@ -329,7 +329,7 @@ void MeshEmbeddedCurve::setFromZeroLevelset(VertexData<double>& implicitF) {
                                                                             implicitF[startingHe.twin().vertex()])));
 
   // = Walk level set, building curve
-  HalfedgePtr walkHe = startingHe;
+  Halfedge walkHe = startingHe;
   do {
 
     // Find next halfedge
@@ -364,16 +364,16 @@ void MeshEmbeddedCurve::setFromZeroLevelset(VertexData<double>& implicitF) {
   }
 }
 
-FacePtr MeshEmbeddedCurve::startingFace(bool reportForClosed) {
-  if (segmentPoints.size() == 0) return FacePtr();
-  if (isClosed() && !reportForClosed) return FacePtr();
+Face MeshEmbeddedCurve::startingFace(bool reportForClosed) {
+  if (segmentPoints.size() == 0) return Face();
+  if (isClosed() && !reportForClosed) return Face();
   return faceBefore(segmentPoints.front());
 }
 
 
-FacePtr MeshEmbeddedCurve::endingFace(bool reportForClosed) {
-  if (segmentPoints.size() == 0) return FacePtr();
-  if (isClosed() && !reportForClosed) return FacePtr();
+Face MeshEmbeddedCurve::endingFace(bool reportForClosed) {
+  if (segmentPoints.size() == 0) return Face();
+  if (isClosed() && !reportForClosed) return Face();
   return faceAfter(segmentPoints.back());
 }
 
@@ -406,7 +406,7 @@ std::vector<CurveSegment> MeshEmbeddedCurve::getCurveSegments() {
       newSeg.face = p1.face;
       newSeg.startBaryCoord = p1.faceCoords;
       newSeg.startPosition = positionOfSegmentEndpoint(p1);
-      newSeg.startHe = HalfedgePtr();
+      newSeg.startHe = Halfedge();
     }
 
     // End point
@@ -417,7 +417,7 @@ std::vector<CurveSegment> MeshEmbeddedCurve::getCurveSegments() {
     } else {
       newSeg.endBaryCoord = p2.faceCoords;
       newSeg.endPosition = positionOfSegmentEndpoint(p2);
-      newSeg.endHe = HalfedgePtr();
+      newSeg.endHe = Halfedge();
     }
 
     segments.push_back(newSeg);
@@ -533,10 +533,10 @@ void MeshEmbeddedCurve::computeCurveGeometry() {
     curveNormalFace = unit(curveNormalFace);
     segmentNormals.push_back(curveNormalFace);
 
-    if (seg.startHe != HalfedgePtr()) {
+    if (seg.startHe != Halfedge()) {
       segmentNormalsAgainstStartHe.push_back(curveNormalFace / unit(gc.halfedgeFaceCoords[seg.startHe]));
     }
-    if (seg.endHe != HalfedgePtr()) {
+    if (seg.endHe != Halfedge()) {
       segmentNormalsAgainstEndHe.push_back(curveNormalFace / unit(gc.halfedgeFaceCoords[seg.endHe]));
     }
   }
@@ -597,7 +597,7 @@ size_t MeshEmbeddedCurve::nSegments() {
 double CurveSegment::length() { return norm(startPosition - endPosition); }
 
 
-bool MeshEmbeddedCurve::crossesFace(FacePtr f) {
+bool MeshEmbeddedCurve::crossesFace(Face f) {
   for (SegmentEndpoint& s : segmentPoints) {
     if (faceBefore(s) == f || faceAfter(s) == f) {
       return true;

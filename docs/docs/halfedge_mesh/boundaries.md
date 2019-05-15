@@ -4,17 +4,17 @@ Mesh boundaries in halfedge meshes are modelled by logically treating each _boun
 
 ## Exterior halfedges
 
-Generally speaking, most nearly all routines involving halfedges include both interior and exterior halfedges, as this is most often what is needed in algorithms. `HalfedgeData<>` containers can hold data on exterior halfedges, and iterators (like `VertexPtr::outgoingHalfedges`) will iterator over both interior and exterior halfedges.
+Generally speaking, most nearly all routines involving halfedges include both interior and exterior halfedges, as this is most often what is needed in algorithms. `HalfedgeData<>` containers can hold data on exterior halfedges, and iterators (like `Vertex::outgoingHalfedges`) will iterate over both interior and exterior halfedges.
 
 A few routines explicitly indicate whether they process interior halfedges, exterior halfedges, or both, such as `HalfedgeMesh::nInteriorHalfedges()`.
 
-??? func "`#!cpp bool HalfedgePtr::isInterior()`"
+??? func "`#!cpp bool Halfedge::isInterior()`"
     **Return:** true if the halfedge is an interior halfedge, and false if it is an exterior halfedge.
 
 
 ## Faces and boundary loops
 
-In some situations, boundary loops will be treated as faces of the mesh. For instance, calling `HalfedgePtr::face()` on an exterior face will yield a `FacePtr` to its boundary loop.  However, we have not really _added_ a face to a user's mesh: `HalfedgeMesh::nFaces()` will still report the input number of faces, etc. 
+In some situations, boundary loops will be treated as faces of the mesh. For instance, calling `Halfedge::face()` on an exterior face will yield a `Face` to its boundary loop.  However, we have not really _added_ a face to a user's mesh: `HalfedgeMesh::nFaces()` will still report the input number of faces, etc. 
 
 
 ## Element boundary properties

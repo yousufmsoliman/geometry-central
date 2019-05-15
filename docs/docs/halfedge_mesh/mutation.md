@@ -11,13 +11,13 @@ All operations invalidate the canonical ordering.
 
 ## Dynamic pointer types
 
-A few of the operations listed below invalidate outstanding element references (like `HalfedgePtr`) by re-indexing the elements of the mesh. [Containers](containers.md) automatically update after re-indexing, and often code can be structured such that no element references need to be maintained across an invalidation.
+A few of the operations listed below invalidate outstanding element references (like `Halfedge`) by re-indexing the elements of the mesh. [Containers](containers.md) automatically update after re-indexing, and often code can be structured such that no element references need to be maintained across an invalidation.
 
-However, if it is necessary to keep a reference to an element through a re-indexing, the `DynamicHalfedgePtr` can be used. These types behave like a `HalfedgePtr`, with the exception that they automatically update to remain valid when a mesh is re-indexed. These types should only be used when necessary, because they are expensive to maintain.
+However, if it is necessary to keep a reference to an element through a re-indexing, the `DynamicHalfedge` can be used. These types behave like a `Halfedge`, with the exception that they automatically update to remain valid when a mesh is re-indexed. These types should only be used when necessary, because they are expensive to maintain.
 
 ## In-place modifications
 
-??? func "`#!cpp bool HalfedgeMesh::flip(EdgePtr e)`"
+??? func "`#!cpp bool HalfedgeMesh::flip(Edge e)`"
 
     Flip an edge by rotating counter-clockwise. 
 
@@ -28,7 +28,7 @@ However, if it is necessary to keep a reference to an element through a re-index
 
     **Return:** true if the edge was actually flipped 
 
-??? func "`#!cpp void HalfedgeMesh::setEdgeHalfedge(EdgePtr e, HalfedgePtr he)`"
+??? func "`#!cpp void HalfedgeMesh::setEdgeHalfedge(Edge e, Halfedge he)`"
 
     Re-index to ensure that `e.halfedge() == he`.
     
@@ -42,41 +42,41 @@ Note that some operations my re-use existing elements to create their output. Fo
 
 !!! warning "Boundary loop invalidation"
 
-    There is one special exception to the rule that inserting does not invalidate indexing. `FacePtr`s which point to boundary loops are invalidated after any operation which adds faces to the mesh. This is a consequence of the way we index boundary loops separate from faces, even though they are essentially faces in practice (see [Boundaries](boundaries.md) and [Internals](internals.md)) for details.
+    There is one special exception to the rule that inserting does not invalidate indexing. `Face`s which point to boundary loops are invalidated after any operation which adds faces to the mesh. This is a consequence of the way we index boundary loops separate from faces, even though they are essentially faces in practice (see [Boundaries](boundaries.md) and [Internals](internals.md)) for details.
 
-    As always, if a reference to a boundary loop must be preserved across an operation, a `DynamicFacePtr` will remain valid.
+    As always, if a reference to a boundary loop must be preserved across an operation, a `DynamicFace` will remain valid.
 
 ---
 
-??? func "`#!cpp HalfedgePtr HalfedgeMesh::insertVertexAlongEdge(EdgePtr e)`"
+??? func "`#!cpp Halfedge HalfedgeMesh::insertVertexAlongEdge(Edge e)`"
     // Adds a vertex along an edge, increasing degree of faces. Returns ptr along the new edge, with he.vertex() as new
     // vertex and he.edge().halfedge() == he. Preserves canonical direction of edge.halfedge() for both halves of new
     // edge.
-    HalfedgePtr insertVertexAlongEdge(EdgePtr e);
+    Halfedge insertVertexAlongEdge(Edge e);
 
-??? func "`#!cpp HalfedgePtr HalfedgeMesh::splitEdge(HalfedgePtr he)`"
+??? func "`#!cpp Halfedge HalfedgeMesh::splitEdge(Halfedge he)`"
     // Split an edge, also splitting adjacent faces. Returns new vertex.
-    HalfedgePtr splitEdge(EdgePtr e);
+    Halfedge splitEdge(Edge e);
 
-??? func "`#!cpp HalfedgePtr HalfedgeMesh::splitEdge(EdgePtr e)`"
+??? func "`#!cpp Halfedge HalfedgeMesh::splitEdge(Edge e)`"
 
     Equivalent to `splitEdge(e.halfedge())`.
 
-??? func "`#!cpp VertexPtr HalfedgeMesh::insertVertex(FacePtr f)`"
+??? func "`#!cpp Vertex HalfedgeMesh::insertVertex(Face f)`"
 
     // Add vertex inside face and triangulate. Returns new vertex.
-    VertexPtr insertVertex(FacePtr f);
+    Vertex insertVertex(Face f);
 
 
-??? func "`#!cpp HalfedgePtr HalfedgeMesh::connectVertices(FacePtr face, VertexPtr vA, VertexPtr vB)`"
+??? func "`#!cpp Halfedge HalfedgeMesh::connectVertices(Face face, Vertex vA, Vertex vB)`"
 
     // Same as above. Faster if you know the face.
-    HalfedgePtr connectVertices(FacePtr face, VertexPtr vA, VertexPtr vB);
+    Halfedge connectVertices(Face face, Vertex vA, Vertex vB);
 
-??? func "`#!cpp std::vector<FacePtr> HalfedgeMesh::triangulate(FacePtr face)`"
+??? func "`#!cpp std::vector<Face> HalfedgeMesh::triangulate(Face face)`"
 
     // Triangulate in a face, returns all subfaces
-    std::vector<FacePtr> triangulate(FacePtr face);
+    std::vector<Face> triangulate(Face face);
 
 
 ### Trimming storage
@@ -88,7 +88,7 @@ To amortize the cost of allocation, mesh buffers are resized sporadically in lar
 
     Free an additional storage associated with the mesh.
 
-    As with insertions, does not invalidate references, except `FacePtr`s which point to boundary loops.
+    As with insertions, does not invalidate references, except `Face`s which point to boundary loops.
 
 
 ## Deletions
@@ -96,18 +96,18 @@ To amortize the cost of allocation, mesh buffers are resized sporadically in lar
 These routines delete mesh elements.
 
 
-??? func "`#!cpp VertexPtr HalfedgeMesh::collapseEdge(EdgePtr e)`"
+??? func "`#!cpp Vertex HalfedgeMesh::collapseEdge(Edge e)`"
 
-    // Collapse an edge. Returns the vertex adjacent to that edge which still exists. Returns VertexPtr() if not
+    // Collapse an edge. Returns the vertex adjacent to that edge which still exists. Returns Vertex() if not
     // collapsible.
-    VertexPtr collapseEdge(EdgePtr e);
+    Vertex collapseEdge(Edge e);
 
-??? func "`#!cpp bool HalfedgeMesh::removeFaceAlongBoundary(FacePtr f)`"
+??? func "`#!cpp bool HalfedgeMesh::removeFaceAlongBoundary(Face f)`"
 
     // Remove a face which is adjacent to the boundary of the mesh (along with its edge on the boundary).
     // Face must have exactly one boundary edge.
     // Returns true if could remove
-    bool removeFaceAlongBoundary(FacePtr f);
+    bool removeFaceAlongBoundary(Face f);
 
 
 ### Compressed mode
@@ -130,7 +130,7 @@ The `makeCompressed()` function invalidates pointers, and incurs an update of ex
 
 ??? func "`#!cpp void HalfedgeMesh::makeCompressed()`"
 
-    Re-index the elements of the mesh to yield a dense enumeration. Invalidates all VertexPtr (etc) objects.
+    Re-index the elements of the mesh to yield a dense enumeration. Invalidates all Vertex (etc) objects.
 
     Does nothing if the mesh is already compressed.
 

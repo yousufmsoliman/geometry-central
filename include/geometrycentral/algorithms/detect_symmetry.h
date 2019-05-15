@@ -8,9 +8,9 @@ namespace geometrycentral {
 
 struct SymmetryResult {
   bool symmetryFound = false;                     // was a symmetry found? is this data valid?
-  std::vector<VertexPtr> canonicalVertices;       // a representative entry from each
+  std::vector<Vertex> canonicalVertices;       // a representative entry from each
                                                   // set of symmetry pairs
-  VertexData<std::vector<VertexPtr>> symmetrySet; // for each unique vertex,
+  VertexData<std::vector<Vertex>> symmetrySet; // for each unique vertex,
                                                   // all others vertices that
                                                   // are symmetry pairs
 };

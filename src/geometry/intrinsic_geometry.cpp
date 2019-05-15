@@ -76,7 +76,7 @@ void IntrinsicGeometry::computeFaceAreas() {
   // "Miscalculating Area and Angles of a Needle-like Triangle" https://www.cs.unc.edu/~snoeyink/c/c205/Triangle.pdf
 
   faceAreas = FaceData<double>(mesh);
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
 
     // Herons formulat
     double a = edgeLengths[f.halfedge().edge()];
@@ -94,9 +94,9 @@ void IntrinsicGeometry::computeFaceAreas() {
 
 void IntrinsicGeometry::computeVertexDualAreas() {
   vertexDualAreas = VertexData<double>(mesh);
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     double A = 0;
-    for (FacePtr f : v.adjacentFaces()) {
+    for (Face f : v.adjacentFaces()) {
       A += faceAreas[f];
     }
     vertexDualAreas[v] = A / 3.0;
@@ -107,11 +107,11 @@ void IntrinsicGeometry::computeHalfedgeFaceCoords() {
   verifyTriangular(mesh);
   halfedgeFaceCoords = HalfedgeData<Complex>(mesh);
 
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
 
-    HalfedgePtr he0 = f.halfedge();
-    HalfedgePtr he1 = he0.next();
-    HalfedgePtr he2 = he1.next();
+    Halfedge he0 = f.halfedge();
+    Halfedge he1 = he0.next();
+    Halfedge he2 = he1.next();
 
     // Angles measured against he0
     halfedgeFaceCoords[he0] = Complex(edgeLengths[he0.edge()], 0.0);
@@ -125,7 +125,7 @@ void IntrinsicGeometry::computeHalfedgeFaceCoords() {
     halfedgeFaceCoords[he2] = -std::exp(IM_I * theta2) * Complex(edgeLengths[he2.edge()], 0.0);
   }
 
-  for (HalfedgePtr he : mesh->imaginaryHalfedges()) {
+  for (Halfedge he : mesh->imaginaryHalfedges()) {
     halfedgeFaceCoords[he] =
         std::numeric_limits<double>::quiet_NaN(); // using this basis is never a good idea, so NaN-out
   }
@@ -136,7 +136,7 @@ void IntrinsicGeometry::computeFaceTransportCoefs() {
 
   faceTransportCoefs = HalfedgeData<Complex>(mesh);
 
-  for (HalfedgePtr he : mesh->realHalfedges()) {
+  for (Halfedge he : mesh->realHalfedges()) {
     if (he.twin().isReal()) {
       Complex angleInSource = halfedgeFaceCoords[he];
       Complex desiredAngleInTarget = -halfedgeFaceCoords[he.twin()];
@@ -149,7 +149,7 @@ void IntrinsicGeometry::computeVertexTransportCoefs() {
 
   vertexTransportCoefs = HalfedgeData<Complex>(mesh);
 
-  for (HalfedgePtr he : mesh->allHalfedges()) {
+  for (Halfedge he : mesh->allHalfedges()) {
     Complex angleInSource = halfedgeVertexCoords[he];
     Complex desiredAngleInTarget = -halfedgeVertexCoords[he.twin()];
     vertexTransportCoefs[he] = desiredAngleInTarget / angleInSource;
@@ -161,7 +161,7 @@ void IntrinsicGeometry::computeHalfedgeOppositeAngles() {
   verifyTriangular(mesh);
 
   halfedgeOppositeAngles = HalfedgeData<double>(mesh);
-  for (HalfedgePtr he : mesh->allHalfedges()) {
+  for (Halfedge he : mesh->allHalfedges()) {
     if (he.isReal()) {
 
       double lOpp = edgeLengths[he.edge()];
@@ -182,11 +182,11 @@ void IntrinsicGeometry::computeHalfedgeOppositeAngles() {
 
 void IntrinsicGeometry::computeHalfedgeCotanWeights() {
   halfedgeCotanWeights = HalfedgeData<double>(mesh);
-  for (HalfedgePtr he : mesh->realHalfedges()) {
+  for (Halfedge he : mesh->realHalfedges()) {
     // halfedgeCotanWeights[he] = 1.0 / std::tan(halfedgeOppositeAngles[he]);
     halfedgeCotanWeights[he] = std::tan(PI / 2.0 - halfedgeOppositeAngles[he]);
   }
-  for (HalfedgePtr he : mesh->imaginaryHalfedges()) {
+  for (Halfedge he : mesh->imaginaryHalfedges()) {
     halfedgeCotanWeights[he] = std::numeric_limits<double>::quiet_NaN();
   }
 }
@@ -194,7 +194,7 @@ void IntrinsicGeometry::computeHalfedgeCotanWeights() {
 
 void IntrinsicGeometry::computeEdgeCotanWeights() {
   edgeCotanWeights = EdgeData<double>(mesh);
-  for (EdgePtr e : mesh->edges()) {
+  for (Edge e : mesh->edges()) {
     double weight = halfedgeCotanWeights[e.halfedge()];
     if (e.halfedge().twin().isReal()) {
       weight += halfedgeCotanWeights[e.halfedge().twin()];
@@ -208,13 +208,13 @@ void IntrinsicGeometry::computeVertexAngleDefects() {
   verifyTriangular(mesh);
 
   vertexAngleDefects = VertexData<double>(mesh);
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     if (v.isBoundary()) {
       // Convention: no curvature at boundary
       vertexAngleDefects[v] = 0;
     } else {
       double sum = 0;
-      for (HalfedgePtr he : v.outgoingHalfedges()) {
+      for (Halfedge he : v.outgoingHalfedges()) {
         sum += halfedgeOppositeAngles[he.next()];
       }
       vertexAngleDefects[v] = 2. * PI - sum;
@@ -225,7 +225,7 @@ void IntrinsicGeometry::computeVertexAngleDefects() {
 
 void IntrinsicGeometry::computeHalfedgeRescaledOppositeAngles() {
   halfedgeRescaledOppositeAngles = HalfedgeData<double>(mesh);
-  for (HalfedgePtr he : mesh->realHalfedges()) {
+  for (Halfedge he : mesh->realHalfedges()) {
     double origSum = 2. * PI - vertexAngleDefects[he.next().next().vertex()];
     halfedgeRescaledOppositeAngles[he] = halfedgeOppositeAngles[he] * 2. * PI / origSum;
   }
@@ -237,15 +237,15 @@ void IntrinsicGeometry::computeHalfedgeVertexCoords() {
 
   halfedgeVertexCoords = HalfedgeData<Complex>(mesh);
 
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
 
     if (v.isBoundary()) {
 
       // First, check what angle we associated with the boundary wedge
       // (recall that in a manifold triangle mesh, there can be at most one boundary wedge)
       double angleSum = 0;
-      HalfedgePtr afterBoundaryHe;
-      for (HalfedgePtr he : v.outgoingHalfedges()) {
+      Halfedge afterBoundaryHe;
+      for (Halfedge he : v.outgoingHalfedges()) {
         if (he.isReal()) {
           angleSum += halfedgeRescaledOppositeAngles[he.next()];
         }
@@ -259,8 +259,8 @@ void IntrinsicGeometry::computeHalfedgeVertexCoords() {
       double coordSum = 0.0;
 
       // Custom loop to orbit CCW
-      HalfedgePtr firstHe = v.halfedge();
-      HalfedgePtr currHe = firstHe;
+      Halfedge firstHe = v.halfedge();
+      Halfedge currHe = firstHe;
       do {
         halfedgeVertexCoords[currHe] = std::exp(coordSum * IM_I);
         if (currHe.isReal()) {
@@ -277,8 +277,8 @@ void IntrinsicGeometry::computeHalfedgeVertexCoords() {
       double coordSum = 0.0;
 
       // Custom loop to orbit CCW
-      HalfedgePtr firstHe = v.halfedge();
-      HalfedgePtr currHe = firstHe;
+      Halfedge firstHe = v.halfedge();
+      Halfedge currHe = firstHe;
       do {
         halfedgeVertexCoords[currHe] = std::exp(coordSum * IM_I);
         coordSum += halfedgeRescaledOppositeAngles[currHe.next()];
@@ -305,7 +305,7 @@ void IntrinsicGeometry::computeBasicDECOperators() {
   { // Hodge 0
     size_t nVerts = mesh->nVertices();
     Eigen::VectorXd hodge0V(nVerts);
-    for (VertexPtr v : mesh->vertices()) {
+    for (Vertex v : mesh->vertices()) {
       double primalArea = 1.0;
       double dualArea = vertexDualAreas[v];
       double ratio = dualArea / primalArea;
@@ -321,7 +321,7 @@ void IntrinsicGeometry::computeBasicDECOperators() {
   { // Hodge 1
     size_t nEdges = mesh->nEdges();
     Eigen::VectorXd hodge1V(nEdges);
-    for (EdgePtr e : mesh->edges()) {
+    for (Edge e : mesh->edges()) {
       double ratio = edgeCotanWeights[e];
       size_t iE = edgeIndices[e];
       hodge1V[iE] = ratio;
@@ -334,7 +334,7 @@ void IntrinsicGeometry::computeBasicDECOperators() {
   { // Hodge 2
     size_t nFaces = mesh->nFaces();
     Eigen::VectorXd hodge2V(nFaces);
-    for (FacePtr f : mesh->faces()) {
+    for (Face f : mesh->faces()) {
       double primalArea = faceAreas[f];
       double dualArea = 1.0;
       double ratio = dualArea / primalArea;

@@ -144,7 +144,7 @@ void WavefrontOBJ::writeHeader(ofstream& out, Geometry<Euclidean>& geometry) {
 void WavefrontOBJ::writeVertices(ofstream& out, Geometry<Euclidean>& geometry) {
   HalfedgeMesh& mesh(geometry.mesh);
 
-  for (VertexPtr v : mesh.vertices()) {
+  for (Vertex v : mesh.vertices()) {
     Vector3 p = geometry.position(v);
     out << "v " << p.x << " " << p.y << " " << p.z << endl;
   }
@@ -153,7 +153,7 @@ void WavefrontOBJ::writeVertices(ofstream& out, Geometry<Euclidean>& geometry) {
 void WavefrontOBJ::writeTexCoords(ofstream& out, Geometry<Euclidean>& geometry, CornerData<Vector2>& texcoords) {
   HalfedgeMesh& mesh(geometry.mesh);
 
-  for (CornerPtr c : mesh.corners()) {
+  for (Corner c : mesh.corners()) {
     if (c.halfedge().isReal()) {
       Vector2 z = texcoords[c];
       out << "vt " << z.x << " " << z.y << endl;
@@ -171,17 +171,17 @@ void WavefrontOBJ::writeFaces(ofstream& out, Geometry<Euclidean>& geometry, bool
     // Get corner indices
     CornerData<size_t> cIndices = mesh.getCornerIndices();
 
-    for (FacePtr f : mesh.faces()) {
+    for (Face f : mesh.faces()) {
       out << "f";
-      for (CornerPtr c : f.adjacentCorners()) {
+      for (Corner c : f.adjacentCorners()) {
         out << " " << indices[c.vertex()] + 1 << "/" << cIndices[c] + 1; // OBJ uses 1-based indexing
       }
       out << endl;
     }
   } else {
-    for (FacePtr f : mesh.faces()) {
+    for (Face f : mesh.faces()) {
       out << "f";
-      for (HalfedgePtr h : f.adjacentHalfedges()) {
+      for (Halfedge h : f.adjacentHalfedges()) {
         out << " " << indices[h.vertex()] + 1; // OBJ uses 1-based indexing
       }
       out << endl;
@@ -219,7 +219,7 @@ bool PLY::write(std::string filename, Geometry<Euclidean>& geometry, VertexData<
   auto round255 = [&](double v) { return static_cast<int>(clamp(std::round(v * 255), 0.0, 255.)); };
 
   // Vertices
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     out << geometry.position(v).x << " ";
     out << geometry.position(v).y << " ";
     out << geometry.position(v).z << " ";
@@ -230,9 +230,9 @@ bool PLY::write(std::string filename, Geometry<Euclidean>& geometry, VertexData<
 
   // Faces
   VertexData<size_t> vInd = mesh->getVertexIndices();
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     out << f.degree();
-    for (VertexPtr v : f.adjacentVertices()) {
+    for (Vertex v : f.adjacentVertices()) {
       out << " " << vInd[v];
     }
     out << endl;

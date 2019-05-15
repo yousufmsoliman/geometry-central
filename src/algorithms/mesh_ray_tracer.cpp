@@ -27,16 +27,16 @@ void MeshRayTracer::buildBVH() {
   rawPositions.resize(mesh->nVertices() * 3);
   rawFaces.resize(mesh->nFaces() * 3);
   VertexData<size_t> vInd = mesh->getVertexIndices();
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     unsigned int i = 3 * vInd[v];
     Vector3 p = geometry->position(v);
     for (unsigned int j = 0; j < 3; j++) rawPositions[i + j] = p[j];
   }
   FaceData<size_t> fInd = mesh->getFaceIndices();
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     unsigned int i = 3 * fInd[f];
     unsigned int j = 0;
-    for (VertexPtr v : f.adjacentVertices()) {
+    for (Vertex v : f.adjacentVertices()) {
       rawFaces[i + j] = vInd[v];
       j++;
     }
@@ -90,7 +90,7 @@ RayHitResult MeshRayTracer::trace(Vector3 start, Vector3 dir) {
 
     return result;
   } else {
-    return RayHitResult{false, std::numeric_limits<double>::quiet_NaN(), FacePtr(), Vector3{-1.0, -1.0, -1.0}};
+    return RayHitResult{false, std::numeric_limits<double>::quiet_NaN(), Face(), Vector3{-1.0, -1.0, -1.0}};
   }
 }
 

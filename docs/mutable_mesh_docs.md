@@ -10,8 +10,8 @@ Beware: As of Oct 2018, these routines are still recently implemented and not we
 
 `HalfedgeMesh.h` contains a variety of the usual mesh modification routines like `triangulate()`, `insertVertex()`, and `collapseEdge()`. You should not modify the mesh except via these functions. Whenever any of these mutation routines is invoked, the following things happen:
 
-- Any element pointers (`VertexPtr`, etc) are immediately invalidated.
-- Any element iterators are immediately invalidated (as in `for(VertexPtr v : mesh->vertices())`, or `for(FacePtr n : f.adjacentFaces())`.
+- Any element pointers (`Vertex`, etc) are immediately invalidated.
+- Any element iterators are immediately invalidated (as in `for(Vertex v : mesh->vertices())`, or `for(Face n : f.adjacentFaces())`.
 - If the operation involved deletion, the mesh is no longer _compressed_ (see below).
 - The mesh is no longer _canonical_ (see below).
 
@@ -21,7 +21,7 @@ Note that the invalidation rules here are similar to `std::vector`-- the invalid
 
 It's a bit inconvenient that mesh pointers get invalidated after mutation calls.  However, the mutation routines return a normal, valid pointer to some relevant mesh element after the modifcation, and with that I've found that you can quite often get away without actually needing to preserve any pointers across a call.
 
-Nonetheless, sometimes you will need to track mesh elements across mutations. For that purpose, there are equivalent _dynamic pointer_ classes (`DynamicVertexPtr` etc), which work just like the usual mesh pointers, except that they are not invalidated by mutation. Of course, dynamic pointers can be converted to traditional pointers, and vice-versa. Use these pointers to keep track of particular elements across mutations.
+Nonetheless, sometimes you will need to track mesh elements across mutations. For that purpose, there are equivalent _dynamic pointer_ classes (`DynamicVertex` etc), which work just like the usual mesh pointers, except that they are not invalidated by mutation. Of course, dynamic pointers can be converted to traditional pointers, and vice-versa. Use these pointers to keep track of particular elements across mutations.
 
 We don't recommended using dynamic pointers for everything, because they are noticebly more expensive in practice, as they use callbacks to respond to buffer resizes and permutations (though they are still amortized O(1)). 
 
@@ -43,7 +43,7 @@ To permute the elements in to the canonical ordering, call `mesh->canonicalize()
 
 ## MeshData Objects
 
-`MeshData<T>` contains are automatically updated as their corresponding mesh is modified. They can _always_ be indexed with a `VertexPtr` (etc), even if the corresponding mesh is not compressed, or is not canonical. This is very useful, because it allows you to write algorithms that track data while modifying a mesh without any extra effort (or storing data on element structs).
+`MeshData<T>` contains are automatically updated as their corresponding mesh is modified. They can _always_ be indexed with a `Vertex` (etc), even if the corresponding mesh is not compressed, or is not canonical. This is very useful, because it allows you to write algorithms that track data while modifying a mesh without any extra effort (or storing data on element structs).
 
 Indexing a `MeshData<T>` container with an integer index is only well-defined if the underlying mesh is compressed. Same for calling `MeshData<T>.toVector()`.
 

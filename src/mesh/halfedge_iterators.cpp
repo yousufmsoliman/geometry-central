@@ -11,15 +11,15 @@ namespace geometrycentral {
 // ==========================================================
 
 // === Incoming halfedges (with imaginary)
-VertexIncomingHalfedgeSet::VertexIncomingHalfedgeSet(HalfedgePtr he) : firstHe(he) {}
+VertexIncomingHalfedgeSet::VertexIncomingHalfedgeSet(Halfedge he) : firstHe(he) {}
 
-VertexIncomingHalfedgeIterator::VertexIncomingHalfedgeIterator(HalfedgePtr startingEdge, bool justStarted_)
+VertexIncomingHalfedgeIterator::VertexIncomingHalfedgeIterator(Halfedge startingEdge, bool justStarted_)
     : currHe(startingEdge), justStarted(justStarted_) {}
 
 // === Incoming halfedges (without imaginary)
-VertexIncomingInteriorHalfedgeSet::VertexIncomingInteriorHalfedgeSet(HalfedgePtr he) : firstHe(he) {}
+VertexIncomingInteriorHalfedgeSet::VertexIncomingInteriorHalfedgeSet(Halfedge he) : firstHe(he) {}
 
-VertexIncomingInteriorHalfedgeIterator::VertexIncomingInteriorHalfedgeIterator(HalfedgePtr startingEdge,
+VertexIncomingInteriorHalfedgeIterator::VertexIncomingInteriorHalfedgeIterator(Halfedge startingEdge,
                                                                                bool justStarted_)
     : currHe(startingEdge), justStarted(justStarted_) {
   // If startingEdge is a boundary edge, the first state of this iterator would
@@ -34,15 +34,15 @@ VertexIncomingInteriorHalfedgeIterator::VertexIncomingInteriorHalfedgeIterator(H
 }
 
 // === Outgoing halfedges (with imaginary)
-VertexOutgoingHalfedgeSet::VertexOutgoingHalfedgeSet(HalfedgePtr he) : firstHe(he) {}
+VertexOutgoingHalfedgeSet::VertexOutgoingHalfedgeSet(Halfedge he) : firstHe(he) {}
 
-VertexOutgoingHalfedgeIterator::VertexOutgoingHalfedgeIterator(HalfedgePtr startingEdge, bool justStarted_)
+VertexOutgoingHalfedgeIterator::VertexOutgoingHalfedgeIterator(Halfedge startingEdge, bool justStarted_)
     : currHe(startingEdge), justStarted(justStarted_) {}
 
 // === Outgoing halfedges (without imaginary)
-VertexOutgoingInteriorHalfedgeSet::VertexOutgoingInteriorHalfedgeSet(HalfedgePtr he) : firstHe(he) {}
+VertexOutgoingInteriorHalfedgeSet::VertexOutgoingInteriorHalfedgeSet(Halfedge he) : firstHe(he) {}
 
-VertexOutgoingInteriorHalfedgeIterator::VertexOutgoingInteriorHalfedgeIterator(HalfedgePtr startingEdge,
+VertexOutgoingInteriorHalfedgeIterator::VertexOutgoingInteriorHalfedgeIterator(Halfedge startingEdge,
                                                                                bool justStarted_)
     : currHe(startingEdge), justStarted(justStarted_) {
   // If startingEdge is a boundary edge, the first state of this iterator would
@@ -57,30 +57,30 @@ VertexOutgoingInteriorHalfedgeIterator::VertexOutgoingInteriorHalfedgeIterator(H
 }
 
 // === Adjacent vertices
-VertexAdjacentVertexSet::VertexAdjacentVertexSet(HalfedgePtr he) : firstHe(he) {}
+VertexAdjacentVertexSet::VertexAdjacentVertexSet(Halfedge he) : firstHe(he) {}
 
-VertexAdjacentVertexIterator::VertexAdjacentVertexIterator(HalfedgePtr startingEdge, bool justStarted_)
+VertexAdjacentVertexIterator::VertexAdjacentVertexIterator(Halfedge startingEdge, bool justStarted_)
     : currHe(startingEdge), justStarted(justStarted_) {}
 
 // === Adjacent faces
-VertexAdjacentFaceSet::VertexAdjacentFaceSet(HalfedgePtr he) : firstHe(he) {}
+VertexAdjacentFaceSet::VertexAdjacentFaceSet(Halfedge he) : firstHe(he) {}
 
-VertexAdjacentFaceIterator::VertexAdjacentFaceIterator(HalfedgePtr startingEdge, bool justStarted_)
+VertexAdjacentFaceIterator::VertexAdjacentFaceIterator(Halfedge startingEdge, bool justStarted_)
     : currHe(startingEdge), justStarted(justStarted_) {}
 
 // === Adjacent edges
-VertexAdjacentEdgeSet::VertexAdjacentEdgeSet(HalfedgePtr he) : firstHe(he) {}
+VertexAdjacentEdgeSet::VertexAdjacentEdgeSet(Halfedge he) : firstHe(he) {}
 
-VertexAdjacentEdgeIterator::VertexAdjacentEdgeIterator(HalfedgePtr startingEdge, bool justStarted_)
+VertexAdjacentEdgeIterator::VertexAdjacentEdgeIterator(Halfedge startingEdge, bool justStarted_)
     : currHe(startingEdge), justStarted(justStarted_) {}
 
 // === Adjacent corners
-VertexAdjacentCornerSet::VertexAdjacentCornerSet(HalfedgePtr he) : firstHe(he) {
+VertexAdjacentCornerSet::VertexAdjacentCornerSet(Halfedge he) : firstHe(he) {
   // Set firstHe to a real halfedge
   if (!firstHe.isReal()) firstHe = firstHe.twin().next();
 }
 
-VertexAdjacentCornerIterator::VertexAdjacentCornerIterator(HalfedgePtr startingEdge, bool justStarted_)
+VertexAdjacentCornerIterator::VertexAdjacentCornerIterator(Halfedge startingEdge, bool justStarted_)
     : currHe(startingEdge), justStarted(justStarted_) {}
 
 // ==========================================================
@@ -88,27 +88,27 @@ VertexAdjacentCornerIterator::VertexAdjacentCornerIterator(HalfedgePtr startingE
 // ==========================================================
 
 // === Adjacent halfedges
-FaceAdjacentHalfedgeSet::FaceAdjacentHalfedgeSet(HalfedgePtr he) : firstHe(he) {}
+FaceAdjacentHalfedgeSet::FaceAdjacentHalfedgeSet(Halfedge he) : firstHe(he) {}
 
-FaceAdjacentHalfedgeIterator::FaceAdjacentHalfedgeIterator(HalfedgePtr startingEdge, bool justStarted_)
+FaceAdjacentHalfedgeIterator::FaceAdjacentHalfedgeIterator(Halfedge startingEdge, bool justStarted_)
     : currHe(startingEdge), justStarted(justStarted_) {}
 
 // === Adjacent vertices
-FaceAdjacentVertexSet::FaceAdjacentVertexSet(HalfedgePtr he) : firstHe(he) {}
+FaceAdjacentVertexSet::FaceAdjacentVertexSet(Halfedge he) : firstHe(he) {}
 
-FaceAdjacentVertexIterator::FaceAdjacentVertexIterator(HalfedgePtr startingEdge, bool justStarted_)
+FaceAdjacentVertexIterator::FaceAdjacentVertexIterator(Halfedge startingEdge, bool justStarted_)
     : currHe(startingEdge), justStarted(justStarted_) {}
 
 // === Adjacent edges
-FaceAdjacentEdgeSet::FaceAdjacentEdgeSet(HalfedgePtr he) : firstHe(he) {}
+FaceAdjacentEdgeSet::FaceAdjacentEdgeSet(Halfedge he) : firstHe(he) {}
 
-FaceAdjacentEdgeIterator::FaceAdjacentEdgeIterator(HalfedgePtr startingEdge, bool justStarted_)
+FaceAdjacentEdgeIterator::FaceAdjacentEdgeIterator(Halfedge startingEdge, bool justStarted_)
     : currHe(startingEdge), justStarted(justStarted_) {}
 
 // === Adjacent faces
-FaceAdjacentFaceSet::FaceAdjacentFaceSet(HalfedgePtr he) : firstHe(he) {}
+FaceAdjacentFaceSet::FaceAdjacentFaceSet(Halfedge he) : firstHe(he) {}
 
-FaceAdjacentFaceIterator::FaceAdjacentFaceIterator(HalfedgePtr startingEdge, bool justStarted_)
+FaceAdjacentFaceIterator::FaceAdjacentFaceIterator(Halfedge startingEdge, bool justStarted_)
     : currHe(startingEdge), justStarted(justStarted_) {
   // face->halfedge could point to a halfedge on the boundary, whose
   // corresponding face should
@@ -133,9 +133,9 @@ FaceAdjacentFaceIterator::FaceAdjacentFaceIterator(HalfedgePtr startingEdge, boo
 }
 
 // === Adjacent corners
-FaceAdjacentCornerSet::FaceAdjacentCornerSet(HalfedgePtr he) : firstHe(he) {}
+FaceAdjacentCornerSet::FaceAdjacentCornerSet(Halfedge he) : firstHe(he) {}
 
-FaceAdjacentCornerIterator::FaceAdjacentCornerIterator(HalfedgePtr startingEdge, bool justStarted_)
+FaceAdjacentCornerIterator::FaceAdjacentCornerIterator(Halfedge startingEdge, bool justStarted_)
     : currHe(startingEdge), justStarted(justStarted_) {}
 
 } // namespace geometrycentral

@@ -12,14 +12,14 @@ namespace geometrycentral {
 struct SegmentEndpoint {
 
   // Construct an edge crossing endpoint
-  SegmentEndpoint(HalfedgePtr he, double tCross_) {
+  SegmentEndpoint(Halfedge he, double tCross_) {
     isEdgeCrossing = true;
     halfedge = he;
     tCross = tCross_;
   }
 
   // Construct a face endpoint
-  SegmentEndpoint(FacePtr face_, Vector3 faceCoords_) {
+  SegmentEndpoint(Face face_, Vector3 faceCoords_) {
     isEdgeCrossing = false;
     face = face_;
     faceCoords = faceCoords_;
@@ -27,11 +27,11 @@ struct SegmentEndpoint {
 
   // Most of the time, this is an edge crossing
   bool isEdgeCrossing;
-  HalfedgePtr halfedge; // enters at halfedges, exits halfedge.twin()
+  Halfedge halfedge; // enters at halfedges, exits halfedge.twin()
   double tCross;        // along halfedge
 
   // Can also be a point in a face
-  FacePtr face;
+  Face face;
   Vector3 faceCoords;
 
   // Geometry
@@ -44,7 +44,7 @@ struct SegmentEndpoint {
 
 // A piecewise linear chunk within a face
 struct CurveSegment {
-  FacePtr face;
+  Face face;
 
   Vector3 startBaryCoord;
   Vector3 endBaryCoord;
@@ -52,8 +52,8 @@ struct CurveSegment {
   Vector3 startPosition;
   Vector3 endPosition;
 
-  HalfedgePtr startHe; // both inside of the face
-  HalfedgePtr endHe;
+  Halfedge startHe; // both inside of the face
+  Halfedge endHe;
 
 
   double length();
@@ -70,9 +70,9 @@ public:
   MeshEmbeddedCurve(){};
 
   // Build the curve
-  // void extendFront(FacePtr f, Vector3 bCoord);
-  void extendBack(FacePtr f, Vector3 bCoord);
-  void tryExtendBack(FacePtr f,
+  // void extendFront(Face f, Vector3 bCoord);
+  void extendBack(Face f, Vector3 bCoord);
+  void tryExtendBack(Face f,
                      Vector3 bCoord); // same as extend back, but no-ops if face is not adjacent to current end of curve
   void removeLastEndpoint();
   void removeFirstEndpoint();
@@ -88,15 +88,15 @@ public:
   bool isClosed();
   std::vector<CurveSegment> getCurveSegments();
   std::vector<SegmentEndpoint> getCurveSegmentPoints();
-  FacePtr endingFace(bool reportForClosed = false);
-  FacePtr startingFace(bool reportForClosed = false);
+  Face endingFace(bool reportForClosed = false);
+  Face startingFace(bool reportForClosed = false);
   double computeLength();
   size_t nSegments();
   Vector3 positionOfSegmentEndpoint(SegmentEndpoint& p);
-  FacePtr faceBefore(SegmentEndpoint& p);
-  FacePtr faceAfter(SegmentEndpoint& p);
+  Face faceBefore(SegmentEndpoint& p);
+  Face faceAfter(SegmentEndpoint& p);
 
-  bool crossesFace(FacePtr f);
+  bool crossesFace(Face f);
 
   // Throws an error if this is not a valid closed or open curve. Does not check self-intersection.
   void validate();
@@ -114,10 +114,10 @@ private:
   std::deque<SegmentEndpoint> segmentPoints;
 
   // == Helpers
-  Vector3 barycoordsForHalfedgePoint(HalfedgePtr he, double t);
-  HalfedgePtr connectingHalfedge(FacePtr f1, FacePtr f2);
-  bool facesAreAdjacentOrEqual(FacePtr f1, FacePtr f2);
-  double crossingPointAlongEdge(HalfedgePtr sharedHe, Vector3 bCoord1, Vector3 bCoord2);
+  Vector3 barycoordsForHalfedgePoint(Halfedge he, double t);
+  Halfedge connectingHalfedge(Face f1, Face f2);
+  bool facesAreAdjacentOrEqual(Face f1, Face f2);
+  double crossingPointAlongEdge(Halfedge sharedHe, Vector3 bCoord1, Vector3 bCoord2);
   double scalarFunctionZeroPoint(double f0, double f1);
 };
 } // namespace geometrycentral

@@ -16,7 +16,7 @@ Geometry<T>* Geometry<T>::copyUsingTransfer(HalfedgeMeshDataTransfer& transfer) 
   VertexData<T> newCoords = transfer.transfer(p);
   Geometry<T>* newGeom = new Geometry<T>(*transfer.newMesh);
 
-  for (VertexPtr v : transfer.newMesh->vertices()) {
+  for (Vertex v : transfer.newMesh->vertices()) {
     newGeom->position(v) = newCoords[v];
   }
 
@@ -26,34 +26,34 @@ Geometry<T>* Geometry<T>::copyUsingTransfer(HalfedgeMeshDataTransfer& transfer) 
 // Vertex attributes (primal)
 
 template <class T>
-inline T& Geometry<T>::position(VertexPtr v) {
+inline T& Geometry<T>::position(Vertex v) {
   return p[v];
 }
 
 template <class T>
-inline T Geometry<T>::position(VertexPtr v) const {
+inline T Geometry<T>::position(Vertex v) const {
   return p[v];
 }
 
 template <class T>
-inline double Geometry<T>::volume(VertexPtr v) {
+inline double Geometry<T>::volume(Vertex v) {
   return 1.;
 }
 
 template <class T>
-inline double Geometry<T>::dualArea(VertexPtr v) {
+inline double Geometry<T>::dualArea(Vertex v) {
   double sum = 0;
-  for (FacePtr f : v.adjacentFaces()) {
+  for (Face f : v.adjacentFaces()) {
     sum += area(f);
   }
   return sum / 3.0;
 }
 
 template <class T>
-inline double Geometry<T>::angleDefect(VertexPtr v) {
+inline double Geometry<T>::angleDefect(Vertex v) {
   double sum = 0.;
 
-  for (HalfedgePtr h : v.outgoingHalfedges()) {
+  for (Halfedge h : v.outgoingHalfedges()) {
     if (h.isReal()) sum += angle(h.next());
   }
 
@@ -61,10 +61,10 @@ inline double Geometry<T>::angleDefect(VertexPtr v) {
 }
 
 template <class T>
-inline Vector3 Geometry<T>::normal(VertexPtr v) {
+inline Vector3 Geometry<T>::normal(Vertex v) {
   Vector3 N{0., 0., 0.};
 
-  for (FacePtr f : v.adjacentFaces()) {
+  for (Face f : v.adjacentFaces()) {
     N += area(f) * normal(f);
   }
 
@@ -72,14 +72,14 @@ inline Vector3 Geometry<T>::normal(VertexPtr v) {
 }
 
 template <class T>
-inline Vector3 Geometry<T>::boundaryNormal(VertexPtr v) {
+inline Vector3 Geometry<T>::boundaryNormal(Vertex v) {
   if (!v.isBoundary()) {
     return Vector3{0., 0., 0.};
   }
 
   Vector3 N1{0., 0., 0.};
   Vector3 N2{0., 0., 0.};
-  for (HalfedgePtr he : v.incomingHalfedges()) {
+  for (Halfedge he : v.incomingHalfedges()) {
     if (!he.isReal()) {
       N1 = vector(he).rotate_around(normal(v), PI / 2.0);
     }
@@ -92,7 +92,7 @@ inline Vector3 Geometry<T>::boundaryNormal(VertexPtr v) {
 }
 
 template <class T>
-inline Complex Geometry<T>::tangentVectorToComplexAngle(VertexPtr v, const Vector3& inVec) {
+inline Complex Geometry<T>::tangentVectorToComplexAngle(Vertex v, const Vector3& inVec) {
   // Assumes vector is tangent
   Vector3 N = normal(v);
   Vector3 refEdge = unit(projectToTangentSpace(v, vector(v.halfedge())));
@@ -105,7 +105,7 @@ inline Complex Geometry<T>::tangentVectorToComplexAngle(VertexPtr v, const Vecto
 }
 
 template <class T>
-inline Vector3 Geometry<T>::complexAngleToTangentVector(VertexPtr v, Complex inAngle) {
+inline Vector3 Geometry<T>::complexAngleToTangentVector(Vertex v, Complex inAngle) {
   // Assumes vector is tangent
   Vector3 N = normal(v);
   Vector3 refEdge = unit(projectToTangentSpace(v, vector(v->halfedge)));
@@ -115,18 +115,18 @@ inline Vector3 Geometry<T>::complexAngleToTangentVector(VertexPtr v, Complex inA
 }
 
 template <class T>
-inline Vector3 Geometry<T>::projectToTangentSpace(VertexPtr v, const Vector3& inVec) {
+inline Vector3 Geometry<T>::projectToTangentSpace(Vertex v, const Vector3& inVec) {
   Vector3 N = normal(v);
   return inVec - dot(inVec, N) * N;
 }
 
 template <class T>
-Complex Geometry<T>::principalDirection(VertexPtr v) {
+Complex Geometry<T>::principalDirection(Vertex v) {
   // NOTE: This logic is duplicated here and in the cached method
 
   Complex principalDir(0, 0);
 
-  for (HalfedgePtr he : v.outgoingHalfedges()) {
+  for (Halfedge he : v.outgoingHalfedges()) {
     double len = length(he->edge);
     double alpha = dihedralAngle(he->edge);
     double theta = angularCoordinate(he);
@@ -143,13 +143,13 @@ Complex Geometry<T>::principalDirection(VertexPtr v) {
 // Edge attributes (primal)
 
 template <class T>
-inline T Geometry<T>::midpoint(EdgePtr e) {
+inline T Geometry<T>::midpoint(Edge e) {
   return .5 * (p[e.halfedge().vertex()] + p[e.halfedge().twin().vertex()]);
 }
 
 template <class T>
-inline double Geometry<T>::length(EdgePtr e) {
-  HalfedgePtr h = e.halfedge();
+inline double Geometry<T>::length(Edge e) {
+  Halfedge h = e.halfedge();
 
   T p0 = p[h.vertex()];
   h = h.twin();
@@ -159,13 +159,13 @@ inline double Geometry<T>::length(EdgePtr e) {
 }
 
 template <class T>
-inline double Geometry<T>::cotanWeight(EdgePtr e) {
-  HalfedgePtr h = e.halfedge();
+inline double Geometry<T>::cotanWeight(Edge e) {
+  Halfedge h = e.halfedge();
   return 0.5 * (cotan(h) + cotan(h.twin()));
 }
 
 template <class T>
-inline double Geometry<T>::dihedralAngle(EdgePtr e) {
+inline double Geometry<T>::dihedralAngle(Edge e) {
   if (e.isBoundary()) {
     return 0;
   }
@@ -181,7 +181,7 @@ inline double Geometry<T>::dihedralAngle(EdgePtr e) {
 // Face attributes (primal)
 
 template <class T>
-inline double Geometry<T>::area(FacePtr f) {
+inline double Geometry<T>::area(Face f) {
   if (!f.isReal()) {
     return std::numeric_limits<double>::quiet_NaN();
   }
@@ -190,7 +190,7 @@ inline double Geometry<T>::area(FacePtr f) {
 }
 
 template <class T>
-inline Vector3 Geometry<T>::normal(FacePtr f) {
+inline Vector3 Geometry<T>::normal(Face f) {
   if (!f.isReal()) {
     return Vector3::undefined();
   }
@@ -199,13 +199,13 @@ inline Vector3 Geometry<T>::normal(FacePtr f) {
 }
 
 template <class T>
-inline Vector3 Geometry<T>::areaVector(FacePtr f) {
+inline Vector3 Geometry<T>::areaVector(Face f) {
   if (!f.isReal()) {
     return Vector3::undefined();
   }
 
   Vector3 AN{0., 0., 0.};
-  for (HalfedgePtr h : f.adjacentHalfedges()) {
+  for (Halfedge h : f.adjacentHalfedges()) {
     Vector3 pi = position(h.vertex());
     Vector3 pj = position(h.twin().vertex());
     AN += cross(pi, pj);
@@ -215,14 +215,14 @@ inline Vector3 Geometry<T>::areaVector(FacePtr f) {
 }
 
 template <class T>
-inline T Geometry<T>::barycenter(FacePtr f) {
+inline T Geometry<T>::barycenter(Face f) {
   if (!f.isReal()) {
     return Vector3::undefined();
   }
 
   T sum = T::zero();
   double k = 0.;
-  for (VertexPtr v : f.adjacentVertices()) {
+  for (Vertex v : f.adjacentVertices()) {
     sum += p[v];
     k += 1.;
   }
@@ -231,12 +231,12 @@ inline T Geometry<T>::barycenter(FacePtr f) {
 }
 
 template <class T>
-inline T Geometry<T>::circumcenter(FacePtr f) {
+inline T Geometry<T>::circumcenter(Face f) {
   if (!f.isReal()) {
     return Vector3::undefined();
   }
 
-  HalfedgePtr h = f.halfedge();
+  Halfedge h = f.halfedge();
   const Vector3& a = position(h.vertex());
   h = h.next();
   const Vector3& b = position(h.vertex());
@@ -255,7 +255,7 @@ inline T Geometry<T>::circumcenter(FacePtr f) {
 // Halfedge attributes (primal)
 
 template <class T>
-inline double Geometry<T>::angle(HalfedgePtr h) {
+inline double Geometry<T>::angle(Halfedge h) {
   T t1 = vector(h.next().next());
   T t2 = -vector(h.next());
 
@@ -263,20 +263,20 @@ inline double Geometry<T>::angle(HalfedgePtr h) {
 }
 
 template <class T>
-inline double Geometry<T>::angle(CornerPtr c) {
+inline double Geometry<T>::angle(Corner c) {
   return angle(c.halfedge());
 }
 
 template <class T>
-inline T Geometry<T>::vector(HalfedgePtr h) {
-  VertexPtr v0 = h.vertex();
-  VertexPtr v1 = h.twin().vertex();
+inline T Geometry<T>::vector(Halfedge h) {
+  Vertex v0 = h.vertex();
+  Vertex v1 = h.twin().vertex();
 
   return p[v1] - p[v0];
 }
 
 template <class T>
-inline double Geometry<T>::cotan(HalfedgePtr h) {
+inline double Geometry<T>::cotan(Halfedge h) {
   if (!h.isReal()) {
     return 0.;
   }
@@ -288,11 +288,11 @@ inline double Geometry<T>::cotan(HalfedgePtr h) {
 }
 
 template <class T>
-inline double Geometry<T>::angularCoordinate(HalfedgePtr h) {
+inline double Geometry<T>::angularCoordinate(Halfedge h) {
   double coord = 0;
   double angleSum = 0;
 
-  for (HalfedgePtr he : h.vertex().outgoingHalfedges()) {
+  for (Halfedge he : h.vertex().outgoingHalfedges()) {
     if (he == h) {
       coord = angleSum;
     }
@@ -307,7 +307,7 @@ inline double Geometry<T>::angularCoordinate(HalfedgePtr h) {
 // Spherical specializations ===================================================
 
 template <>
-inline double Geometry<Spherical>::length(EdgePtr e) {
+inline double Geometry<Spherical>::length(Edge e) {
   UnitVector3 u0 = p[e.halfedge().vertex()];
   UnitVector3 u1 = p[e.halfedge().twin().vertex()];
 
@@ -315,19 +315,19 @@ inline double Geometry<Spherical>::length(EdgePtr e) {
 }
 
 template <>
-inline double Geometry<Spherical>::cotanWeight(EdgePtr e) {
+inline double Geometry<Spherical>::cotanWeight(Edge e) {
   throw std::domain_error("Edge cotangent weights not meaningful/useful for spherical geometry.");
 }
 
 template <>
-inline double Geometry<Spherical>::area(FacePtr f) {
+inline double Geometry<Spherical>::area(Face f) {
   if (!f.isReal()) {
     return std::numeric_limits<double>::quiet_NaN();
   }
 
   double sum = 0.;
 
-  for (HalfedgePtr h : f.adjacentHalfedges()) {
+  for (Halfedge h : f.adjacentHalfedges()) {
     sum += angle(h);
   }
 
@@ -335,8 +335,8 @@ inline double Geometry<Spherical>::area(FacePtr f) {
 }
 
 template <>
-inline Vector3 Geometry<Spherical>::normal(FacePtr f) {
-  HalfedgePtr h = f.halfedge();
+inline Vector3 Geometry<Spherical>::normal(Face f) {
+  Halfedge h = f.halfedge();
 
   Vector3 pi = p[h.vertex()];
   h = h.next();
@@ -352,7 +352,7 @@ inline Vector3 Geometry<Spherical>::normal(FacePtr f) {
 }
 
 template <>
-inline UnitVector3 Geometry<Spherical>::barycenter(FacePtr f) {
+inline UnitVector3 Geometry<Spherical>::barycenter(Face f) {
   const double eps = 1e-7;
   const double delta = 1e-5;
   Vector3 u{0., 0., 0.}; // mean tangent vector
@@ -360,13 +360,13 @@ inline UnitVector3 Geometry<Spherical>::barycenter(FacePtr f) {
 
   // Use normalized Euclidean average as initial guess for barycenter
   Vector3 c{0., 0., 0.};
-  for (HalfedgePtr h : f.adjacentHalfedges()) {
+  for (Halfedge h : f.adjacentHalfedges()) {
     c += p[h.vertex()];
   }
 
   // Iteratively average in Lie algebra until convergence
   do {
-    for (HalfedgePtr h : f.adjacentHalfedges()) {
+    for (Halfedge h : f.adjacentHalfedges()) {
       Vector3 q = p[h.vertex()];
 
       double theta = geometrycentral::angle(c, q);
@@ -392,7 +392,7 @@ inline UnitVector3 Geometry<Spherical>::barycenter(FacePtr f) {
 }
 
 template <>
-inline UnitVector3 Geometry<Spherical>::vector(HalfedgePtr h) {
+inline UnitVector3 Geometry<Spherical>::vector(Halfedge h) {
   // Since the sphere is not a vector space, we cannot just return
   // the difference of points on the sphere.  Instead, we do the next
   // best thing and return a unit vector tangent to the first vertex and
@@ -407,7 +407,7 @@ inline UnitVector3 Geometry<Spherical>::vector(HalfedgePtr h) {
 }
 
 template <>
-inline double Geometry<Spherical>::cotan(HalfedgePtr h) {
+inline double Geometry<Spherical>::cotan(Halfedge h) {
   throw std::domain_error("Halfedge cotangents not meaningful/useful for spherical geometry.");
 }
 
@@ -422,7 +422,7 @@ template <class T>
 inline double Geometry<T>::totalArea(void) {
   double A = 0.;
 
-  for (FacePtr f : mesh.faces()) {
+  for (Face f : mesh.faces()) {
     A += area(f);
   }
 
@@ -434,7 +434,7 @@ inline T Geometry<T>::center(void) {
   double A = 0.;
   T c = T::zero();
 
-  for (FacePtr f : mesh.faces()) {
+  for (Face f : mesh.faces()) {
     double Af = area(f);
     A += Af;
     c += Af * barycenter(f);
@@ -448,7 +448,7 @@ inline void Geometry<T>::boundingBox(T& bboxMin, T& bboxMax) {
   bboxMin = T::infinity();
   bboxMax = -T::infinity();
 
-  for (VertexPtr v : mesh.vertices()) {
+  for (Vertex v : mesh.vertices()) {
     bboxMin = componentwiseMin(bboxMin, p[v]);
     bboxMax = componentwiseMax(bboxMax, p[v]);
   }
@@ -476,7 +476,7 @@ void Geometry<T>::getVertexPositions(VertexData<T>& vertexPosition) {
 template <class T>
 void Geometry<T>::getVertexNormals(VertexData<Vector3>& vertexNormal) {
   vertexNormal = VertexData<Vector3>(&mesh);
-  for (VertexPtr v : mesh.vertices()) {
+  for (Vertex v : mesh.vertices()) {
     vertexNormal[v] = normal(v);
   }
 }
@@ -484,7 +484,7 @@ void Geometry<T>::getVertexNormals(VertexData<Vector3>& vertexNormal) {
 template <class T>
 void Geometry<T>::getVertexAngleDefects(VertexData<double>& vertexAngleDefect) {
   vertexAngleDefect = VertexData<double>(&mesh);
-  for (VertexPtr v : mesh.vertices()) {
+  for (Vertex v : mesh.vertices()) {
     vertexAngleDefect[v] = angleDefect(v);
   }
 }
@@ -504,10 +504,10 @@ void Geometry<T>::getPrincipalDirections(VertexData<Complex>& principalDirection
   // NOTE: This logic is duplicated here and in the per-vertex method (to use a
   // cached coordinate array)
 
-  for (VertexPtr v : mesh.vertices()) {
+  for (Vertex v : mesh.vertices()) {
     Complex principalDir(0, 0);
 
-    for (HalfedgePtr he : v.outgoingHalfedges()) {
+    for (Halfedge he : v.outgoingHalfedges()) {
       double len = length(he.edge());
       double alpha = dihedralAngle(he.edge());
       double theta = angularCoordinates[he];
@@ -525,7 +525,7 @@ void Geometry<T>::getPrincipalDirections(VertexData<Complex>& principalDirection
 template <class T>
 void Geometry<T>::getEdgeLengths(EdgeData<double>& edgeLength) {
   edgeLength = EdgeData<double>(&mesh);
-  for (EdgePtr e : mesh.edges()) {
+  for (Edge e : mesh.edges()) {
     edgeLength[e] = length(e);
   }
 }
@@ -533,7 +533,7 @@ void Geometry<T>::getEdgeLengths(EdgeData<double>& edgeLength) {
 template <class T>
 void Geometry<T>::getEdgeCotanWeights(EdgeData<double>& edgeCotanWeight) {
   edgeCotanWeight = EdgeData<double>(&mesh);
-  for (EdgePtr e : mesh.edges()) {
+  for (Edge e : mesh.edges()) {
     edgeCotanWeight[e] = cotanWeight(e);
   }
 }
@@ -541,7 +541,7 @@ void Geometry<T>::getEdgeCotanWeights(EdgeData<double>& edgeCotanWeight) {
 template <class T>
 void Geometry<T>::getFaceAreas(FaceData<double>& faceArea) {
   faceArea = FaceData<double>(&mesh);
-  for (FacePtr f : mesh.faces()) {
+  for (Face f : mesh.faces()) {
     faceArea[f] = area(f);
   }
 }
@@ -550,7 +550,7 @@ void Geometry<T>::getFaceAreas(FaceData<double>& faceArea) {
 template <class T>
 void Geometry<T>::getFaceNormals(FaceData<Vector3>& faceNormal) {
   faceNormal = FaceData<Vector3>(&mesh);
-  for (FacePtr f : mesh.faces()) {
+  for (Face f : mesh.faces()) {
     faceNormal[f] = normal(f);
   }
 }
@@ -558,7 +558,7 @@ void Geometry<T>::getFaceNormals(FaceData<Vector3>& faceNormal) {
 template <class T>
 void Geometry<T>::getFaceBarycenters(FaceData<T>& faceBarycenter) {
   faceBarycenter = FaceData<T>(&mesh);
-  for (FacePtr f : mesh.faces()) {
+  for (Face f : mesh.faces()) {
     faceBarycenter[f] = barycenter(f);
   }
 }
@@ -566,7 +566,7 @@ void Geometry<T>::getFaceBarycenters(FaceData<T>& faceBarycenter) {
 template <class T>
 void Geometry<T>::getHalfedgeVectors(HalfedgeData<T>& halfedgeVector) {
   halfedgeVector = HalfedgeData<T>(&mesh);
-  for (HalfedgePtr h : mesh.allHalfedges()) {
+  for (Halfedge h : mesh.allHalfedges()) {
     halfedgeVector[h] = vector(h);
   }
 }
@@ -574,7 +574,7 @@ void Geometry<T>::getHalfedgeVectors(HalfedgeData<T>& halfedgeVector) {
 template <class T>
 void Geometry<T>::getHalfedgeAngles(HalfedgeData<double>& halfedgeAngle) {
   halfedgeAngle = HalfedgeData<double>(&mesh);
-  for (HalfedgePtr h : mesh.allHalfedges()) {
+  for (Halfedge h : mesh.allHalfedges()) {
     halfedgeAngle[h] = angle(h);
   }
 }
@@ -582,7 +582,7 @@ void Geometry<T>::getHalfedgeAngles(HalfedgeData<double>& halfedgeAngle) {
 template <class T>
 void Geometry<T>::getCornerAngles(CornerData<double>& cornerAngle) {
   cornerAngle = CornerData<double>(&mesh);
-  for (CornerPtr c : mesh.corners()) {
+  for (Corner c : mesh.corners()) {
     cornerAngle[c] = angle(c);
   }
 }
@@ -590,7 +590,7 @@ void Geometry<T>::getCornerAngles(CornerData<double>& cornerAngle) {
 template <class T>
 void Geometry<T>::getHalfedgeCotans(HalfedgeData<double>& halfedgeCotan) {
   halfedgeCotan = HalfedgeData<double>(&mesh);
-  for (HalfedgePtr h : mesh.realHalfedges()) {
+  for (Halfedge h : mesh.realHalfedges()) {
     halfedgeCotan[h] = cotan(h);
   }
 }
@@ -598,7 +598,7 @@ void Geometry<T>::getHalfedgeCotans(HalfedgeData<double>& halfedgeCotan) {
 template <class T>
 void Geometry<T>::getAngularCoordinates(HalfedgeData<double>& angularCoordinates) {
   angularCoordinates = HalfedgeData<double>(&mesh);
-  for (HalfedgePtr h : mesh.allHalfedges()) {
+  for (Halfedge h : mesh.allHalfedges()) {
     angularCoordinates[h] = angularCoordinate(h);
   }
 }
@@ -607,7 +607,7 @@ template <class T>
 std::vector<T> Geometry<T>::getVertexPositionList() {
 
   std::vector<T> pList;
-  for (VertexPtr v : mesh.vertices()) {
+  for (Vertex v : mesh.vertices()) {
     pList.push_back(position(v));
   }
 

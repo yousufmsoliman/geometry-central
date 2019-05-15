@@ -24,7 +24,7 @@ inline bool VertexIncomingHalfedgeIterator::operator==(const VertexIncomingHalfe
 inline bool VertexIncomingHalfedgeIterator::operator!=(const VertexIncomingHalfedgeIterator& other) const {
   return !(*this == other);
 }
-inline HalfedgePtr VertexIncomingHalfedgeIterator::operator*() const { return currHe; }
+inline Halfedge VertexIncomingHalfedgeIterator::operator*() const { return currHe; }
 
 // === Incoming halfedges, excluding those on the domain boundary
 // Note: This is currently commented out because
@@ -50,7 +50,7 @@ inline bool VertexIncomingInteriorHalfedgeIterator::
 operator!=(const VertexIncomingInteriorHalfedgeIterator& other) const {
   return !(*this == other);
 }
-inline HalfedgePtr VertexIncomingInteriorHalfedgeIterator::operator*() const { return currHe; }
+inline Halfedge VertexIncomingInteriorHalfedgeIterator::operator*() const { return currHe; }
 
 // === Outgoing halfedges, including those on the domain boundary
 inline VertexOutgoingHalfedgeIterator VertexOutgoingHalfedgeSet::begin() {
@@ -70,7 +70,7 @@ inline bool VertexOutgoingHalfedgeIterator::operator==(const VertexOutgoingHalfe
 inline bool VertexOutgoingHalfedgeIterator::operator!=(const VertexOutgoingHalfedgeIterator& other) const {
   return !(*this == other);
 }
-inline HalfedgePtr VertexOutgoingHalfedgeIterator::operator*() const { return currHe; }
+inline Halfedge VertexOutgoingHalfedgeIterator::operator*() const { return currHe; }
 
 // === Outgoing halfedges, excluding those on the domain boundary
 // Note: This is currently commented out because
@@ -96,7 +96,7 @@ inline bool VertexOutgoingInteriorHalfedgeIterator::
 operator!=(const VertexOutgoingInteriorHalfedgeIterator& other) const {
   return !(*this == other);
 }
-inline HalfedgePtr VertexOutgoingInteriorHalfedgeIterator::operator*() const { return currHe; }
+inline Halfedge VertexOutgoingInteriorHalfedgeIterator::operator*() const { return currHe; }
 
 // === Adjacent vertices
 inline VertexAdjacentVertexIterator VertexAdjacentVertexSet::begin() {
@@ -116,7 +116,7 @@ inline bool VertexAdjacentVertexIterator::operator==(const VertexAdjacentVertexI
 inline bool VertexAdjacentVertexIterator::operator!=(const VertexAdjacentVertexIterator& other) const {
   return !(*this == other);
 }
-inline VertexPtr VertexAdjacentVertexIterator::operator*() const { return currHe.vertex(); }
+inline Vertex VertexAdjacentVertexIterator::operator*() const { return currHe.vertex(); }
 
 // === Adjacent faces
 inline VertexAdjacentFaceIterator VertexAdjacentFaceSet::begin() { return VertexAdjacentFaceIterator(firstHe, true); }
@@ -134,7 +134,7 @@ inline bool VertexAdjacentFaceIterator::operator==(const VertexAdjacentFaceItera
 inline bool VertexAdjacentFaceIterator::operator!=(const VertexAdjacentFaceIterator& other) const {
   return !(*this == other);
 }
-inline FacePtr VertexAdjacentFaceIterator::operator*() const { return currHe.face(); }
+inline Face VertexAdjacentFaceIterator::operator*() const { return currHe.face(); }
 
 // === Adjacent edges
 inline VertexAdjacentEdgeIterator VertexAdjacentEdgeSet::begin() { return VertexAdjacentEdgeIterator(firstHe, true); }
@@ -150,7 +150,7 @@ inline bool VertexAdjacentEdgeIterator::operator==(const VertexAdjacentEdgeItera
 inline bool VertexAdjacentEdgeIterator::operator!=(const VertexAdjacentEdgeIterator& other) const {
   return !(*this == other);
 }
-inline EdgePtr VertexAdjacentEdgeIterator::operator*() const { return currHe.edge(); }
+inline Edge VertexAdjacentEdgeIterator::operator*() const { return currHe.edge(); }
 
 // === Adjacent corners
 inline VertexAdjacentCornerIterator VertexAdjacentCornerSet::begin() {
@@ -171,7 +171,7 @@ inline bool VertexAdjacentCornerIterator::operator==(const VertexAdjacentCornerI
 inline bool VertexAdjacentCornerIterator::operator!=(const VertexAdjacentCornerIterator& other) const {
   return !(*this == other);
 }
-inline CornerPtr VertexAdjacentCornerIterator::operator*() const { return currHe.next().corner(); }
+inline Corner VertexAdjacentCornerIterator::operator*() const { return currHe.next().corner(); }
 
 // ==========================================================
 // ================     Face Iterators     ==================
@@ -195,7 +195,7 @@ inline bool FaceAdjacentHalfedgeIterator::operator==(const FaceAdjacentHalfedgeI
 inline bool FaceAdjacentHalfedgeIterator::operator!=(const FaceAdjacentHalfedgeIterator& other) const {
   return !(*this == other);
 }
-inline HalfedgePtr FaceAdjacentHalfedgeIterator::operator*() const { return currHe; }
+inline Halfedge FaceAdjacentHalfedgeIterator::operator*() const { return currHe; }
 
 // === Adjacent vertices
 inline FaceAdjacentVertexIterator FaceAdjacentVertexSet::begin() { return FaceAdjacentVertexIterator(firstHe, true); }
@@ -211,7 +211,7 @@ inline bool FaceAdjacentVertexIterator::operator==(const FaceAdjacentVertexItera
 inline bool FaceAdjacentVertexIterator::operator!=(const FaceAdjacentVertexIterator& other) const {
   return !(*this == other);
 }
-inline VertexPtr FaceAdjacentVertexIterator::operator*() const { return currHe.vertex(); }
+inline Vertex FaceAdjacentVertexIterator::operator*() const { return currHe.vertex(); }
 
 // === Adjacent edges
 inline FaceAdjacentEdgeIterator FaceAdjacentEdgeSet::begin() { return FaceAdjacentEdgeIterator(firstHe, true); }
@@ -227,7 +227,7 @@ inline bool FaceAdjacentEdgeIterator::operator==(const FaceAdjacentEdgeIterator&
 inline bool FaceAdjacentEdgeIterator::operator!=(const FaceAdjacentEdgeIterator& other) const {
   return !(*this == other);
 }
-inline EdgePtr FaceAdjacentEdgeIterator::operator*() const { return currHe.edge(); }
+inline Edge FaceAdjacentEdgeIterator::operator*() const { return currHe.edge(); }
 
 // === Adjacent faces
 inline FaceAdjacentFaceIterator FaceAdjacentFaceSet::begin() { return FaceAdjacentFaceIterator(firstHe, true); }
@@ -245,7 +245,7 @@ inline bool FaceAdjacentFaceIterator::operator==(const FaceAdjacentFaceIterator&
 inline bool FaceAdjacentFaceIterator::operator!=(const FaceAdjacentFaceIterator& other) const {
   return !(*this == other);
 }
-inline FacePtr FaceAdjacentFaceIterator::operator*() const { return currHe.twin().face(); }
+inline Face FaceAdjacentFaceIterator::operator*() const { return currHe.twin().face(); }
 
 // === Adjacent corners
 inline FaceAdjacentCornerIterator FaceAdjacentCornerSet::begin() { return FaceAdjacentCornerIterator(firstHe, true); }
@@ -261,6 +261,6 @@ inline bool FaceAdjacentCornerIterator::operator==(const FaceAdjacentCornerItera
 inline bool FaceAdjacentCornerIterator::operator!=(const FaceAdjacentCornerIterator& other) const {
   return !(*this == other);
 }
-inline CornerPtr FaceAdjacentCornerIterator::operator*() const { return currHe.next().corner(); }
+inline Corner FaceAdjacentCornerIterator::operator*() const { return currHe.next().corner(); }
 
 } // namespace geometrycentral

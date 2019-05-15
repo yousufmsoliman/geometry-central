@@ -34,26 +34,26 @@ class HalfedgeMesh {
 };
 ```
 
-The `HalfedgePtr`, `VertexPtr`, etc. classes serve as typed wrappers referring to a mesh element. These wrappers store the index of the underlying element, as well as pointer to the mesh object itself. Traversal operations like `he.next()` are either implemented implicitly via index arithmetic, or by lookup in to the appropriate array.
+The `Halfedge`, `Vertex`, etc. classes serve as typed wrappers referring to a mesh element. These wrappers store the index of the underlying element, as well as pointer to the mesh object itself. Traversal operations like `he.next()` are either implemented implicitly via index arithmetic, or by lookup in to the appropriate array.
 ```
-class HalfedgePtr {
+class Halfedge {
   ...
   size_t ind;
   HalfedgeMesh* mesh;
-  HalfedgePtr next() { return HalfedgePtr{mesh->heNext[ind], mesh}; }   // explicit
-  HalfedgePtr twin() { return HalfedgePtr{ind ^ 1, mesh}; }             // implicit
+  Halfedge next() { return Halfedge{mesh->heNext[ind], mesh}; }   // explicit
+  Halfedge twin() { return Halfedge{ind ^ 1, mesh}; }             // implicit
   ...
 };
 ```
 
 !!! info "Why not pointers?"
-    One potential drawback to the index-based design is that each element must store its index as well as a pointer to the underlying mesh data structure. For instance, the smallest possible data layout of `HalfedgePtr` would look something like ` struct HalfedgePtr { size_t ind; HalfedgeMesh* mesh; };`, because the `ind` is useless unless we know what arrays to index in to (e.g., to implement `next()`).
+    One potential drawback to the index-based design is that each element must store its index as well as a pointer to the underlying mesh data structure. For instance, the smallest possible data layout of `Halfedge` would look something like ` struct Halfedge { size_t ind; HalfedgeMesh* mesh; };`, because the `ind` is useless unless we know what arrays to index in to (e.g., to implement `next()`).
 
-    This extra storage could be avoided by replacing `size_t ind` with a pointer directly to memory encoding data about the halfedge. This design would reduce the `sizeof(HalfedgePtr)` from 16 bytes to 8, as well as potentially avoiding some offset index instructions. So why don't we do that instead?
+    This extra storage could be avoided by replacing `size_t ind` with a pointer directly to memory encoding data about the halfedge. This design would reduce the `sizeof(Halfedge)` from 16 bytes to 8, as well as potentially avoiding some offset index instructions. So why don't we do that instead?
 
     In fact, the first implementation of this library used exactly that pointer-based design. However, it turned out to have two main downsides:
 
-    - **semantics of pointer invalidation:** In C++, doing nearly anything with an invalid pointer incurs undefined behavior, and expanding our buffers invalidates pointers. This meant that an "under the hood" resize event would invalidate all of the user's `HalfedgePtr` objects, necessitating frequent expensive use of `DynamicHalfedgePtr`, rather than just around `compress()` as in the current design.  
+    - **semantics of pointer invalidation:** In C++, doing nearly anything with an invalid pointer incurs undefined behavior, and expanding our buffers invalidates pointers. This meant that an "under the hood" resize event would invalidate all of the user's `Halfedge` objects, necessitating frequent expensive use of `DynamicHalfedge`, rather than just around `compress()` as in the current design.  
     - **implementation complexity:** Working with raw pointers makes a lot of easy things hard. Significant pointer gymnastics were needed to internally implement resize operations without running afoul of invalid pointer rules. Simple operations like copying meshes and mesh data required pointer translation. Indexing in to a container essentially required a dense index from the element, so the codebase ended up littered with operations to construct indices from pointer offsets. The cumulative effect was quite error-prone.
 
     Ultimately, the index-based design seems preferrable.
@@ -97,4 +97,4 @@ In contrast, although boundary loops are just faces internally, the API provides
 
 As the halfedge mesh is mutated, all `MeshData<>` contains automatically resize to stay in sync. This is implemented under the hood with a system of callback functions registered with the mesh itself. Whenever the mesh resizes or compresses one of its index spaces, it invokes a callback for each `MeshData<>` to do the same.
 
-`DynamicHalfedgePtr` and friends also register themselves with the callback system, to stay valid as the mesh resizes. However, this results in a callback per dynammic element, which has a significant performace impact. Fortunately, dynamic elements can be used sparingly.
+`DynamicHalfedge` and friends also register themselves with the callback system, to stay valid as the mesh resizes. However, this results in a callback per dynammic element, which has a significant performace impact. Fortunately, dynamic elements can be used sparingly.

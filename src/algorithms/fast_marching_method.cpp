@@ -7,7 +7,7 @@
 namespace geometrycentral {
 
 VertexData<double> FMMDistance(Geometry<Euclidean>* geometry,
-                               const std::vector<std::pair<VertexPtr, double>>& initialDistances) {
+                               const std::vector<std::pair<Vertex, double>>& initialDistances) {
 
   HalfedgeMesh* mesh = geometry->getMesh();
 
@@ -20,10 +20,10 @@ VertexData<double> FMMDistance(Geometry<Euclidean>* geometry,
   return FMMDistance(mesh, initialDistances, edgeLengths, oppAngles);
 }
 
-VertexData<double> FMMDistance(HalfedgeMesh* mesh, const std::vector<std::pair<VertexPtr, double>>& initialDistances,
+VertexData<double> FMMDistance(HalfedgeMesh* mesh, const std::vector<std::pair<Vertex, double>>& initialDistances,
                                const EdgeData<double>& edgeLengths, const HalfedgeData<double>& oppAngles) {
 
-  typedef std::pair<double, VertexPtr> Entry;
+  typedef std::pair<double, Vertex> Entry;
 
   // Initialize
   VertexData<double> distances(mesh, std::numeric_limits<double>::infinity());
@@ -42,7 +42,7 @@ VertexData<double> FMMDistance(HalfedgeMesh* mesh, const std::vector<std::pair<V
     // Pop the nearest element
     Entry currPair = frontierPQ.top();
     frontierPQ.pop();
-    VertexPtr currV = currPair.second;
+    Vertex currV = currPair.second;
     double currDist = currPair.first;
 
 
@@ -56,8 +56,8 @@ VertexData<double> FMMDistance(HalfedgeMesh* mesh, const std::vector<std::pair<V
 
 
     // Add any eligible neighbors
-    for (HalfedgePtr he : currV.incomingHalfedges()) {
-      VertexPtr neighVert = he.vertex();
+    for (Halfedge he : currV.incomingHalfedges()) {
+      Vertex neighVert = he.vertex();
 
       // Add with length
       if (!finalized[neighVert]) {
@@ -71,7 +71,7 @@ VertexData<double> FMMDistance(HalfedgeMesh* mesh, const std::vector<std::pair<V
 
       // Check the third point of the "left" triangle straddling this edge
       if (he.isReal()) {
-        VertexPtr newVert = he.next().next().vertex();
+        Vertex newVert = he.next().next().vertex();
         if (!finalized[newVert]) {
 
           // Compute the distance
@@ -90,9 +90,9 @@ VertexData<double> FMMDistance(HalfedgeMesh* mesh, const std::vector<std::pair<V
       }
 
       // Check the third point of the "right" triangle straddling this edge
-      HalfedgePtr heT = he.twin();
+      Halfedge heT = he.twin();
       if (heT.isReal()) {
-        VertexPtr newVert = heT.next().next().vertex();
+        Vertex newVert = heT.next().next().vertex();
         if (!finalized[newVert]) {
 
           // Compute the distance

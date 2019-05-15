@@ -65,11 +65,11 @@ cholmod_sparse* toCholmod(Eigen::SparseMatrix<double, Eigen::ColMajor>& A, Cholm
 
   // Copy
   for (size_t iEntry = 0; iEntry < Nentries; iEntry++) {
-    values[iEntry] = A.valuePtr()[iEntry];
-    rowIndices[iEntry] = A.innerIndexPtr()[iEntry];
+    values[iEntry] = A.value()[iEntry];
+    rowIndices[iEntry] = A.innerIndex()[iEntry];
   }
   for (size_t iCol = 0; iCol < Ncols; iCol++) {
-    colStart[iCol] = A.outerIndexPtr()[iCol];
+    colStart[iCol] = A.outerIndex()[iCol];
   }
   colStart[Ncols] = Nentries;
 
@@ -98,11 +98,11 @@ cholmod_sparse* toCholmod(Eigen::SparseMatrix<float, Eigen::ColMajor>& A, Cholmo
 
   // Copy
   for (size_t iEntry = 0; iEntry < Nentries; iEntry++) {
-    values[iEntry] = static_cast<double>(A.valuePtr()[iEntry]);
-    rowIndices[iEntry] = A.innerIndexPtr()[iEntry];
+    values[iEntry] = static_cast<double>(A.value()[iEntry]);
+    rowIndices[iEntry] = A.innerIndex()[iEntry];
   }
   for (size_t iCol = 0; iCol < Ncols; iCol++) {
-    colStart[iCol] = A.outerIndexPtr()[iCol];
+    colStart[iCol] = A.outerIndex()[iCol];
   }
   colStart[Ncols] = Nentries;
 
@@ -130,11 +130,11 @@ cholmod_sparse* toCholmod(Eigen::SparseMatrix<Complex, Eigen::ColMajor>& A, Chol
 
   // Copy
   for (size_t iEntry = 0; iEntry < Nentries; iEntry++) {
-    values[iEntry] = A.valuePtr()[iEntry];
-    rowIndices[iEntry] = A.innerIndexPtr()[iEntry];
+    values[iEntry] = A.value()[iEntry];
+    rowIndices[iEntry] = A.innerIndex()[iEntry];
   }
   for (size_t iCol = 0; iCol < Ncols; iCol++) {
-    colStart[iCol] = A.outerIndexPtr()[iCol];
+    colStart[iCol] = A.outerIndex()[iCol];
   }
   colStart[Ncols] = Nentries;
 
@@ -148,9 +148,9 @@ cholmod_dense* toCholmod(const Eigen::Matrix<double, Eigen::Dynamic, 1>& v, Chol
   size_t N = v.rows();
 
   cholmod_dense* cVec = cholmod_l_allocate_dense(N, 1, N, CHOLMOD_REAL, context);
-  double* cVecPtr = (double*)cVec->x;
+  double* cVec = (double*)cVec->x;
   for (size_t i = 0; i < N; i++) {
-    cVecPtr[i] = v(i);
+    cVec[i] = v(i);
   }
 
   return cVec;
@@ -163,9 +163,9 @@ cholmod_dense* toCholmod(const Eigen::Matrix<float, Eigen::Dynamic, 1>& v, Cholm
   size_t N = v.rows();
 
   cholmod_dense* cVec = cholmod_l_allocate_dense(N, 1, N, CHOLMOD_REAL, context);
-  double* cVecPtr = (double*)cVec->x;
+  double* cVec = (double*)cVec->x;
   for (size_t i = 0; i < N; i++) {
-    cVecPtr[i] = v(i);
+    cVec[i] = v(i);
   }
 
   return cVec;
@@ -178,9 +178,9 @@ cholmod_dense* toCholmod(const Eigen::Matrix<Complex, Eigen::Dynamic, 1>& v, Cho
   size_t N = v.rows();
 
   cholmod_dense* cVec = cholmod_l_allocate_dense(N, 1, N, CHOLMOD_COMPLEX, context);
-  Complex* cVecPtr = (Complex*)cVec->x;
+  Complex* cVec = (Complex*)cVec->x;
   for (size_t i = 0; i < N; i++) {
-    cVecPtr[i] = v(i);
+    cVec[i] = v(i);
   }
 
   return cVec;
@@ -201,9 +201,9 @@ void toEigen(cholmod_dense* cVec, CholmodContext& context, Eigen::Matrix<T, Eige
   // Needed because cholmod always uses double precision
   typedef typename std::conditional<std::is_same<T, float>::value, double, T>::type SCALAR_TYPE;
 
-  SCALAR_TYPE* cVecPtr = (SCALAR_TYPE*)cVec->x;
+  SCALAR_TYPE* cVec = (SCALAR_TYPE*)cVec->x;
   for (size_t i = 0; i < N; i++) {
-    xOut(i) = cVecPtr[i];
+    xOut(i) = cVec[i];
   }
 }
 template void toEigen(cholmod_dense* cVec, CholmodContext& context, Eigen::Matrix<double, Eigen::Dynamic, 1>& xOut);

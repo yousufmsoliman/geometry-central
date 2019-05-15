@@ -15,7 +15,7 @@ EdgeData<char> minimalSpanningTree(EdgeLengthGeometry* geometry);
 // Note: Uses an MST+pruning approach to find short trees in O(N logN), but not guaranteed to be minimal; that's an
 // NP-hard Steiner tree problem
 EdgeData<char> spanningTreeBetweenVertices(Geometry<Euclidean>* geometry,
-                                           const std::vector<VertexPtr>& requiredVertices);
+                                           const std::vector<Vertex>& requiredVertices);
 
 
 } // namespace geometrycentral

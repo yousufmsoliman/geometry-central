@@ -122,7 +122,7 @@ template <class T>
 void PlyHalfedgeMeshData::addVertexProperty(std::string propertyName, VertexData<T>& vData) {
 
   std::vector<T> vec;
-  for (VertexPtr v : mesh->vertices()) {
+  for (Vertex v : mesh->vertices()) {
     vec.push_back(vData[v]);
   }
 
@@ -134,7 +134,7 @@ template <class T>
 void PlyHalfedgeMeshData::addFaceProperty(std::string propertyName, FaceData<T>& fData) {
 
   std::vector<T> vec;
-  for (FacePtr f : mesh->faces()) {
+  for (Face f : mesh->faces()) {
     vec.push_back(fData[f]);
   }
 
