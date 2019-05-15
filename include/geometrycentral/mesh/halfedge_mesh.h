@@ -5,7 +5,7 @@
 
 #include "geometrycentral/utilities/vector3.h"
 #include <geometrycentral/utilities/utilities.h>
-// NOTE: More includes at bottom of file
+// NOTE: More ipp includes at bottom of file
 
 namespace geometrycentral {
 
@@ -62,7 +62,6 @@ public:
   HalfedgePtrSet realHalfedges();
   HalfedgePtrSet imaginaryHalfedges();
   HalfedgePtrSet allHalfedges();
-  CornerPtrSet corners();
   VertexPtrSet vertices();
   EdgePtrSet edges();
   FacePtrSet faces();
@@ -197,13 +196,15 @@ public:
 
 
 private:
-  // The contiguous chunks of memory which hold the actual structs. These may change size and even become sparse as
-  // insertions and deletions happen.
-  std::vector<Halfedge> rawHalfedges;
-  std::vector<Vertex> rawVertices;
-  std::vector<Edge> rawEdges;
-  std::vector<Face> rawFaces;
-  std::vector<Face> rawBoundaryLoops;
+
+  // Core arrays which hold the connectivity
+  std::vector<size_t> heNext;
+  std::vector<size_t> heVertex;
+  std::vector<size_t> heFace;
+  std::vector<size_t> vHalfedge;
+  std::vector<size_t> fHalfedge;
+  
+  // Auxilliary arrays which cache other useful information
 
   // Track element counts (can't rely on rawVertices.size() after deletions have made the list sparse). These are the
   // actual number of elements, not the size of the buffer that holds them.

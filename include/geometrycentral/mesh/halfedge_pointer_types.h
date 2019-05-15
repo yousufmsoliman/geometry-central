@@ -31,7 +31,7 @@ class VertexPtr;
 class EdgePtr;
 class FacePtr;
 
-// The dynamic variants are automatically updated when the mesh is mutated, (the standard variants are invalidated).
+// The dynamic variants are automatically updated when the mesh is compressed, (the standard variants are invalidated).
 class DynamicHalfedgePtr;
 class DynamicVertexPtr;
 class DynamicEdgePtr;
@@ -54,7 +54,6 @@ public:
   FacePtr face() const;
   CornerPtr corner() const;
 
-
   // Properties
   bool isReal() const;
 
@@ -72,26 +71,12 @@ public:
   bool operator<(const HalfedgePtr& other) const;
   bool operator<=(const HalfedgePtr& other) const;
 
-  // Null comparators
-  bool operator==(void* n) const;
-  bool operator!=(void* n) const;
-  bool operator>(void* n) const;
-  bool operator>=(void* n) const;
-  bool operator<(void* n) const;
-  bool operator<=(void* n) const;
-
-  // Arithmetic
-  unsigned int operator-(const HalfedgePtr& other) const;
-  HalfedgePtr& operator++();
-  HalfedgePtr operator++(int);
-  HalfedgePtr& operator--();
-  HalfedgePtr operator--(int);
-
   // The dynamic equivalent
   typedef DynamicHalfedgePtr DynamicType;
 
 protected:
-  Halfedge* ptr = nullptr;
+  size_t ind = INVALID_IND;
+  HalfedgeMesh* mesh;
 
   friend class HalfedgeMesh;
   friend class DynamicHalfedgePtr;

@@ -7,18 +7,24 @@ endif()
 
 # List of .cpp files to be compiled
 SET(SRCS
-  mesh/halfedge_mesh_data_transfer.cpp
-  mesh/ply_wrapper.cpp
+  mesh/halfedge_mesh.cpp
   mesh/halfedge_iterators.cpp
   mesh/halfedge_pointer_types.cpp
-  mesh/halfedge_mesh.cpp
-  mesh/polygon_soup_mesh.cpp
-  mesh/mesh_embedded_curve.cpp
   mesh/meshio.cpp
+  mesh/polygon_soup_mesh.cpp
+  mesh/ply_halfedge_mesh_data.cpp
+  mesh/halfedge_mesh_data_transfer.cpp
+  mesh/mesh_embedded_curve.cpp
+  
+  geometry/geometry.cpp
+  geometry/intrinsic_geometry.cpp
+  geometry/geometry_cache.cpp 
+  geometry/edge_length_geometry.cpp
+  geometry/dependent_quantity.cpp
 
-  numerical/eigenproblem_solvers.cpp
-  numerical/linear_solvers.cpp
   numerical/suitesparse_utilities.cpp
+  numerical/linear_solvers.cpp
+  numerical/eigenproblem_solvers.cpp
   numerical/qr_solvers.cpp
   numerical/square_solvers.cpp
   numerical/positive_definite_solvers.cpp
@@ -37,12 +43,6 @@ SET(SRCS
   utilities/utilities.cpp
   utilities/quaternion.cpp
   utilities/disjoint_sets.cpp
-
-  geometry/edge_length_geometry.cpp
-  geometry/geometry.cpp
-  geometry/dependent_quantity.cpp
-  geometry/intrinsic_geometry.cpp
-  geometry/geometry_cache.cpp 
 )
 
 

@@ -32,34 +32,6 @@ inline bool HalfedgePtr::operator>(const HalfedgePtr& other) const { return ptr 
 inline bool HalfedgePtr::operator>=(const HalfedgePtr& other) const { return ptr >= other.ptr; }
 inline bool HalfedgePtr::operator<(const HalfedgePtr& other) const { return ptr < other.ptr; }
 inline bool HalfedgePtr::operator<=(const HalfedgePtr& other) const { return ptr <= other.ptr; }
-inline bool HalfedgePtr::operator==(void* n) const { return ptr == n; }
-inline bool HalfedgePtr::operator!=(void* n) const { return ptr != n; }
-inline bool HalfedgePtr::operator>(void* n) const { return ptr > n; }
-inline bool HalfedgePtr::operator>=(void* n) const { return ptr >= n; }
-inline bool HalfedgePtr::operator<(void* n) const { return ptr < n; }
-inline bool HalfedgePtr::operator<=(void* n) const { return ptr <= n; }
-inline unsigned int HalfedgePtr::operator-(const HalfedgePtr& other) const {
-#ifndef NDEBUG
-  assert(ptr >= other.ptr && "Pointer subtraction must yield a nonnegative result");
-#endif
-  return ptr - other.ptr;
-}
-inline HalfedgePtr& HalfedgePtr::operator++() {
-  ptr++;
-  return *this;
-}
-inline HalfedgePtr HalfedgePtr::operator++(int) {
-  ptr++;
-  return HalfedgePtr(ptr - 1);
-}
-inline HalfedgePtr& HalfedgePtr::operator--() {
-  ptr--;
-  return *this;
-}
-inline HalfedgePtr HalfedgePtr::operator--(int) {
-  ptr--;
-  return HalfedgePtr(ptr + 1);
-}
 
 inline ::std::ostream& operator<<(::std::ostream& output, const HalfedgePtr& he) {
   output << "he_" << he.ptr;
