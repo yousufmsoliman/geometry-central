@@ -39,19 +39,12 @@ inline ::std::ostream& operator<<(::std::ostream& output, const Halfedge& he) {
 }
 
 // FIXME dynamic pointers are currently broken -- need to support permutation callback for on compress()
-inline DynamicHalfedge::DynamicHalfedge(Halfedge* ptr_, HalfedgeMesh* mesh_)
-    : ind(mesh_->indexOf(ptr_)), mesh(mesh_) {}
+inline DynamicHalfedge::DynamicHalfedge(Halfedge* ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_)), mesh(mesh_) {}
 inline DynamicHalfedge::DynamicHalfedge(Halfedge ptr_, HalfedgeMesh* mesh_)
     : ind(mesh_->indexOf(ptr_.ptr)), mesh(mesh_) {}
-inline DynamicHalfedge DynamicHalfedge::twin() const {
-  return DynamicHalfedge(Halfedge(*this).twin(), mesh);
-}
-inline DynamicHalfedge DynamicHalfedge::next() const {
-  return DynamicHalfedge(Halfedge(*this).next(), mesh);
-}
-inline DynamicVertex DynamicHalfedge::vertex() const {
-  return DynamicVertex(Halfedge(*this).vertex(), mesh);
-}
+inline DynamicHalfedge DynamicHalfedge::twin() const { return DynamicHalfedge(Halfedge(*this).twin(), mesh); }
+inline DynamicHalfedge DynamicHalfedge::next() const { return DynamicHalfedge(Halfedge(*this).next(), mesh); }
+inline DynamicVertex DynamicHalfedge::vertex() const { return DynamicVertex(Halfedge(*this).vertex(), mesh); }
 inline DynamicEdge DynamicHalfedge::edge() const { return DynamicEdge(Halfedge(*this).edge(), mesh); }
 inline DynamicFace DynamicHalfedge::face() const { return DynamicFace(Halfedge(*this).face(), mesh); }
 
@@ -63,8 +56,7 @@ inline bool DynamicHalfedge::operator<(const DynamicHalfedge& other) const { ret
 inline bool DynamicHalfedge::operator<=(const DynamicHalfedge& other) const { return ind <= other.ind; }
 inline size_t DynamicHalfedge::getInd() const { return ind; }
 
-inline HalfedgeRangeIterator::HalfedgeRangeIterator(Halfedge startingHalfedge, HalfedgeSetType type_,
-                                                          Halfedge end_)
+inline HalfedgeRangeIterator::HalfedgeRangeIterator(Halfedge startingHalfedge, HalfedgeSetType type_, Halfedge end_)
     : currHalfedge(startingHalfedge), type(type_), end(end_) {
   // Advance to satisfy the type
   if (currHalfedge != end &&
@@ -264,11 +256,8 @@ inline ::std::ostream& operator<<(::std::ostream& output, const Vertex& v) {
 }
 
 inline DynamicVertex::DynamicVertex(Vertex* ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_)), mesh(mesh_) {}
-inline DynamicVertex::DynamicVertex(Vertex ptr_, HalfedgeMesh* mesh_)
-    : ind(mesh_->indexOf(ptr_.ptr)), mesh(mesh_) {}
-inline DynamicHalfedge DynamicVertex::halfedge() const {
-  return DynamicHalfedge(Vertex(*this).halfedge(), mesh);
-}
+inline DynamicVertex::DynamicVertex(Vertex ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_.ptr)), mesh(mesh_) {}
+inline DynamicHalfedge DynamicVertex::halfedge() const { return DynamicHalfedge(Vertex(*this).halfedge(), mesh); }
 inline bool DynamicVertex::operator==(const DynamicVertex& other) const { return ind == other.ind; }
 inline bool DynamicVertex::operator!=(const DynamicVertex& other) const { return !(*this == other); }
 inline bool DynamicVertex::operator>(const DynamicVertex& other) const { return ind > other.ind; }
@@ -355,9 +344,7 @@ inline ::std::ostream& operator<<(::std::ostream& output, const Edge& e) {
 
 inline DynamicEdge::DynamicEdge(Edge* ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_)), mesh(mesh_) {}
 inline DynamicEdge::DynamicEdge(Edge ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_.ptr)), mesh(mesh_) {}
-inline DynamicHalfedge DynamicEdge::halfedge() const {
-  return DynamicHalfedge(Edge(*this).halfedge(), mesh);
-}
+inline DynamicHalfedge DynamicEdge::halfedge() const { return DynamicHalfedge(Edge(*this).halfedge(), mesh); }
 inline bool DynamicEdge::operator==(const DynamicEdge& other) const { return ind == other.ind; }
 inline bool DynamicEdge::operator!=(const DynamicEdge& other) const { return !(*this == other); }
 inline bool DynamicEdge::operator>(const DynamicEdge& other) const { return ind > other.ind; }
@@ -366,8 +353,7 @@ inline bool DynamicEdge::operator<(const DynamicEdge& other) const { return ind 
 inline bool DynamicEdge::operator<=(const DynamicEdge& other) const { return ind <= other.ind; }
 inline size_t DynamicEdge::getInd() const { return ind; }
 
-inline EdgeRangeIterator::EdgeRangeIterator(Edge startingEdge, Edge end_)
-    : currEdge(startingEdge), end(end_) {}
+inline EdgeRangeIterator::EdgeRangeIterator(Edge startingEdge, Edge end_) : currEdge(startingEdge), end(end_) {}
 inline const EdgeRangeIterator& EdgeRangeIterator::operator++() {
   currEdge++;
   while (currEdge != end && currEdge->isDead()) {
@@ -375,12 +361,8 @@ inline const EdgeRangeIterator& EdgeRangeIterator::operator++() {
   }
   return *this;
 }
-inline bool EdgeRangeIterator::operator==(const EdgeRangeIterator& other) const {
-  return currEdge == other.currEdge;
-}
-inline bool EdgeRangeIterator::operator!=(const EdgeRangeIterator& other) const {
-  return currEdge != other.currEdge;
-}
+inline bool EdgeRangeIterator::operator==(const EdgeRangeIterator& other) const { return currEdge == other.currEdge; }
+inline bool EdgeRangeIterator::operator!=(const EdgeRangeIterator& other) const { return currEdge != other.currEdge; }
 inline Edge EdgeRangeIterator::operator*() const { return currEdge; }
 
 inline EdgeSet::EdgeSet(Edge beginptr_, Edge endptr_) : beginptr(beginptr_), endptr(endptr_) {}
@@ -453,9 +435,7 @@ inline ::std::ostream& operator<<(::std::ostream& output, const Face& f) {
 
 inline DynamicFace::DynamicFace(Face* ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_)), mesh(mesh_) {}
 inline DynamicFace::DynamicFace(Face ptr_, HalfedgeMesh* mesh_) : ind(mesh_->indexOf(ptr_.ptr)), mesh(mesh_) {}
-inline DynamicHalfedge DynamicFace::halfedge() const {
-  return DynamicHalfedge(Face(*this).halfedge(), mesh);
-}
+inline DynamicHalfedge DynamicFace::halfedge() const { return DynamicHalfedge(Face(*this).halfedge(), mesh); }
 inline bool DynamicFace::operator==(const DynamicFace& other) const { return ind == other.ind; }
 inline bool DynamicFace::operator!=(const DynamicFace& other) const { return !(*this == other); }
 inline bool DynamicFace::operator>(const DynamicFace& other) const { return ind > other.ind; }
@@ -464,8 +444,7 @@ inline bool DynamicFace::operator<(const DynamicFace& other) const { return ind 
 inline bool DynamicFace::operator<=(const DynamicFace& other) const { return ind <= other.ind; }
 inline size_t DynamicFace::getInd() const { return ind; }
 
-inline FaceRangeIterator::FaceRangeIterator(Face startingFace, Face end_)
-    : currFace(startingFace), end(end_) {
+inline FaceRangeIterator::FaceRangeIterator(Face startingFace, Face end_) : currFace(startingFace), end(end_) {
   if (currFace != end && currFace->isDead()) {
     this->operator++();
   }
@@ -477,12 +456,8 @@ inline const FaceRangeIterator& FaceRangeIterator::operator++() {
   }
   return *this;
 }
-inline bool FaceRangeIterator::operator==(const FaceRangeIterator& other) const {
-  return currFace == other.currFace;
-}
-inline bool FaceRangeIterator::operator!=(const FaceRangeIterator& other) const {
-  return currFace != other.currFace;
-}
+inline bool FaceRangeIterator::operator==(const FaceRangeIterator& other) const { return currFace == other.currFace; }
+inline bool FaceRangeIterator::operator!=(const FaceRangeIterator& other) const { return currFace != other.currFace; }
 inline Face FaceRangeIterator::operator*() const { return currFace; }
 
 inline FaceSet::FaceSet(Face beginptr_, Face endptr_) : beginptr(beginptr_), endptr(endptr_) {}

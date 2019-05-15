@@ -79,16 +79,16 @@ public:
 
   // Vertex attributes
   T& position(Vertex p); // TODO get rid of this method; all write access
-                            // should be done through operator[], to
-                            // distinguish it from all other named accessors
-                            // (which are read-only)
+                         // should be done through operator[], to
+                         // distinguish it from all other named accessors
+                         // (which are read-only)
   T position(Vertex p) const;
   double dualArea(Vertex v);
   double volume(Vertex v);          // always equal to 1
   double angleDefect(Vertex v);     // 2π minus sum of incident angles
   Vector3 normal(Vertex v);         // area-weighted average of incident face normals
   Vector3 boundaryNormal(Vertex v); // length-weighted normal vector to the
-                                       // two neighboring edges
+                                    // two neighboring edges
   Vector3 projectToTangentSpace(Vertex v, const Vector3& inVec);
   Complex tangentVectorToComplexAngle(Vertex v, const Vector3& inVec);
   Vector3 complexAngleToTangentVector(Vertex v, Complex inAngle);
@@ -114,8 +114,8 @@ public:
   double angle(Halfedge h);             // **triangles only**
   double angle(Corner c);               // **triangles only**
   double angularCoordinate(Halfedge h); // **triangles only** Measured CCW
-                                           // against the tail vertex's
-                                           // arbitrary halfedge
+                                        // against the tail vertex's
+                                        // arbitrary halfedge
   double cotan(Halfedge h);             // **triangles only**
 
   // Global attributes

@@ -128,8 +128,7 @@ private:
   void propogateWindow(const Window& win);
   void generateSubWinsForPseudoSrc(const PseudoWindow& pseudoWin);
   void generateSubWinsForPseudoSrcFromWindow(const PseudoWindow& pseudoWin, Halfedge& startHe, Halfedge& endHe);
-  void generateSubWinsForPseudoSrcFromPseudoSrc(const PseudoWindow& pseudoWin, Halfedge& startHe,
-                                                Halfedge& endHe);
+  void generateSubWinsForPseudoSrcFromPseudoSrc(const PseudoWindow& pseudoWin, Halfedge& startHe, Halfedge& endHe);
   void buildWindow(const Window& pWin, Halfedge& he, double t0, double t1, const Vector2& v0, const Vector2& v1,
                    Window& win);
   bool isValidWindow(const Window& win, bool isLeftChild);

@@ -17,9 +17,9 @@ namespace geometrycentral {
 // Get number of elemenents
 template <typename E> size_t nElements(HalfedgeMesh* mesh)            { return std::numeric_limits<size_t>::max(); }
 template<> inline size_t nElements<Vertex  >(HalfedgeMesh* mesh)   { return mesh->nVertices();   }
-template<> inline size_t nElements<Face    >(HalfedgeMesh* mesh)   { return mesh->nFaces() + mesh->nBoundaryLoops(); }
+template<> inline size_t nElements<Face    >(HalfedgeMesh* mesh)   { return mesh->nFaces();      }
 template<> inline size_t nElements<Edge    >(HalfedgeMesh* mesh)   { return mesh->nEdges();      }
-template<> inline size_t nElements<Halfedge>(HalfedgeMesh* mesh)   { return mesh->nRealHalfedges() + mesh->nImaginaryHalfedges();  }
+template<> inline size_t nElements<Halfedge>(HalfedgeMesh* mesh)   { return mesh->nHalfedges();  }
 template<> inline size_t nElements<Corner  >(HalfedgeMesh* mesh)   { return mesh->nCorners();    }
 
 template <typename E> size_t elementCapacity(HalfedgeMesh* mesh)            { return std::numeric_limits<size_t>::max(); }

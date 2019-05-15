@@ -28,7 +28,7 @@ struct SegmentEndpoint {
   // Most of the time, this is an edge crossing
   bool isEdgeCrossing;
   Halfedge halfedge; // enters at halfedges, exits halfedge.twin()
-  double tCross;        // along halfedge
+  double tCross;     // along halfedge
 
   // Can also be a point in a face
   Face face;

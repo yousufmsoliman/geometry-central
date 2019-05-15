@@ -18,6 +18,7 @@ class Halfedge;
 class Vertex;
 class Edge;
 class Face;
+class Corner;
 
 // Forward declare classes used for conversion from other mesh types
 class PolygonSoupMesh;
@@ -32,13 +33,12 @@ class Geometry;
 // 3
 #include "geometrycentral/mesh/halfedge_data_types.h"
 #include "geometrycentral/mesh/halfedge_iterators.h"
-// 4
-#include "geometrycentral/mesh/halfedge_mesh_data_transfer.h"
 
 namespace geometrycentral {
 
 
 class HalfedgeMesh {
+
 
 public:
   HalfedgeMesh();
@@ -46,8 +46,7 @@ public:
   ~HalfedgeMesh();
 
   // Number of mesh elements of each type
-  // TODO at some point add back in nHalfedges(), which gives real+imaginary. It's gone for now (Dec 2018) b/c I renamed
-  // it to nRealHalfedges(), and want existing code to fail to compile
+  size_t nHalfedges() const;
   size_t nRealHalfedges() const;
   size_t nCorners() const;
   size_t nVertices() const;
@@ -68,7 +67,7 @@ public:
   BoundarySet boundaryLoops();
 
   // Methods for accessing elements by index
-  // Example: Vertex v = mesh.vertex(123);
+  // only valid when the  mesh is compressed
   Halfedge halfedge(size_t index);
   Corner corner(size_t index);
   Vertex vertex(size_t index);
@@ -151,8 +150,7 @@ public:
   int eulerCharacteristic();
   size_t nConnectedComponents();
   std::vector<std::vector<size_t>> getPolygonSoupFaces();
-  HalfedgeMesh* copy();                            // returns a deep copy
-  HalfedgeMesh* copy(HalfedgeMeshDataTransfer& t); // returns a deep copy
+  std::unique_ptr<HalfedgeMesh> copy();
 
   // Compress the mesh
   bool isCompressed();
@@ -196,14 +194,13 @@ public:
 
 
 private:
-
   // Core arrays which hold the connectivity
   std::vector<size_t> heNext;
   std::vector<size_t> heVertex;
   std::vector<size_t> heFace;
   std::vector<size_t> vHalfedge;
   std::vector<size_t> fHalfedge;
-  
+
   // Auxilliary arrays which cache other useful information
 
   // Track element counts (can't rely on rawVertices.size() after deletions have made the list sparse). These are the
@@ -259,112 +256,6 @@ private:
   friend class DynamicFace;
 };
 
-class Halfedge {
-  friend class Edge;
-  friend class HalfedgeMesh;
-  friend class Halfedge;
-  friend struct std::hash<Halfedge>;
-  friend struct std::hash<DynamicHalfedge>;
-
-protected:
-  Halfedge* twin;
-  Halfedge* next;
-  Vertex* vertex;
-  Edge* edge;
-  Face* face;
-
-  bool isReal = true;
-  size_t ID; // a unique value useful for hashing (etc). NOT an index
-
-public:
-#ifndef NDEBUG
-  // The mesh that this is a part of. Should only be used for debugging, so
-  // exclude it unless debug is enabled.
-  HalfedgeMesh* parentMesh;
-#endif
-
-  // Null twin ptr measn this halfedge has been deleted
-  void markDead() { twin = nullptr; };
-  bool isDead() { return twin == nullptr; };
-};
-
-class Vertex {
-  friend class Edge;
-  friend class HalfedgeMesh;
-  friend class Vertex;
-  friend struct std::hash<Vertex>;
-  friend struct std::hash<DynamicVertex>;
-
-protected:
-  // Data structure
-  Halfedge* halfedge; // some halfedge that emanates from this vertex
-                      // (guaranteed to be real)
-  bool isBoundary = false;
-  size_t ID; // a unique value useful for hashing (etc). NOT an index
-
-public:
-#ifndef NDEBUG
-  // The mesh that this is a part of. Should only be used for debugging, so
-  // exclude it unless debug is enabled.
-  HalfedgeMesh* parentMesh;
-#endif
-
-  // Null halfedge ptr means this vertex has been deleted
-  void markDead() { halfedge = nullptr; };
-  bool isDead() { return halfedge == nullptr; };
-};
-
-class Edge {
-  friend class HalfedgeMesh;
-  friend class Edge;
-  friend struct std::hash<Edge>;
-  friend struct std::hash<DynamicEdge>;
-
-protected:
-  Halfedge* halfedge;
-
-  bool isBoundary = false;
-  size_t ID; // a unique value useful for hashing (etc). NOT an index
-
-public:
-#ifndef NDEBUG
-  // The mesh that this is a part of. Should only be used for debugging, so
-  // exclude it unless debug is enabled.
-  HalfedgeMesh* parentMesh;
-#endif
-
-  // Null halfedge ptr means this edge has been deleted
-  void markDead() { halfedge = nullptr; };
-  bool isDead() { return halfedge == nullptr; };
-};
-
-class Face {
-  friend class Edge;
-  friend class HalfedgeMesh;
-  friend class Face;
-  friend struct std::hash<Face>;
-  friend struct std::hash<DynamicFace>;
-
-protected:
-  Halfedge* halfedge;
-
-  bool isBoundary = false;
-  bool isReal = false;
-  size_t ID; // a unique value useful for hashing (etc). NOT an index
-
-public:
-#ifndef NDEBUG
-  // The mesh that this is a part of. Should only be used for debugging, so
-  // exclude it unless debug is enabled.
-  HalfedgeMesh* parentMesh;
-#endif
-
-  // Null halfedge ptr means this face has been deleted
-  void markDead() { halfedge = nullptr; };
-  bool isDead() { return halfedge == nullptr; };
-};
-
-} // namespace geometrycentral
 
 #include "geometrycentral/mesh/halfedge_data_types.ipp"
 #include "geometrycentral/mesh/halfedge_iterators.ipp"

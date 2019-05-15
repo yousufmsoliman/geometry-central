@@ -336,8 +336,8 @@ void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrc(const PseudoWindow& p
   }
 }
 
-void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrcFromWindow(const PseudoWindow& pseudoWin,
-                                                                     Halfedge& startHe, Halfedge& endHe) {
+void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrcFromWindow(const PseudoWindow& pseudoWin, Halfedge& startHe,
+                                                                     Halfedge& endHe) {
   Halfedge he0 = vertInfos[pseudoWin.v].enterHalfedge;
   Halfedge he1 = he0.next();
   Halfedge he2 = he1.next();

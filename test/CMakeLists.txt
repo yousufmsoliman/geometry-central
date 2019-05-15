@@ -3,6 +3,12 @@ cmake_minimum_required(VERSION 3.10.0)
 # Set up testing
 enable_testing()
 
+project(geometry-central-tests)
+
+### Configure output locations
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 ### Configure the compiler
 
@@ -91,3 +97,6 @@ add_executable(geometry-central-test "${TEST_SRCS}")
 target_include_directories(geometry-central-test PUBLIC "${gtest_SOURCE_DIR}/include")
 target_include_directories(geometry-central-test PRIVATE "include/")
 target_link_libraries(geometry-central-test gtest_main geometry-central)
+
+# Add geometry central as a subproject
+add_subdirectory(../ "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")

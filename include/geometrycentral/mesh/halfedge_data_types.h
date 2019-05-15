@@ -96,4 +96,7 @@ using EdgeData = MeshData<Edge, T>;
 template <typename T>
 using HalfedgeData = MeshData<Halfedge, T>;
 
+template <typename T>
+using CornerData = MeshData<Corner, T>;
+
 } // namespace geometrycentral

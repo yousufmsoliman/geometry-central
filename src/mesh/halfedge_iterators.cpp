@@ -19,8 +19,7 @@ VertexIncomingHalfedgeIterator::VertexIncomingHalfedgeIterator(Halfedge starting
 // === Incoming halfedges (without imaginary)
 VertexIncomingInteriorHalfedgeSet::VertexIncomingInteriorHalfedgeSet(Halfedge he) : firstHe(he) {}
 
-VertexIncomingInteriorHalfedgeIterator::VertexIncomingInteriorHalfedgeIterator(Halfedge startingEdge,
-                                                                               bool justStarted_)
+VertexIncomingInteriorHalfedgeIterator::VertexIncomingInteriorHalfedgeIterator(Halfedge startingEdge, bool justStarted_)
     : currHe(startingEdge), justStarted(justStarted_) {
   // If startingEdge is a boundary edge, the first state of this iterator would
   // be a halfedge which should not be returned,
@@ -42,8 +41,7 @@ VertexOutgoingHalfedgeIterator::VertexOutgoingHalfedgeIterator(Halfedge starting
 // === Outgoing halfedges (without imaginary)
 VertexOutgoingInteriorHalfedgeSet::VertexOutgoingInteriorHalfedgeSet(Halfedge he) : firstHe(he) {}
 
-VertexOutgoingInteriorHalfedgeIterator::VertexOutgoingInteriorHalfedgeIterator(Halfedge startingEdge,
-                                                                               bool justStarted_)
+VertexOutgoingInteriorHalfedgeIterator::VertexOutgoingInteriorHalfedgeIterator(Halfedge startingEdge, bool justStarted_)
     : currHe(startingEdge), justStarted(justStarted_) {
   // If startingEdge is a boundary edge, the first state of this iterator would
   // be a halfedge which should not be returned,

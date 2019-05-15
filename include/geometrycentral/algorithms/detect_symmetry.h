@@ -7,12 +7,12 @@
 namespace geometrycentral {
 
 struct SymmetryResult {
-  bool symmetryFound = false;                     // was a symmetry found? is this data valid?
+  bool symmetryFound = false;                  // was a symmetry found? is this data valid?
   std::vector<Vertex> canonicalVertices;       // a representative entry from each
-                                                  // set of symmetry pairs
+                                               // set of symmetry pairs
   VertexData<std::vector<Vertex>> symmetrySet; // for each unique vertex,
-                                                  // all others vertices that
-                                                  // are symmetry pairs
+                                               // all others vertices that
+                                               // are symmetry pairs
 };
 
 // Look for a symmetry about a mirror plane

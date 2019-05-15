@@ -107,8 +107,7 @@ EdgeData<char> minimalSpanningTree(EdgeLengthGeometry* geometry) {
 
 
 // Note: Assumes mesh is a single connected component
-EdgeData<char> spanningTreeBetweenVertices(Geometry<Euclidean>* geometry,
-                                           const std::vector<Vertex>& requiredVertices) {
+EdgeData<char> spanningTreeBetweenVertices(Geometry<Euclidean>* geometry, const std::vector<Vertex>& requiredVertices) {
 
   // Preliminaries
   HalfedgeMesh* mesh = geometry->getMesh();

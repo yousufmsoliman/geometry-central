@@ -41,7 +41,7 @@ class DynamicBoundaryLoop;
 // Halfedge
 class Halfedge {
 public:
-  Halfedge(); // defaults to nullptr
+  Halfedge(); // defaults to null
   Halfedge(Halfedge* ptr);
   Halfedge(DynamicHalfedge he);
 
