@@ -7,6 +7,8 @@ theme:
 markdown_extensions:
   - codehilite
   - admonition
+  - markdown.extensions.footnotes
+  - markdown.extensions.smarty
   - pymdownx.superfences
   - pymdownx.details
   - pymdownx.inlinehilite

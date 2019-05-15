@@ -58,9 +58,23 @@ class HalfedgePtr {
 
     Ultimately, the index-based design seems preferrable.
 
+## Invariants
+
+In addition to the basic properties of the `twin()` and `next()` maps, the halfedge mesh data structure offers a few useful invariants about its indexing scheme which must be maintained by all operations.
+
+  - on a boundary edge, `e.halfedge()` is the interior halfedge
+  - on a boundary vertex, `v.vertex()` is the unique real interior halfedge along the boundary (so traversing in CCW order walks the wedge)
+
+
+The `validateConnectivity()` is extremely useful for checking invariants while developing the data structure.
+
+??? func "`#!cpp void HalfedgeMesh::validateConnectivity()`"
+
+    Perform _a lot_ of sanity checks about the halfedge mesh. Throws if any fail.
+
 ## Resizing and deleting
 
-To enable (amortized) O(1) mutation, the buffers containing mesh data are lazily reallocated like a `std::vector` when needed. As such the actual buffers like `mesh.heNext` might be larger than the current number of elements in the mesh; we separately track the count of real, valid elements to avoid accessing the extra regions of the array. The special index value `INVALID_IND` (which happens to be `std::numeric_limits<size_t>::max()`) is used to fill index values that have no meaning.
+To enable (amortized) $\mathcal{O}(1)$ mutation, the buffers containing mesh data are lazily reallocated like a `std::vector` when needed. As such the actual buffers like `mesh.heNext` might be larger than the current number of elements in the mesh; we separately track the count of real, valid elements to avoid accessing the extra regions of the array. The special index value `INVALID_IND` (which happens to be `std::numeric_limits<size_t>::max()`) is used to fill index values that have no meaning.
 
 A similar issues arises with deletion. When a mesh element is deleted, it would be too expensive to shift the indices of all subsequent elements. Instead, we simply mark the element as deleted, leaving a hole in our index space. Deleted halfedges and their edges are implicitly encoded by `heNext[he] == INVALID_IND`, while deleted edges and vertices are encoded by `vHalfedge[v] == INVALID_IND` and `fHalfedge[f] == INVALID_IND`.
 

@@ -62,7 +62,7 @@ Additionally, see the vector-based initializers in [vector interop](containers.m
 
     Access data stored in the container by the index of a mesh element. A const version also exists; expect semantics like `std::vector<>`.
 
-    **Warning**: only valid when the underlying mesh is _compressed_. 
+    Only valid when the underlying mesh is [compressed](mutation.md#compressed-mode).
     
     Must have `0 <= ind < N`, where `N` is the number of elements of that type.
 
@@ -125,7 +125,29 @@ The corresponding vectors are indexed according to the indices of the underlying
 ??? func "`#!cpp MeshData<E,T>::MeshData<E,T>(HalfedgeMesh& mesh Eigen::Matrix<T, Eigen::Dynamic, 1> vec, MeshData<E, size_t>& indexer)`"
 
     Construct a new container over a mesh, with the contents of `vec`, indexed according to `indexer`.
-  
+ 
+
+
+## Transferring data
+
+`MeshData<>` containers are defined with respect to a particular mesh object. Sometimes one may need to transfer data defined on one mesh to another, for instance after making a copy of a mesh, or when reading data from file.
+
+??? func "`#!cpp MeshData<E,T> MeshData<E,T>::reinterpretTo(HalfedgeMesh& target)`"
+
+    Map data defined on one halfedge mesh to another. The meshes must have the same number of elements, and data will be naively transferred between elements with the same index.
+
+    Requires that both meshes be [compressed](mutation.md#compressed-mode).
+
+    Example usage:
+    ```cpp
+    HalfedgeMesh meshA = /* something */;
+    HalfedgeMesh meshB = meshA.copy();
+
+    FaceData<Vector3> myDataOnA(meshA);
+    /* fill myDataOnA with interesting values */
+
+    FaceData<Vector3> myDataOnB = myDataOnA.reinterpretTo(meshB);
+    ```
 
 
 ## Advanced features
@@ -136,7 +158,7 @@ The corresponding vectors are indexed according to the indices of the underlying
 <!--TODO reword...-->
 Scalar values on edges often carry meaning with respect to some oriented direction along the edge--- common examples include differences between values at vertices, or more generally 1-forms in discrete differential geometry. In such settings, a scalar value is concisely stored along edges, but its sign should flip when accessed "along" the opposite direction.
 
-`EdgeData<T>` containers offer a pair of special additional accessors for oriented data, which handle the sign flips automatically. Note that they cannot be instantiated unless `T` supports a unary `-` operator.
+`EdgeData<T>` containers offer a pair of special additional accessors for oriented data, which handle the sign flips automatically. Note that they cannot be instantiated unless the scalar type `T` supports a unary `-` operator.
 
 ??? func "`#!cpp T EdgeData<T>::getOriented(HalfedgePtr he)`"
 

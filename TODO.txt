@@ -4,4 +4,31 @@ Things to not forget about:
 
 - #defines to manage safety checks. Docs mention NGC_SAFETY_CHECKS.
 
-- Seems to be no reason we can't re-use delete elements for future allocations. This will reduce sparsification (though invalidate the property that iteration works through insertion) 
+- Seems to be no reason we can't re-use deleted elements for future allocations. This will reduce sparsification (though invalidate the property that iteration works through insertion) 
+
+
+
+
+
+WTF to do with boundary loops?
+
+Boundary loops at back of face index space
+  - addition invalidates boundary loop pointers, which is different from all other invalidation rules
+
+Boundary loops intermingled in face index space
+  - memory & time cost of extra marker array
+  - face index space does not stay dense, even if only insertions are being performed
+
+Boundary loops in separate index space
+  - no weird invalidation rules
+  - switches in face indexing code
+  - he.face().index() could easily be mistaken for face index
+
+
+---> Combination of back of face space and separate index space
+  - internally in data structure, index at back of space: [ ... faces ...     ... empty ...   ... boundary loops ...]
+  - Define BoundaryLoopPtr, which actually enumerates from [0, nBL)
+    - MeshData<BoundaryLoopPtr> can now work out of the box
+    - BoundaryLoopPtrs don't get invalidated weirdly
+  - Only weirdness: exteriorHe.face() yields a face which should really be a boundary loop. User must do BoundaryLoopPtr(exteriorHe.face()) 
+  
