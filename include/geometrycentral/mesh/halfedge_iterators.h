@@ -5,22 +5,19 @@
 #include "geometrycentral/mesh/halfedge_mesh.h"
 
 namespace geometrycentral {
+namespace halfedge_mesh {
 
-// TODO add const interators across the board
 
-// NOTE: These iterators are not STL compliant (so you can use them with
-// <algorithm> and friends.
-// This is mainly becuase the STL notion of iterators seems to strongly imply
-// each "container"
-// has exactly one set of data to be iterated over. Obviously we break this
-// here, we don't even
-// have containers.
+// NOTE: These iterators are not STL compliant (so you can't use them with <algorithm> and friends. This is mainly
+// becuase the STL notion of iterators seems to strongly imply each "container" has exactly one set of data to be
+// iterated over. Obviously we break this here, we don't even have containers.
 
-// The ugly inlining throughout these iterators was chosen after some
-// halfhearted performance
-// testing. When first implemented, these functions seemed to be a factor of 4
-// slower than
-// the equivalent do{} while() loops. Now, they're are 1.0x-1.5x the cost.
+// The excessive inlining throughout these iterators was chosen after some halfhearted performance testing. When first
+// implemented, the initial functions seemed to be a factor of 4 slower than the equivalent do{} while() loops. Now,
+// they're are 1.0x-1.5x the cost.
+
+// TODO add const interators across the board ?
+
 
 // ==========================================================
 // ================    Vertex Iterators    ==================
@@ -35,7 +32,6 @@ public:
   bool operator==(const VertexIncomingHalfedgeIterator& other) const;
   bool operator!=(const VertexIncomingHalfedgeIterator& other) const;
   Halfedge operator*() const;
-  // Halfedge operator-> () const;
 
 private:
   Halfedge currHe;
@@ -46,31 +42,6 @@ public:
   VertexIncomingHalfedgeSet(Halfedge he);
   VertexIncomingHalfedgeIterator begin();
   VertexIncomingHalfedgeIterator end();
-
-private:
-  Halfedge firstHe;
-};
-
-// Iterate around all incoming halfedges that are strictly on the interior of
-// the domain
-class VertexIncomingInteriorHalfedgeIterator {
-public:
-  VertexIncomingInteriorHalfedgeIterator(Halfedge startingEdge, bool justStarted);
-  const VertexIncomingInteriorHalfedgeIterator& operator++();
-  bool operator==(const VertexIncomingInteriorHalfedgeIterator& other) const;
-  bool operator!=(const VertexIncomingInteriorHalfedgeIterator& other) const;
-  Halfedge operator*() const;
-  // Halfedge operator-> () const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
-};
-class VertexIncomingInteriorHalfedgeSet {
-public:
-  VertexIncomingInteriorHalfedgeSet(Halfedge he);
-  VertexIncomingInteriorHalfedgeIterator begin();
-  VertexIncomingInteriorHalfedgeIterator end();
 
 private:
   Halfedge firstHe;
@@ -101,30 +72,6 @@ private:
   Halfedge firstHe;
 };
 
-// Iterate around all outgoing halfedges that are strictly on the interior of
-// the domain
-class VertexOutgoingInteriorHalfedgeIterator {
-public:
-  VertexOutgoingInteriorHalfedgeIterator(Halfedge startingEdge, bool justStarted);
-  const VertexOutgoingInteriorHalfedgeIterator& operator++();
-  bool operator==(const VertexOutgoingInteriorHalfedgeIterator& other) const;
-  bool operator!=(const VertexOutgoingInteriorHalfedgeIterator& other) const;
-  Halfedge operator*() const;
-  // Halfedge operator-> () const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
-};
-class VertexOutgoingInteriorHalfedgeSet {
-public:
-  VertexOutgoingInteriorHalfedgeSet(Halfedge he);
-  VertexOutgoingInteriorHalfedgeIterator begin();
-  VertexOutgoingInteriorHalfedgeIterator end();
-
-private:
-  Halfedge firstHe;
-};
 
 // Iterate around adjacent vertices
 class VertexAdjacentVertexIterator {
@@ -342,4 +289,80 @@ private:
   Halfedge firstHe;
 };
 
+
+// ==========================================================
+// ================     Face Iterators     ==================
+// ==========================================================
+
+// Iterate around adjacent halfedges
+class BoundaryLoopAdjacentHalfedgeIterator {
+public:
+  BoundaryLoopAdjacentHalfedgeIterator(Halfedge startingEdge, bool justStarted);
+  const BoundaryLoopAdjacentHalfedgeIterator& operator++();
+  bool operator==(const BoundaryLoopAdjacentHalfedgeIterator& other) const;
+  bool operator!=(const BoundaryLoopAdjacentHalfedgeIterator& other) const;
+  Halfedge operator*() const;
+
+private:
+  Halfedge currHe;
+  bool justStarted;
+};
+class BoundaryLoopAdjacentHalfedgeSet {
+public:
+  BoundaryLoopAdjacentHalfedgeSet(Halfedge he);
+  BoundaryLoopAdjacentHalfedgeIterator begin();
+  BoundaryLoopAdjacentHalfedgeIterator end();
+
+private:
+  Halfedge firstHe;
+};
+
+// Iterate around adjacent vertices
+class BoundaryLoopAdjacentVertexIterator {
+public:
+  BoundaryLoopAdjacentVertexIterator(Halfedge startingEdge, bool justStarted);
+  const BoundaryLoopAdjacentVertexIterator& operator++();
+  bool operator==(const BoundaryLoopAdjacentVertexIterator& other) const;
+  bool operator!=(const BoundaryLoopAdjacentVertexIterator& other) const;
+  Vertex operator*() const;
+
+private:
+  Halfedge currHe;
+  bool justStarted;
+};
+class BoundaryLoopAdjacentVertexSet {
+public:
+  BoundaryLoopAdjacentVertexSet(Halfedge he);
+  BoundaryLoopAdjacentVertexIterator begin();
+  BoundaryLoopAdjacentVertexIterator end();
+
+private:
+  Halfedge firstHe;
+};
+
+// Iterate around adjacent edges
+class BoundaryLoopAdjacentEdgeIterator {
+public:
+  BoundaryLoopAdjacentEdgeIterator(Halfedge startingEdge, bool justStarted);
+  const BoundaryLoopAdjacentEdgeIterator& operator++();
+  bool operator==(const BoundaryLoopAdjacentEdgeIterator& other) const;
+  bool operator!=(const BoundaryLoopAdjacentEdgeIterator& other) const;
+  Edge operator*() const;
+
+private:
+  Halfedge currHe;
+  bool justStarted;
+};
+class BoundaryLoopAdjacentEdgeSet {
+public:
+  BoundaryLoopAdjacentEdgeSet(Halfedge he);
+  BoundaryLoopAdjacentEdgeIterator begin();
+  BoundaryLoopAdjacentEdgeIterator end();
+
+private:
+  Halfedge firstHe;
+};
+
+
+} // namespace halfedge_mesh
 } // namespace geometrycentral

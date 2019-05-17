@@ -1,13 +1,16 @@
 #pragma once
 
-#include <cassert>
+#include "geometrycentral/mesh/halfedge_mesh.h"
+#include "geometrycentral/mesh/halfedge_element_types.h"
 
+#include <cassert>
 #include "Eigen/Core"
 
 // === Datatypes which hold data stored on the mesh
 
-
 namespace geometrycentral {
+namespace halfedge_mesh {
+
 
 // Geneneric datatype, specialized as VertexData (etc) below
 // E is the element pointer type (eg Vertex)
@@ -99,4 +102,5 @@ using HalfedgeData = MeshData<Halfedge, T>;
 template <typename T>
 using CornerData = MeshData<Corner, T>;
 
+} // namespace halfedge_mesh
 } // namespace geometrycentral

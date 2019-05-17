@@ -3,68 +3,45 @@
 #include <list>
 #include <vector>
 
-#include "geometrycentral/utilities/vector3.h"
 #include <geometrycentral/utilities/utilities.h>
-// NOTE: More ipp includes at bottom of file
 
-namespace geometrycentral {
-
-// A HalfedgeMesh encodes the connectivity---but not the geometry---of a
-// manifold surface, possibly with boundary.
-
-// Forward declare classes for primary mesh objects
-class HalfedgeMesh;
-class Halfedge;
-class Vertex;
-class Edge;
-class Face;
-class Corner;
-
-// Forward declare classes used for conversion from other mesh types
-class PolygonSoupMesh;
-template <class T>
-class Geometry;
-
-} // namespace geometrycentral
-
-// Order MATTERS for these includes
-// 1
-#include "geometrycentral/mesh/halfedge_pointer_types.h"
-// 3
-#include "geometrycentral/mesh/halfedge_data_types.h"
+#include "geometrycentral/mesh/halfedge_containers.h"
+#include "geometrycentral/mesh/halfedge_element_types.h"
 #include "geometrycentral/mesh/halfedge_iterators.h"
 
-namespace geometrycentral {
+// NOTE: ipp includes at bottom of file
 
+namespace geometrycentral {
+namespace halfedge_mesh {
 
 class HalfedgeMesh {
 
-
 public:
   HalfedgeMesh();
-  HalfedgeMesh(const PolygonSoupMesh& soup, Geometry<Vector3>*& geometry);
   ~HalfedgeMesh();
+
 
   // Number of mesh elements of each type
   size_t nHalfedges() const;
-  size_t nRealHalfedges() const;
+  size_t nInteriorHalfedges() const;
   size_t nCorners() const;
   size_t nVertices() const;
   size_t nInteriorVertices();
   size_t nEdges() const;
   size_t nFaces() const;
   size_t nBoundaryLoops() const;
-  size_t nImaginaryHalfedges() const;
+  size_t nExteriorHalfedges() const;
 
   // Methods for range-based for loops
   // Example: for(Vertex v : mesh.vertices()) { ... }
-  HalfedgeSet realHalfedges();
-  HalfedgeSet imaginaryHalfedges();
-  HalfedgeSet allHalfedges();
+  HalfedgeSet halfedges();
+  HalfedgeInteriorSet interiorHalfedges();
+  HalfedgeExteriorSet exteriorHalfedges();
+  CornerSet corners();
   VertexSet vertices();
   EdgeSet edges();
   FaceSet faces();
-  BoundarySet boundaryLoops();
+  BoundaryLoopSet boundaryLoops();
 
   // Methods for accessing elements by index
   // only valid when the  mesh is compressed
@@ -188,6 +165,7 @@ public:
   size_t nVerticesCapacity() const;
   size_t nEdgesCapacity() const;
   size_t nFacesCapacity() const;
+  size_t nBoundaryLoopsCapacity() const;
 
   // Performs a sanity checks on halfedge structure; throws on fail
   void validateConnectivity();
@@ -195,23 +173,46 @@ public:
 
 private:
   // Core arrays which hold the connectivity
-  std::vector<size_t> heNext;
-  std::vector<size_t> heVertex;
-  std::vector<size_t> heFace;
-  std::vector<size_t> vHalfedge;
-  std::vector<size_t> fHalfedge;
+  std::vector<size_t> heNext;    // he.next()
+  std::vector<size_t> heVertex;  // he.vertex()
+  std::vector<size_t> heFace;    // he.face()
+  std::vector<size_t> vHalfedge; // v.halfedge()
+  std::vector<size_t> fHalfedge; // f.halfedge()
+
+  // Implicit connectivity relationships
+  static size_t heTwin(size_t iHe);   // he.twin()
+  static size_t heEdge(size_t iHe);   // he.edge()
+  static size_t eHalfedge(size_t iE); // e.halfedge()
+
+  // Other implicit relationships
+  bool heIsInterior(size_t iHe) const;
+  bool faceIsBoundaryLoop(size_t iF) const;
+  size_t faceIndToBoundaryLoopInd(size_t iF) const;
+  size_t boundaryLoopIndToFaceInd(size_t iF) const;
 
   // Auxilliary arrays which cache other useful information
 
   // Track element counts (can't rely on rawVertices.size() after deletions have made the list sparse). These are the
   // actual number of elements, not the size of the buffer that holds them.
-  size_t nRealHalfedgesCount = 0;
-  size_t nImaginaryHalfedgesCount = 0;
+  size_t nHalfedgesCount = 0;
+  size_t nInteriorHalfedgesCount = 0;
   size_t nVerticesCount = 0;
   size_t nEdgesCount = 0;
   size_t nFacesCount = 0;
   size_t nBoundaryLoopsCount = 0;
-  size_t nextElemID = 77777; // used to assign unique ID to elements
+
+  // == Track the capacity and fill size of our buffers.
+  // These give the capacity of the currently allocated buffer?
+  size_t nVertexCapacityCount = 0;
+  size_t nHalfedgeCapacityCount = 0; // must always be even
+  size_t nFaceCapacityCount = 0;
+
+  // These give the number of filled elements in the currently allocated buffer
+  size_t nVertexFillCount = 0;
+  size_t nHalfedgeFillCount = 0;     // must always be even
+  size_t edgeFillCount() const;
+  size_t nFaceFillCount = 0;         // where the real faces stop, and empty/boundary loops begin
+  size_t nBoundaryLoopFillCount = 0; // remember, these fill from the back of the face buffer
 
   bool isCanonicalFlag = true;
   bool isCompressedFlag = true;
@@ -223,10 +224,16 @@ private:
   HalfedgeMesh& operator=(HalfedgeMesh&& other) = delete;
 
   // Used to resize the halfedge mesh. Expands and shifts vectors as necessary.
-  Halfedge* getNewHalfedge(bool real = true);
+  Halfedge* getNewHalfedge(bool interior = true);
   Vertex* getNewVertex();
   Edge* getNewEdge();
   Face* getNewFace();
+
+  // Detect dead elements
+  bool vertexIsDead(size_t iV) const;
+  bool halfedgeIsDead(size_t iHe) const;
+  bool edgeIsDead(size_t iE) const;
+  bool faceIsDead(size_t iF) const;
 
   // Deletes leave tombstones, which can be cleaned up with compress()
   void deleteElement(Halfedge he);
@@ -241,24 +248,39 @@ private:
   void compressVertices();
 
 
-  size_t indexOf(Halfedge* ptr);
-  size_t indexOf(Vertex* ptr);
-  size_t indexOf(Edge* ptr);
-  size_t indexOf(Face* ptr);
-
   // Helpers for mutation methods
   void ensureVertexHasBoundaryHalfedge(Vertex v); // impose invariant that v.halfedge is start of half-disk
   Vertex collapseEdgeAlongBoundary(Edge e);
 
-  friend class DynamicHalfedge;
-  friend class DynamicVertex;
-  friend class DynamicEdge;
-  friend class DynamicFace;
+
+  // Elements need direct access in to members to traverse
+  friend class Vertex;
+  friend class Halfedge;
+  friend class Corner;
+  friend class Edge;
+  friend class Face;
+  friend class BoundaryLoop;
+
+  // friend class VertexRangeIterator;
+  friend struct VertexRangeF;
+  friend struct HalfedgeRangeF;
+  friend struct HalfedgeInteriorRangeF;
+  friend struct HalfedgeExteriorRangeF;
+  friend struct CornerRangeF;
+  friend struct EdgeRangeF;
+  friend struct FaceRangeF;
+  friend struct BoundaryLoopRangeF;
 };
 
+} // namespace halfedge_mesh
+} // namespace geometrycentral
 
-#include "geometrycentral/mesh/halfedge_data_types.ipp"
+// clang-format off
+// preserve ordering
+#include "geometrycentral/mesh/halfedge_containers.ipp"
 #include "geometrycentral/mesh/halfedge_iterators.ipp"
+#include "geometrycentral/mesh/halfedge_element_types.ipp"
+#include "geometrycentral/mesh/halfedge_logic_templates.ipp"
 #include "geometrycentral/mesh/halfedge_mesh.ipp"
+// clang-format on
 #include "geometrycentral/mesh/halfedge_mesh_data_transfer.ipp"
-#include "geometrycentral/mesh/halfedge_pointer_types.ipp"

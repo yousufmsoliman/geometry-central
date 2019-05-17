@@ -1,106 +1,71 @@
 #pragma once
 
 namespace geometrycentral {
+namespace halfedge_mesh {
+
+// clang-format off
 
 // Methods for getting number of mesh elements
+inline size_t HalfedgeMesh::nHalfedges()         const { return nHalfedgesCount; }
+inline size_t HalfedgeMesh::nInteriorHalfedges() const { return nInteriorHalfedgesCount; }
+inline size_t HalfedgeMesh::nExteriorHalfedges() const { return nHalfedgesCount - nInteriorHalfedgesCount; }
+inline size_t HalfedgeMesh::nCorners()           const { return nInteriorHalfedgesCount; }
+inline size_t HalfedgeMesh::nVertices()          const { return nVerticesCount; }
+inline size_t HalfedgeMesh::nEdges()             const { return nEdgesCount; }
+inline size_t HalfedgeMesh::nFaces()             const { return nFacesCount; }
+inline size_t HalfedgeMesh::nBoundaryLoops()     const { return nBoundaryLoopsCount; }
 
-inline size_t HalfedgeMesh::nRealHalfedges(void) const { return nRealHalfedgesCount; }
-inline size_t HalfedgeMesh::nCorners(void) const { return nRealHalfedgesCount; }
-inline size_t HalfedgeMesh::nVertices(void) const { return nVerticesCount; }
-inline size_t HalfedgeMesh::nEdges(void) const { return nEdgesCount; }
-inline size_t HalfedgeMesh::nFaces(void) const { return nFacesCount; }
-inline size_t HalfedgeMesh::nBoundaryLoops(void) const { return rawBoundaryLoops.size(); }
-inline size_t HalfedgeMesh::nImaginaryHalfedges(void) const { return nImaginaryHalfedgesCount; }
+// Capacities
+inline size_t HalfedgeMesh::nHalfedgesCapacity() const { return nHalfedgeCapacityCount; }
+inline size_t HalfedgeMesh::nVerticesCapacity()  const { return nVertexCapacityCount; }
+inline size_t HalfedgeMesh::nEdgesCapacity()     const { return nHalfedgeCapacityCount / 2; }
+inline size_t HalfedgeMesh::nFacesCapacity()     const { return nFaceCapacityCount; }
 
-inline size_t HalfedgeMesh::nHalfedgesCapacity(void) const { return rawHalfedges.capacity(); }
-inline size_t HalfedgeMesh::nVerticesCapacity(void) const { return rawVertices.capacity(); }
-inline size_t HalfedgeMesh::nEdgesCapacity(void) const { return rawEdges.capacity(); }
-inline size_t HalfedgeMesh::nFacesCapacity(void) const { return rawFaces.capacity(); }
+// Implicit relationships
+inline size_t HalfedgeMesh::heTwin(size_t iHe)   { return iHe ^ 1; }
+inline size_t HalfedgeMesh::heEdge(size_t iHe)   { return iHe / 2; }
+inline size_t HalfedgeMesh::eHalfedge(size_t iE) { return 2 * iE; }
+inline size_t HalfedgeMesh::edgeFillCount() const { return nHalfedgeFillCount/2; }
+
+// Other getters
+inline bool HalfedgeMesh::heIsInterior(size_t iHe) const { return faceIsBoundaryLoop(heFace[iHe]); }
+inline bool HalfedgeMesh::faceIsBoundaryLoop(size_t iF) const { return iF >= nFaceFillCount; }
+inline size_t HalfedgeMesh::faceIndToBoundaryLoopInd(size_t iF) const { return nFaceCapacityCount - 1 - iF;}
+inline size_t HalfedgeMesh::boundaryLoopIndToFaceInd(size_t iB) const { return nFaceCapacityCount - 1 - iB;}
+
+// Detect dead elements
+bool HalfedgeMesh::vertexIsDead(size_t iV)      const { return vHalfedge[iV] == INVALID_IND; }
+bool HalfedgeMesh::halfedgeIsDead(size_t iHe)   const { return heNext[iHe] == INVALID_IND; }
+bool HalfedgeMesh::edgeIsDead(size_t iE)        const { return heNext[eHalfedge(iE)] == INVALID_IND; }
+bool HalfedgeMesh::faceIsDead(size_t iF)        const { return fHalfedge[iF] == INVALID_IND;}
 
 // Methods for iterating over mesh elements w/ range-based for loops ===========
 
-inline HalfedgeSet HalfedgeMesh::realHalfedges(void) {
-  size_t nH = rawHalfedges.size();
-  Halfedge beginptr(&rawHalfedges[0]);
-  Halfedge endptr(&rawHalfedges[nH]);
-
-  return HalfedgeSet(beginptr, endptr, HalfedgeSetType::Real);
-}
-
-inline HalfedgeSet HalfedgeMesh::imaginaryHalfedges(void) {
-  size_t nH = rawHalfedges.size();
-  Halfedge beginptr(&rawHalfedges[0]);
-  Halfedge endptr(&rawHalfedges[nH]);
-
-  return HalfedgeSet(beginptr, endptr, HalfedgeSetType::Imaginary);
-}
-
-inline HalfedgeSet HalfedgeMesh::allHalfedges(void) {
-  size_t nH = rawHalfedges.size();
-  Halfedge beginptr(&rawHalfedges[0]);
-  Halfedge endptr(&rawHalfedges[nH]);
-
-  return HalfedgeSet(beginptr, endptr, HalfedgeSetType::All);
-}
-
-inline CornerSet HalfedgeMesh::corners(void) {
-  size_t nC = rawHalfedges.size();
-  Corner beginptr(&rawHalfedges[0]);
-  Corner endptr(&rawHalfedges[nC]);
-
-  return CornerSet(beginptr, endptr);
-}
-
-inline VertexSet HalfedgeMesh::vertices(void) {
-  size_t nV = rawVertices.size();
-  Vertex beginptr{&rawVertices[0]};
-  Vertex endptr{&rawVertices[nV]};
-
-  return VertexSet(beginptr, endptr);
-}
-
-inline EdgeSet HalfedgeMesh::edges(void) {
-  size_t nE = rawEdges.size();
-  Edge beginptr{&rawEdges[0]};
-  Edge endptr{&rawEdges[nE]};
-
-  return EdgeSet(beginptr, endptr);
-}
-
-inline FaceSet HalfedgeMesh::faces(void) {
-  size_t nF = rawFaces.size();
-  Face beginptr{&rawFaces[0]};
-  Face endptr{&rawFaces[nF]};
-
-  return FaceSet(beginptr, endptr);
-}
-
-inline BoundarySet HalfedgeMesh::boundaryLoops(void) {
-  size_t nBL = rawBoundaryLoops.size();
-  BoundaryLoop beginptr{&rawBoundaryLoops[0]};
-  BoundaryLoop endptr{&rawBoundaryLoops[nBL]};
-
-  return BoundarySet(beginptr, endptr);
-}
+inline VertexSet HalfedgeMesh::vertices()                       { return VertexSet(this, 0, nVertexFillCount); }
+inline HalfedgeSet HalfedgeMesh::halfedges()                    { return HalfedgeSet(this, 0, nHalfedgeFillCount); }
+inline HalfedgeInteriorSet HalfedgeMesh::interiorHalfedges()    { return HalfedgeInteriorSet(this, 0, nHalfedgeFillCount); }
+inline HalfedgeExteriorSet HalfedgeMesh::exteriorHalfedges()    { return HalfedgeExteriorSet(this, 0, nHalfedgeFillCount); }
+inline CornerSet HalfedgeMesh::corners()                        { return CornerSet(this, 0, nHalfedgeFillCount); }
+inline EdgeSet HalfedgeMesh::edges()                            { return EdgeSet(this, 0, edgeFillCount()); }
+inline FaceSet HalfedgeMesh::faces()                            { return FaceSet(this, 0, nFaceFillCount); }
+inline BoundaryLoopSet HalfedgeMesh::boundaryLoops()            { return BoundaryLoopSet(this, 0, nBoundaryLoopFillCount); }
 
 // Methods for accessing elements by index =====================================
 // Note that these are only valid when the mesh is compressed.
 
-inline Halfedge HalfedgeMesh::halfedge(size_t index) { return Halfedge{&rawHalfedges[index]}; }
-
-inline Corner HalfedgeMesh::corner(size_t index) { return Corner{&rawHalfedges[index]}; }
-
-inline Vertex HalfedgeMesh::vertex(size_t index) { return Vertex{&rawVertices[index]}; }
-
-inline Edge HalfedgeMesh::edge(size_t index) { return Edge{&rawEdges[index]}; }
-
-inline Face HalfedgeMesh::face(size_t index) { return Face{&rawFaces[index]}; }
-
-inline BoundaryLoop HalfedgeMesh::boundaryLoop(size_t index) { return BoundaryLoop{&rawBoundaryLoops[index]}; }
+inline Vertex HalfedgeMesh::vertex(size_t index)             { return Vertex(this, index); }
+inline Halfedge HalfedgeMesh::halfedge(size_t index)         { return Halfedge(this, index); } 
+inline Corner HalfedgeMesh::corner(size_t index)             { return Corner(this,index); }
+inline Edge HalfedgeMesh::edge(size_t index)                 { return Edge(this, index); }
+inline Face HalfedgeMesh::face(size_t index)                 { return Face(this, index); }
+inline BoundaryLoop HalfedgeMesh::boundaryLoop(size_t index) { return BoundaryLoop(this, index); }
 
 // Misc utility methods =====================================
 
 inline bool HalfedgeMesh::isCompressed() { return isCompressedFlag; }
 inline bool HalfedgeMesh::isCanonical() { return isCanonicalFlag; }
 
+// clang-format on
+
+} // namespace halfedge_mesh
 } // namespace geometrycentral

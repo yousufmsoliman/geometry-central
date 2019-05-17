@@ -22,7 +22,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STR
 
   if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     message("Setting clang-specific options")
-    SET(BASE_CXX_FLAGS "${BASE_CXX_FLAGS} -ferror-limit=5 -fcolor-diagnostics")
+    SET(BASE_CXX_FLAGS "${BASE_CXX_FLAGS} -ferror-limit=3 -fcolor-diagnostics")
     SET(CMAKE_CXX_FLAGS_DEBUG          "-fsanitize=address -fno-limit-debug-info")
   elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     message("Setting gcc-specific options")

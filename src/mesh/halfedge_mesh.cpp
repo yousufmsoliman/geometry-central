@@ -18,6 +18,7 @@ using std::cout;
 using std::endl;
 
 namespace geometrycentral {
+namespace halfedge_mesh {
 
 
 HalfedgeMesh::HalfedgeMesh() {}
@@ -2261,4 +2262,5 @@ size_t HalfedgeMesh::indexOf(Edge* ptr) { return (ptr - &rawEdges[0]); }
 size_t HalfedgeMesh::indexOf(Face* ptr) { return (ptr - &rawFaces[0]); }
 
 
+} // namespace halfedge_mesh
 } // namespace geometrycentral

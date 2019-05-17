@@ -11,6 +11,15 @@
 #include "geometrycentral/utilities/vector2.h"
 #include "geometrycentral/utilities/vector3.h"
 
+// Error checking macro. CONDITION should be true if life is good (like in assert(CONDITION))
+#ifdef NGC_SAFTEY_CHECKS
+#define GC_SAFETY_ASSERT(CONDITION, MSG)
+#else
+#define GC_SAFETY_ASSERT(CONDITION, MSG)                                                                               \
+  if (!(CONDITION))                                                                                                    \
+    throw std::runtime_error("GC_SAFETY CHECK " + std::string(__FILE__) + ":" + std::to_string(__LINE__) + " - " + MSG);
+#endif
+
 namespace geometrycentral {
 
 const size_t INVALID_IND = std::numeric_limits<size_t>::max();
@@ -165,6 +174,7 @@ class FunctionalityException : public std::runtime_error {
 public:
   FunctionalityException(std::string msg) : std::runtime_error("Missing functionaliy: " + msg){};
 };
+
 
 } // namespace geometrycentral
 

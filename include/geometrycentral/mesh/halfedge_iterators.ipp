@@ -1,6 +1,7 @@
 #pragma once
 
 namespace geometrycentral {
+namespace halfedge_mesh {
 
 // ==========================================================
 // ================    Vertex Iterators    ==================
@@ -26,31 +27,6 @@ inline bool VertexIncomingHalfedgeIterator::operator!=(const VertexIncomingHalfe
 }
 inline Halfedge VertexIncomingHalfedgeIterator::operator*() const { return currHe; }
 
-// === Incoming halfedges, excluding those on the domain boundary
-// Note: This is currently commented out because
-//   A) It's currently broken, and can infinite-loop for a boundary vertex
-inline VertexIncomingInteriorHalfedgeIterator VertexIncomingInteriorHalfedgeSet::begin() {
-  return VertexIncomingInteriorHalfedgeIterator(firstHe, true);
-}
-inline VertexIncomingInteriorHalfedgeIterator VertexIncomingInteriorHalfedgeSet::end() {
-  return VertexIncomingInteriorHalfedgeIterator(firstHe, false);
-}
-inline const VertexIncomingInteriorHalfedgeIterator& VertexIncomingInteriorHalfedgeIterator::operator++() {
-  justStarted = false;
-  do {
-    currHe = currHe.next().twin();
-  } while (!currHe.isReal());
-  return *this;
-}
-inline bool VertexIncomingInteriorHalfedgeIterator::
-operator==(const VertexIncomingInteriorHalfedgeIterator& other) const {
-  return currHe == other.currHe && justStarted == other.justStarted;
-}
-inline bool VertexIncomingInteriorHalfedgeIterator::
-operator!=(const VertexIncomingInteriorHalfedgeIterator& other) const {
-  return !(*this == other);
-}
-inline Halfedge VertexIncomingInteriorHalfedgeIterator::operator*() const { return currHe; }
 
 // === Outgoing halfedges, including those on the domain boundary
 inline VertexOutgoingHalfedgeIterator VertexOutgoingHalfedgeSet::begin() {
@@ -71,32 +47,6 @@ inline bool VertexOutgoingHalfedgeIterator::operator!=(const VertexOutgoingHalfe
   return !(*this == other);
 }
 inline Halfedge VertexOutgoingHalfedgeIterator::operator*() const { return currHe; }
-
-// === Outgoing halfedges, excluding those on the domain boundary
-// Note: This is currently commented out because
-//   A) It's currently broken, and can infinite-loop for a boundary vertex
-inline VertexOutgoingInteriorHalfedgeIterator VertexOutgoingInteriorHalfedgeSet::begin() {
-  return VertexOutgoingInteriorHalfedgeIterator(firstHe, true);
-}
-inline VertexOutgoingInteriorHalfedgeIterator VertexOutgoingInteriorHalfedgeSet::end() {
-  return VertexOutgoingInteriorHalfedgeIterator(firstHe, false);
-}
-inline const VertexOutgoingInteriorHalfedgeIterator& VertexOutgoingInteriorHalfedgeIterator::operator++() {
-  justStarted = false;
-  do {
-    currHe = currHe.twin().next();
-  } while (!currHe.isReal());
-  return *this;
-}
-inline bool VertexOutgoingInteriorHalfedgeIterator::
-operator==(const VertexOutgoingInteriorHalfedgeIterator& other) const {
-  return currHe == other.currHe && justStarted == other.justStarted;
-}
-inline bool VertexOutgoingInteriorHalfedgeIterator::
-operator!=(const VertexOutgoingInteriorHalfedgeIterator& other) const {
-  return !(*this == other);
-}
-inline Halfedge VertexOutgoingInteriorHalfedgeIterator::operator*() const { return currHe; }
 
 // === Adjacent vertices
 inline VertexAdjacentVertexIterator VertexAdjacentVertexSet::begin() {
@@ -125,7 +75,7 @@ inline const VertexAdjacentFaceIterator& VertexAdjacentFaceIterator::operator++(
   justStarted = false;
   do {
     currHe = currHe.twin().next();
-  } while (!currHe.isReal());
+  } while (!currHe.isInterior());
   return *this;
 }
 inline bool VertexAdjacentFaceIterator::operator==(const VertexAdjacentFaceIterator& other) const {
@@ -162,7 +112,7 @@ inline VertexAdjacentCornerIterator VertexAdjacentCornerSet::end() {
 inline const VertexAdjacentCornerIterator& VertexAdjacentCornerIterator::operator++() {
   justStarted = false;
   currHe = currHe.twin().next();
-  if (!currHe.isReal()) currHe = currHe.twin().next(); // currHe must always be real
+  if (!currHe.isInterior()) currHe = currHe.twin().next(); // currHe must always be real
   return *this;
 }
 inline bool VertexAdjacentCornerIterator::operator==(const VertexAdjacentCornerIterator& other) const {
@@ -236,7 +186,7 @@ inline const FaceAdjacentFaceIterator& FaceAdjacentFaceIterator::operator++() {
   justStarted = false;
   do {
     currHe = currHe.next();
-  } while (!currHe.twin().isReal());
+  } while (!currHe.twin().isInterior());
   return *this;
 }
 inline bool FaceAdjacentFaceIterator::operator==(const FaceAdjacentFaceIterator& other) const {
@@ -263,4 +213,5 @@ inline bool FaceAdjacentCornerIterator::operator!=(const FaceAdjacentCornerItera
 }
 inline Corner FaceAdjacentCornerIterator::operator*() const { return currHe.next().corner(); }
 
+} // namespace halfedge_mesh
 } // namespace geometrycentral

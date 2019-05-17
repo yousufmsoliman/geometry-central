@@ -10,74 +10,7 @@
 // its own container type.
 
 namespace geometrycentral {
-
-// === Helpers which will allow us abstract over element access
-// clang-format off
-
-// Get number of elemenents
-template <typename E> size_t nElements(HalfedgeMesh* mesh)            { return std::numeric_limits<size_t>::max(); }
-template<> inline size_t nElements<Vertex  >(HalfedgeMesh* mesh)   { return mesh->nVertices();   }
-template<> inline size_t nElements<Face    >(HalfedgeMesh* mesh)   { return mesh->nFaces();      }
-template<> inline size_t nElements<Edge    >(HalfedgeMesh* mesh)   { return mesh->nEdges();      }
-template<> inline size_t nElements<Halfedge>(HalfedgeMesh* mesh)   { return mesh->nHalfedges();  }
-template<> inline size_t nElements<Corner  >(HalfedgeMesh* mesh)   { return mesh->nCorners();    }
-
-template <typename E> size_t elementCapacity(HalfedgeMesh* mesh)            { return std::numeric_limits<size_t>::max(); }
-template<> inline size_t elementCapacity<Vertex  >(HalfedgeMesh* mesh)   { return mesh->nVerticesCapacity();   }
-template<> inline size_t elementCapacity<Face    >(HalfedgeMesh* mesh)   { return mesh->nFacesCapacity() + mesh->nBoundaryLoops(); }
-template<> inline size_t elementCapacity<Edge    >(HalfedgeMesh* mesh)   { return mesh->nEdgesCapacity();      }
-template<> inline size_t elementCapacity<Halfedge>(HalfedgeMesh* mesh)   { return mesh->nHalfedgesCapacity();}
-template<> inline size_t elementCapacity<Corner  >(HalfedgeMesh* mesh)   { return mesh->nHalfedgesCapacity();    }
-
-// Index from element
-template <typename E> size_t dataIndexOfElement(HalfedgeMesh* mesh, E e)            { return std::numeric_limits<size_t>::max(); }
-template<> inline size_t dataIndexOfElement<Vertex  >(HalfedgeMesh* mesh, Vertex e)    { return e - mesh->vertex(0); }
-template<> inline size_t dataIndexOfElement<Face    >(HalfedgeMesh* mesh, Face e)      { 
-  if (e.isReal()) {
-    return e - mesh->face(0);
-  } else {
-    return e - mesh->boundaryLoop(0) + mesh->nFaces();
-  }
-}
-template<> inline size_t dataIndexOfElement<Edge    >(HalfedgeMesh* mesh, Edge e)      { return e - mesh->edge(0);      }
-template<> inline size_t dataIndexOfElement<Halfedge>(HalfedgeMesh* mesh, Halfedge e)  { return e - mesh->halfedge(0);  }
-template<> inline size_t dataIndexOfElement<Corner  >(HalfedgeMesh* mesh, Corner e)    { return e - mesh->corner(0);    }
-
-// Set iterator type
-template <class E> struct ElementSetType            { typedef E                 type; };
-template <> struct ElementSetType<Vertex     >   { typedef VertexSet      type; };
-template <> struct ElementSetType<Face       >   { typedef FaceSet        type; };
-template <> struct ElementSetType<Edge       >   { typedef EdgeSet        type; };
-template <> struct ElementSetType<Halfedge   >   { typedef HalfedgeSet    type; };
-template <> struct ElementSetType<Corner     >   { typedef CornerSet      type; };
-
-// Iterate through elements
-template <typename E> typename ElementSetType<E>::type iterateElements(HalfedgeMesh* mesh)  { return std::numeric_limits<size_t>::max(); }
-template<> inline VertexSet      iterateElements<Vertex  >(HalfedgeMesh* mesh)   { return mesh->vertices();      }
-template<> inline FaceSet        iterateElements<Face    >(HalfedgeMesh* mesh)   { return mesh->faces();         }
-template<> inline EdgeSet        iterateElements<Edge    >(HalfedgeMesh* mesh)   { return mesh->edges();         }
-template<> inline HalfedgeSet    iterateElements<Halfedge>(HalfedgeMesh* mesh)   { return mesh->allHalfedges();  }
-template<> inline CornerSet      iterateElements<Corner  >(HalfedgeMesh* mesh)   { return mesh->corners();       }
-
-// Get the expand callback list
-template <typename E> std::list<std::function<void(size_t)>>& getExpandCallbackList(HalfedgeMesh* mesh)            { return mesh->vertexExpandCallbackList;   } // not appropriate, placeholder value
-template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<Vertex  >(HalfedgeMesh* mesh)   { return mesh->vertexExpandCallbackList;   }
-template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<Face    >(HalfedgeMesh* mesh)   { return mesh->faceExpandCallbackList;   }
-template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<Edge    >(HalfedgeMesh* mesh)   { return mesh->edgeExpandCallbackList;   }
-template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<Halfedge>(HalfedgeMesh* mesh)   { return mesh->halfedgeExpandCallbackList;   }
-template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<Corner  >(HalfedgeMesh* mesh)   { return mesh->halfedgeExpandCallbackList;   }
-
-// Get the permute callback list
-template <typename E> std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList(HalfedgeMesh* mesh)            { return mesh->vertexPermuteCallbackList; } // not appropriate, placeholder value
-template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<Vertex  >(HalfedgeMesh* mesh)   { return mesh->vertexPermuteCallbackList;   }
-template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<Face    >(HalfedgeMesh* mesh)   { return mesh->facePermuteCallbackList;   }
-template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<Edge    >(HalfedgeMesh* mesh)   { return mesh->edgePermuteCallbackList;   }
-template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<Halfedge>(HalfedgeMesh* mesh)   { return mesh->halfedgePermuteCallbackList;   }
-template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<Corner  >(HalfedgeMesh* mesh)   { return mesh->halfedgePermuteCallbackList;   }
-
-
-// clang-format on
-
+namespace halfedge_mesh {
 
 // === Actual function implementations
 
@@ -299,5 +232,4 @@ inline size_t MeshData<E, T>::size() const {
   return nElements<E>(mesh);
 }
 
-
-} // namespace geometrycentral
+}}
