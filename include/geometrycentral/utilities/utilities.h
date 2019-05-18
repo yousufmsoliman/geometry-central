@@ -16,8 +16,10 @@
 #define GC_SAFETY_ASSERT(CONDITION, MSG)
 #else
 #define GC_SAFETY_ASSERT(CONDITION, MSG)                                                                               \
-  if (!(CONDITION))                                                                                                    \
-    throw std::runtime_error("GC_SAFETY CHECK " + std::string(__FILE__) + ":" + std::to_string(__LINE__) + " - " + MSG);
+  if (!(CONDITION)) {                                                                                                  \
+    throw std::runtime_error("GC_SAFETY CHECK " + std::string(__FILE__) + ":" + std::to_string(__LINE__) + " - " +     \
+                             MSG);                                                                                     \
+  }
 #endif
 
 namespace geometrycentral {

@@ -1,13 +1,13 @@
 #pragma once
 
 #include <list>
+#include <memory>
 #include <vector>
-
-#include <geometrycentral/utilities/utilities.h>
 
 #include "geometrycentral/mesh/halfedge_containers.h"
 #include "geometrycentral/mesh/halfedge_element_types.h"
 #include "geometrycentral/mesh/halfedge_iterators.h"
+#include "geometrycentral/utilities/utilities.h"
 
 // NOTE: ipp includes at bottom of file
 
@@ -18,7 +18,9 @@ class HalfedgeMesh {
 
 public:
   HalfedgeMesh();
-  HalfedgeMesh(const std::vector<std::vector<size_t>>& triangleIndices);
+
+  // Build a halfedge mesh from polygons, with a list of 0-indexed vertices incident on each face, in CCW order.
+  HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, bool verbose = false);
   ~HalfedgeMesh();
 
 
@@ -203,14 +205,17 @@ private:
   size_t nBoundaryLoopsCount = 0;
 
   // == Track the capacity and fill size of our buffers.
-  // These give the capacity of the currently allocated buffer?
+  // These give the capacity of the currently allocated buffer.
+  // Note that this is _not_ defined to be std::vector::capacity(), it's the large size such that arr[i] is legal.
   size_t nVertexCapacityCount = 0;
-  size_t nHalfedgeCapacityCount = 0; // must always be even
-  size_t nFaceCapacityCount = 0;
+  size_t nHalfedgeCapacityCount = 0; // will always be even
+  size_t nFaceCapacityCount = 0;     // capacity for faces _and_ boundary loops
 
-  // These give the number of filled elements in the currently allocated buffer
+  // These give the number of filled elements in the currently allocated buffer.
+  // As elements get marked dead, nVerticesCount decreases but nVertexFillCount does not (etc), so it denotes the
+  // end of the region in the buffer where elements have been stored.
   size_t nVertexFillCount = 0;
-  size_t nHalfedgeFillCount = 0;     // must always be even
+  size_t nHalfedgeFillCount = 0; // must always be even
   size_t edgeFillCount() const;
   size_t nFaceFillCount = 0;         // where the real faces stop, and empty/boundary loops begin
   size_t nBoundaryLoopFillCount = 0; // remember, these fill from the back of the face buffer

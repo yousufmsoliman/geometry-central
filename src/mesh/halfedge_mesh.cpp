@@ -49,7 +49,7 @@ size_t halfedgeLookup(const std::vector<size_t>& compressedList, size_t target, 
 
 } // namespace
 
-HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons) {
+HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, bool verbose) {
 
   // Assumes that the input index set is dense. This sometimes isn't true of (eg) obj files floating around the
   // internet, so consider removing unused vertices first when reading from foreign sources.
@@ -58,17 +58,17 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons) {
   nFacesCount = polygons.size();
   nVerticesCount = 0;
   std::vector<size_t> flatFaces;
-  std::vector<size_t> faceDegrees();
+  std::vector<size_t> faceDegrees;
   faceDegrees.reserve(nFacesCount);
   for (auto poly : polygons) {
     GC_SAFETY_ASSERT(poly.size() >= 3, "faces must have degree >= 3");
     faceDegrees.push_back(poly.size());
     for (auto i : poly) {
-      nVerticesCount = std::max(maxVertexID, i);
+      nVerticesCount = std::max(nVerticesCount, i);
       flatFaces.push_back(i);
     }
   }
-  nVerticesCount++;
+  nVerticesCount++; // 0-based means count is max+1
 
   // Pre-allocate face and vertex arrays
   vHalfedge = std::vector<size_t>(nVerticesCount, INVALID_IND);
@@ -117,15 +117,12 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons) {
         nHalfedgesCount += 2;
 
         // Grow arrays to make space
-        heNext.resize(nHalfedgesCount);
-        heNext[nHalfedgesCount - 2] = INVALID_IND;
-        heNext[nHalfedgesCount - 1] = INVALID_IND;
-        heVertex.resize(nHalfedgesCount);
-        heVertex[nHalfedgesCount - 2] = INVALID_IND;
-        heVertex[nHalfedgesCount - 1] = INVALID_IND;
-        heFace.resize(nHalfedgesCount);
-        heFace[nHalfedgesCount - 2] = INVALID_IND;
-        heFace[nHalfedgesCount - 1] = INVALID_IND;
+        heNext.push_back(INVALID_IND);
+        heNext.push_back(INVALID_IND);
+        heVertex.push_back(INVALID_IND);
+        heVertex.push_back(INVALID_IND);
+        heFace.push_back(INVALID_IND);
+        heFace.push_back(INVALID_IND);
       } else {
         // If the twin has already been created, we have an index for the halfedge
         halfedgeInd = heTwin(twinInd);
@@ -151,18 +148,108 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons) {
   }
 
 
+  // Ensure that each boundary neighborhood is either a disk or a half-disk. Harder to diagnose if we wait until the
+  // boundary walk below.
+#ifndef NGC_SAFTEY_CHECKS
+  {
+    std::vector<char> vertexOnBoundary(nVerticesCount, false);
+    for (size_t iHe = 0; iHe < nHalfedgesCount; iHe++) {
+      if (heNext[iHe] == INVALID_IND) {
+        size_t v = heVertex[iHe];
+        GC_SAFETY_ASSERT(!vertexOnBoundary[v],
+                         "vertex " + std::to_string(iV) + " appears in more than one boundary loop");
+        vertexOnBoundary[v] = true;
+      }
+    }
+  }
+#endif
+
   // == Resolve boundary loops
   nInteriorHalfedgesCount = nHalfedgesCount; // will decrement as we find exterior
   for (size_t iHe = 0; iHe < nHalfedgesCount; iHe++) {
 
     // If the face pointer is invalid, the halfedge must be along an unresolved boundary loop
-    if(heFace[iHe] != INVALID_IND) continue;
- 
+    if (heFace[iHe] != INVALID_IND) continue;
+
     // Create the new boundary loop
+    size_t boundaryLoopInd = nFacesCount + nBoundaryLoopsCount;
+    fHalfedge.push_back(iHe);
     nBoundaryLoopsCount++;
+
+    // = Walk around the loop (CW)
+    size_t currHe = iHe;
+    size_t prevHe = INVALID_IND;
+    do {
+
+      // The boundary loop is the face for these halfedges
+      heFace[currHe] = boundaryLoopInd;
+
+      // This isn't an interior halfedge.
+      nInteriorHalfedgesCount--;
+
+      // Advance to the next halfedge along the boundary
+      prevHe = currHe;
+      currHe = heTwin(heNext[heTwin(currHe)]);
+      while (heFace[iHe] != INVALID_IND) {
+        currHe = heNext[heTwin(currHe)];
+      }
+
+      // Set the next pointer around the boundary loop
+      heNext[currHe] = prevHe;
+
+    } while (currHe != iHe);
+  }
+
+  // SOMEDAY: could shrink_to_fit() std::vectors here, at the cost of a copy. What's preferable?
+
+  // Set capacities and other properties
+  nEdgesCount = nHalfedgesCount / 2;
+  nVertexCapacityCount = nVerticesCount;
+  nHalfedgeCapacityCount = nHalfedgesCount;
+  nFaceCapacityCount = nFacesCount + nBoundaryLoopsCount;
+  nVertexFillCount = nVerticesCount;
+  nHalfedgeFillCount = nHalfedgesCount;
+  nFaceFillCount = nFacesCapacity;       
+  nBoundaryLoopFillCount = nBoundaryLoops;
+  isCanonicalFlag = true;
+  isCompressedFlag = true;
   
-    // Walk around the loop
-    for  
+
+#ifndef NGC_SAFTEY_CHECKS
+  { // Check that the input was manifold in the sense that each vertex has a single connected loop of faces around it.
+    std::vector<char> halfedgeSeen(nHalfedgesCount, false);
+    for (size_t iV = 0; iV < nVerticesCount; iV++) {
+
+      // For each vertex, orbit around the outgoing halfedges. This _should_ touch every halfedge.
+      size_t currHe = vHalfedge[iV];
+      size_t firstHe = currHe;
+      do {
+
+        GC_SAFETY_ASSERT(!halfedgeSeen[currHe], "somehow encountered outgoing halfedge before orbiting v");
+        halfedgeSeen[currHe] = true;
+
+        currHe = heNext[heTwin(currHe)];
+      } while (currHe != firstHe);
+    }
+
+    // Verify that we actually did touch every halfedge.
+    for (size_t iHe = 0; iHe < nHalfedgesCount; iHe++) {
+      GC_SAFETY_ASSERT(halfedgeSeen[currHe], "mesh not manifold. Vertex " + std::to_string(heVertex[iHe]) +
+                                                 " has disconnected neighborhoods incident (imagine an hourglass)");
+    }
+  }
+#endif
+
+
+  // Print some nice statistics
+  if (verbose) {
+    std::cout << "Constructed halfedge mesh with: " << std::endl;
+    std::cout << "    # verts =  " << nVertices() << std::endl;
+    std::cout << "    # edges =  " << nEdges() << std::endl;
+    std::cout << "    # faces =  " << nFaces() << std::endl;
+    std::cout << "    # halfedges =  " << nHalfedges() << std::endl;
+    std::cout << "      and " << nBoundaryLoops() << " boundary components. " << std::endl;
+    std::cout << "Construction took " << pretty_time(FINISH_TIMING(construction)) << std::endl;
   }
 }
 

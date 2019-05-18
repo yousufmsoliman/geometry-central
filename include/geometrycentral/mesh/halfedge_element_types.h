@@ -4,6 +4,8 @@
 #include <functional>
 #include <iostream>
 
+#include "geometrycentral/utilities/utilities.h"
+
 namespace geometrycentral {
 namespace halfedge_mesh {
 
@@ -77,6 +79,14 @@ template <typename E> std::string typeShortName() { return "X"; }
 // ================      Base Element      ==================
 // ==========================================================
 
+
+// Need to pre-declare template friends to avoid generating a non-template version
+// (see https://isocpp.org/wiki/faq/templates#template-friends)
+template <typename T>
+class Element;
+template <typename T>
+std::ostream& operator<<(std::ostream& o, const Element<T>& x);
+
 // == Base type for shared logic between elements.
 //
 // This class uses the "curiously recurring template pattern" (CRTP), partly because I've always wanted an excuse to use
@@ -114,7 +124,7 @@ protected:
   size_t ind = INVALID_IND;
 
   // Friends
-  friend std::ostream& operator<<(std::ostream& output, const T& e);
+  friend std::ostream& operator<<<>(std::ostream& output, const Element<T>& e);
   friend struct std::hash<T>;
 };
 
@@ -326,7 +336,8 @@ typedef RangeSetBase<FaceRangeF> FaceSet;
 // ================     Boundary Loop      ==================
 // ==========================================================
 
-// Implementation note: the `ind` parameter for a boundary loop is index from the back of the face index space, from [0, nBoundaryLoopFillCount). 
+// Implementation note: the `ind` parameter for a boundary loop is index from the back of the face index space, from [0,
+// nBoundaryLoopFillCount).
 
 class BoundaryLoop : public Element<BoundaryLoop> {
 public:
