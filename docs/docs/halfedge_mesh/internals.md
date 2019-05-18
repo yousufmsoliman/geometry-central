@@ -9,6 +9,8 @@ The halfedge mesh structure is designed to simultaneously satisfy two core princ
 
 The solution to these two requirements is a dynamically-resizing, array-based mesh. Like a `std::vector`, elements are stored in contiguous buffers of memory, which are transparently expanded and copied sporadically. Of course, this expansion is largely hidden from the user.
 
+Philosophically, our halfmesh aims to be _as-implicit-as-possible_; whenever we can, we represent connectivity and properties implicitly by indices. Although this strategy runs the risk of being "overly clever" programming, it has proven effective for two reasons. First, anything tracked explicitly and stored an array is a liability if that array is not updated properly---conversely implicit relationships can be abstracted away behind helper functions, and once the helper function is written there is no danger of breaking the relationship. Second, implicit relationships tend to lead fast implementations out of the box, avoiding performance hacking which runs a huge risk of breaking correctness.
+
 ## Permutation halfedge mesh
 
 Here's a neat fact: a halfedge mesh can be represented by a single [permutation](https://en.wikipedia.org/wiki/Permutation) of length `nHalfedges`. 
@@ -95,6 +97,6 @@ In contrast, although boundary loops are just faces internally, the API provides
 
 ## Resize callbacks
 
-As the halfedge mesh is mutated, all `MeshData<>` contains automatically resize to stay in sync. This is implemented under the hood with a system of callback functions registered with the mesh itself. Whenever the mesh resizes or compresses one of its index spaces, it invokes a callback for each `MeshData<>` to do the same.
+As the halfedge mesh is mutated, all `MeshData<>` containers automatically resize to stay in sync. This is implemented under the hood with a system of callback functions registered with the mesh itself. Whenever the mesh resizes or compresses one of its index spaces, it invokes a callback for each associated `MeshData<>` to do the same.
 
-`DynamicHalfedge` and friends also register themselves with the callback system, to stay valid as the mesh resizes. However, this results in a callback per dynammic element, which has a significant performace impact. Fortunately, dynamic elements can be used sparingly.
+`DynamicHalfedge` and friends also register themselves with the callback system, to stay valid as the mesh resizes. However, this results in a callback per dynamic element, which is why the dynamic elements are more expensive. Fortunately, dynamic elements can be used sparingly.

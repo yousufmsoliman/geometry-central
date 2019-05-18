@@ -18,6 +18,7 @@ class HalfedgeMesh {
 
 public:
   HalfedgeMesh();
+  HalfedgeMesh(const std::vector<std::vector<size_t>>& triangleIndices);
   ~HalfedgeMesh();
 
 
@@ -283,4 +284,3 @@ private:
 #include "geometrycentral/mesh/halfedge_logic_templates.ipp"
 #include "geometrycentral/mesh/halfedge_mesh.ipp"
 // clang-format on
-#include "geometrycentral/mesh/halfedge_mesh_data_transfer.ipp"

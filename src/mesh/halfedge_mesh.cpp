@@ -8,9 +8,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "geometrycentral/geometry/geometry.h"
-#include <geometrycentral/mesh/halfedge_mesh_data_transfer.h>
-#include <geometrycentral/mesh/polygon_soup_mesh.h>
 #include <geometrycentral/utilities/disjoint_sets.h>
 #include <geometrycentral/utilities/timing.h>
 
@@ -23,7 +20,10 @@ namespace halfedge_mesh {
 
 HalfedgeMesh::HalfedgeMesh() {}
 
-// Helper for below
+// Helpers for below
+namespace {
+
+// Find an element in a sorted list
 size_t halfedgeLookup(const std::vector<size_t>& compressedList, size_t target, size_t start, size_t end) {
   // Linear search is fast for small searches
   if (end - start < 20) {
@@ -47,20 +47,136 @@ size_t halfedgeLookup(const std::vector<size_t>& compressedList, size_t target, 
   }
 }
 
-HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& geometry) {
+} // namespace
+
+HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons) {
+
+  // Assumes that the input index set is dense. This sometimes isn't true of (eg) obj files floating around the
+  // internet, so consider removing unused vertices first when reading from foreign sources.
+
+  // Flatten in the input list and measure some element counts
+  nFacesCount = polygons.size();
+  nVerticesCount = 0;
+  std::vector<size_t> flatFaces;
+  std::vector<size_t> faceDegrees();
+  faceDegrees.reserve(nFacesCount);
+  for (auto poly : polygons) {
+    GC_SAFETY_ASSERT(poly.size() >= 3, "faces must have degree >= 3");
+    faceDegrees.push_back(poly.size());
+    for (auto i : poly) {
+      nVerticesCount = std::max(maxVertexID, i);
+      flatFaces.push_back(i);
+    }
+  }
+  nVerticesCount++;
+
+  // Pre-allocate face and vertex arrays
+  vHalfedge = std::vector<size_t>(nVerticesCount, INVALID_IND);
+  fHalfedge = std::vector<size_t>(nVerticesCount, INVALID_IND);
+
+  // Track halfedges which have already been created
+  // TODO replace with compressed list for performance
+  std::unordered_map<std::tuple<size_t, size_t>, size_t> createdHalfedges;
+  auto createdHeLookup = [&](std::tuple<size_t, size_t> key) -> size_t& {
+    if (createdHalfedges.find(key) == createdHalfedges.end()) {
+      createdHalfedges[key] = INVALID_IND;
+    }
+    return createdHalfedges[key];
+  };
+
+  // Walk the faces, creating halfedges and hooking up pointers
+  size_t iFlatHeStart = 0;
+  for (size_t iFace = 0; iFace < nFaces; iFace++) {
+
+    // Walk around this face
+    size_t faceDegree = faceDegrees[iFace];
+    size_t prevHeInd = INVALID_IND;
+    size_t firstHeInd = INVALID_IND;
+    for (size_t iFaceHe = 0; iFaceHe < faceDegree; iFaceHe++) {
+
+      size_t indTail = iFace + iFaceHe;
+      size_t indTip = iFace + (iFaceHe + 1) % faceDegree;
+
+      // Get an index for this halfedge
+      std::tuple<size_t, size_t> heKey{indTail, indTip};
+      std::tuple<size_t, size_t> heTwinKey{indTip, indTail};
+      size_t& halfedgeInd = createdHeLookup(heKey);
+
+      // Some sanity checks
+      GC_SAFETY_ASSERT(indTail != indTip,
+                       "self-edge in face list " + std::to_string(indTail) + " -- " + std::to_string(indTip));
+      GC_SAFETY_ASSERT(halfedgeInd == INVALID_IND,
+                       "duplicate edge in list " + std::to_string(indTail) + " -- " + std::to_string(indTip));
+
+      // Find the twin to check if the element is already created
+      size_t twinInd = createdHeLookup(heTwinKey);
+      if (twinInd == INVALID_IND) {
+        // If we haven't seen the twin yet either, create a new edge
+        // TODO use createHalfedge() or something here?
+        halfedgeInd = nHalfedgesCount;
+        nHalfedgesCount += 2;
+
+        // Grow arrays to make space
+        heNext.resize(nHalfedgesCount);
+        heNext[nHalfedgesCount - 2] = INVALID_IND;
+        heNext[nHalfedgesCount - 1] = INVALID_IND;
+        heVertex.resize(nHalfedgesCount);
+        heVertex[nHalfedgesCount - 2] = INVALID_IND;
+        heVertex[nHalfedgesCount - 1] = INVALID_IND;
+        heFace.resize(nHalfedgesCount);
+        heFace[nHalfedgesCount - 2] = INVALID_IND;
+        heFace[nHalfedgesCount - 1] = INVALID_IND;
+      } else {
+        // If the twin has already been created, we have an index for the halfedge
+        halfedgeInd = heTwin(twinInd);
+      }
+
+      // Hook up a bunch of pointers
+      heFace[halfedgeInd] = iFace;
+      heVertex[halfedgeInd] = indTail;
+      vHalfedge[indTail] = halfedgeInd;
+      if (iFaceHe == 0) {
+        fHalfedge[iFace] = halfedgeInd;
+        firstHeInd = halfedgeInd;
+      } else {
+        heNext[prevHeInd] = halfedgeInd;
+      }
+      prevHeInd = halfedgeInd;
+    }
+
+    heNext[prevHeInd] = firstHeInd; // hook up the first next() pointer, which we missed in the loop above
+
+    // Prepare to loop again
+    iFlatHeStart += faceDegree;
+  }
+
+
+  // == Resolve boundary loops
+  nInteriorHalfedgesCount = nHalfedgesCount; // will decrement as we find exterior
+  for (size_t iHe = 0; iHe < nHalfedgesCount; iHe++) {
+
+    // If the face pointer is invalid, the halfedge must be along an unresolved boundary loop
+    if(heFace[iHe] != INVALID_IND) continue;
+ 
+    // Create the new boundary loop
+    nBoundaryLoopsCount++;
+  
+    // Walk around the loop
+    for  
+  }
+}
+
+
+HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons) {
   /*   High-level outline of this algorithm:
    *
-   *      0. Count how many of each object we will need so we can pre-allocate
-   * them
+   *      0. Count how many of each object we will need so we can pre-allocate them
    *
-   *      1. Iterate over the faces of the input mesh, creating edge, face, and
-   * halfedge objects
+   *      1. Iterate over the faces of the input mesh, creating edge, face, and halfedge objects
    *
-   *      2. Walk around boundaries, marking boundary edge and creating
-   * imaginary halfedges/faces
+   *      2. Walk around boundaries, marking boundary edge and creating imaginary halfedges/faces
    *
-   *      3. Copy the vertex positions to the geometry associated with the new
-   * mesh
+   *      3. Copy the vertex positions to the geometry associated with the new mesh
    *
    */
 
@@ -69,17 +185,23 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
   // === 0. Count needed objects
 
   // Find which vertices are actually used
-  std::vector<bool> usedVerts(input.vertexCoordinates.size());
-  std::vector<size_t> usedVertsIndex(input.vertexCoordinates.size());
+  size_t maxVertexID = 0;
+  for (auto poly : polygons) {
+    for (auto i : poly) {
+      maxVertexID = std::max(maxVertexID, i);
+    }
+  }
+  std::vector<bool> usedVerts(maxVertexID);
+  std::vector<size_t> usedVertsIndex(maxVertexID);
   std::fill(usedVerts.begin(), usedVerts.end(), false);
   std::fill(usedVertsIndex.begin(), usedVertsIndex.end(), 0);
   size_t nVerts = 0;
-  for (auto poly : input.polygons) {
+  for (auto poly : polygons) {
     for (auto i : poly) {
       usedVerts[i] = true;
     }
   }
-  for (size_t i = 0; i < usedVertsIndex.size(); i++) {
+  for (size_t i = 0; i < maxVertexID; i++) {
     if (usedVerts[i]) {
       usedVertsIndex[i] = nVerts++;
     }
@@ -89,16 +211,15 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
 
   size_t INVALID_IND = std::numeric_limits<size_t>::max();
 
-  // Build a sorted list of (directed halfedge) neighbors of each vertex in
-  // compressed format.
+  // Build a sorted list of (directed halfedge) neighbors of each vertex in compressed format.
 
   // Count neighbors of each vertex
   size_t nDirected = 0;
   size_t maxPolyDegree = 0;
-  std::vector<size_t> vertexNeighborsCount(input.vertexCoordinates.size(), 0);
-  std::vector<size_t> vertexNeighborsStart(input.vertexCoordinates.size() + 1);
-  for (size_t iFace = 0; iFace < input.polygons.size(); iFace++) {
-    auto poly = input.polygons[iFace];
+  std::vector<size_t> vertexNeighborsCount(maxVertexID, 0);
+  std::vector<size_t> vertexNeighborsStart(maxVertexID + 1);
+  for (size_t iFace = 0; iFace < polygons.size(); iFace++) {
+    auto poly = polygons[iFace];
     nDirected += poly.size();
     maxPolyDegree = std::max(maxPolyDegree, poly.size());
     for (size_t j : poly) {
@@ -109,7 +230,7 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
   // Build a running sum of the number of neighbors to use a compressed list
   vertexNeighborsStart[0] = 0;
   size_t runningSum = 0;
-  for (size_t iVert = 0; iVert < input.vertexCoordinates.size(); iVert++) {
+  for (size_t iVert = 0; iVert < maxVertexID; iVert++) {
     runningSum += vertexNeighborsCount[iVert];
     vertexNeighborsStart[iVert + 1] = runningSum;
   }
@@ -119,8 +240,8 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
   // vertexNeighborsStart[i+1]
   std::vector<size_t> vertexNeighborsInd(vertexNeighborsStart.begin(), vertexNeighborsStart.end() - 1);
   std::vector<size_t> allVertexNeighbors(nDirected);
-  for (size_t iFace = 0; iFace < input.polygons.size(); iFace++) {
-    auto poly = input.polygons[iFace];
+  for (size_t iFace = 0; iFace < polygons.size(); iFace++) {
+    auto poly = polygons[iFace];
     for (size_t j = 0; j < poly.size(); j++) {
       size_t fromInd = poly[j];
       size_t toInd = poly[(j + 1) % poly.size()];
@@ -130,7 +251,7 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
   }
 
   // Sort each of the sublists in the compressed list
-  for (size_t iVert = 0; iVert < input.vertexCoordinates.size(); iVert++) {
+  for (size_t iVert = 0; iVert < maxVertexID; iVert++) {
     std::sort(allVertexNeighbors.begin() + vertexNeighborsStart[iVert],
               allVertexNeighbors.begin() + vertexNeighborsStart[iVert + 1]);
   }
@@ -141,7 +262,7 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
   size_t nPairedEdges = 0;
   size_t nUnpairedEdges = 0;
   std::vector<size_t> twinInd(allVertexNeighbors.size());
-  for (size_t iVert = 0; iVert < input.vertexCoordinates.size(); iVert++) {
+  for (size_t iVert = 0; iVert < maxVertexID; iVert++) {
     size_t jStart = vertexNeighborsStart[iVert];
     size_t jEnd = vertexNeighborsStart[iVert + 1];
     for (size_t jInd = jStart; jInd < jEnd; jInd++) {
@@ -164,7 +285,7 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
   size_t nRealHalfedgesToMake =
       2 * nPairedEdges + nUnpairedEdges; // use a temp variable here because this is tracked as part of class state
   size_t nImaginaryHalfedges = nUnpairedEdges;
-  size_t nRealFaces = input.polygons.size();
+  size_t nRealFaces = polygons.size();
 
   // Allocate space and construct elements
   rawHalfedges.reserve(nRealHalfedgesToMake + nImaginaryHalfedges);
@@ -189,7 +310,7 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
   size_t iHalfedge = 0;
   std::vector<Halfedge> thisFaceHalfedges;
   thisFaceHalfedges.reserve(maxPolyDegree);
-  for (auto poly : input.polygons) {
+  for (auto poly : polygons) {
     size_t degree = poly.size();
 
     // Create a new face object
@@ -410,7 +531,7 @@ HalfedgeMesh::HalfedgeMesh(const PolygonSoupMesh& input, Geometry<Euclidean>*& g
   // Create the vertex objects and build a map to find them
   size_t iVert = 0;
   geometry = new Geometry<Euclidean>(*this);
-  for (size_t i = 0; i < input.vertexCoordinates.size(); i++) {
+  for (size_t i = 0; i < maxVertexID; i++) {
     if (usedVerts[i]) {
       geometry->position(vertex(iVert)) = input.vertexCoordinates[i];
       iVert++;
