@@ -2,13 +2,6 @@
 
 // === Implementations for datatypes which hold data stored on the mesh
 
-// Note: these implementations assuming that the default indexing convention for elements will be the same as the
-// iteration order.
-
-// FIXME right now these do weird this if boundary loop data and face data are both stored in the same container, and
-// that container is adaptively resized. To fix, should break out boundary loop in to a real separate type, and give it
-// its own container type.
-
 namespace geometrycentral {
 namespace halfedge_mesh {
 
@@ -184,8 +177,9 @@ void MeshData<E, T>::fromVector(const Eigen::Matrix<T, Eigen::Dynamic, 1>& vecto
 template <typename E, typename T>
 inline T& MeshData<E, T>::operator[](E e) {
 #ifndef NDEBUG
+  // These checks are a bit much to do on every access, so disable in release mode.
   assert(mesh != nullptr && "MeshData is uninitialized.");
-  assert(e->parentMesh == mesh && "Attempted to access MeshData with member from wrong mesh");
+  assert(e.getMesh() == mesh && "Attempted to access MeshData with member from wrong mesh");
 #endif
   size_t i = dataIndexOfElement(mesh, e);
   return data[i];
@@ -194,8 +188,9 @@ inline T& MeshData<E, T>::operator[](E e) {
 template <typename E, typename T>
 inline const T& MeshData<E, T>::operator[](E e) const {
 #ifndef NDEBUG
+  // These checks are a bit much to do on every access, so disable in release mode.
   assert(mesh != nullptr && "MeshData is uninitialized.");
-  assert(e->parentMesh == mesh && "Attempted to access MeshData with member from wrong mesh");
+  assert(e.getMesh() == mesh && "Attempted to access MeshData with member from wrong mesh");
 #endif
   size_t i = dataIndexOfElement(mesh, e);
   return data[i];

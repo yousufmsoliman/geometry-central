@@ -54,10 +54,18 @@ inline const RangeIteratorBase<F>& RangeIteratorBase<F>::operator++() {
   return *this;
 }
 
+template <typename F>
+inline bool RangeIteratorBase<F>::operator==(const RangeIteratorBase<F>& other) const {
+	return iCurr == other.iCurr;
+}
+
+template <typename F>
+inline bool RangeIteratorBase<F>::operator!=(const RangeIteratorBase<F>& other) const {
+	return !(*this == other);
+}
 
 template <typename F>
 inline typename F::Etype RangeIteratorBase<F>::operator*() const { return typename F::Etype(mesh, iCurr); }
-
 
 template <typename F>
 RangeSetBase<F>::RangeSetBase(HalfedgeMesh* mesh_, size_t iStart_, size_t iEnd_) : mesh(mesh_), iStart(iStart_), iEnd(iEnd_) {}  

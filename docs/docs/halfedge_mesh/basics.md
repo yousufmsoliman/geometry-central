@@ -20,9 +20,15 @@ Each vertex, edge, and face need just one relationship:
 - `Edge::halfedge()` _any_ of the incident halfedges
 - `Face::halfedge()` _any_ of the incident halfedges
 
-Notice how this fixed set of relationships can be used implement local traversals. For instance, the neighboring face across an edge can be accessed with `face.halfedge().twin().face()`, and we can iterate around the neighbors of a vertex by advancing `currHe = currHe.twin().next()` and examining `currHe.vertex()`. See [navigation](navigation.md) for more information on traversals, and convenience iterators.
+In fact, this fixed set of relationships is sufficient to implement pretty much _any_ local traversal. Geometry central provides a wide range of convience iterators which wrap these relationships to traverse neighborhoods, such as the example below.
+```cpp
+for(Edge e : vertex.adjacentEdges()) {
+  // do science
+}
+```
+See [navigation](navigation.md) for more information on traversals and convenience iterators.
 
-You many notice in the above examples that the primary type we use to interact with halfedge mesh elements is the lightweight `Halfedge` (etc) types. These types logically refer to a mesh element, and offer routines to access their neighbors. There is no explicit `Halfedge` class in our API, only references to logical halfedges.
+Notice that the lightweight `Halfedge` (etc) types serve simply as logical references, or "handles" to a mesh element. Deleting one of these handles does not delete the underlying element, and one may have multiple handles to the same element `Vertex a; Vertex b; a == b;`.
 
 ## Manifold, Oriented Surfaces
 
@@ -38,14 +44,18 @@ These properties are invariants which always hold for any meaningful halfedge me
 
 Note that our halfedge mesh _does not_ require that faces be triangles or quads; arbitrary faces with degree >= 3 are supported, and faces of different degree may be intermingled. However, many operations are only defined for triangle meshes and will throw errors if invoked on other meshes.
 
-## Boundaries
-
-
 
 ## Basic API
 
 
 ### Constructors
+
+
+??? func "`#!cpp HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, bool verbose = false)`"
+    Constructs a halfedge mesh from a face-index list.
+
+    - `polygons` a list of faces, each holding the indices of the vertices incident on that face, zero-indexed and in counter-clockwise order.
+    - `verbose` if true, prints some statistics to `std::cout` during construction.
 
 ### Element counts
 
@@ -82,12 +92,12 @@ Note that our halfedge mesh _does not_ require that faces be triangles or quads;
 ??? func "`#!cpp int HalfedgeMesh::eulerCharacteristic()`"
     Returns the Euler characteristic of the surface. Computed in O(1) from element counts. 
     
-    **Warning:** assumes the mesh is a single connected component.
+    **Note:** always computed by naively applying [Euler's polyhedron formula](https://en.wikipedia.org/wiki/Euler_characteristic#Polyhedra), which might not do what you want in the case of multiple-connected components.
 
 ??? func "`#!cpp int HalfedgeMesh::genus()`"
     Returns the genus of the surface. Computed in O(1) from element counts.
     
-    **Warning:** assumes the mesh is a single connected component.
+    **Note:** always computed by naively applying [Euler's polyhedron formula](https://en.wikipedia.org/wiki/Euler_characteristic#Polyhedra), which might not do what you want in the case of multiple-connected components.
 
 ??? func "`#!cpp bool HalfedgeMesh::isTriangular()`"
     Returns true if all faces in the mesh have 3 sides. 

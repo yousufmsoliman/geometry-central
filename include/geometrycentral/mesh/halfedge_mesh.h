@@ -29,7 +29,7 @@ public:
   size_t nInteriorHalfedges() const;
   size_t nCorners() const;
   size_t nVertices() const;
-  size_t nInteriorVertices();
+  size_t nInteriorVertices(); // warning: O(n)
   size_t nEdges() const;
   size_t nFaces() const;
   size_t nBoundaryLoops() const;
@@ -121,15 +121,13 @@ public:
   HalfedgeData<size_t> getHalfedgeIndices();
   CornerData<size_t> getCornerIndices();
 
-  // Utility functions
-  bool isSimplicial();          // returns true if and only if all faces are triangles
-  size_t nFacesTriangulation(); // returns the number of triangles in the
-                                // triangulation determined by
-                                // Face::triangulate()
-  size_t longestBoundaryLoop();
-  int eulerCharacteristic();
-  size_t nConnectedComponents();
-  std::vector<std::vector<size_t>> getPolygonSoupFaces();
+  // == Utility functions
+  bool isTriangular();           // returns true if and only if all faces are triangles [O(n)]
+  int eulerCharacteristic();     // compute the Euler characteristic [O(1)]
+  int genus();     								// compute the genus [O(1)]
+  size_t nConnectedComponents(); // compute number of connected components [O(n)]
+
+  std::vector<std::vector<size_t>> getFaceVertexList();
   std::unique_ptr<HalfedgeMesh> copy();
 
   // Compress the mesh
@@ -209,11 +207,13 @@ private:
   // Note that this is _not_ defined to be std::vector::capacity(), it's the largest size such that arr[i] is legal.
   size_t nVerticesCapacityCount = 0;
   size_t nHalfedgesCapacityCount = 0; // will always be even
+  size_t nEdgesCapacityCount() const;
   size_t nFacesCapacityCount = 0;     // capacity for faces _and_ boundary loops
 
-  // These give the number of filled elements in the currently allocated buffer.
-  // As elements get marked dead, nVerticesCount decreases but nVertexFillCount does not (etc), so it denotes the
-  // end of the region in the buffer where elements have been stored.
+  // These give the number of filled elements in the currently allocated buffer. This will also be the maximal index of
+  // any element (except the weirdness of boundary loop faces). As elements get marked dead, nVerticesCount decreases
+  // but nVertexFillCount does not (etc), so it denotes the end of the region in the buffer where elements have been
+  // stored.
   size_t nVerticesFillCount = 0;
   size_t nHalfedgesFillCount = 0; // must always be even
   size_t nEdgesFillCount() const;

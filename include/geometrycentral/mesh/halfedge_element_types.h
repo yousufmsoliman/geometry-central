@@ -87,12 +87,11 @@ class DynamicElement;
 
 // == Base type for shared logic between elements.
 //
-// This class uses the "curiously recurring template pattern" (CRTP), partly because I've always wanted an excuse to use
-// it :), and partly because it allows to implement more shared functionality in this template. Instantiations of the
-// template will be templted on its child types, like `Vertex : public Element<Vertex>`. Because the parent class will
-// know its child type at compile time, it can customize functionality based on that child type using the helpers above.
-// This is essentially "compile time polymorphism", which allows us to share common functionality without paying a
-// virtual function runtime cost.
+// This class uses the "curiously recurring template pattern" (CRTP) because it allows to implement more shared
+// functionality in this template. Instantiations of the template will be templted on its child types, like `Vertex :
+// public Element<Vertex>`. Because the parent class will know its child type at compile time, it can customize
+// functionality based on that child type using the helpers above. This is essentially "compile time polymorphism",
+// which allows us to share common functionality without paying a virtual function runtime cost.
 template <typename T>
 class Element {
 
@@ -130,7 +129,7 @@ protected:
 template <typename T>
 std::ostream& operator<<(std::ostream& output, const Element<T>& e);
 
-// The equivalent dynamic pointers. These should be rarely used, but are guarnteed to be preserved through _all_ mesh
+// The equivalent dynamic pointers. These should be rarely used, but are guaranteed to be preserved through _all_ mesh
 // operations, including compress().
 template <typename S>
 class DynamicElement {
@@ -145,7 +144,7 @@ public:
   S decay() const;
 
 private:
-  // References to the callbacks which keep the element valid. Keep these around to de-registe on destruction.
+  // References to the callbacks which keep the element valid. Keep these around to de-register on destruction.
   std::list<std::function<void(const std::vector<size_t>&)>>::iterator permuteCallbackIt;
   std::list<std::function<void()>>::iterator deleteCallbackIt;
 };
@@ -216,7 +215,7 @@ using DynamicVertex = DynamicElement<Vertex>;
 
 // All vertices
 struct VertexRangeF {
-  bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
+  static bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
   typedef Vertex Etype;
 };
 typedef RangeSetBase<VertexRangeF> VertexSet;
@@ -248,21 +247,21 @@ using DynamicHalfedge = DynamicElement<Halfedge>;
 
 // All halfedges
 struct HalfedgeRangeF {
-  bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
+  static bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
   typedef Halfedge Etype;
 };
 typedef RangeSetBase<HalfedgeRangeF> HalfedgeSet;
 
 // Interior halfedges
 struct HalfedgeInteriorRangeF {
-  bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
+  static bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
   typedef Halfedge Etype;
 };
 typedef RangeSetBase<HalfedgeInteriorRangeF> HalfedgeInteriorSet;
 
 // Exterior halfedges
 struct HalfedgeExteriorRangeF {
-  bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
+  static bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
   typedef Halfedge Etype;
 };
 typedef RangeSetBase<HalfedgeExteriorRangeF> HalfedgeExteriorSet;
@@ -290,7 +289,7 @@ using DynamicCorner = DynamicElement<Corner>;
 
 // All corners
 struct CornerRangeF {
-  bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
+  static bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
   typedef Corner Etype;
 };
 typedef RangeSetBase<CornerRangeF> CornerSet;
@@ -317,7 +316,7 @@ using DynamicEdge = DynamicElement<Edge>;
 
 // All edges
 struct EdgeRangeF {
-  bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
+  static bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
   typedef Edge Etype;
 };
 typedef RangeSetBase<EdgeRangeF> EdgeSet;
@@ -355,9 +354,9 @@ using DynamicFace = DynamicElement<Face>;
 
 // == Range iterators
 
-// All faces 
+// All faces
 struct FaceRangeF {
-  bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
+  static bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
   typedef Face Etype;
 };
 typedef RangeSetBase<FaceRangeF> FaceSet;
@@ -390,9 +389,9 @@ using DynamicBoundaryLoop = DynamicElement<BoundaryLoop>;
 
 // == Range iterators
 
-// All boundary loops 
+// All boundary loops
 struct BoundaryLoopRangeF {
-  bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
+  static bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
   typedef BoundaryLoop Etype;
 };
 typedef RangeSetBase<BoundaryLoopRangeF> BoundaryLoopSet;
