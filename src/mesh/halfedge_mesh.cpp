@@ -8,8 +8,9 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <geometrycentral/utilities/disjoint_sets.h>
-#include <geometrycentral/utilities/timing.h>
+#include "geometrycentral/utilities/combining_hash_functions.h"
+#include "geometrycentral/utilities/disjoint_sets.h"
+#include "geometrycentral/utilities/timing.h"
 
 using std::cout;
 using std::endl;
@@ -53,6 +54,8 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
 
   // Assumes that the input index set is dense. This sometimes isn't true of (eg) obj files floating around the
   // internet, so consider removing unused vertices first when reading from foreign sources.
+  
+  START_TIMING(construction)
 
   // Flatten in the input list and measure some element counts
   nFacesCount = polygons.size();
@@ -86,7 +89,7 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
 
   // Walk the faces, creating halfedges and hooking up pointers
   size_t iFlatHeStart = 0;
-  for (size_t iFace = 0; iFace < nFaces; iFace++) {
+  for (size_t iFace = 0; iFace < nFacesCount; iFace++) {
 
     // Walk around this face
     size_t faceDegree = faceDegrees[iFace];
@@ -157,7 +160,7 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
       if (heNext[iHe] == INVALID_IND) {
         size_t v = heVertex[iHe];
         GC_SAFETY_ASSERT(!vertexOnBoundary[v],
-                         "vertex " + std::to_string(iV) + " appears in more than one boundary loop");
+                         "vertex " + std::to_string(v) + " appears in more than one boundary loop");
         vertexOnBoundary[v] = true;
       }
     }
@@ -179,6 +182,7 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
     // = Walk around the loop (CW)
     size_t currHe = iHe;
     size_t prevHe = INVALID_IND;
+    size_t loopCount = 0;
     do {
 
       // The boundary loop is the face for these halfedges
@@ -197,6 +201,10 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
       // Set the next pointer around the boundary loop
       heNext[currHe] = prevHe;
 
+      // Make sure this loop doesn't infinite-loop. Certainly won't happen for proper input, but might happen for bogus
+      // input. I don't _think_ it can happen, but there might be some non-manifold input which manfests failure via an
+      // infinte loop here, and such a loop is an inconvenient failure mode.
+      loopCount++;
     } while (currHe != iHe);
   }
 
@@ -204,16 +212,16 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
 
   // Set capacities and other properties
   nEdgesCount = nHalfedgesCount / 2;
-  nVertexCapacityCount = nVerticesCount;
-  nHalfedgeCapacityCount = nHalfedgesCount;
-  nFaceCapacityCount = nFacesCount + nBoundaryLoopsCount;
-  nVertexFillCount = nVerticesCount;
-  nHalfedgeFillCount = nHalfedgesCount;
-  nFaceFillCount = nFacesCapacity;       
-  nBoundaryLoopFillCount = nBoundaryLoops;
+  nVerticesCapacityCount = nVerticesCount;
+  nHalfedgesCapacityCount = nHalfedgesCount;
+  nFacesCapacityCount = nFacesCount + nBoundaryLoopsCount;
+  nVerticesFillCount = nVerticesCount;
+  nHalfedgesFillCount = nHalfedgesCount;
+  nFacesFillCount = nFacesCapacityCount;
+  nBoundaryLoopsFillCount = nBoundaryLoopsCount;
   isCanonicalFlag = true;
   isCompressedFlag = true;
-  
+
 
 #ifndef NGC_SAFTEY_CHECKS
   { // Check that the input was manifold in the sense that each vertex has a single connected loop of faces around it.
@@ -234,8 +242,8 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
 
     // Verify that we actually did touch every halfedge.
     for (size_t iHe = 0; iHe < nHalfedgesCount; iHe++) {
-      GC_SAFETY_ASSERT(halfedgeSeen[currHe], "mesh not manifold. Vertex " + std::to_string(heVertex[iHe]) +
-                                                 " has disconnected neighborhoods incident (imagine an hourglass)");
+      GC_SAFETY_ASSERT(halfedgeSeen[iHe], "mesh not manifold. Vertex " + std::to_string(heVertex[iHe]) +
+                                              " has disconnected neighborhoods incident (imagine an hourglass)");
     }
   }
 #endif
@@ -254,389 +262,6 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
 }
 
 
-HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons) {
-  /*   High-level outline of this algorithm:
-   *
-   *      0. Count how many of each object we will need so we can pre-allocate them
-   *
-   *      1. Iterate over the faces of the input mesh, creating edge, face, and halfedge objects
-   *
-   *      2. Walk around boundaries, marking boundary edge and creating imaginary halfedges/faces
-   *
-   *      3. Copy the vertex positions to the geometry associated with the new mesh
-   *
-   */
-
-  START_TIMING(construction)
-
-  // === 0. Count needed objects
-
-  // Find which vertices are actually used
-  size_t maxVertexID = 0;
-  for (auto poly : polygons) {
-    for (auto i : poly) {
-      maxVertexID = std::max(maxVertexID, i);
-    }
-  }
-  std::vector<bool> usedVerts(maxVertexID);
-  std::vector<size_t> usedVertsIndex(maxVertexID);
-  std::fill(usedVerts.begin(), usedVerts.end(), false);
-  std::fill(usedVertsIndex.begin(), usedVertsIndex.end(), 0);
-  size_t nVerts = 0;
-  for (auto poly : polygons) {
-    for (auto i : poly) {
-      usedVerts[i] = true;
-    }
-  }
-  for (size_t i = 0; i < maxVertexID; i++) {
-    if (usedVerts[i]) {
-      usedVertsIndex[i] = nVerts++;
-    }
-  }
-
-  // === 0.5 Efficiently build an adjacent-face lookup table
-
-  size_t INVALID_IND = std::numeric_limits<size_t>::max();
-
-  // Build a sorted list of (directed halfedge) neighbors of each vertex in compressed format.
-
-  // Count neighbors of each vertex
-  size_t nDirected = 0;
-  size_t maxPolyDegree = 0;
-  std::vector<size_t> vertexNeighborsCount(maxVertexID, 0);
-  std::vector<size_t> vertexNeighborsStart(maxVertexID + 1);
-  for (size_t iFace = 0; iFace < polygons.size(); iFace++) {
-    auto poly = polygons[iFace];
-    nDirected += poly.size();
-    maxPolyDegree = std::max(maxPolyDegree, poly.size());
-    for (size_t j : poly) {
-      vertexNeighborsCount[j]++;
-    }
-  }
-
-  // Build a running sum of the number of neighbors to use a compressed list
-  vertexNeighborsStart[0] = 0;
-  size_t runningSum = 0;
-  for (size_t iVert = 0; iVert < maxVertexID; iVert++) {
-    runningSum += vertexNeighborsCount[iVert];
-    vertexNeighborsStart[iVert + 1] = runningSum;
-  }
-
-  // Populate the compressed list
-  // Each vertex's neighbors are stored between vertexNeighborsStart[i] and
-  // vertexNeighborsStart[i+1]
-  std::vector<size_t> vertexNeighborsInd(vertexNeighborsStart.begin(), vertexNeighborsStart.end() - 1);
-  std::vector<size_t> allVertexNeighbors(nDirected);
-  for (size_t iFace = 0; iFace < polygons.size(); iFace++) {
-    auto poly = polygons[iFace];
-    for (size_t j = 0; j < poly.size(); j++) {
-      size_t fromInd = poly[j];
-      size_t toInd = poly[(j + 1) % poly.size()];
-      allVertexNeighbors[vertexNeighborsInd[fromInd]] = toInd;
-      vertexNeighborsInd[fromInd]++;
-    }
-  }
-
-  // Sort each of the sublists in the compressed list
-  for (size_t iVert = 0; iVert < maxVertexID; iVert++) {
-    std::sort(allVertexNeighbors.begin() + vertexNeighborsStart[iVert],
-              allVertexNeighbors.begin() + vertexNeighborsStart[iVert + 1]);
-  }
-
-  // Count real and imaginary edges and faces and cache adjacent twin indices
-  // Note: counting boundary loops is kinda difficult, so we wait to do so until
-  // the final step
-  size_t nPairedEdges = 0;
-  size_t nUnpairedEdges = 0;
-  std::vector<size_t> twinInd(allVertexNeighbors.size());
-  for (size_t iVert = 0; iVert < maxVertexID; iVert++) {
-    size_t jStart = vertexNeighborsStart[iVert];
-    size_t jEnd = vertexNeighborsStart[iVert + 1];
-    for (size_t jInd = jStart; jInd < jEnd; jInd++) {
-      size_t jVert = allVertexNeighbors[jInd];
-
-      // Search for the j --> i edge
-      size_t searchResult =
-          halfedgeLookup(allVertexNeighbors, iVert, vertexNeighborsStart[jVert], vertexNeighborsStart[jVert + 1]);
-      twinInd[jInd] = searchResult;
-      if (searchResult == INVALID_IND) {
-        nUnpairedEdges++;
-      } else {
-        nPairedEdges++;
-      }
-    }
-  }
-  nPairedEdges /= 2;
-
-  size_t nTotalEdges = nPairedEdges + nUnpairedEdges;
-  size_t nRealHalfedgesToMake =
-      2 * nPairedEdges + nUnpairedEdges; // use a temp variable here because this is tracked as part of class state
-  size_t nImaginaryHalfedges = nUnpairedEdges;
-  size_t nRealFaces = polygons.size();
-
-  // Allocate space and construct elements
-  rawHalfedges.reserve(nRealHalfedgesToMake + nImaginaryHalfedges);
-  for (size_t i = 0; i < nRealHalfedgesToMake; i++) getNewHalfedge(true);
-  for (size_t i = 0; i < nImaginaryHalfedges; i++) getNewHalfedge(false);
-  rawVertices.reserve(nVerts);
-  for (size_t i = 0; i < nVerts; i++) getNewVertex();
-  rawEdges.reserve(nTotalEdges);
-  for (size_t i = 0; i < nTotalEdges; i++) getNewEdge();
-  rawFaces.reserve(nRealFaces);
-  for (size_t i = 0; i < nRealFaces; i++) getNewFace();
-
-  // === 1. Create faces, edges, and halfedges
-
-  // Keep track of the edges we've already created since we only need one per
-  // edge
-  std::vector<Edge> sharedEdges(twinInd.size(), Edge());
-
-  // Iterate over faces
-  size_t iFace = 0;
-  size_t iEdge = 0;
-  size_t iHalfedge = 0;
-  std::vector<Halfedge> thisFaceHalfedges;
-  thisFaceHalfedges.reserve(maxPolyDegree);
-  for (auto poly : polygons) {
-    size_t degree = poly.size();
-
-    // Create a new face object
-    Face f{&rawFaces[iFace]};
-    f->isReal = true;
-
-    // The halfedges that make up this face
-    // std::vector<Halfedge> thisFaceHalfedges(degree);
-    thisFaceHalfedges.resize(degree);
-
-    for (size_t iPolyEdge = 0; iPolyEdge < degree; iPolyEdge++) {
-      Halfedge he{&rawHalfedges[iHalfedge]};
-      iHalfedge++;
-
-      size_t ind1 = poly[iPolyEdge];
-      size_t ind2 = poly[(iPolyEdge + 1) % degree];
-
-      // Connect up pointers
-      he->vertex = &rawVertices[usedVertsIndex[ind1]];
-      he->vertex->halfedge = he.ptr;
-      he->face = f.ptr;
-      thisFaceHalfedges[iPolyEdge] = he;
-      he->twin = nullptr; // ensure this is null so we can detect boundaries below
-
-      // Get a reference to the edge shared by this and its twin, creating the
-      // object if needed
-      size_t myHeInd =
-          halfedgeLookup(allVertexNeighbors, ind2, vertexNeighborsStart[ind1], vertexNeighborsStart[ind1 + 1]);
-      size_t twinHeInd = twinInd[myHeInd];
-      bool edgeAlreadyCreated = (twinHeInd != INVALID_IND) && (sharedEdges[twinHeInd] != Edge());
-
-      if (edgeAlreadyCreated) {
-        Edge sharedEdge = sharedEdges[twinHeInd];
-        he->edge = sharedEdge.ptr;
-        he->twin = sharedEdge->halfedge;
-        he->twin->twin = he.ptr;
-      } else {
-        Edge sharedEdge{&rawEdges[iEdge]};
-        iEdge++;
-        sharedEdge->halfedge = he.ptr;
-        he->edge = sharedEdge.ptr;
-        sharedEdges[myHeInd] = sharedEdge;
-      }
-    }
-
-    // Do one more lap around the face to set next pointers
-    for (size_t iPolyEdge = 0; iPolyEdge < degree; iPolyEdge++) {
-      thisFaceHalfedges[iPolyEdge]->next = thisFaceHalfedges[(iPolyEdge + 1) % degree].ptr;
-    }
-
-    f->halfedge = thisFaceHalfedges[0].ptr;
-    thisFaceHalfedges.clear();
-    iFace++;
-  }
-
-  // === 2. Walk the boundary to find/create boundary cycles
-
-  // First, do a pre-walk to count the boundary loops we will need and allocate
-  // them
-  size_t nBoundaryLoops = 0;
-  std::set<Halfedge> walkedHalfedges;
-  for (size_t iHe = 0; iHe < nRealHalfedges(); iHe++) {
-    if (halfedge(iHe)->twin == nullptr && walkedHalfedges.find(halfedge(iHe)) == walkedHalfedges.end()) {
-      nBoundaryLoops++;
-      Halfedge currHe = halfedge(iHe);
-      walkedHalfedges.insert(currHe);
-      size_t walkCount = 0;
-      do {
-        currHe = currHe->next;
-        while (currHe->twin != nullptr) {
-          currHe = currHe->twin->next;
-          walkCount++;
-          if (walkCount > nRealHalfedges()) {
-            throw std::runtime_error(
-                "Encountered infinite loop while constructing halfedge mesh. Are you sure the input is manifold?");
-          }
-        }
-        walkedHalfedges.insert(currHe);
-      } while (currHe != halfedge(iHe));
-    }
-  }
-  rawBoundaryLoops.resize(nBoundaryLoops);
-
-
-  // Now do the actual walk in which we construct and connect objects
-  size_t iBoundaryLoop = 0;
-  size_t iImaginaryHalfedge = 0;
-  std::vector<char> vertexAppearedInBoundaryLoop(nVerts, false);
-  for (size_t iHe = 0; iHe < nRealHalfedges(); iHe++) {
-    // Note: If distinct holes share a given vertex, this algorithm will see
-    // them as a single "figure 8-like"
-    // hole and connect them with a single imaginary face.
-    // TODO: fix this?
-
-    // If this halfedge doesn't have a twin, it must be on a boundary (or have
-    // already been processed while walking a hole)
-    if (halfedge(iHe)->twin == nullptr) {
-      // Create a boundary loop for this hole
-      BoundaryLoop boundaryLoop{&rawBoundaryLoops[iBoundaryLoop]};
-      boundaryLoop->isReal = false;
-
-      // Walk around the boundary loop, creating imaginary halfedges
-      Halfedge currHe = halfedge(iHe);
-      Halfedge prevHe{nullptr};
-      bool finished = false;
-      while (!finished) {
-
-        // Check for non-manifoldness via non-disk-like boundary vertex
-        size_t iV = currHe.vertex().ptr - &rawVertices[0];
-        if (vertexAppearedInBoundaryLoop[iV] == true) {
-          throw std::runtime_error("Input mesh is nonmanifold: vertex appears in two distinct boundary loops");
-        }
-        vertexAppearedInBoundaryLoop[iV] = true;
-
-        // Create a new, imaginary halfedge
-        Halfedge newHe{&rawHalfedges[nRealHalfedgesCount + iImaginaryHalfedge]};
-        boundaryLoop->halfedge = newHe.ptr;
-        iImaginaryHalfedge++;
-
-        // Connect up pointers
-        newHe->isReal = false;
-        newHe->twin = currHe.ptr;
-        currHe->twin = newHe.ptr;
-        newHe->face = boundaryLoop.ptr;
-        newHe->edge = currHe->edge;
-        newHe->vertex = currHe->next->vertex;
-        currHe->vertex->halfedge =
-            currHe.ptr; // ensure that halfedge for boundary vertex is the one that starts the boundary
-
-        // Some pointers need values only visible from the previous iteration of
-        // the loop.
-        // The first one we process gets missed, handle it at the end outside
-        // the loop.
-        if (prevHe == nullptr) {
-          newHe->next = nullptr;
-        } else {
-          newHe->next = prevHe->twin;
-        }
-
-        // Set the isBoundary property where appropriate
-        currHe->face->isBoundary = true;
-        currHe->vertex->isBoundary = true;
-        currHe->edge->isBoundary = true;
-
-        // Prepare for the next iteration
-        prevHe = currHe;
-        currHe = currHe->next;
-        while (currHe->twin != nullptr) {
-          // When we've finished walking the loop, we'll be able to tell
-          // because we spin in circles around the vertex trying to continue
-          // the loop. Detect that here and quit.
-          if (currHe->twin->next == nullptr) {
-            finished = true;
-            break;
-          }
-
-          currHe = currHe->twin->next;
-        }
-      }
-
-      // As noted above, the pointers don't get set properly on the first
-      // iteration of
-      // the loop above because we don't have a reference to prev yet. Fix that
-      // here.
-      halfedge(iHe)->twin->next = prevHe->twin;
-
-      iBoundaryLoop++;
-    }
-  }
-
-  { // Check that the input was manifold in the sense that each vertex has a single connected loop of faces around it.
-    // This is just a sanity check, and can be skipped if the input is trusted. However, if not checked, we could output
-    // a nonmanifold "mesh".
-    std::vector<char> vertexSeen(nVerts, false);
-    std::vector<char> halfedgeSeen(nRealHalfedges() + this->nImaginaryHalfedges(), false);
-    for (size_t iHe = 0; iHe < nRealHalfedges(); iHe++) {
-      if (halfedgeSeen[iHe]) continue;
-
-      Halfedge* firstHe = &rawHalfedges[iHe];
-      Halfedge* currHe = firstHe;
-      size_t iV = firstHe->vertex - &rawVertices[0];
-      if (vertexSeen[iV]) {
-        throw std::runtime_error(
-            "Vertex neighborhood is nonmanifold: >1 distinct ring of triangles incident on vertex.");
-      }
-      vertexSeen[iV] = true;
-      do {
-        size_t currIHe = currHe - &rawHalfedges[0];
-        halfedgeSeen[currIHe] = true;
-        currHe = currHe->twin->next;
-      } while (currHe != firstHe);
-    }
-  }
-
-
-// When in debug mode, mesh elements know what mesh they are a part of so
-// we can do assertions for saftey checks.
-#ifndef NDEBUG
-  for (Halfedge x : allHalfedges()) {
-    x->parentMesh = this;
-  }
-  for (Vertex x : vertices()) {
-    x->parentMesh = this;
-  }
-  for (Edge x : edges()) {
-    x->parentMesh = this;
-  }
-  for (Face x : faces()) {
-    x->parentMesh = this;
-  }
-  for (Face x : boundaryLoops()) {
-    x->parentMesh = this;
-  }
-#endif
-
-  // === 3. Map vertices in the halfedge mesh to the associated vertex
-  // coordinates in space
-  // Create the vertex objects and build a map to find them
-  size_t iVert = 0;
-  geometry = new Geometry<Euclidean>(*this);
-  for (size_t i = 0; i < maxVertexID; i++) {
-    if (usedVerts[i]) {
-      geometry->position(vertex(iVert)) = input.vertexCoordinates[i];
-      iVert++;
-    }
-  }
-
-  // Print some nice statistics
-  std::cout << "Constructed halfedge mesh with: " << std::endl;
-  std::cout << "    # verts =  " << nVertices() << std::endl;
-  std::cout << "    # edges =  " << nEdges() << std::endl;
-  std::cout << "    # faces =  " << nFaces() << std::endl;
-  std::cout << "    # halfedges =  " << nRealHalfedges() + this->nImaginaryHalfedges() << std::endl;
-  std::cout << "      and " << nBoundaryLoops << " boundary components. " << std::endl;
-  std::cout << "Construction took " << pretty_time(FINISH_TIMING(construction)) << std::endl;
-
-
-  // Compute some basic information about the mesh
-}
 
 HalfedgeMesh::~HalfedgeMesh() {
   for (auto& f : meshDeleteCallbackList) {
@@ -1730,6 +1355,43 @@ std::vector<Face> HalfedgeMesh::triangulate(Face f) {
   if (f.degree() == 3) {
     return {f};
   }
+  
+  /* 
+  // Get list of vertices
+  std::vector<Vertex> vertices;
+  unsigned int k = 0;
+  for (Vertex v : adjacentVertices()) {
+    vertices.push_back(v);
+    k++;
+  }
+
+  // Construct alternating triangulation
+  std::vector<Triangle> triangles(k - 2);
+  unsigned int a = 0;
+  unsigned int b = k - 1;
+  unsigned int i = 0;
+  while (b - a > 1) {
+    if (i % 2 == 0) {
+      triangles[i][0] = vertices[a];
+      triangles[i][1] = vertices[a + 1];
+      triangles[i][2] = vertices[b];
+      a++;
+    } else {
+      triangles[i][0] = vertices[b - 1];
+      triangles[i][1] = vertices[b];
+      triangles[i][2] = vertices[a];
+      b--;
+    }
+    i++;
+  }
+
+  if (k % 2 == 1) {
+    Triangle tmp = triangles[k - 3];
+    triangles[k - 3][0] = tmp[1];
+    triangles[k - 3][1] = tmp[2];
+    triangles[k - 3][2] = tmp[0];
+  }
+  */
 
 
   std::vector<DynamicVertex> neighVerts;

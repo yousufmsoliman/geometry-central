@@ -196,7 +196,7 @@ private:
   // Auxilliary arrays which cache other useful information
 
   // Track element counts (can't rely on rawVertices.size() after deletions have made the list sparse). These are the
-  // actual number of elements, not the size of the buffer that holds them.
+  // actual number of valid elements, not the size of the buffer that holds them.
   size_t nHalfedgesCount = 0;
   size_t nInteriorHalfedgesCount = 0;
   size_t nVerticesCount = 0;
@@ -206,19 +206,19 @@ private:
 
   // == Track the capacity and fill size of our buffers.
   // These give the capacity of the currently allocated buffer.
-  // Note that this is _not_ defined to be std::vector::capacity(), it's the large size such that arr[i] is legal.
-  size_t nVertexCapacityCount = 0;
-  size_t nHalfedgeCapacityCount = 0; // will always be even
-  size_t nFaceCapacityCount = 0;     // capacity for faces _and_ boundary loops
+  // Note that this is _not_ defined to be std::vector::capacity(), it's the largest size such that arr[i] is legal.
+  size_t nVerticesCapacityCount = 0;
+  size_t nHalfedgesCapacityCount = 0; // will always be even
+  size_t nFacesCapacityCount = 0;     // capacity for faces _and_ boundary loops
 
   // These give the number of filled elements in the currently allocated buffer.
   // As elements get marked dead, nVerticesCount decreases but nVertexFillCount does not (etc), so it denotes the
   // end of the region in the buffer where elements have been stored.
-  size_t nVertexFillCount = 0;
-  size_t nHalfedgeFillCount = 0; // must always be even
-  size_t edgeFillCount() const;
-  size_t nFaceFillCount = 0;         // where the real faces stop, and empty/boundary loops begin
-  size_t nBoundaryLoopFillCount = 0; // remember, these fill from the back of the face buffer
+  size_t nVerticesFillCount = 0;
+  size_t nHalfedgesFillCount = 0; // must always be even
+  size_t nEdgesFillCount() const;
+  size_t nFacesFillCount = 0;         // where the real faces stop, and empty/boundary loops begin
+  size_t nBoundaryLoopsFillCount = 0; // remember, these fill from the back of the face buffer
 
   bool isCanonicalFlag = true;
   bool isCompressedFlag = true;

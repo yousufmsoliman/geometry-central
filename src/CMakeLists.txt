@@ -9,7 +9,6 @@ endif()
 SET(SRCS
   mesh/halfedge_mesh.cpp
   mesh/halfedge_iterators.cpp
-  mesh/halfedge_pointer_types.cpp
   mesh/meshio.cpp
   mesh/polygon_soup_mesh.cpp
   mesh/ply_halfedge_mesh_data.cpp

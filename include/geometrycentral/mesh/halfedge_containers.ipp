@@ -202,16 +202,6 @@ inline const T& MeshData<E, T>::operator[](E e) const {
 }
 
 template <typename E, typename T>
-inline T& MeshData<E, T>::operator[](typename E::DynamicType e) {
-  return (*this)[E(e)];
-}
-
-template <typename E, typename T>
-inline const T& MeshData<E, T>::operator[](typename E::DynamicType e) const {
-  return (*this)[E(e)];
-}
-
-template <typename E, typename T>
 inline T& MeshData<E, T>::operator[](size_t i) {
 #ifndef NDEBUG
   assert(i < size() && "Attempted to access MeshData with out of bounds index");

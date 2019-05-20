@@ -9,7 +9,7 @@ The halfedge mesh structure is designed to simultaneously satisfy two core princ
 
 The solution to these two requirements is a dynamically-resizing, array-based mesh. Like a `std::vector`, elements are stored in contiguous buffers of memory, which are transparently expanded and copied sporadically. Of course, this expansion is largely hidden from the user.
 
-Philosophically, our halfmesh aims to be _as-implicit-as-possible_; whenever we can, we represent connectivity and properties implicitly by indices. Although this strategy runs the risk of being "overly clever" programming, it has proven effective for two reasons. First, anything tracked explicitly and stored an array is a liability if that array is not updated properly---conversely implicit relationships can be abstracted away behind helper functions, and once the helper function is written there is no danger of breaking the relationship. Second, implicit relationships tend to lead fast implementations out of the box, avoiding performance hacking which runs a huge risk of breaking correctness.
+Philosophically, our halfmesh aims to be _as-implicit-as-possible_: whenever we can, we represent connectivity and properties implicitly by indices. Although this strategy runs the risk of being "overly clever" programming, it has proven effective for two reasons. First, anything tracked explicitly and stored an array is a liability if that array is not updated properly---conversely implicit relationships can be abstracted away behind helper functions, and need not be carefully maintained. Second, implicit relationships tend to lead fast implementations out of the box, avoiding performance hacking which runs a huge risk of breaking correctness.
 
 ## Permutation halfedge mesh
 
@@ -21,7 +21,7 @@ This idea of a permutation is essentially the representation used for our halfed
 
 ## Basic structures
 
-Our halfedge mesh is index-based. Each {halfedge,edge,vertex,face} is identified by a 0-based index. The `HalfedgeMesh` class then holds the following explicit arrays encoding the connectivity (the remaining relationships are implicitly defined).
+Our halfedge mesh is index-based. Each {halfedge,edge,vertex,face} is identified by a 0-based index. The `HalfedgeMesh` class then holds the following explicit arrays encoding the connectivity between these indexed elements (the remaining relationships are implicitly defined).
 
 ```
 class HalfedgeMesh {
@@ -68,7 +68,7 @@ In addition to the basic properties of the `twin()` and `next()` maps, the halfe
   - on a boundary vertex, `v.vertex()` is the unique real interior halfedge along the boundary (so traversing in CCW order walks the wedge)
 
 
-The `validateConnectivity()` is extremely useful for checking invariants while developing the data structure.
+The `validateConnectivity()` function is extremely useful for checking invariants while developing the data structure.
 
 ??? func "`#!cpp void HalfedgeMesh::validateConnectivity()`"
 

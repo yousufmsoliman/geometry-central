@@ -21,12 +21,6 @@ class Edge;
 class Face;
 class BoundaryLoop;
 
-// The dynamic variants are automatically updated when the mesh is compressed, (the standard variants are invalidated).
-class DynamicHalfedge;
-class DynamicVertex;
-class DynamicEdge;
-class DynamicFace;
-class DynamicBoundaryLoop;
 
 // === Forward declare iterator set types (pointers may need to return these to
 // support range-based for loops)
@@ -87,6 +81,10 @@ class Element;
 template <typename T>
 std::ostream& operator<<(std::ostream& o, const Element<T>& x);
 
+// Forward-declare dynamic equivalent so we can declare a conversion constructor
+template <typename S>
+class DynamicElement;
+
 // == Base type for shared logic between elements.
 //
 // This class uses the "curiously recurring template pattern" (CRTP), partly because I've always wanted an excuse to use
@@ -99,8 +97,9 @@ template <typename T>
 class Element {
 
 public:
-  Element();
-  Element(HalfedgeMesh* mesh_, size_t ind_);
+  Element();                                 // construct an empty (null) element
+  Element(HalfedgeMesh* mesh_, size_t ind_); // construct pointing to the i'th element of that type on a mesh.
+  Element(const DynamicElement<T>& e);       // construct from a dynamic element of matching type
 
   inline bool operator==(const Element<T>& other) const;
   inline bool operator!=(const Element<T>& other) const;
@@ -110,7 +109,7 @@ public:
   inline bool operator<=(const Element<T>& other) const;
 
   // Get the "index" associated with the element.
-  // Note that these are not always a dense enumeration, and generally should not be accessed by users unless you are
+  // Note that these are not always a dense enumeration, and generally should not be accessed by "users" unless you are
   // monkeying around the HalfedgeMesh datastructure in some deep and scary way. Generally prefer
   // `HalfedgeMesh::getVertexIndices()` (etc) if you are looking for a set of indices for a linear algebra problem or
   // something.
@@ -130,6 +129,27 @@ protected:
 
 template <typename T>
 std::ostream& operator<<(std::ostream& output, const Element<T>& e);
+
+// The equivalent dynamic pointers. These should be rarely used, but are guarnteed to be preserved through _all_ mesh
+// operations, including compress().
+template <typename S>
+class DynamicElement {
+public:
+  DynamicElement();                                 // construct an empty (null) element
+  DynamicElement(HalfedgeMesh* mesh_, size_t ind_); // construct from an index as usual
+  DynamicElement(const S& e);                       // construct from a non-dynamic element
+
+  ~DynamicElement();
+
+  // returns a new plain old static element. Useful for chaining.
+  S decay() const;
+
+private:
+  // References to the callbacks which keep the element valid. Keep these around to de-registe on destruction.
+  std::list<std::function<void(const std::vector<size_t>&)>>::iterator permuteCallbackIt;
+  std::list<std::function<void()>>::iterator deleteCallbackIt;
+};
+
 
 // == Base range iterator
 // All range iterators have the form "advance through indices, skipping invalid elements". The two classes below
@@ -190,6 +210,8 @@ public:
   VertexAdjacentCornerSet adjacentCorners() const;
 };
 
+using DynamicVertex = DynamicElement<Vertex>;
+
 // == Range iterators
 
 // All vertices
@@ -219,6 +241,8 @@ public:
   // Properties
   bool isInterior() const;
 };
+
+using DynamicHalfedge = DynamicElement<Halfedge>;
 
 // == Range iterators
 
@@ -260,6 +284,8 @@ public:
   Face face() const;
 };
 
+using DynamicCorner = DynamicElement<Corner>;
+
 // == Range iterators
 
 // All corners
@@ -285,9 +311,11 @@ public:
   bool isBoundary() const;
 };
 
+using DynamicEdge = DynamicElement<Edge>;
+
 // == Range iterators
 
-// All corners
+// All edges
 struct EdgeRangeF {
   bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
   typedef Edge Etype;
@@ -323,9 +351,11 @@ public:
   FaceAdjacentCornerSet adjacentCorners() const;
 };
 
+using DynamicFace = DynamicElement<Face>;
+
 // == Range iterators
 
-// All corners
+// All faces 
 struct FaceRangeF {
   bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
   typedef Face Etype;
@@ -356,9 +386,11 @@ public:
   BoundaryLoopAdjacentEdgeSet adjacentEdges() const;
 };
 
+using DynamicBoundaryLoop = DynamicElement<BoundaryLoop>;
+
 // == Range iterators
 
-// All corners
+// All boundary loops 
 struct BoundaryLoopRangeF {
   bool elementOkay(const HalfedgeMesh& mesh, size_t ind);
   typedef BoundaryLoop Etype;

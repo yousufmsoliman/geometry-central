@@ -63,10 +63,6 @@ public:
   T& operator[](E e);
   const T& operator[](E e) const;
 
-  // Access with a dynamic element pointer
-  T& operator[](typename E::DynamicType e);
-  const T& operator[](typename E::DynamicType e) const;
-
   // Access with an index. Returns the item associated with the i'th element pointer (in the natural ordering).
   // The underlying mesh must be compressed.
   T& operator[](size_t e);

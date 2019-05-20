@@ -6,6 +6,7 @@
 // Some useful hash functions that should really be in the standard library
 // WARNING: It is technically illegal to specialize things in std, so this might
 // break in the future. However, this works for now and is immensely practical.
+// Avoid including in public-facing headers.
 
 // See https://stackoverflow.com/questions/7110301/generic-hash-for-tuples-in-unordered-map-unordered-set
 // and elsewhere
@@ -13,7 +14,7 @@
 namespace std {
 
 // Combinie hash values in a not-completely-evil way
-// (I think this is borrowed from boost)
+// (I think this is strategy boost uses)
 namespace {
 template <class T>
 inline void hash_combine(std::size_t& seed, T const& v) {
@@ -45,7 +46,6 @@ struct hash<std::tuple<TT...>> {
   }
 };
 
-// TODO tuples
 
 // Hash for pairs
 template <typename T, typename U>
