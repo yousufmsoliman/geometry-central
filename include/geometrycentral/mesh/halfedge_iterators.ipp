@@ -4,214 +4,133 @@ namespace geometrycentral {
 namespace halfedge_mesh {
 
 // ==========================================================
+// ================     Base  Iterator     ==================
+// ==========================================================
+
+// Note: the class below may seem a bit weird, in that we call advance() lazily in operator* rather than proactively in
+// operator++ (and occaisonally in operator++ in case operator* was never called). We do this to avoid repeatedly
+// advancing to hte first valid element on std::end(set). The intuition is that the iterators will still be efficient
+// even if advancing to the first valid element is expensive (though we do assume that calling isValid() is cheap).
+//
+// If we one day really want to optimize performance, it might be a good idea to benchmark these to figure out how much
+// it costs to satisfy isValid(), which isn't actually used by many iterators in practice.
+
+template <typename N>
+inline NavigationIteratorBase<N>::NavigationIteratorBase(HalfedgeMesh* mesh_, typename N::Etype e, bool justStarted_)
+    : mesh(mesh_), state(e), justStarted(justStarted_) {}
+
+template <typename N>
+inline const NavigationIteratorBase<N>& NavigationIteratorBase<N>::operator++() {
+  while (!state.isValid()) { // in case operator* never got called
+    state.advance();
+  }
+  state.advance();
+  justStarted = false;
+  return *this;
+}
+
+template <typename N>
+inline bool NavigationIteratorBase<N>::operator==(const NavigationIteratorBase<N>& other) const {
+  return justStarted == other.justStarted && state.currE == other.state.currE;
+}
+
+template <typename N>
+inline bool NavigationIteratorBase<N>::operator!=(const NavigationIteratorBase<N>& other) const {
+  return !(*this == other);
+}
+
+template <typename N>
+inline typename N::Rtype NavigationIteratorBase<N>::operator*() const {
+  while (!state.isValid()) {
+    state.advance();
+  }
+  return state.getCurrent();
+}
+
+template <typename N>
+NavigationSetBase<N>::NavigationSetBase(HalfedgeMesh* mesh_, typename N::Etype firstE_)
+    : mesh(mesh_), firstE(firstE_) {}
+
+template <typename N>
+inline NavigationIteratorBase<N> NavigationSetBase<N>::begin() const {
+  return NavigationIteratorBase<N>(mesh, firstE, true);
+}
+
+template <typename N>
+inline NavigationIteratorBase<N> NavigationSetBase<N>::end() const {
+  return NavigationIteratorBase<N>(mesh, firstE, false);
+}
+
+
+// ==========================================================
 // ================    Vertex Iterators    ==================
 // ==========================================================
 
-// === Incoming halfedges, including those on the domain boundary
-inline VertexIncomingHalfedgeIterator VertexIncomingHalfedgeSet::begin() {
-  return VertexIncomingHalfedgeIterator(firstHe, true);
-}
-inline VertexIncomingHalfedgeIterator VertexIncomingHalfedgeSet::end() {
-  return VertexIncomingHalfedgeIterator(firstHe, false);
-}
-inline const VertexIncomingHalfedgeIterator& VertexIncomingHalfedgeIterator::operator++() {
-  justStarted = false;
-  currHe = currHe.next().twin();
-  return *this;
-}
-inline bool VertexIncomingHalfedgeIterator::operator==(const VertexIncomingHalfedgeIterator& other) const {
-  return currHe == other.currHe && justStarted == other.justStarted;
-}
-inline bool VertexIncomingHalfedgeIterator::operator!=(const VertexIncomingHalfedgeIterator& other) const {
-  return !(*this == other);
-}
-inline Halfedge VertexIncomingHalfedgeIterator::operator*() const { return currHe; }
+inline void VertexAdjacentVertexNavigator::advance() { currE = currE.twin().next(); }
+inline bool VertexAdjacentVertexNavigator::isValid() const { return true; }
+inline Vertex VertexAdjacentVertexNavigator::getCurrent() const { return currE.twin().vertex(); }
 
+inline void VertexIncomingHalfedgeNavigator::advance() { currE = currE.twin().next(); }
+inline bool VertexIncomingHalfedgeNavigator::isValid() const { return true; }
+inline Halfedge VertexIncomingHalfedgeNavigator::getCurrent() const { return currE.twin(); }
 
-// === Outgoing halfedges, including those on the domain boundary
-inline VertexOutgoingHalfedgeIterator VertexOutgoingHalfedgeSet::begin() {
-  return VertexOutgoingHalfedgeIterator(firstHe, true);
-}
-inline VertexOutgoingHalfedgeIterator VertexOutgoingHalfedgeSet::end() {
-  return VertexOutgoingHalfedgeIterator(firstHe, false);
-}
-inline const VertexOutgoingHalfedgeIterator& VertexOutgoingHalfedgeIterator::operator++() {
-  justStarted = false;
-  currHe = currHe.twin().next();
-  return *this;
-}
-inline bool VertexOutgoingHalfedgeIterator::operator==(const VertexOutgoingHalfedgeIterator& other) const {
-  return currHe == other.currHe && justStarted == other.justStarted;
-}
-inline bool VertexOutgoingHalfedgeIterator::operator!=(const VertexOutgoingHalfedgeIterator& other) const {
-  return !(*this == other);
-}
-inline Halfedge VertexOutgoingHalfedgeIterator::operator*() const { return currHe; }
+inline void VertexOutgoingHalfedgeNavigator::advance() { currE = currE.twin().next(); }
+inline bool VertexOutgoingHalfedgeNavigator::isValid() const { return true; }
+inline Halfedge VertexOutgoingHalfedgeNavigator::getCurrent() const { return currE; }
 
-// === Adjacent vertices
-inline VertexAdjacentVertexIterator VertexAdjacentVertexSet::begin() {
-  return VertexAdjacentVertexIterator(firstHe, true);
-}
-inline VertexAdjacentVertexIterator VertexAdjacentVertexSet::end() {
-  return VertexAdjacentVertexIterator(firstHe, false);
-}
-inline const VertexAdjacentVertexIterator& VertexAdjacentVertexIterator::operator++() {
-  justStarted = false;
-  currHe = currHe.next().twin();
-  return *this;
-}
-inline bool VertexAdjacentVertexIterator::operator==(const VertexAdjacentVertexIterator& other) const {
-  return currHe == other.currHe && justStarted == other.justStarted;
-}
-inline bool VertexAdjacentVertexIterator::operator!=(const VertexAdjacentVertexIterator& other) const {
-  return !(*this == other);
-}
-inline Vertex VertexAdjacentVertexIterator::operator*() const { return currHe.vertex(); }
+inline void VertexAdjacentCornerNavigator::advance() { currE = currE.twin().next(); }
+inline bool VertexAdjacentCornerNavigator::isValid() const { return true; }
+inline Corner VertexAdjacentCornerNavigator::getCurrent() const { return currE.corner(); }
 
-// === Adjacent faces
-inline VertexAdjacentFaceIterator VertexAdjacentFaceSet::begin() { return VertexAdjacentFaceIterator(firstHe, true); }
-inline VertexAdjacentFaceIterator VertexAdjacentFaceSet::end() { return VertexAdjacentFaceIterator(firstHe, false); }
-inline const VertexAdjacentFaceIterator& VertexAdjacentFaceIterator::operator++() {
-  justStarted = false;
-  do {
-    currHe = currHe.twin().next();
-  } while (!currHe.isInterior());
-  return *this;
-}
-inline bool VertexAdjacentFaceIterator::operator==(const VertexAdjacentFaceIterator& other) const {
-  return currHe == other.currHe && justStarted == other.justStarted;
-}
-inline bool VertexAdjacentFaceIterator::operator!=(const VertexAdjacentFaceIterator& other) const {
-  return !(*this == other);
-}
-inline Face VertexAdjacentFaceIterator::operator*() const { return currHe.face(); }
+inline void VertexAdjacentEdgeNavigator::advance() { currE = currE.twin().next(); }
+inline bool VertexAdjacentEdgeNavigator::isValid() const { return true; }
+inline Edge VertexAdjacentEdgeNavigator::getCurrent() const { return currE.edge(); }
 
-// === Adjacent edges
-inline VertexAdjacentEdgeIterator VertexAdjacentEdgeSet::begin() { return VertexAdjacentEdgeIterator(firstHe, true); }
-inline VertexAdjacentEdgeIterator VertexAdjacentEdgeSet::end() { return VertexAdjacentEdgeIterator(firstHe, false); }
-inline const VertexAdjacentEdgeIterator& VertexAdjacentEdgeIterator::operator++() {
-  justStarted = false;
-  currHe = currHe.twin().next();
-  return *this;
-}
-inline bool VertexAdjacentEdgeIterator::operator==(const VertexAdjacentEdgeIterator& other) const {
-  return currHe == other.currHe && justStarted == other.justStarted;
-}
-inline bool VertexAdjacentEdgeIterator::operator!=(const VertexAdjacentEdgeIterator& other) const {
-  return !(*this == other);
-}
-inline Edge VertexAdjacentEdgeIterator::operator*() const { return currHe.edge(); }
+inline void VertexAdjacentFaceNavigator::advance() { currE = currE.twin().next(); }
+inline bool VertexAdjacentFaceNavigator::isValid() const { return currE.isInterior(); }
+inline Face VertexAdjacentFaceNavigator::getCurrent() const { return currE.face(); }
 
-// === Adjacent corners
-inline VertexAdjacentCornerIterator VertexAdjacentCornerSet::begin() {
-  return VertexAdjacentCornerIterator(firstHe, true);
-}
-inline VertexAdjacentCornerIterator VertexAdjacentCornerSet::end() {
-  return VertexAdjacentCornerIterator(firstHe, false);
-}
-inline const VertexAdjacentCornerIterator& VertexAdjacentCornerIterator::operator++() {
-  justStarted = false;
-  currHe = currHe.twin().next();
-  if (!currHe.isInterior()) currHe = currHe.twin().next(); // currHe must always be real
-  return *this;
-}
-inline bool VertexAdjacentCornerIterator::operator==(const VertexAdjacentCornerIterator& other) const {
-  return currHe == other.currHe && justStarted == other.justStarted;
-}
-inline bool VertexAdjacentCornerIterator::operator!=(const VertexAdjacentCornerIterator& other) const {
-  return !(*this == other);
-}
-inline Corner VertexAdjacentCornerIterator::operator*() const { return currHe.next().corner(); }
 
 // ==========================================================
 // ================     Face Iterators     ==================
 // ==========================================================
 
-// === Adjacent halfedges
-inline FaceAdjacentHalfedgeIterator FaceAdjacentHalfedgeSet::begin() {
-  return FaceAdjacentHalfedgeIterator(firstHe, true);
-}
-inline FaceAdjacentHalfedgeIterator FaceAdjacentHalfedgeSet::end() {
-  return FaceAdjacentHalfedgeIterator(firstHe, false);
-}
-inline const FaceAdjacentHalfedgeIterator& FaceAdjacentHalfedgeIterator::operator++() {
-  justStarted = false;
-  currHe = currHe.next();
-  return *this;
-}
-inline bool FaceAdjacentHalfedgeIterator::operator==(const FaceAdjacentHalfedgeIterator& other) const {
-  return currHe == other.currHe && justStarted == other.justStarted;
-}
-inline bool FaceAdjacentHalfedgeIterator::operator!=(const FaceAdjacentHalfedgeIterator& other) const {
-  return !(*this == other);
-}
-inline Halfedge FaceAdjacentHalfedgeIterator::operator*() const { return currHe; }
+inline void FaceAdjacentVertexNavigator::advance() { currE = currE.next(); }
+inline bool FaceAdjacentVertexNavigator::isValid() const { return true; }
+inline Vertex FaceAdjacentVertexNavigator::getCurrent() const { return currE.vertex(); }
 
-// === Adjacent vertices
-inline FaceAdjacentVertexIterator FaceAdjacentVertexSet::begin() { return FaceAdjacentVertexIterator(firstHe, true); }
-inline FaceAdjacentVertexIterator FaceAdjacentVertexSet::end() { return FaceAdjacentVertexIterator(firstHe, false); }
-inline const FaceAdjacentVertexIterator& FaceAdjacentVertexIterator::operator++() {
-  justStarted = false;
-  currHe = currHe.next();
-  return *this;
-}
-inline bool FaceAdjacentVertexIterator::operator==(const FaceAdjacentVertexIterator& other) const {
-  return currHe == other.currHe && justStarted == other.justStarted;
-}
-inline bool FaceAdjacentVertexIterator::operator!=(const FaceAdjacentVertexIterator& other) const {
-  return !(*this == other);
-}
-inline Vertex FaceAdjacentVertexIterator::operator*() const { return currHe.vertex(); }
+inline void FaceAdjacentHalfedgeNavigator::advance() { currE = currE.next(); }
+inline bool FaceAdjacentHalfedgeNavigator::isValid() const { return true; }
+inline Halfedge FaceAdjacentHalfedgeNavigator::getCurrent() const { return currE; }
 
-// === Adjacent edges
-inline FaceAdjacentEdgeIterator FaceAdjacentEdgeSet::begin() { return FaceAdjacentEdgeIterator(firstHe, true); }
-inline FaceAdjacentEdgeIterator FaceAdjacentEdgeSet::end() { return FaceAdjacentEdgeIterator(firstHe, false); }
-inline const FaceAdjacentEdgeIterator& FaceAdjacentEdgeIterator::operator++() {
-  justStarted = false;
-  currHe = currHe.next();
-  return *this;
-}
-inline bool FaceAdjacentEdgeIterator::operator==(const FaceAdjacentEdgeIterator& other) const {
-  return currHe == other.currHe && justStarted == other.justStarted;
-}
-inline bool FaceAdjacentEdgeIterator::operator!=(const FaceAdjacentEdgeIterator& other) const {
-  return !(*this == other);
-}
-inline Edge FaceAdjacentEdgeIterator::operator*() const { return currHe.edge(); }
+inline void FaceAdjacentCornerNavigator::advance() { currE = currE.next(); }
+inline bool FaceAdjacentCornerNavigator::isValid() const { return true; }
+inline Corner FaceAdjacentCornerNavigator::getCurrent() const { return currE.corner(); }
 
-// === Adjacent faces
-inline FaceAdjacentFaceIterator FaceAdjacentFaceSet::begin() { return FaceAdjacentFaceIterator(firstHe, true); }
-inline FaceAdjacentFaceIterator FaceAdjacentFaceSet::end() { return FaceAdjacentFaceIterator(firstHe, false); }
-inline const FaceAdjacentFaceIterator& FaceAdjacentFaceIterator::operator++() {
-  justStarted = false;
-  do {
-    currHe = currHe.next();
-  } while (!currHe.twin().isInterior());
-  return *this;
-}
-inline bool FaceAdjacentFaceIterator::operator==(const FaceAdjacentFaceIterator& other) const {
-  return currHe == other.currHe && justStarted == other.justStarted;
-}
-inline bool FaceAdjacentFaceIterator::operator!=(const FaceAdjacentFaceIterator& other) const {
-  return !(*this == other);
-}
-inline Face FaceAdjacentFaceIterator::operator*() const { return currHe.twin().face(); }
+inline void FaceAdjacentEdgeNavigator::advance() { currE = currE.next(); }
+inline bool FaceAdjacentEdgeNavigator::isValid() const { return true; }
+inline Edge FaceAdjacentEdgeNavigator::getCurrent() const { return currE.edge(); }
 
-// === Adjacent corners
-inline FaceAdjacentCornerIterator FaceAdjacentCornerSet::begin() { return FaceAdjacentCornerIterator(firstHe, true); }
-inline FaceAdjacentCornerIterator FaceAdjacentCornerSet::end() { return FaceAdjacentCornerIterator(firstHe, false); }
-inline const FaceAdjacentCornerIterator& FaceAdjacentCornerIterator::operator++() {
-  justStarted = false;
-  currHe = currHe.next();
-  return *this;
-}
-inline bool FaceAdjacentCornerIterator::operator==(const FaceAdjacentCornerIterator& other) const {
-  return currHe == other.currHe && justStarted == other.justStarted;
-}
-inline bool FaceAdjacentCornerIterator::operator!=(const FaceAdjacentCornerIterator& other) const {
-  return !(*this == other);
-}
-inline Corner FaceAdjacentCornerIterator::operator*() const { return currHe.next().corner(); }
+// TODO I think this has a problem and will loop forever on a single isolated face
+inline void FaceAdjacentFaceNavigator::advance() { currE = currE.next(); }
+inline bool FaceAdjacentFaceNavigator::isValid() const { return currE.twin().isInterior(); }
+inline Face FaceAdjacentFaceNavigator::getCurrent() const { return currE.twin().face(); }
+
+// ==========================================================
+// ==============   Boundary Loop Iterators   ===============
+// ==========================================================
+
+inline void BoundaryLoopAdjacentVertexNavigator::advance() { currE = currE.next(); }
+inline bool BoundaryLoopAdjacentVertexNavigator::isValid() const { return true; }
+inline Vertex BoundaryLoopAdjacentVertexNavigator::getCurrent() const { return currE.vertex(); }
+
+inline void BoundaryLoopAdjacentHalfedgeNavigator::advance() { currE = currE.next(); }
+inline bool BoundaryLoopAdjacentHalfedgeNavigator::isValid() const { return true; }
+inline Halfedge BoundaryLoopAdjacentHalfedgeNavigator::getCurrent() const { return currE; }
+
+inline void BoundaryLoopAdjacentEdgeNavigator::advance() { currE = currE.next(); }
+inline bool BoundaryLoopAdjacentEdgeNavigator::isValid() const { return true; }
+inline Edge BoundaryLoopAdjacentEdgeNavigator::getCurrent() const { return currE.edge(); }
 
 } // namespace halfedge_mesh
 } // namespace geometrycentral

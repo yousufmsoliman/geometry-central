@@ -23,23 +23,26 @@ class BoundaryLoop;
 
 
 // === Forward declare iterator set types (pointers may need to return these to
-// support range-based for loops)
-class VertexIncomingHalfedgeSet;
-class VertexOutgoingHalfedgeSet;
-class VertexAdjacentVertexSet;
-class VertexAdjacentFaceSet;
-class VertexAdjacentEdgeSet;
-class VertexAdjacentCornerSet;
-class FaceAdjacentHalfedgeSet;
-class FaceAdjacentVertexSet;
-class FaceAdjacentEdgeSet;
-class FaceAdjacentFaceSet;
-class FaceAdjacentCornerSet;
-class BoundaryLoopAdjacentHalfedgeSet;
-class BoundaryLoopAdjacentVertexSet;
-class BoundaryLoopAdjacentEdgeSet;
-class BoundaryLoopAdjacentFaceSet;
-class BoundaryLoopAdjacentCornerSet;
+// support range-based for loops, and we cannot foward declare typedef.)
+
+template <typename N>
+class NavigationSetBase;
+struct VertexAdjacentVertexNavigator;
+struct VertexIncomingHalfedgeNavigator;
+struct VertexOutgoingHalfedgeNavigator;
+struct VertexAdjacentFaceNavigator;
+struct VertexAdjacentEdgeNavigator;
+struct VertexAdjacentCornerNavigator;
+struct FaceAdjacentHalfedgeNavigator;
+struct FaceAdjacentVertexNavigator;
+struct FaceAdjacentEdgeNavigator;
+struct FaceAdjacentFaceNavigator;
+struct FaceAdjacentCornerNavigator;
+struct BoundaryLoopAdjacentHalfedgeNavigator;
+struct BoundaryLoopAdjacentVertexNavigator;
+struct BoundaryLoopAdjacentEdgeNavigator;
+struct BoundaryLoopAdjacentFaceNavigator;
+struct BoundaryLoopAdjacentCornerNavigator;
 
 
 // === Templated helper functions
@@ -201,12 +204,12 @@ public:
   size_t faceDegree();
 
   // Iterators
-  VertexIncomingHalfedgeSet incomingHalfedges() const;
-  VertexOutgoingHalfedgeSet outgoingHalfedges() const;
-  VertexAdjacentVertexSet adjacentVertices() const;
-  VertexAdjacentFaceSet adjacentFaces() const;
-  VertexAdjacentEdgeSet adjacentEdges() const;
-  VertexAdjacentCornerSet adjacentCorners() const;
+  NavigationSetBase<VertexAdjacentVertexNavigator> adjacentVertices() const;
+  NavigationSetBase<VertexIncomingHalfedgeNavigator> incomingHalfedges() const;
+  NavigationSetBase<VertexOutgoingHalfedgeNavigator> outgoingHalfedges() const;
+  NavigationSetBase<VertexAdjacentCornerNavigator> adjacentCorners() const;
+  NavigationSetBase<VertexAdjacentEdgeNavigator> adjacentEdges() const;
+  NavigationSetBase<VertexAdjacentFaceNavigator> adjacentFaces() const;
 };
 
 using DynamicVertex = DynamicElement<Vertex>;
@@ -343,11 +346,11 @@ public:
   size_t degree() const;
 
   // Iterators
-  FaceAdjacentHalfedgeSet adjacentHalfedges() const;
-  FaceAdjacentVertexSet adjacentVertices() const;
-  FaceAdjacentFaceSet adjacentFaces() const;
-  FaceAdjacentEdgeSet adjacentEdges() const;
-  FaceAdjacentCornerSet adjacentCorners() const;
+  NavigationSetBase<FaceAdjacentVertexNavigator> adjacentVertices() const;
+  NavigationSetBase<FaceAdjacentHalfedgeNavigator> adjacentHalfedges() const;
+  NavigationSetBase<FaceAdjacentCornerNavigator> adjacentCorners() const;
+  NavigationSetBase<FaceAdjacentEdgeNavigator> adjacentEdges() const;
+  NavigationSetBase<FaceAdjacentFaceNavigator> adjacentFaces() const;
 };
 
 using DynamicFace = DynamicElement<Face>;
@@ -380,9 +383,9 @@ public:
   size_t degree() const;
 
   // Iterators
-  BoundaryLoopAdjacentHalfedgeSet adjacentHalfedges() const;
-  BoundaryLoopAdjacentVertexSet adjacentVertices() const;
-  BoundaryLoopAdjacentEdgeSet adjacentEdges() const;
+  NavigationSetBase<BoundaryLoopAdjacentVertexNavigator> adjacentVertices() const;
+  NavigationSetBase<BoundaryLoopAdjacentHalfedgeNavigator> adjacentHalfedges() const;
+  NavigationSetBase<BoundaryLoopAdjacentEdgeNavigator> adjacentEdges() const;
 };
 
 using DynamicBoundaryLoop = DynamicElement<BoundaryLoop>;

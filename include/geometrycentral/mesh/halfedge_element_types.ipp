@@ -88,15 +88,23 @@ inline Corner Vertex::corner() const        { return halfedge().corner(); }
 inline bool Vertex::isBoundary() const { return halfedge().twin().isInterior(); }
 
 // Iterators
-inline VertexIncomingHalfedgeSet Vertex::incomingHalfedges() const { return VertexIncomingHalfedgeSet(halfedge().twin()); }
-inline VertexOutgoingHalfedgeSet Vertex::outgoingHalfedges() const { return VertexOutgoingHalfedgeSet(halfedge()); }
-inline VertexAdjacentVertexSet Vertex::adjacentVertices() const { return VertexAdjacentVertexSet(halfedge().twin()); }
-inline VertexAdjacentFaceSet Vertex::adjacentFaces() const { return VertexAdjacentFaceSet(halfedge()); }
-inline VertexAdjacentEdgeSet Vertex::adjacentEdges() const { return VertexAdjacentEdgeSet(halfedge()); }
-inline VertexAdjacentCornerSet Vertex::adjacentCorners() const {
-  Halfedge h = halfedge();
-  if (!h.isInterior()) h = h.twin().next();
-  return VertexAdjacentCornerSet(h);
+inline NavigationSetBase<VertexIncomingHalfedgeNavigator> Vertex::incomingHalfedges() const { 
+  return NavigationSetBase<VertexIncomingHalfedgeNavigator>(mesh, halfedge()); 
+}
+inline NavigationSetBase<VertexOutgoingHalfedgeNavigator> Vertex::outgoingHalfedges() const { 
+  return NavigationSetBase<VertexOutgoingHalfedgeNavigator>(mesh, halfedge()); 
+}
+inline NavigationSetBase<VertexAdjacentVertexNavigator> Vertex::adjacentVertices() const { 
+  return NavigationSetBase<VertexAdjacentVertexNavigator>(mesh, halfedge()); 
+}
+inline NavigationSetBase<VertexAdjacentFaceNavigator> Vertex::adjacentFaces() const { 
+  return NavigationSetBase<VertexAdjacentFaceNavigator>(mesh, halfedge()); 
+}
+inline NavigationSetBase<VertexAdjacentEdgeNavigator> Vertex::adjacentEdges() const { 
+  return NavigationSetBase<VertexAdjacentEdgeNavigator>(mesh, halfedge()); 
+}
+inline NavigationSetBase<VertexAdjacentCornerNavigator> Vertex::adjacentCorners() const {
+  return NavigationSetBase<VertexAdjacentCornerNavigator>(mesh, halfedge());
 }
 
 // Range iterators
@@ -181,11 +189,21 @@ inline size_t Face::degree() const {
 inline bool Face::isBoundaryLoop() const { return mesh->faceIsBoundaryLoop(ind); }
 
 // Iterators
-inline FaceAdjacentHalfedgeSet Face::adjacentHalfedges() const { return FaceAdjacentHalfedgeSet(halfedge()); }
-inline FaceAdjacentVertexSet Face::adjacentVertices() const { return FaceAdjacentVertexSet(halfedge()); }
-inline FaceAdjacentFaceSet Face::adjacentFaces() const { return FaceAdjacentFaceSet(halfedge()); }
-inline FaceAdjacentEdgeSet Face::adjacentEdges() const { return FaceAdjacentEdgeSet(halfedge()); }
-inline FaceAdjacentCornerSet Face::adjacentCorners() const { return FaceAdjacentCornerSet(halfedge()); }
+inline NavigationSetBase<FaceAdjacentHalfedgeNavigator> Face::adjacentHalfedges() const { 
+  return NavigationSetBase<FaceAdjacentHalfedgeNavigator>(mesh, halfedge()); 
+}
+inline NavigationSetBase<FaceAdjacentVertexNavigator> Face::adjacentVertices() const { 
+  return NavigationSetBase<FaceAdjacentVertexNavigator>(mesh, halfedge()); 
+}
+inline NavigationSetBase<FaceAdjacentFaceNavigator> Face::adjacentFaces() const { 
+  return NavigationSetBase<FaceAdjacentFaceNavigator>(mesh, halfedge()); 
+}
+inline NavigationSetBase<FaceAdjacentEdgeNavigator> Face::adjacentEdges() const { 
+  return NavigationSetBase<FaceAdjacentEdgeNavigator>(mesh, halfedge()); 
+}
+inline NavigationSetBase<FaceAdjacentCornerNavigator> Face::adjacentCorners() const { 
+  return NavigationSetBase<FaceAdjacentCornerNavigator>(mesh, halfedge()); 
+}
 
 
 // Range iterators
@@ -205,9 +223,15 @@ inline size_t BoundaryLoop::degree() const {
   return k;
 }
 
-inline BoundaryLoopAdjacentHalfedgeSet BoundaryLoop::adjacentHalfedges() const { return BoundaryLoopAdjacentHalfedgeSet(halfedge()); }
-inline BoundaryLoopAdjacentVertexSet BoundaryLoop::adjacentVertices() const { return BoundaryLoopAdjacentVertexSet(halfedge()); }
-inline BoundaryLoopAdjacentEdgeSet BoundaryLoop::adjacentEdges() const { return BoundaryLoopAdjacentEdgeSet(halfedge()); }
+inline NavigationSetBase<BoundaryLoopAdjacentHalfedgeNavigator> BoundaryLoop::adjacentHalfedges() const { 
+  return NavigationSetBase<BoundaryLoopAdjacentHalfedgeNavigator>(mesh, halfedge()); 
+}
+inline NavigationSetBase<BoundaryLoopAdjacentVertexNavigator> BoundaryLoop::adjacentVertices() const { 
+  return NavigationSetBase<BoundaryLoopAdjacentVertexNavigator>(mesh, halfedge()); 
+}
+inline NavigationSetBase<BoundaryLoopAdjacentEdgeNavigator> BoundaryLoop::adjacentEdges() const { 
+  return NavigationSetBase<BoundaryLoopAdjacentEdgeNavigator>(mesh, halfedge()); 
+}
 
 // Range iterators
 inline bool BoundaryLoopRangeF::elementOkay(const HalfedgeMesh& mesh, size_t ind) {

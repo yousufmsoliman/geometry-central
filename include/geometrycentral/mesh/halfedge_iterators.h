@@ -30,7 +30,8 @@ namespace halfedge_mesh {
 // function for each. The remaining boilerplates are generated. The template argument should be a class <N> with the
 // following functionality:
 //
-//    - type Etype: the type of elements returned by the iterator (eg Vertex)
+//    - type Rtype: the type of elements returned by the iterator (eg Vertex)
+//    - type Etype: the type of elements tracked by the iterator (eg Halfedge)
 //    - member Etype currE: the current element pointed to by the iterator
 //    - advance(): advance the iterator once (updating currE). Note that if some should be skipped, isValid will handle.
 //    - isValid(): reports true if Etype should be returned by the iterator (not needed for most: always True)
@@ -47,7 +48,7 @@ public:
   const NavigationIteratorBase& operator++();
   bool operator==(const NavigationIteratorBase& other) const;
   bool operator!=(const NavigationIteratorBase& other) const;
-  typename N::Etype operator*() const;
+  typename N::Rtype operator*() const;
 
 private:
   HalfedgeMesh* mesh;
@@ -59,13 +60,13 @@ private:
 template <typename N>
 class NavigationSetBase {
 public:
-  NavigationSetBase(HalfedgeMesh* mesh_, typename N::Etype);
+  NavigationSetBase(HalfedgeMesh* mesh_, typename N::Etype firstE_);
   NavigationIteratorBase<N> begin() const;
   NavigationIteratorBase<N> end() const;
 
 private:
   HalfedgeMesh* mesh;
-  size_t iStart, iEnd;
+  typename N::Etype firstE;
 };
 
 
@@ -73,286 +74,65 @@ private:
 // ================    Vertex Iterators    ==================
 // ==========================================================
 
+// Adjacent vertices
+struct VertexAdjacentVertexNavigator {
+  void advance();
+  bool isValid() const;
+  typedef Halfedge Etype;
+  Etype currE;
+  typedef Vertex Rtype;
+  Rtype getCurrent() const;
+};
+
 // Adjacent incoming halfedges
 struct VertexIncomingHalfedgeNavigator {
   void advance();
   bool isValid() const;
   typedef Halfedge Etype;
   Etype currE;
-};
-typedef NavigationSetBase<VertexIncomingHalfedgeNavigator> VertexIncomingHalfedgeSet;
-
-class VertexIncomingHalfedgeSet;
-class VertexOutgoingHalfedgeSet;
-class VertexAdjacentVertexSet;
-class VertexAdjacentFaceSet;
-class VertexAdjacentEdgeSet;
-class VertexAdjacentCornerSet;
-
-// Iterate around all incoming halfedges (both on the interior and the boundary
-// of the domain)
-class VertexIncomingHalfedgeIterator {
-public:
-  VertexIncomingHalfedgeIterator(Halfedge startingEdge, bool justStarted);
-  const VertexIncomingHalfedgeIterator& operator++();
-  bool operator==(const VertexIncomingHalfedgeIterator& other) const;
-  bool operator!=(const VertexIncomingHalfedgeIterator& other) const;
-  Halfedge operator*() const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
-};
-class VertexIncomingHalfedgeSet {
-public:
-  VertexIncomingHalfedgeSet(Halfedge he);
-  VertexIncomingHalfedgeIterator begin();
-  VertexIncomingHalfedgeIterator end();
-
-private:
-  Halfedge firstHe;
+  typedef Halfedge Rtype;
+  Rtype getCurrent() const;
 };
 
-// Iterate around all outgoing halfedges (both on the interior and the boundary
-// of the domain)
-class VertexOutgoingHalfedgeIterator {
-public:
-  VertexOutgoingHalfedgeIterator(Halfedge startingEdge, bool justStarted);
-  const VertexOutgoingHalfedgeIterator& operator++();
-  bool operator==(const VertexOutgoingHalfedgeIterator& other) const;
-  bool operator!=(const VertexOutgoingHalfedgeIterator& other) const;
-  Halfedge operator*() const;
-  // Halfedge operator-> () const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
+// Adjacent outgoing halfedges
+struct VertexOutgoingHalfedgeNavigator {
+  void advance();
+  bool isValid() const;
+  typedef Halfedge Etype;
+  Etype currE;
+  typedef Halfedge Rtype;
+  Rtype getCurrent() const;
 };
-class VertexOutgoingHalfedgeSet {
-public:
-  VertexOutgoingHalfedgeSet(Halfedge he);
-  VertexOutgoingHalfedgeIterator begin();
-  VertexOutgoingHalfedgeIterator end();
 
-private:
-  Halfedge firstHe;
+// Adjacent corners
+struct VertexAdjacentCornerNavigator {
+  void advance();
+  bool isValid() const;
+  typedef Halfedge Etype;
+  Etype currE;
+  typedef Corner Rtype;
+  Rtype getCurrent() const;
 };
 
 
-// Iterate around adjacent vertices
-class VertexAdjacentVertexIterator {
-public:
-  VertexAdjacentVertexIterator(Halfedge startingEdge, bool justStarted);
-  const VertexAdjacentVertexIterator& operator++();
-  bool operator==(const VertexAdjacentVertexIterator& other) const;
-  bool operator!=(const VertexAdjacentVertexIterator& other) const;
-  Vertex operator*() const;
-  // Vertex operator-> () const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
-};
-class VertexAdjacentVertexSet {
-public:
-  VertexAdjacentVertexSet(Halfedge he);
-  VertexAdjacentVertexIterator begin();
-  VertexAdjacentVertexIterator end();
-
-private:
-  Halfedge firstHe;
+// Adjacent edges
+struct VertexAdjacentEdgeNavigator {
+  void advance();
+  bool isValid() const;
+  typedef Halfedge Etype;
+  Etype currE;
+  typedef Edge Rtype;
+  Rtype getCurrent() const;
 };
 
-// Iterate around adjacent (real) faces
-class VertexAdjacentFaceIterator {
-public:
-  VertexAdjacentFaceIterator(Halfedge startingEdge, bool justStarted);
-  const VertexAdjacentFaceIterator& operator++();
-  bool operator==(const VertexAdjacentFaceIterator& other) const;
-  bool operator!=(const VertexAdjacentFaceIterator& other) const;
-  Face operator*() const;
-  // Face operator-> () const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
-};
-class VertexAdjacentFaceSet {
-public:
-  VertexAdjacentFaceSet(Halfedge he);
-  VertexAdjacentFaceIterator begin();
-  VertexAdjacentFaceIterator end();
-
-private:
-  Halfedge firstHe;
-};
-
-// Iterate around adjacent edges
-class VertexAdjacentEdgeIterator {
-public:
-  VertexAdjacentEdgeIterator(Halfedge startingEdge, bool justStarted);
-  const VertexAdjacentEdgeIterator& operator++();
-  bool operator==(const VertexAdjacentEdgeIterator& other) const;
-  bool operator!=(const VertexAdjacentEdgeIterator& other) const;
-  Edge operator*() const;
-  // Edge operator-> () const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
-};
-class VertexAdjacentEdgeSet {
-public:
-  VertexAdjacentEdgeSet(Halfedge he);
-  VertexAdjacentEdgeIterator begin();
-  VertexAdjacentEdgeIterator end();
-
-private:
-  Halfedge firstHe;
-};
-
-// Iterate around all adjacent corners
-class VertexAdjacentCornerIterator {
-public:
-  VertexAdjacentCornerIterator(Halfedge startingEdge, bool justStarted);
-  const VertexAdjacentCornerIterator& operator++();
-  bool operator==(const VertexAdjacentCornerIterator& other) const;
-  bool operator!=(const VertexAdjacentCornerIterator& other) const;
-  Corner operator*() const;
-  // Halfedge operator-> () const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
-};
-class VertexAdjacentCornerSet {
-public:
-  VertexAdjacentCornerSet(Halfedge he);
-  VertexAdjacentCornerIterator begin();
-  VertexAdjacentCornerIterator end();
-
-private:
-  Halfedge firstHe;
-};
-
-// ==========================================================
-// ================     Face Iterators     ==================
-// ==========================================================
-
-// Iterate around adjacent halfedges
-class FaceAdjacentHalfedgeIterator {
-public:
-  FaceAdjacentHalfedgeIterator(Halfedge startingEdge, bool justStarted);
-  const FaceAdjacentHalfedgeIterator& operator++();
-  bool operator==(const FaceAdjacentHalfedgeIterator& other) const;
-  bool operator!=(const FaceAdjacentHalfedgeIterator& other) const;
-  Halfedge operator*() const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
-};
-class FaceAdjacentHalfedgeSet {
-public:
-  FaceAdjacentHalfedgeSet(Halfedge he);
-  FaceAdjacentHalfedgeIterator begin();
-  FaceAdjacentHalfedgeIterator end();
-
-private:
-  Halfedge firstHe;
-};
-
-// Iterate around adjacent vertices
-class FaceAdjacentVertexIterator {
-public:
-  FaceAdjacentVertexIterator(Halfedge startingEdge, bool justStarted);
-  const FaceAdjacentVertexIterator& operator++();
-  bool operator==(const FaceAdjacentVertexIterator& other) const;
-  bool operator!=(const FaceAdjacentVertexIterator& other) const;
-  Vertex operator*() const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
-};
-class FaceAdjacentVertexSet {
-public:
-  FaceAdjacentVertexSet(Halfedge he);
-  FaceAdjacentVertexIterator begin();
-  FaceAdjacentVertexIterator end();
-
-private:
-  Halfedge firstHe;
-};
-
-// Iterate around adjacent edges
-class FaceAdjacentEdgeIterator {
-public:
-  FaceAdjacentEdgeIterator(Halfedge startingEdge, bool justStarted);
-  const FaceAdjacentEdgeIterator& operator++();
-  bool operator==(const FaceAdjacentEdgeIterator& other) const;
-  bool operator!=(const FaceAdjacentEdgeIterator& other) const;
-  Edge operator*() const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
-};
-class FaceAdjacentEdgeSet {
-public:
-  FaceAdjacentEdgeSet(Halfedge he);
-  FaceAdjacentEdgeIterator begin();
-  FaceAdjacentEdgeIterator end();
-
-private:
-  Halfedge firstHe;
-};
-
-// Iterate around adjacent (real) faces
-class FaceAdjacentFaceIterator {
-public:
-  FaceAdjacentFaceIterator(Halfedge startingEdge, bool justStarted);
-  const FaceAdjacentFaceIterator& operator++();
-  bool operator==(const FaceAdjacentFaceIterator& other) const;
-  bool operator!=(const FaceAdjacentFaceIterator& other) const;
-  Face operator*() const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
-};
-class FaceAdjacentFaceSet {
-public:
-  FaceAdjacentFaceSet(Halfedge he);
-  FaceAdjacentFaceIterator begin();
-  FaceAdjacentFaceIterator end();
-
-private:
-  Halfedge firstHe;
-};
-
-// Iterate around all adjacent corners
-class FaceAdjacentCornerIterator {
-public:
-  FaceAdjacentCornerIterator(Halfedge startingEdge, bool justStarted_);
-  const FaceAdjacentCornerIterator& operator++();
-  bool operator==(const FaceAdjacentCornerIterator& other) const;
-  bool operator!=(const FaceAdjacentCornerIterator& other) const;
-  Corner operator*() const;
-  // Halfedge operator-> () const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
-};
-class FaceAdjacentCornerSet {
-public:
-  FaceAdjacentCornerSet(Halfedge he);
-  FaceAdjacentCornerIterator begin();
-  FaceAdjacentCornerIterator end();
-
-private:
-  Halfedge firstHe;
+// Adjacent faces
+struct VertexAdjacentFaceNavigator {
+  void advance();
+  bool isValid() const;
+  typedef Halfedge Etype;
+  Etype currE;
+  typedef Face Rtype;
+  Rtype getCurrent() const;
 };
 
 
@@ -360,73 +140,89 @@ private:
 // ================     Face Iterators     ==================
 // ==========================================================
 
-// Iterate around adjacent halfedges
-class BoundaryLoopAdjacentHalfedgeIterator {
-public:
-  BoundaryLoopAdjacentHalfedgeIterator(Halfedge startingEdge, bool justStarted);
-  const BoundaryLoopAdjacentHalfedgeIterator& operator++();
-  bool operator==(const BoundaryLoopAdjacentHalfedgeIterator& other) const;
-  bool operator!=(const BoundaryLoopAdjacentHalfedgeIterator& other) const;
-  Halfedge operator*() const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
-};
-class BoundaryLoopAdjacentHalfedgeSet {
-public:
-  BoundaryLoopAdjacentHalfedgeSet(Halfedge he);
-  BoundaryLoopAdjacentHalfedgeIterator begin();
-  BoundaryLoopAdjacentHalfedgeIterator end();
-
-private:
-  Halfedge firstHe;
+// Adjacent vertices
+struct FaceAdjacentVertexNavigator {
+  void advance();
+  bool isValid() const;
+  typedef Halfedge Etype;
+  Etype currE;
+  typedef Vertex Rtype;
+  Rtype getCurrent() const;
 };
 
-// Iterate around adjacent vertices
-class BoundaryLoopAdjacentVertexIterator {
-public:
-  BoundaryLoopAdjacentVertexIterator(Halfedge startingEdge, bool justStarted);
-  const BoundaryLoopAdjacentVertexIterator& operator++();
-  bool operator==(const BoundaryLoopAdjacentVertexIterator& other) const;
-  bool operator!=(const BoundaryLoopAdjacentVertexIterator& other) const;
-  Vertex operator*() const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
-};
-class BoundaryLoopAdjacentVertexSet {
-public:
-  BoundaryLoopAdjacentVertexSet(Halfedge he);
-  BoundaryLoopAdjacentVertexIterator begin();
-  BoundaryLoopAdjacentVertexIterator end();
-
-private:
-  Halfedge firstHe;
+// Adjacent halfedge
+struct FaceAdjacentHalfedgeNavigator {
+  void advance();
+  bool isValid() const;
+  typedef Halfedge Etype;
+  Etype currE;
+  typedef Halfedge Rtype;
+  Rtype getCurrent() const;
 };
 
-// Iterate around adjacent edges
-class BoundaryLoopAdjacentEdgeIterator {
-public:
-  BoundaryLoopAdjacentEdgeIterator(Halfedge startingEdge, bool justStarted);
-  const BoundaryLoopAdjacentEdgeIterator& operator++();
-  bool operator==(const BoundaryLoopAdjacentEdgeIterator& other) const;
-  bool operator!=(const BoundaryLoopAdjacentEdgeIterator& other) const;
-  Edge operator*() const;
-
-private:
-  Halfedge currHe;
-  bool justStarted;
+// Adjacent corner
+struct FaceAdjacentCornerNavigator {
+  void advance();
+  bool isValid() const;
+  typedef Halfedge Etype;
+  Etype currE;
+  typedef Corner Rtype;
+  Rtype getCurrent() const;
 };
-class BoundaryLoopAdjacentEdgeSet {
-public:
-  BoundaryLoopAdjacentEdgeSet(Halfedge he);
-  BoundaryLoopAdjacentEdgeIterator begin();
-  BoundaryLoopAdjacentEdgeIterator end();
 
-private:
-  Halfedge firstHe;
+// Adjacent edge
+struct FaceAdjacentEdgeNavigator {
+  void advance();
+  bool isValid() const;
+  typedef Halfedge Etype;
+  Etype currE;
+  typedef Edge Rtype;
+  Rtype getCurrent() const;
+};
+
+// Adjacent face
+struct FaceAdjacentFaceNavigator {
+  void advance();
+  bool isValid() const;
+  typedef Halfedge Etype;
+  Etype currE;
+  typedef Face Rtype;
+  Rtype getCurrent() const;
+};
+
+
+// ==========================================================
+// ==============   Boundary Loop Iterators   ===============
+// ==========================================================
+
+// Adjacent vertex
+struct BoundaryLoopAdjacentVertexNavigator {
+  void advance();
+  bool isValid() const;
+  typedef Halfedge Etype;
+  Etype currE;
+  typedef Vertex Rtype;
+  Rtype getCurrent() const;
+};
+
+// Adjacent halfedge
+struct BoundaryLoopAdjacentHalfedgeNavigator {
+  void advance();
+  bool isValid() const;
+  typedef Halfedge Etype;
+  Etype currE;
+  typedef Halfedge Rtype;
+  Rtype getCurrent() const;
+};
+
+// Adjacent edge
+struct BoundaryLoopAdjacentEdgeNavigator {
+  void advance();
+  bool isValid() const;
+  typedef Halfedge Etype;
+  Etype currE;
+  typedef Edge Rtype;
+  Rtype getCurrent() const;
 };
 
 

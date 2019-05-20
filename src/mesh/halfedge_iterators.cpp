@@ -7,61 +7,6 @@
 namespace geometrycentral {
 namespace halfedge_mesh {
 
-// ==========================================================
-// ================     Base  Iterator     ==================
-// ==========================================================
-
-// Note: the class below may seem a bit weird, in that we call advance() lazily in operator* rather than proactively in
-// operator++ (and occaisonally in operator++ in case operator* was never called). We do this to avoid repeatedly
-// advancing to hte first valid element on std::end(set). The intuition is that the iterators will still be efficient
-// even if advancing to the first valid element is expensive (though we do assume that calling isValid() is cheap).
-
-template <typename N>
-inline NavigationIteratorBase<N>::NavigationIteratorBase(HalfedgeMesh* mesh_, typename N::Etype e, bool justStarted_)
-    : mesh(mesh_), state(e), justStarted(justStarted_) {}
-
-template <typename N>
-inline const NavigationIteratorBase<N>& NavigationIteratorBase<N>::operator++() {
-  while (!state.isValid()) { // in case operator* never got called
-    state.advance();
-  }
-  state.advance();
-  justStarted = false;
-  return *this;
-}
-
-template <typename N>
-inline bool NavigationIteratorBase<N>::operator==(const NavigationIteratorBase<N>& other) const {
-  return justStarted == other.justStarted && state.currE == other.state.currE;
-}
-
-template <typename N>
-inline bool NavigationIteratorBase<N>::operator!=(const NavigationIteratorBase<N>& other) const {
-  return !(*this == other);
-}
-
-template <typename N>
-inline typename N::Etype NavigationIteratorBase<N>::operator*() const {
-  while (!state.isValid()) {
-    state.advance();
-  }
-  return state.currE;
-}
-
-template <typename N>
-NavigationSetBase<N>::NavigationSetBase(HalfedgeMesh* mesh_, size_t iStart_, size_t iEnd_)
-    : mesh(mesh_), iStart(iStart_), iEnd(iEnd_) {}
-
-template <typename N>
-inline NavigationIteratorBase<N> NavigationSetBase<N>::begin() const {
-  return NavigationIteratorBase<N>(mesh, iStart, iEnd);
-}
-
-template <typename N>
-inline NavigationIteratorBase<N> NavigationSetBase<N>::end() const {
-  return NavigationIteratorBase<N>(mesh, iEnd, iEnd);
-}
-
 
 // ==========================================================
 // ================    Vertex Iterators    ==================
