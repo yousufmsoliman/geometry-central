@@ -8,7 +8,6 @@ endif()
 # List of .cpp files to be compiled
 SET(SRCS
   mesh/halfedge_mesh.cpp
-  mesh/halfedge_iterators.cpp
   mesh/meshio.cpp
   mesh/polygon_soup_mesh.cpp
   mesh/ply_halfedge_mesh_data.cpp

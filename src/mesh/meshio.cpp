@@ -2,12 +2,12 @@
 #include <limits>
 
 #include "geometrycentral/geometry/geometry.h"
+#include "geometrycentral/mesh/halfedge_containers.h"
 #include "geometrycentral/mesh/meshio.h"
 #include "geometrycentral/mesh/polygon_soup_mesh.h"
 
 #include "happly.h"
 
-using namespace std;
 
 namespace geometrycentral {
 

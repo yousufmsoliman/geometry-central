@@ -7,24 +7,26 @@ namespace halfedge_mesh {
 // ================     Base  Iterator     ==================
 // ==========================================================
 
-// Note: the class below may seem a bit weird, in that we call advance() lazily in operator* rather than proactively in
-// operator++ (and occaisonally in operator++ in case operator* was never called). We do this to avoid repeatedly
-// advancing to hte first valid element on std::end(set). The intuition is that the iterators will still be efficient
-// even if advancing to the first valid element is expensive (though we do assume that calling isValid() is cheap).
-//
-// If we one day really want to optimize performance, it might be a good idea to benchmark these to figure out how much
-// it costs to satisfy isValid(), which isn't actually used by many iterators in practice.
 
 template <typename N>
-inline NavigationIteratorBase<N>::NavigationIteratorBase(HalfedgeMesh* mesh_, typename N::Etype e, bool justStarted_)
-    : mesh(mesh_), state(e), justStarted(justStarted_) {}
+inline NavigationIteratorBase<N>::NavigationIteratorBase(typename N::Etype e, bool justStarted_)
+    : state{e}, justStarted(justStarted_) {
+
+  // checking startingE is a weird hack, but ensures the iterators don't infinite loop if there are no valid elemetnts
+  // to return
+  typename N::Etype startingE;
+  while (!state.isValid()) {
+    state.advance();
+    if (e == startingE) break;
+  }
+}
 
 template <typename N>
 inline const NavigationIteratorBase<N>& NavigationIteratorBase<N>::operator++() {
-  while (!state.isValid()) { // in case operator* never got called
+  state.advance();
+  while (!state.isValid()) {
     state.advance();
   }
-  state.advance();
   justStarted = false;
   return *this;
 }
@@ -41,24 +43,21 @@ inline bool NavigationIteratorBase<N>::operator!=(const NavigationIteratorBase<N
 
 template <typename N>
 inline typename N::Rtype NavigationIteratorBase<N>::operator*() const {
-  while (!state.isValid()) {
-    state.advance();
-  }
   return state.getCurrent();
 }
 
 template <typename N>
-NavigationSetBase<N>::NavigationSetBase(HalfedgeMesh* mesh_, typename N::Etype firstE_)
-    : mesh(mesh_), firstE(firstE_) {}
+NavigationSetBase<N>::NavigationSetBase(typename N::Etype firstE_)
+    : firstE(firstE_), cachedEndIter{NavigationIteratorBase<N>(firstE, false)} {}
 
 template <typename N>
 inline NavigationIteratorBase<N> NavigationSetBase<N>::begin() const {
-  return NavigationIteratorBase<N>(mesh, firstE, true);
+  return NavigationIteratorBase<N>(firstE, true);
 }
 
 template <typename N>
 inline NavigationIteratorBase<N> NavigationSetBase<N>::end() const {
-  return NavigationIteratorBase<N>(mesh, firstE, false);
+  return cachedEndIter;
 }
 
 

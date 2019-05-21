@@ -11,6 +11,10 @@
 
 // NOTE: ipp includes at bottom of file
 
+// Foward declare some return types from below
+template<typename T> class VertexData;
+template<> class VertexData<size_t>;
+
 namespace geometrycentral {
 namespace halfedge_mesh {
 
@@ -124,7 +128,7 @@ public:
   // == Utility functions
   bool isTriangular();           // returns true if and only if all faces are triangles [O(n)]
   int eulerCharacteristic();     // compute the Euler characteristic [O(1)]
-  int genus();     								// compute the genus [O(1)]
+  int genus();                   // compute the genus [O(1)]
   size_t nConnectedComponents(); // compute number of connected components [O(n)]
 
   std::vector<std::vector<size_t>> getFaceVertexList();
@@ -208,7 +212,7 @@ private:
   size_t nVerticesCapacityCount = 0;
   size_t nHalfedgesCapacityCount = 0; // will always be even
   size_t nEdgesCapacityCount() const;
-  size_t nFacesCapacityCount = 0;     // capacity for faces _and_ boundary loops
+  size_t nFacesCapacityCount = 0; // capacity for faces _and_ boundary loops
 
   // These give the number of filled elements in the currently allocated buffer. This will also be the maximal index of
   // any element (except the weirdness of boundary loop faces). As elements get marked dead, nVerticesCount decreases

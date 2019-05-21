@@ -1,6 +1,8 @@
 #pragma once
 
 #include "geometrycentral/geometry/dependent_quantity.h"
+#include "geometrycentral/geometry/geometry.h"
+#include "geometrycentral/mesh/halfedge_containers.h"
 #include "geometrycentral/mesh/halfedge_mesh.h"
 #include "geometrycentral/utilities/unit_vector3.h"
 #include "geometrycentral/utilities/vector2.h"
@@ -12,6 +14,10 @@
 #include <Eigen/SparseCore>
 
 namespace geometrycentral {
+
+// Foward declare the geometry object
+template <class T>
+class Geometry;
 
 
 template <typename G>
@@ -26,7 +32,7 @@ public:
   void repopulate();
 
   // Get the mesh
-  HalfedgeMesh* getMesh();
+  halfedge_mesh::HalfedgeMesh* getMesh();
 
   // Get the geometry
   Geometry<G>* getGeometry();
@@ -61,7 +67,7 @@ public:
   // (note, more public members below)
 private:
   // The mesh for which this cache applies
-  HalfedgeMesh* mesh;
+  halfedge_mesh::HalfedgeMesh* mesh;
   Geometry<G>* geometry;
 
   std::vector<DependentQuantity*> allQuantities;

@@ -72,10 +72,9 @@ class Geometry : public VertexData<T> {
   // vertex
 
 public:
-  Geometry(HalfedgeMesh& mesh_) : VertexData<T>(&mesh_), mesh(mesh_), cache(this), p(*this) {}
+  Geometry(halfedge_mesh::HalfedgeMesh& mesh_) : VertexData<T>(&mesh_), mesh(mesh_), cache(this), p(*this) {}
 
-  HalfedgeMesh* getMesh(void); // Returns a pointer to the domain
-  Geometry<T>* copyUsingTransfer(HalfedgeMeshDataTransfer& transfer);
+  halfedge_mesh::HalfedgeMesh* getMesh(void); // Returns a pointer to the domain
 
   // Vertex attributes
   T& position(Vertex p); // TODO get rid of this method; all write access
@@ -151,7 +150,7 @@ public:
   std::vector<T> getVertexPositionList();
 
   // members
-  HalfedgeMesh& mesh;
+  halfedge_mesh::HalfedgeMesh& mesh;
   GeometryCache<T> cache;
 
 protected:

@@ -44,14 +44,13 @@ template <typename N>
 class NavigationIteratorBase {
 
 public:
-  NavigationIteratorBase(HalfedgeMesh* mesh_, typename N::Etype, bool justStarted_);
+  NavigationIteratorBase(typename N::Etype firstE_, bool justStarted_);
   const NavigationIteratorBase& operator++();
   bool operator==(const NavigationIteratorBase& other) const;
   bool operator!=(const NavigationIteratorBase& other) const;
   typename N::Rtype operator*() const;
 
 private:
-  HalfedgeMesh* mesh;
   N state;
   bool justStarted; // our iterators are generally best expressed as "do-while" loops, so this is useful to distinguish
                     // begin() from end()
@@ -60,13 +59,13 @@ private:
 template <typename N>
 class NavigationSetBase {
 public:
-  NavigationSetBase(HalfedgeMesh* mesh_, typename N::Etype firstE_);
+  NavigationSetBase(typename N::Etype firstE_);
   NavigationIteratorBase<N> begin() const;
   NavigationIteratorBase<N> end() const;
 
 private:
-  HalfedgeMesh* mesh;
   typename N::Etype firstE;
+  NavigationIteratorBase<N> cachedEndIter; // avoid advancing to a new ending iterator for each end()
 };
 
 
