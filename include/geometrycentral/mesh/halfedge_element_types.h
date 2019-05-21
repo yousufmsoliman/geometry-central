@@ -1,10 +1,11 @@
 #pragma once
 
+#include "geometrycentral/utilities/utilities.h"
+
 #include <cstddef>
 #include <functional>
 #include <iostream>
-
-#include "geometrycentral/utilities/utilities.h"
+#include <list>
 
 namespace geometrycentral {
 namespace halfedge_mesh {

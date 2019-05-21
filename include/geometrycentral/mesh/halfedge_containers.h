@@ -1,10 +1,10 @@
 #pragma once
 
-#include "geometrycentral/mesh/halfedge_mesh.h"
 #include "geometrycentral/mesh/halfedge_element_types.h"
 
-#include <cassert>
 #include "Eigen/Core"
+
+#include <cassert>
 
 // === Datatypes which hold data stored on the mesh
 

@@ -1,5 +1,9 @@
 #include "geometrycentral/mesh/halfedge_mesh.h"
 
+#include "geometrycentral/utilities/combining_hash_functions.h"
+#include "geometrycentral/utilities/disjoint_sets.h"
+#include "geometrycentral/utilities/timing.h"
+
 #include <algorithm>
 #include <limits>
 #include <map>
@@ -8,9 +12,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "geometrycentral/utilities/combining_hash_functions.h"
-#include "geometrycentral/utilities/disjoint_sets.h"
-#include "geometrycentral/utilities/timing.h"
 
 using std::cout;
 using std::endl;

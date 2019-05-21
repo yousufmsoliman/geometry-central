@@ -8,10 +8,11 @@
 #include "geometrycentral/utilities/vector2.h"
 #include "geometrycentral/utilities/vector3.h"
 
+#include <Eigen/SparseCore>
+
 #include <functional>
 #include <vector>
 
-#include <Eigen/SparseCore>
 
 namespace geometrycentral {
 
@@ -177,112 +178,112 @@ public:
   // Face area normals
   // vector which points in the normal direction and has magnitude equal to area of face
   inline void requireFaceAreaNormals() { faceAreaNormalsQ.require(); }
-  FaceData<Vector3> faceAreaNormals;
+  halfedge_mesh::FaceData<Vector3> faceAreaNormals;
 
   // Face areas
   inline void requireFaceAreas() { faceAreasQ.require(); }
-  FaceData<double> faceAreas;
+  halfedge_mesh::FaceData<double> faceAreas;
 
   // Face normals
   inline void requireFaceNormals() { faceNormalsQ.require(); }
-  FaceData<Vector3> faceNormals;
+  halfedge_mesh::FaceData<Vector3> faceNormals;
 
   // Vertex normals
   inline void requireVertexNormals() { vertexNormalsQ.require(); }
-  VertexData<Vector3> vertexNormals;
+  halfedge_mesh::VertexData<Vector3> vertexNormals;
 
   // Vertex dual areas
   inline void requireVertexDualAreas() { vertexDualAreasQ.require(); }
-  VertexData<double> vertexDualAreas;
+  halfedge_mesh::VertexData<double> vertexDualAreas;
 
   // Halfedge cotans
   inline void requireHalfedgeVectors() { halfedgeVectorsQ.require(); }
-  HalfedgeData<Vector3> halfedgeVectors;
+  halfedge_mesh::HalfedgeData<Vector3> halfedgeVectors;
 
   // Edge lengths
   inline void requireEdgeLengths() { edgeLengthsQ.require(); }
-  EdgeData<double> edgeLengths;
+  halfedge_mesh::EdgeData<double> edgeLengths;
 
   // Dihedral angle
   inline void requireDihedralAngles() { dihedralAnglesQ.require(); }
-  EdgeData<double> dihedralAngles;
+  halfedge_mesh::EdgeData<double> dihedralAngles;
 
   // Halfedge cotan weights
   inline void requireHalfedgeCotanWeights() { halfedgeCotanWeightsQ.require(); }
-  HalfedgeData<double> halfedgeCotanWeights;
+  halfedge_mesh::HalfedgeData<double> halfedgeCotanWeights;
 
   // Edge cotan weights
   inline void requireEdgeCotanWeights() { edgeCotanWeightsQ.require(); }
-  EdgeData<double> edgeCotanWeights;
+  halfedge_mesh::EdgeData<double> edgeCotanWeights;
 
   // Angle defect at vertices
   inline void requireVertexAngleDefects() { vertexAngleDefectsQ.require(); }
-  VertexData<double> vertexAngleDefects;
+  halfedge_mesh::VertexData<double> vertexAngleDefects;
 
 
   // == Vector fields, angles, and transport
 
   // Extrinsic basis vector pair in each face
   inline void requireFaceBases() { faceBasesQ.require(); }
-  FaceData<std::array<Vector3, 2>> faceBases;
+  halfedge_mesh::FaceData<std::array<Vector3, 2>> faceBases;
 
   // Extrinsic basis vector pair in each vertex's tangent plane
   inline void requireVertexBases() { vertexBasesQ.require(); }
-  VertexData<std::array<Vector3, 2>> vertexBases;
+  halfedge_mesh::VertexData<std::array<Vector3, 2>> vertexBases;
 
   // The coordinate of each halfedge in the basis of he.face()
   // NOTE: These HAVE magnitude, unlike the vertex version (confusingly)
   inline void requireHalfedgeFaceCoords() { halfedgeFaceCoordsQ.require(); }
-  HalfedgeData<Complex> halfedgeFaceCoords;
+  halfedge_mesh::HalfedgeData<Complex> halfedgeFaceCoords;
 
   // Transport an intrinsic vector field in he.face() to he.twin().face() by multiplying
   // by complex z = e^(theta I) given here
   inline void requireFaceTransportCoefs() { faceTransportCoefsQ.require(); }
-  HalfedgeData<Complex> faceTransportCoefs;
+  halfedge_mesh::HalfedgeData<Complex> faceTransportCoefs;
 
   // Halfedge opposite angles
   inline void requireHalfedgeOppositeAngles() { halfedgeOppositeAnglesQ.require(); }
-  HalfedgeData<double> halfedgeOppositeAngles;
+  halfedge_mesh::HalfedgeData<double> halfedgeOppositeAngles;
 
   // Halfedge opposite angles (scaled by the angle defect to sum to 2 PI at each vertex)
   inline void requireHalfedgeRescaledOppositeAngles() { halfedgeRescaledOppositeAnglesQ.require(); }
-  HalfedgeData<double> halfedgeRescaledOppositeAngles;
+  halfedge_mesh::HalfedgeData<double> halfedgeRescaledOppositeAngles;
 
   // The coordinate of each halfedge in the basis of he.vertex(), rescaled so the sum around each vertex is 2*PI
   inline void requireHalfedgeVertexCoords() { halfedgeVertexCoordsQ.require(); }
-  HalfedgeData<Complex> halfedgeVertexCoords;
+  halfedge_mesh::HalfedgeData<Complex> halfedgeVertexCoords;
 
   // Transport an intrinsic vector field in he.vertex() to he.twin().vertex() by multiplying
   // by complex z = e^(theta I) given here
   inline void requireVertexTransportCoefs() { vertexTransportCoefsQ.require(); }
-  HalfedgeData<Complex> vertexTransportCoefs;
+  halfedge_mesh::HalfedgeData<Complex> vertexTransportCoefs;
 
   // Transport an intrinsic vector field in he.vertex() to he.face() by multiplying
   // by complex z = e^(theta I) given here
   inline void requireVertexFaceTransportCoefs() { vertexFaceTransportCoefsQ.require(); }
-  HalfedgeData<Complex> vertexFaceTransportCoefs;
+  halfedge_mesh::HalfedgeData<Complex> vertexFaceTransportCoefs;
 
   // The two-symmetric vector field encoding the principal directions and their strength
   inline void requirePrincipalDirections() { principalDirectionsQ.require(); }
-  VertexData<Complex> principalDirections;
+  halfedge_mesh::VertexData<Complex> principalDirections;
 
 
   // == Indices
 
   inline void requireVertexIndices() { vertexIndicesQ.require(); }
-  VertexData<size_t> vertexIndices;
+  halfedge_mesh::VertexData<size_t> vertexIndices;
 
   inline void requireInteriorVertexIndices() { interiorVertexIndicesQ.require(); }
-  VertexData<size_t> interiorVertexIndices;
+  halfedge_mesh::VertexData<size_t> interiorVertexIndices;
 
   inline void requireFaceIndices() { faceIndicesQ.require(); }
-  FaceData<size_t> faceIndices;
+  halfedge_mesh::FaceData<size_t> faceIndices;
 
   inline void requireEdgeIndices() { edgeIndicesQ.require(); }
-  EdgeData<size_t> edgeIndices;
+  halfedge_mesh::EdgeData<size_t> edgeIndices;
 
   inline void requireHalfedgeIndices() { halfedgeIndicesQ.require(); }
-  HalfedgeData<size_t> halfedgeIndices;
+  halfedge_mesh::HalfedgeData<size_t> halfedgeIndices;
 
 
   // == Operators

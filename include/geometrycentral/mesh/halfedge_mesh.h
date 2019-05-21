@@ -1,22 +1,22 @@
 #pragma once
 
-#include <list>
-#include <memory>
-#include <vector>
-
 #include "geometrycentral/mesh/halfedge_containers.h"
 #include "geometrycentral/mesh/halfedge_element_types.h"
 #include "geometrycentral/mesh/halfedge_iterators.h"
 #include "geometrycentral/utilities/utilities.h"
 
-// NOTE: ipp includes at bottom of file
+#include <list>
+#include <memory>
+#include <vector>
 
-// Foward declare some return types from below
-template<typename T> class VertexData;
-template<> class VertexData<size_t>;
+// NOTE: ipp includes at bottom of file
 
 namespace geometrycentral {
 namespace halfedge_mesh {
+
+// Foward declare some return types from below
+//template<typename T> class VertexData;
+//template<> class VertexData<size_t>;
 
 class HalfedgeMesh {
 

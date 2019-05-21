@@ -15,9 +15,11 @@ inline NavigationIteratorBase<N>::NavigationIteratorBase(typename N::Etype e, bo
   // checking startingE is a weird hack, but ensures the iterators don't infinite loop if there are no valid elemetnts
   // to return
   typename N::Etype startingE;
+
+  // Advance to first valid element
   while (!state.isValid()) {
     state.advance();
-    if (e == startingE) break;
+    if (state.currE == startingE) break;
   }
 }
 
@@ -110,7 +112,6 @@ inline void FaceAdjacentEdgeNavigator::advance() { currE = currE.next(); }
 inline bool FaceAdjacentEdgeNavigator::isValid() const { return true; }
 inline Edge FaceAdjacentEdgeNavigator::getCurrent() const { return currE.edge(); }
 
-// TODO I think this has a problem and will loop forever on a single isolated face
 inline void FaceAdjacentFaceNavigator::advance() { currE = currE.next(); }
 inline bool FaceAdjacentFaceNavigator::isValid() const { return currE.twin().isInterior(); }
 inline Face FaceAdjacentFaceNavigator::getCurrent() const { return currE.twin().face(); }

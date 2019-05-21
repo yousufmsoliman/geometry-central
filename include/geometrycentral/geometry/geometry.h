@@ -47,13 +47,14 @@
 // are triangular.
 //       If you want to store non-triangular faces, be careful.
 
-#include <iostream>
 
 #include "geometrycentral/geometry/geometry_cache.h"
 #include "geometrycentral/mesh/halfedge_mesh.h"
 #include "geometrycentral/utilities/unit_vector3.h"
 #include "geometrycentral/utilities/vector2.h"
 #include "geometrycentral/utilities/vector3.h"
+
+#include <iostream>
 
 namespace geometrycentral {
 
@@ -67,7 +68,7 @@ typedef UnitVector3 Spherical;
 // TODO In the future, could be extended to other types of mesh data structures
 // (e.g., via an additional template argument)
 template <class T>
-class Geometry : public VertexData<T> {
+class Geometry : public halfedge_mesh::VertexData<T> {
   // TODO add subclass WeightedGeometry that has additional value (weight) per
   // vertex
 

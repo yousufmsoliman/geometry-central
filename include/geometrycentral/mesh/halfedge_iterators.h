@@ -33,8 +33,8 @@ namespace halfedge_mesh {
 //    - type Rtype: the type of elements returned by the iterator (eg Vertex)
 //    - type Etype: the type of elements tracked by the iterator (eg Halfedge)
 //    - member Etype currE: the current element pointed to by the iterator
-//    - advance(): advance the iterator once (updating currE). Note that if some should be skipped, isValid will handle.
-//    - isValid(): reports true if Etype should be returned by the iterator (not needed for most: always True)
+//    - advance(): advance the iterator once (updating currE). Should not skip element, isValid will be used for that.
+//    - isValid(): reports true if currE should be returned by the iterator (not needed for most: always True)
 //
 // The helper classes will construct an instance of N, call advance() until isValid(), return currE. When iterator++ is
 // invoked, the wrapper will call advance() until isValid() is satisfied. iterator== is implemented by comparing
