@@ -8,14 +8,14 @@ If you are implementing intrinsic triangulation algorithms, doing an unreasonabl
 
 Halfedge meshes are often used to represent *simplicial complexes*. When you're thinking about a triangle mesh, you probably imagine a simplicial complex: each face has three distinct vertices and three distinct edges, each edge connects two distinct vertices, and there can be at most one edge between any pair of vertices.
 
-In fact, halfedge meshes (unlike many other mesh representations) can actually represent more general structures than just simplicial complexes. Halfedges meshes can represent any (orientable) $\Delta$-complex[^1]. Intuitively, the $\Delta$-complex relaxes the restriction that incident elements be unique:
+In fact, halfedge meshes (unlike many other mesh representations) can actually represent more general structures than just simplicial complexes. Halfedges meshes can represent any (oriented, manifold) $\Delta$-complex[^1]. Intuitively, the $\Delta$-complex relaxes the restriction that incident elements be unique:
 [^1]: see Section 2.1 of *Algebraic Topology* by Allen Hatcher
 
 - a face may be incident on the same vertex multiple times
 - an edge may connect a vertex to itself
 - there may be multiple edges between a pair of vertices
 
-However, the $\Delta$-complex still requires that every faces has 3 sides, and that locally the complex looks like a surface at every point. Recall that we are only concerned with the _connectivity_ of these surfaces, not how they sit in space: these general $\Delta$-complexes might be impossible to embed with straight edges between vertex positions in $\mathbb{R}^3$, but that does not bother us right now.
+However, the $\Delta$-complex still requires that every faces has 3 sides, and the manifold restriction still means that the complex looks like a surface in any local neighborhood. Recall that we are only concerned with the _connectivity_ of these surfaces, not how they sit in space: these general $\Delta$-complexes might be impossible to embed with straight edges between vertex positions in $\mathbb{R}^3$, but that does not bother us right now.
 
 The following surfaces are $\Delta$-complexes but not simplicial complexes:
 

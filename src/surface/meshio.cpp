@@ -17,7 +17,10 @@ namespace surface {
 
 // ======= Input =======
 
-std::tuple<HalfedgeMesh, Geometry<Euclidean>> loadMesh_PLY(std::string filename) {
+// Mesh loader helpers
+namespace {
+std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<Geometry<Euclidean>>> loadMesh_PLY(std::string filename,
+                                                                                             bool verbose) {
 
   happly::PLYData plyData(filename);
 
@@ -34,15 +37,18 @@ std::tuple<HalfedgeMesh, Geometry<Euclidean>> loadMesh_PLY(std::string filename)
   std::vector<std::vector<size_t>> faceIndices = plyData.getFaceIndices();
 
   // === Build the mesh objects
-  return makeHalfedgeAndGeometry(faceIndices, vertexPositions, true);
+  return makeHalfedgeAndGeometry(faceIndices, vertexPositions, verbose);
 }
 
-std::tuple<HalfedgeMesh, Geometry<Euclidean>> loadMesh_OBJ(std::string filename) {
+std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<Geometry<Euclidean>>> loadMesh_OBJ(std::string filename,
+                                                                                             bool verbose) {
   PolygonSoupMesh soup(filename);
-  return makeHalfedgeAndGeometry(soup.polygons, soup.vertexCoordinates, true);
+  return makeHalfedgeAndGeometry(soup.polygons, soup.vertexCoordinates, verbose);
 }
+} // namespace
 
-std::tuple<HalfedgeMesh, Geometry<Euclidean>> loadMesh(std::string filename, std::string type) {
+std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<Geometry<Euclidean>>>
+loadMesh(std::string filename, bool verbose, std::string type) {
 
   // Check if file exists
   std::ifstream testStream(filename);
@@ -67,9 +73,69 @@ std::tuple<HalfedgeMesh, Geometry<Euclidean>> loadMesh(std::string filename, std
 
 
   if (type == "obj") {
-    return loadMesh_OBJ(filename);
+    return loadMesh_OBJ(filename, verbose);
   } else if (type == "ply") {
-    return loadMesh_PLY(filename);
+    return loadMesh_PLY(filename, verbose);
+  } else {
+    if (typeGiven) {
+      throw std::runtime_error("Did not recognize mesh file type " + type);
+    } else {
+      throw std::runtime_error("Could not detect file type to load mesh from " + filename);
+    }
+  }
+}
+
+
+// connectivity loader helpers
+namespace {
+std::unique_ptr<HalfedgeMesh> loadConnectivity_PLY(std::string filename, bool verbose) {
+
+  happly::PLYData plyData(filename);
+
+  // Get face list
+  std::vector<std::vector<size_t>> faceIndices = plyData.getFaceIndices();
+
+  // === Build the mesh objects
+  return std::unique_ptr<HalfedgeMesh>(new HalfedgeMesh(faceIndices, verbose));
+}
+
+std::unique_ptr<HalfedgeMesh> loadConnectivity_OBJ(std::string filename, bool verbose) {
+  // TODO this will fail unless the obj file has vertex listings, which is not strictly needed to load connectivity. I'm
+  // not sure if that's really a valid .obj file, but nonetheless this function could certainly process such .obj files.
+  PolygonSoupMesh soup(filename);
+  return std::unique_ptr<HalfedgeMesh>(new HalfedgeMesh(soup.polygons, verbose));
+}
+} // namespace
+
+
+std::unique_ptr<HalfedgeMesh> loadConnectivity(std::string filename, bool verbose, std::string type) {
+
+  // Check if file exists
+  std::ifstream testStream(filename);
+  if (!testStream) {
+    throw std::runtime_error("Could not load mesh; file does not exist: " + filename);
+  }
+  testStream.close();
+
+  // Attempt to detect filename
+  bool typeGiven = type != "";
+  std::string::size_type sepInd = filename.rfind('.');
+  if (!typeGiven) {
+    if (sepInd != std::string::npos) {
+      std::string extension;
+      extension = filename.substr(sepInd + 1);
+
+      // Convert to all lowercase
+      std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+      type = extension;
+    }
+  }
+
+
+  if (type == "obj") {
+    return loadConnectivity_OBJ(filename, verbose);
+  } else if (type == "ply") {
+    return loadConnectivity_PLY(filename, verbose);
   } else {
     if (typeGiven) {
       throw std::runtime_error("Did not recognize mesh file type " + type);

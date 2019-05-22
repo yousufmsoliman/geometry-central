@@ -1,5 +1,6 @@
 
 // === Helpers which will allow us abstract over types
+// The corresponding template declarations are given in halfedge_element_types.h
 
 namespace geometrycentral {
 namespace surface {

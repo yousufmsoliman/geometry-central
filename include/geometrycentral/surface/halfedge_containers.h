@@ -98,5 +98,8 @@ using HalfedgeData = MeshData<Halfedge, T>;
 template <typename T>
 using CornerData = MeshData<Corner, T>;
 
+template <typename T>
+using BoundaryLoopData = MeshData<BoundaryLoop, T>;
+
 } // namespace surface
 } // namespace geometrycentral

@@ -10,12 +10,14 @@
 namespace geometrycentral {
 namespace surface {
 
-// Loads a halfedge mesh from file, automatically detecting type
-// Specify a type like "ply" or "obj".
-// If no type is specified, attempts to infer from extension.
-std::tuple<HalfedgeMesh, Geometry<Euclidean>> loadMesh(std::string filename, std::string type = "");
-std::tuple<HalfedgeMesh, Geometry<Euclidean>> loadMesh_OBJ(std::string filename);
-std::tuple<HalfedgeMesh, Geometry<Euclidean>> loadMesh_PLY(std::string filename);
+// Loads a halfedge mesh and its geometry from file.
+// Specify a type like "ply" or "obj", if no type is specified, attempts to infer from extension.
+std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<Geometry<Euclidean>>>
+loadMesh(std::string filename, bool verbose = false, std::string type = "");
+
+// Load just the connectivity of a mesh from file.
+// Specify a type like "ply" or "obj", if no type is specified, attempts to infer from extension.
+std::unique_ptr<HalfedgeMesh> loadConnectivity(std::string filename, bool verbose = false, std::string type = "");
 
 class WavefrontOBJ {
 public:

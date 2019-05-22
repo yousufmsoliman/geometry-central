@@ -47,6 +47,7 @@ struct BoundaryLoopAdjacentCornerNavigator;
 
 
 // === Templated helper functions
+// The corresponding specializations are given in halfedge_logic_templates.ipp
 // clang-format off
 
 // Enums, which we use to template the base case of all actual element types

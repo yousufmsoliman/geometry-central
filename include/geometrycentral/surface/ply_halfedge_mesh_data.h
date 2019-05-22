@@ -8,76 +8,115 @@
 #include <iostream>
 #include <string>
 
-// === Reader and writing classes supporting direct interop between the GeometryCentral mesh types and the .ply file
-// === format.
 
 namespace geometrycentral {
 namespace surface {
 
-
+// A reader/writer class supporting direct interop between the GeometryCentral mesh types and the .ply file
+// format. Allows storing and retriving of VertexData<> etc containers.
+// No operations are valid if the mesh is modified after the creation of the reader/writer.
 class PlyHalfedgeMeshData {
 
-public:
+  // TODO implement permutation halfedge mesh storage
 
+  // TODO support intrinsic geometry
+
+  // TODO give helpers to store Vector2 and Vector3 types easily, rather than having to store each component manually.
+
+public:
   // Construct by reading from file, mapping the elements on to an existing mesh.
   // To simultaneously read the mesh encoded by the file, see the static method loadMeshAndData below.
   PlyHalfedgeMeshData(HalfedgeMesh& mesh_, std::string filename, bool verbose = false);
- 
-  // Construct a data object. Connectivity will be written automatically, and other data fields can be added.
+
+  // Construct a data object. Connectivity will be added automatically, geometry and other data fields can be added.
   PlyHalfedgeMeshData(HalfedgeMesh& mesh_, bool verbose = false);
-  
+
   // Convenience factory method to simultaneously read the mesh from a file and
   static std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<PlyHalfedgeMeshData>>
   loadMeshAndData(std::string filename, bool verbose = false);
 
   // The mesh on which the properties in this file are presumed to exist
-  HalfedgeMesh& mesh; 
+  HalfedgeMesh& mesh;
 
-
-
-  // === Get properties as geometrycentral types.
-  // Will fail with an error if not possible.
-  
-  // Registers vertex posititions from a geometry object with the file
-  Geometry<Euclidean>& geometry getGeometry();
-  
-  template <class T>
-  VertexData<T> getVertexProperty(std::string propertyName);
-
-  template <class T>
-  FaceData<T> getFaceProperty(std::string propertyName);
-
-  // === Convenience getters
-
-  // Looks for vertex colors, either as a uchar or a float
-  VertexData<Vector3> getVertexColors();
-
-  // === Set properties as geometrycentral types.
- 
-  // Registers vertex posititions from a geometry object with the file
-  void addGeometry(Geometry<Euclidean>& geometry);
-
-  template <class T>
-  void addVertexProperty(std::string propertyName, VertexData<T>& vData);
-
-  template <class T>
-  void addFaceProperty(std::string propertyName, FaceData<T>& fData);
+  // The underlying reader/writer object
+  happly::PLYData plyData;
 
   // Write this object out to file
   void write(std::string filename);
 
-  // The underlying reader/writer object
-  happly::PLYData& plyData;
-
-private:
-
-  // File data
-
-  bool isBinary;
-  float version;
-
   // Options
   bool verbose;
+  happly::DataFormat outputFormat = happly::DataFormat::Binary;
+
+  // === Get properties as geometrycentral types.
+  // Will fail with an error if not possible.
+
+  // The generic getter
+  // (all the nicely-named versions below are just wrappers around this)
+  template <typename E, typename T>
+  MeshData<E, T> getElementProperty(std::string propertyName);
+
+  template <class T>
+  VertexData<T> getVertexProperty(std::string propertyName);
+
+  template <class T>
+  HalfedgeData<T> getHalfedgeProperty(std::string propertyName);
+
+  template <class T>
+  CornerData<T> getCornerProperty(std::string propertyName);
+
+  template <class T>
+  EdgeData<T> getEdgeProperty(std::string propertyName);
+
+  template <class T>
+  FaceData<T> getFaceProperty(std::string propertyName);
+
+  template <class T>
+  BoundaryLoopData<T> getBoundaryLoopProperty(std::string propertyName);
+
+
+  // = Convenience getters
+
+  // Creates vertex posititions from a geometry object with the file
+  std::unique_ptr<Geometry<Euclidean>> getGeometry();
+
+  // Looks for vertex colors, either as a uchar or a float
+  VertexData<Vector3> getVertexColors();
+
+
+  // === Set properties as geometrycentral types.
+
+  // The generic setter
+  // (all the nicely-named versions below are just wrappers around this)
+  template <typename E, typename T>
+  void addElementProperty(std::string propertyName, const MeshData<E, T>& data);
+
+  template <class T>
+  void addVertexProperty(std::string propertyName, const VertexData<T>& data);
+
+  template <class T>
+  void addHalfedgeProperty(std::string propertyName, const HalfedgeData<T>& data);
+
+  template <class T>
+  void addCornerProperty(std::string propertyName, const CornerData<T>& data);
+
+  template <class T>
+  void addEdgeProperty(std::string propertyName, const EdgeData<T>& data);
+
+  template <class T>
+  void addFaceProperty(std::string propertyName, const FaceData<T>& data);
+
+  template <class T>
+  void addBoundaryLoopProperty(std::string propertyName, const BoundaryLoopData<T>& fData);
+
+  // = Convenience setters
+
+  // Registers vertex posititions from a geometry object with the file
+  void addGeometry(const Geometry<Euclidean>& geometry);
+
+
+private:
+  // Set the names to use for various element types
   std::string vertexName = "vertex";
   std::string faceName = "face";
   std::string edgeName = "edge";
@@ -85,70 +124,9 @@ private:
   std::string boundaryLoopName = "boundaryloop";
 };
 
-// === Implementations
-template <class T>
-VertexData<T> PlyHalfedgeMeshData::getVertexProperty(std::string propertyName) {
-  if (mesh == nullptr) {
-    getMesh();
-  }
-
-  std::vector<T> rawData = plyData->getElement(vertexName).getProperty<T>(propertyName);
-
-  if (rawData.size() != mesh->nVertices()) {
-    throw std::runtime_error("Property " + propertyName + " does not have size equal to number of vertices");
-  }
-
-  VertexData<T> result(mesh);
-  for (size_t i = 0; i < mesh->nVertices(); i++) {
-    result[mesh->vertex(i)] = rawData[i];
-  }
-
-  return result;
-}
-
-
-template <class T>
-FaceData<T> PlyHalfedgeMeshData::getFaceProperty(std::string propertyName) {
-  if (mesh == nullptr) {
-    getMesh();
-  }
-
-  std::vector<T> rawData = plyData->getElement(faceName).getProperty<T>(propertyName);
-
-  if (rawData.size() != mesh->nVertices()) {
-    throw std::runtime_error("Property " + propertyName + " does not have size equal to number of vertices");
-  }
-
-  VertexData<T> result(mesh);
-  for (size_t i = 0; i < mesh->nVertices(); i++) {
-    result[mesh->vertex(i)] = rawData[i];
-  }
-
-  return result;
-}
-
-template <class T>
-void PlyHalfedgeMeshData::addVertexProperty(std::string propertyName, VertexData<T>& vData) {
-
-  std::vector<T> vec;
-  for (Vertex v : mesh->vertices()) {
-    vec.push_back(vData[v]);
-  }
-
-  plyData->getElement(vertexName).addProperty<T>(propertyName, vec);
-}
-
-
-template <class T>
-void PlyHalfedgeMeshData::addFaceProperty(std::string propertyName, FaceData<T>& fData) {
-
-  std::vector<T> vec;
-  for (Face f : mesh->faces()) {
-    vec.push_back(fData[f]);
-  }
-
-  plyData->getElement(faceName).addProperty<T>(propertyName, vec);
-}
 
 } // namespace surface
 } // namespace geometrycentral
+
+
+#include "geometrycentral/surface/ply_halfedge_mesh_data.ipp"
