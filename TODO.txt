@@ -12,7 +12,7 @@ Test to write:
 
 
 
-WTF to do with boundary loops?
+# WTF to do with boundary loops?
 
 Boundary loops at back of face index space
   - addition invalidates boundary loop pointers, which is different from all other invalidation rules
@@ -34,3 +34,11 @@ Boundary loops in separate index space
     - BoundaryLoopPtrs don't get invalidated weirdly
   - Only weirdness: exteriorHe.face() yields a face which should really be a boundary loop. User must do BoundaryLoopPtr(exteriorHe.face()) 
   
+
+# Organization
+
+Problem: almost everything that currently exists is surface mesh (really, halfedge mesh) based.
+
+
+- numerical
+- utilities
