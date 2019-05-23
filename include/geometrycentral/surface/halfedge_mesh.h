@@ -212,7 +212,6 @@ private:
   // Note that this is _not_ defined to be std::vector::capacity(), it's the largest size such that arr[i] is legal.
   size_t nVerticesCapacityCount = 0;
   size_t nHalfedgesCapacityCount = 0; // will always be even
-  size_t nEdgesCapacityCount() const;
   size_t nFacesCapacityCount = 0; // capacity for faces _and_ boundary loops
 
   // These give the number of filled elements in the currently allocated buffer. This will also be the maximal index of

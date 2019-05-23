@@ -1,4 +1,4 @@
-#include "geometrycentral/surface/geometry_cache.h"
+//#include "geometrycentral/surface/geometry_cache.h" FIXME
 
 #include "geometrycentral/surface/discrete_operators.h"
 #include "geometrycentral/surface/geometry.h"
@@ -20,50 +20,47 @@ GeometryCache<G>::GeometryCache(Geometry<G>* geometry_) : geometry(geometry_) {
     allQuantities.push_back(&q);
   };
 
+  // clang-format off
   // === ALL the quantities
   //          quantity manager            dependencies                                  compute function
   // == Basic geometric quantities
-  addQuantity(faceAreaNormalsQ, {}, &GeometryCache<G>::computeFaceAreaNormals);
-  addQuantity(faceAreasQ, {&faceAreaNormalsQ}, &GeometryCache<G>::computeFaceAreas);
-  addQuantity(faceNormalsQ, {&faceAreaNormalsQ}, &GeometryCache<G>::computeFaceNormals);
-  addQuantity(vertexNormalsQ, {&faceAreaNormalsQ}, &GeometryCache<G>::computeVertexNormals);
-  addQuantity(vertexDualAreasQ, {&faceAreasQ}, &GeometryCache<G>::computeVertexDualAreas);
-  addQuantity(halfedgeVectorsQ, {}, &GeometryCache<G>::computeHalfedgeVectors);
-  addQuantity(edgeLengthsQ, {}, &GeometryCache<G>::computeEdgeLengths);
-  addQuantity(dihedralAnglesQ, {}, &GeometryCache<G>::computeDihedralAngles);
-  addQuantity(halfedgeCotanWeightsQ, {}, &GeometryCache<G>::computeHalfedgeCotanWeights);
-  addQuantity(edgeCotanWeightsQ, {}, &GeometryCache<G>::computeEdgeCotanWeights);
-  addQuantity(vertexAngleDefectsQ, {&halfedgeOppositeAnglesQ}, &GeometryCache<G>::computeVertexAngleDefects);
+  addQuantity(faceAreaNormalsQ,         {},                             &GeometryCache<G>::computeFaceAreaNormals);
+  addQuantity(faceAreasQ,               {&faceAreaNormalsQ},            &GeometryCache<G>::computeFaceAreas);
+  addQuantity(faceNormalsQ,             {&faceAreaNormalsQ},            &GeometryCache<G>::computeFaceNormals);
+  addQuantity(vertexNormalsQ,           {&faceAreaNormalsQ},            &GeometryCache<G>::computeVertexNormals);
+  addQuantity(vertexDualAreasQ,         {&faceAreasQ},                  &GeometryCache<G>::computeVertexDualAreas);
+  addQuantity(halfedgeVectorsQ,         {},                             &GeometryCache<G>::computeHalfedgeVectors);
+  addQuantity(edgeLengthsQ,             {},                             &GeometryCache<G>::computeEdgeLengths);
+  addQuantity(dihedralAnglesQ,          {},                             &GeometryCache<G>::computeDihedralAngles);
+  addQuantity(halfedgeCotanWeightsQ,    {},                             &GeometryCache<G>::computeHalfedgeCotanWeights);
+  addQuantity(edgeCotanWeightsQ,        {},                             &GeometryCache<G>::computeEdgeCotanWeights);
+  addQuantity(vertexAngleDefectsQ,      {&halfedgeOppositeAnglesQ},     &GeometryCache<G>::computeVertexAngleDefects);
 
   // == Vector fields, angles, and transport
-  addQuantity(faceBasesQ, {&faceNormalsQ}, &GeometryCache<G>::computeFaceBases);
-  addQuantity(vertexBasesQ, {&vertexNormalsQ}, &GeometryCache<G>::computeVertexBases);
-  addQuantity(halfedgeFaceCoordsQ, {&faceBasesQ}, &GeometryCache<G>::computeHalfedgeFaceCoords);
-  addQuantity(faceTransportCoefsQ, {&faceBasesQ, &halfedgeFaceCoordsQ}, &GeometryCache<G>::computeFaceTransportCoefs);
-  addQuantity(halfedgeOppositeAnglesQ, {}, &GeometryCache<G>::computeHalfedgeOppositeAngles);
-  addQuantity(halfedgeRescaledOppositeAnglesQ, {&vertexAngleDefectsQ, &halfedgeOppositeAnglesQ},
-              &GeometryCache<G>::computeHalfedgeRescaledOppositeAngles);
-  addQuantity(halfedgeVertexCoordsQ, {&halfedgeRescaledOppositeAnglesQ},
-              &GeometryCache<G>::computeHalfedgeVertexCoords);
-  addQuantity(vertexTransportCoefsQ, {&vertexBasesQ, &halfedgeVertexCoordsQ},
-              &GeometryCache<G>::computeVertexTransportCoefs);
-  addQuantity(vertexFaceTransportCoefsQ, {&halfedgeFaceCoordsQ, &halfedgeVertexCoordsQ},
-              &GeometryCache<G>::computeVertexFaceTransportCoefs);
-  addQuantity(principalDirectionsQ, {&edgeLengthsQ, &dihedralAnglesQ, &halfedgeVertexCoordsQ},
-              &GeometryCache<G>::computePrincipalDirections);
+  addQuantity(faceBasesQ,                       {&faceNormalsQ},                            &GeometryCache<G>::computeFaceBases);
+  addQuantity(vertexBasesQ,                     {&vertexNormalsQ},                          &GeometryCache<G>::computeVertexBases);
+  addQuantity(halfedgeFaceCoordsQ,              {&faceBasesQ},                              &GeometryCache<G>::computeHalfedgeFaceCoords);
+  addQuantity(faceTransportCoefsQ,              {&faceBasesQ,                               &halfedgeFaceCoordsQ}, &GeometryCache<G>::computeFaceTransportCoefs);
+  addQuantity(halfedgeOppositeAnglesQ,          {},                                         &GeometryCache<G>::computeHalfedgeOppositeAngles);
+  addQuantity(halfedgeRescaledOppositeAnglesQ,  {&vertexAngleDefectsQ,                      &halfedgeOppositeAnglesQ}, &GeometryCache<G>::computeHalfedgeRescaledOppositeAngles);
+  addQuantity(halfedgeVertexCoordsQ,            {&halfedgeRescaledOppositeAnglesQ},         &GeometryCache<G>::computeHalfedgeVertexCoords);
+  addQuantity(vertexTransportCoefsQ,            {&vertexBasesQ, &halfedgeVertexCoordsQ},    &GeometryCache<G>::computeVertexTransportCoefs);
+  addQuantity(vertexFaceTransportCoefsQ,        {&halfedgeFaceCoordsQ, &halfedgeVertexCoordsQ},             &GeometryCache<G>::computeVertexFaceTransportCoefs);
+  addQuantity(principalDirectionsQ,             {&edgeLengthsQ, &dihedralAnglesQ, &halfedgeVertexCoordsQ},  &GeometryCache<G>::computePrincipalDirections);
 
   // == Indices
-  addQuantity(vertexIndicesQ, {}, &GeometryCache<G>::computeVertexIndices);
-  addQuantity(interiorVertexIndicesQ, {}, &GeometryCache<G>::computeInteriorVertexIndices);
-  addQuantity(faceIndicesQ, {}, &GeometryCache<G>::computeFaceIndices);
-  addQuantity(edgeIndicesQ, {}, &GeometryCache<G>::computeEdgeIndices);
-  addQuantity(halfedgeIndicesQ, {}, &GeometryCache<G>::computeHalfedgeIndices);
+  addQuantity(vertexIndicesQ,           {},         &GeometryCache<G>::computeVertexIndices);
+  addQuantity(interiorVertexIndicesQ,   {},         &GeometryCache<G>::computeInteriorVertexIndices);
+  addQuantity(faceIndicesQ,             {},         &GeometryCache<G>::computeFaceIndices);
+  addQuantity(edgeIndicesQ,             {},         &GeometryCache<G>::computeEdgeIndices);
+  addQuantity(halfedgeIndicesQ,         {},         &GeometryCache<G>::computeHalfedgeIndices);
 
   // == Operators
-  addQuantity(basicDECOperatorsQ, {&vertexDualAreasQ, &edgeCotanWeightsQ}, &GeometryCache<G>::computeBasicDECOperators);
-  addQuantity(modifiedDECOperatorsQ, {&basicDECOperatorsQ}, &GeometryCache<G>::computeModifiedDECOperators);
-  addQuantity(zeroFormWeakLaplacianQ, {&basicDECOperatorsQ}, &GeometryCache<G>::computeZeroFormWeakLaplacian);
+  addQuantity(basicDECOperatorsQ,       {&vertexDualAreasQ,         &edgeCotanWeightsQ}, &GeometryCache<G>::computeBasicDECOperators);
+  addQuantity(modifiedDECOperatorsQ,    {&basicDECOperatorsQ},      &GeometryCache<G>::computeModifiedDECOperators);
+  addQuantity(zeroFormWeakLaplacianQ,   {&basicDECOperatorsQ},      &GeometryCache<G>::computeZeroFormWeakLaplacian);
 }
+// clang-format on
 
 template <typename G>
 void GeometryCache<G>::repopulate() {
@@ -79,9 +76,11 @@ void GeometryCache<G>::repopulate() {
 // Helper
 namespace {
 void verifyTriangular(HalfedgeMesh* m) {
-  if (!m->isSimplicial()) {
+#ifndef NDEBUG // costs O(N) for now
+  if (!m->isTriangular()) {
     throw std::logic_error("Only implemented for triangular meshes");
   }
+#endif
 }
 } // namespace
 
@@ -146,7 +145,7 @@ void GeometryCache<Euclidean>::computeVertexDualAreas() {
 template <>
 void GeometryCache<Euclidean>::computeHalfedgeVectors() {
   halfedgeVectors = HalfedgeData<Vector3>(mesh);
-  for (Halfedge he : mesh->allHalfedges()) {
+  for (Halfedge he : mesh->halfedges()) {
     halfedgeVectors[he] = geometry->vector(he);
   }
 }
@@ -190,16 +189,10 @@ template <>
 void GeometryCache<Euclidean>::computeHalfedgeFaceCoords() {
   halfedgeFaceCoords = HalfedgeData<Complex>(mesh);
 
-  for (Halfedge he : mesh->realHalfedges()) {
+  for (Halfedge he : mesh->interiorHalfedges()) {
     Face f = he.face();
-
-    if (f.isReal()) {
-      Vector3 heVec = geometry->vector(he);
-      halfedgeFaceCoords[he] = Complex(dot(faceBases[f][0], heVec), dot(faceBases[f][1], heVec));
-    } else {
-      halfedgeFaceCoords[he] =
-          std::numeric_limits<double>::quiet_NaN(); // using this basis is never a good idea, so NaN-out
-    }
+    Vector3 heVec = geometry->vector(he);
+    halfedgeFaceCoords[he] = Complex(dot(faceBases[f][0], heVec), dot(faceBases[f][1], heVec));
   }
 }
 
@@ -209,8 +202,8 @@ void GeometryCache<Euclidean>::computeFaceTransportCoefs() {
 
   faceTransportCoefs = HalfedgeData<Complex>(mesh);
 
-  for (Halfedge he : mesh->realHalfedges()) {
-    if (he.twin().isReal()) {
+  for (Halfedge he : mesh->interiorHalfedges()) {
+    if (he.twin().isInterior()) {
       Complex angleInSource = halfedgeFaceCoords[he];
       Complex desiredAngleInTarget = -halfedgeFaceCoords[he.twin()];
       faceTransportCoefs[he] = desiredAngleInTarget / angleInSource;
@@ -224,7 +217,7 @@ void GeometryCache<Euclidean>::computeVertexTransportCoefs() {
 
   vertexTransportCoefs = HalfedgeData<Complex>(mesh);
 
-  for (Halfedge he : mesh->allHalfedges()) {
+  for (Halfedge he : mesh->halfedges()) {
     Complex angleInSource = halfedgeVertexCoords[he];
     Complex desiredAngleInTarget = -halfedgeVertexCoords[he.twin()];
     vertexTransportCoefs[he] = desiredAngleInTarget / angleInSource;
@@ -236,7 +229,7 @@ void GeometryCache<Euclidean>::computeVertexFaceTransportCoefs() {
 
   vertexFaceTransportCoefs = HalfedgeData<Complex>(mesh);
 
-  for (Halfedge he : mesh->realHalfedges()) {
+  for (Halfedge he : mesh->interiorHalfedges()) {
     Complex angleInSource = halfedgeVertexCoords[he];
     Complex desiredAngleInTarget = halfedgeFaceCoords[he];
     vertexFaceTransportCoefs[he] = desiredAngleInTarget / angleInSource;
@@ -273,8 +266,8 @@ void GeometryCache<Euclidean>::computeHalfedgeOppositeAngles() {
   verifyTriangular(mesh);
 
   halfedgeOppositeAngles = HalfedgeData<double>(mesh);
-  for (Halfedge he : mesh->allHalfedges()) {
-    if (he.isReal()) {
+  for (Halfedge he : mesh->halfedges()) {
+    if (he.isInterior()) {
       halfedgeOppositeAngles[he] = angle(-geometry->vector(he.next()), geometry->vector(he.next().next()));
     } else {
       halfedgeOppositeAngles[he] = std::numeric_limits<double>::quiet_NaN();
@@ -285,7 +278,7 @@ void GeometryCache<Euclidean>::computeHalfedgeOppositeAngles() {
 template <>
 void GeometryCache<Euclidean>::computeHalfedgeCotanWeights() {
   halfedgeCotanWeights = HalfedgeData<double>(mesh);
-  for (Halfedge he : mesh->realHalfedges()) {
+  for (Halfedge he : mesh->interiorHalfedges()) {
     halfedgeCotanWeights[he] = geometry->cotan(he);
   }
 }
@@ -320,7 +313,7 @@ void GeometryCache<Euclidean>::computeVertexAngleDefects() {
 template <>
 void GeometryCache<Euclidean>::computeHalfedgeRescaledOppositeAngles() {
   halfedgeRescaledOppositeAngles = HalfedgeData<double>(mesh);
-  for (Halfedge he : mesh->realHalfedges()) {
+  for (Halfedge he : mesh->interiorHalfedges()) {
     double origSum = 2. * PI - vertexAngleDefects[he.next().next().vertex()];
     halfedgeRescaledOppositeAngles[he] = halfedgeOppositeAngles[he] * 2. * PI / origSum;
   }
@@ -341,10 +334,10 @@ void GeometryCache<Euclidean>::computeHalfedgeVertexCoords() {
       double angleSum = 0;
       Halfedge afterBoundaryHe;
       for (Halfedge he : v.outgoingHalfedges()) {
-        if (he.isReal()) {
+        if (he.isInterior()) {
           angleSum += halfedgeRescaledOppositeAngles[he.next()];
         }
-        if (!he.twin().isReal()) {
+        if (!he.twin().isInterior()) {
           afterBoundaryHe = he;
         }
       }
@@ -358,7 +351,7 @@ void GeometryCache<Euclidean>::computeHalfedgeVertexCoords() {
       Halfedge currHe = firstHe;
       do {
         halfedgeVertexCoords[currHe] = std::exp(coordSum * IM_I);
-        if (currHe.isReal()) {
+        if (currHe.isInterior()) {
           coordSum += halfedgeRescaledOppositeAngles[currHe.next()];
           currHe = currHe.next().next().twin();
         } else {
@@ -439,5 +432,4 @@ template class GeometryCache<Euclidean>;
 // template class GeometryCache<Spherical>;
 
 } // namespace surface
-} // namespace geometrycentral
 } // namespace geometrycentral

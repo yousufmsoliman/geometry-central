@@ -6,6 +6,9 @@
 using std::cout;
 using std::endl;
 
+namespace geometrycentral {
+namespace surface {
+
 ExactPolyhedralGeodesics::ExactPolyhedralGeodesics(EdgeLengthGeometry* geom_) : geom(geom_) {
   mesh = geom->mesh;
   clear();
@@ -20,21 +23,21 @@ void ExactPolyhedralGeodesics::clear() {
   splitInfos = HalfedgeData<SplitInfo>(mesh);
   vertInfos = VertexData<VertInfo>(mesh);
 
-  for (Halfedge he : mesh->allHalfedges()) {
+  for (Halfedge he : mesh->halfedges()) {
     splitInfos[he].dist = std::numeric_limits<double>::infinity();
     splitInfos[he].x = std::numeric_limits<double>::infinity();
-    splitInfos[he].pseudoSrc = nullptr;
-    splitInfos[he].src = nullptr;
+    splitInfos[he].pseudoSrc = Vertex();
+    splitInfos[he].src = Vertex();
     splitInfos[he].level = -1;
   }
 
   for (Vertex v : mesh->vertices()) {
     vertInfos[v].birthTime = -1;
     vertInfos[v].dist = std::numeric_limits<double>::infinity();
-    vertInfos[v].enterHalfedge = nullptr;
+    vertInfos[v].enterHalfedge = Halfedge();
     vertInfos[v].isSource = false;
-    vertInfos[v].pseudoSrc = nullptr;
-    vertInfos[v].src = nullptr;
+    vertInfos[v].pseudoSrc = Vertex();
+    vertInfos[v].src = Vertex();
   }
 
   srcVerts.clear();
@@ -97,7 +100,7 @@ void ExactPolyhedralGeodesics::initialize() {
     }
     vertInfos[v].birthTime = 0;
     vertInfos[v].dist = 0.;
-    vertInfos[v].enterHalfedge = nullptr;
+    vertInfos[v].enterHalfedge = Halfedge();
     vertInfos[v].isSource = true;
     vertInfos[v].src = v;
     vertInfos[v].pseudoSrc = v;
@@ -166,7 +169,7 @@ double ExactPolyhedralGeodesics::intersect(const Vector2& v0, const Vector2& v1,
 
 void ExactPolyhedralGeodesics::propogateWindow(const Window& win) {
   Halfedge he0 = win.halfedge.twin();
-  if (he0 == nullptr) return;
+  if (he0 == Halfedge()) return;
 
   Halfedge he1 = he0.next();
   Halfedge he2 = he1.next();
@@ -275,7 +278,7 @@ void ExactPolyhedralGeodesics::propogateWindow(const Window& win) {
 void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrc(const PseudoWindow& pseudoWin) {
   Halfedge startHe, endHe;
 
-  if (vertInfos[pseudoWin.v].enterHalfedge == nullptr && vertInfos[pseudoWin.v].birthTime != -1) {
+  if (vertInfos[pseudoWin.v].enterHalfedge == Halfedge() && vertInfos[pseudoWin.v].birthTime != -1) {
     startHe = pseudoWin.v.halfedge();
     endHe = startHe;
   } else if (vertInfos[pseudoWin.v].enterHalfedge.vertex() == pseudoWin.v)
@@ -368,10 +371,10 @@ void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrcFromWindow(const Pseud
   angleFromLeft = acos(angleFromLeft);
   angleFromRight = acos(angleFromRight);
 
-  startHe = nullptr;
-  endHe = nullptr;
+  startHe = Halfedge();
+  endHe = Halfedge();
   Halfedge currHe = he1.twin();
-  while (angleFromLeft < M_PI && currHe != nullptr) {
+  while (angleFromLeft < M_PI && currHe != Halfedge()) {
     Halfedge oppHe = currHe.next();
     Halfedge nextHe = oppHe.next();
     double L0 = geom->edgeLengths[currHe.edge()];
@@ -386,10 +389,10 @@ void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrcFromWindow(const Pseud
     angleFromLeft += currAngle;
     currHe = nextHe.twin();
   }
-  if (currHe != nullptr) startHe = currHe.twin().next();
+  if (currHe != Halfedge()) startHe = currHe.twin().next();
 
   currHe = he2.twin();
-  while (angleFromRight < M_PI && currHe != nullptr) {
+  while (angleFromRight < M_PI && currHe != Halfedge()) {
     Halfedge nextHe = currHe.next();
     Halfedge oppHe = nextHe.next();
     double L0 = geom->edgeLengths[currHe.edge()];
@@ -404,17 +407,17 @@ void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrcFromWindow(const Pseud
     angleFromRight += currAngle;
     currHe = nextHe.twin();
   }
-  if (currHe != nullptr) endHe = currHe.twin().next().next().twin();
+  if (currHe != Halfedge()) endHe = currHe.twin().next().next().twin();
 }
 
 void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrcFromPseudoSrc(const PseudoWindow& pseudoWin,
                                                                         Halfedge& startHe, Halfedge& endHe) {
   Vertex pseudoSrc = pseudoWin.v;
   double angleFromLeft = 0., angleFromRight = 0.;
-  startHe = nullptr;
-  endHe = nullptr;
+  startHe = Halfedge();
+  endHe = Halfedge();
   Halfedge currHe = vertInfos[pseudoWin.v].enterHalfedge;
-  while (angleFromLeft < M_PI && currHe != nullptr) {
+  while (angleFromLeft < M_PI && currHe != Halfedge()) {
     Halfedge oppHe = currHe.next();
     Halfedge nextHe = oppHe.next();
     double L0 = geom->edgeLengths[currHe.edge()];
@@ -429,10 +432,10 @@ void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrcFromPseudoSrc(const Ps
     angleFromLeft += currAngle;
     currHe = nextHe.twin();
   }
-  if (currHe != nullptr) startHe = currHe.twin().next();
+  if (currHe != Halfedge()) startHe = currHe.twin().next();
 
   currHe = vertInfos[pseudoWin.v].enterHalfedge.twin();
-  while (angleFromRight < M_PI && currHe != nullptr) {
+  while (angleFromRight < M_PI && currHe != Halfedge()) {
     Halfedge nextHe = currHe.next();
     Halfedge oppHe = nextHe.next();
     double L0 = geom->edgeLengths[currHe.edge()];
@@ -447,7 +450,7 @@ void ExactPolyhedralGeodesics::generateSubWinsForPseudoSrcFromPseudoSrc(const Ps
     angleFromRight += currAngle;
     currHe = nextHe.twin();
   }
-  if (currHe != nullptr) endHe = currHe.twin().next().next().twin();
+  if (currHe != Halfedge()) endHe = currHe.twin().next().next().twin();
 }
 
 VertexData<double> ExactPolyhedralGeodesics::computeDistance() {
@@ -461,11 +464,11 @@ VertexData<double> ExactPolyhedralGeodesics::computeDistance() {
     maxWinQSize = fmax(maxWinQSize, winQ.size());
     maxPseudoQSize = fmax(maxPseudoQSize, pseudoSrcQ.size());
 
-    while (not winQ.empty() && winQ.top().pseudoSrc != nullptr &&
+    while (not winQ.empty() && winQ.top().pseudoSrc != Vertex() &&
            winQ.top().pseudoSrcBirthTime != vertInfos[winQ.top().pseudoSrc].birthTime)
       winQ.pop();
 
-    while (not pseudoSrcQ.empty() && winQ.top().pseudoSrc != nullptr &&
+    while (not pseudoSrcQ.empty() && winQ.top().pseudoSrc != Vertex() &&
            (int)pseudoSrcQ.top().pseudoSrcBirthTime != vertInfos[pseudoSrcQ.top().v].birthTime)
       pseudoSrcQ.pop();
 
@@ -492,3 +495,6 @@ VertexData<double> ExactPolyhedralGeodesics::computeDistance() {
   }
   return dists;
 }
+
+} // namespace surface
+} // namespace geometrycentral

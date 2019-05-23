@@ -1,14 +1,15 @@
 #pragma once
 
+#include "geometrycentral/surface/geometry.h"
+#include "geometrycentral/utilities/utilities.h"
+
 #include <cmath>
 #include <utility>
 #include <vector>
 
-#include "geometrycentral/surface/geometry.h"
-#include "geometrycentral/utilities/utilities.h"
 
-// TODO: Split obtuse triangles instead of being wrong.
 namespace geometrycentral {
+namespace surface {
 
 VertexData<double> FMMDistance(Geometry<Euclidean>* geometry,
                                const std::vector<std::pair<Vertex, double>>& initialDistances);
@@ -18,4 +19,5 @@ VertexData<double> FMMDistance(HalfedgeMesh* mesh, const std::vector<std::pair<V
 
 double eikonalDistanceSubroutine(double a, double b, double theta, double dA, double dB);
 
+} // namespace surface
 } // namespace geometrycentral

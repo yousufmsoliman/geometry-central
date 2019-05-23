@@ -13,7 +13,6 @@ SET(SRCS
   surface/meshio.cpp
   surface/polygon_soup_mesh.cpp
   surface/ply_halfedge_mesh_data.cpp
-  surface/mesh_embedded_curve.cpp
   surface/geometry.cpp
   surface/intrinsic_geometry.cpp
   surface/geometry_cache.cpp 

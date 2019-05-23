@@ -6,6 +6,7 @@
 #include <limits>
 
 namespace geometrycentral {
+namespace surface {
 
 EdgeLengthGeometry::EdgeLengthGeometry(HalfedgeMesh* mesh_, EdgeData<double>& edgeLengths_)
     : IntrinsicGeometry(mesh_), geodesicEdgeLengths(edgeLengths_)
@@ -38,4 +39,5 @@ void EdgeLengthGeometry::update(EdgeData<double> edgeLengths) {
 
 void EdgeLengthGeometry::computeEdgeLengths() { edgeLengths = geodesicEdgeLengths; }
 
+} // namespace surface
 } // namespace geometrycentral

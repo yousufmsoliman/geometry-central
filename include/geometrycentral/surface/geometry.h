@@ -65,24 +65,14 @@ typedef Vector3 Euclidean;
 typedef UnitVector3 Spherical;
 // TODO Hyperbolic
 
-
-// TODO In the future, could be extended to other types of mesh data structures
-// (e.g., via an additional template argument)
 template <class T>
 class Geometry : public surface::VertexData<T> {
-  // TODO add subclass WeightedGeometry that has additional value (weight) per
-  // vertex
 
 public:
   Geometry(surface::HalfedgeMesh& mesh_) : VertexData<T>(&mesh_), mesh(mesh_), cache(this), p(*this) {}
 
   surface::HalfedgeMesh* getMesh(void); // Returns a pointer to the domain
 
-  // Vertex attributes
-  T& position(Vertex p); // TODO get rid of this method; all write access
-                         // should be done through operator[], to
-                         // distinguish it from all other named accessors
-                         // (which are read-only)
   T position(Vertex p) const;
   double dualArea(Vertex v);
   double volume(Vertex v);          // always equal to 1

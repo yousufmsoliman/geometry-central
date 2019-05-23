@@ -12,6 +12,7 @@ using std::cout;
 using std::endl;
 
 namespace geometrycentral {
+namespace surface {
 
 // Anonymous namespace for helper functions
 namespace {
@@ -334,7 +335,7 @@ FaceData<Complex> computeSmoothestFaceDirectionField_noBoundary(Geometry<Euclide
     std::complex<double> weightISum = 0;
     for (Halfedge he : f.adjacentHalfedges()) {
 
-      if (!he.twin().isReal()) {
+      if (!he.twin().isInterior()) {
         continue;
       }
 
@@ -695,4 +696,6 @@ VertexData<int> computeVertexIndex(Geometry<Euclidean>* geometry, FaceData<Compl
   return indices;
 }
 
+
+} // namespace surface
 } // namespace geometrycentral

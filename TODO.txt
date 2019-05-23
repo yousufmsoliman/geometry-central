@@ -6,6 +6,8 @@ Things to not forget about:
 
 - Seems to be no reason we can't re-use deleted elements for future allocations. This will reduce sparsification (though invalidate the property that iteration works through insertion) 
 
+- resurrect mesh_embedded_curve.h
+
 Test to write:
 
 - Make sure iterators work in empty case where possible. In particular, face.adjacentFaces() for single face

@@ -1354,7 +1354,7 @@ void HalfedgeMesh::validateConnectivity() {
     if (vertexIsDead(iV)) continue;
     validateHalfedge(vHalfedge[iV], "v.halfedge()");
   }
-  for (size_t iE = 0; iE < nEdgesCapacityCount(); iE++) {
+  for (size_t iE = 0; iE < nEdgesCapacity(); iE++) {
     if (edgeIsDead(iE)) continue;
     validateHalfedge(eHalfedge(iE), "e.halfedge()");
   }

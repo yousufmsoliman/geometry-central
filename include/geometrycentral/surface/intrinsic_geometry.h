@@ -1,6 +1,7 @@
 #pragma once
 
 #include "geometrycentral/surface/dependent_quantity.h"
+#include "geometrycentral/surface/geometry.h"
 #include "geometrycentral/surface/halfedge_mesh.h"
 #include "geometrycentral/utilities/unit_vector3.h"
 #include "geometrycentral/utilities/vector2.h"
@@ -11,6 +12,7 @@
 #include <iostream>
 
 namespace geometrycentral {
+namespace surface {
 
 
 class IntrinsicGeometry {
@@ -192,4 +194,5 @@ protected:
   void verifyTriangular(HalfedgeMesh* m);
 };
 
+} // namespace surface
 } // namespace geometrycentral

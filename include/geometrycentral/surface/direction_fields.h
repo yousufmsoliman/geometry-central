@@ -1,17 +1,17 @@
 #pragma once
 
-#include <vector>
-
 #include "geometrycentral/surface/geometry.h"
 
-// Compute useful geometric quantities relating to optimal (Levi-Civita)
-// transport
+#include <vector>
 
-// Note: All of these functions implicitly follow the convention that angles in
-// tangent space
-// are measured against vertex.halfedge.
+
+// Compute useful geometric quantities relating to optimal (Levi-Civita) transport
+
+// Note: All of these functions implicitly follow the convention that angles in tangent space are measured against
+// vertex.halfedge.
 
 namespace geometrycentral {
+namespace surface {
 
 // === Completely compute direction fields
 //     If the mesh has boundary, imposes dirichlet boundary conditions to
@@ -29,4 +29,5 @@ FaceData<Complex> computeSmoothestFaceDirectionField(Geometry<Euclidean>* geomet
 FaceData<int> computeFaceIndex(Geometry<Euclidean>* geometry, VertexData<Complex> directionField, int nSym = 1);
 VertexData<int> computeVertexIndex(Geometry<Euclidean>* geometry, FaceData<Complex> directionField, int nSym = 1);
 
+} // namespace surface
 } // namespace geometrycentral

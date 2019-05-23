@@ -1,15 +1,17 @@
 #pragma once
 
+#include "geometrycentral/surface/edge_length_geometry.h"
+#include "geometrycentral/surface/geometry.h"
+#include "geometrycentral/utilities/utilities.h"
+
 #include <cmath>
 #include <queue>
 #include <utility>
 #include <vector>
 
-#include "geometrycentral/surface/edge_length_geometry.h"
-#include "geometrycentral/surface/geometry.h"
-#include "geometrycentral/utilities/utilities.h"
 
-using namespace geometrycentral;
+namespace geometrycentral {
+namespace surface {
 
 const double REL_ERR = 1e-8;
 
@@ -62,8 +64,8 @@ struct SplitInfo {
 
   SplitInfo() {
     dist = std::numeric_limits<double>::infinity();
-    pseudoSrc = nullptr;
-    src = nullptr;
+    pseudoSrc = Vertex();
+    src = Vertex();
     level = -1;
     x = std::numeric_limits<double>::infinity();
   }
@@ -80,9 +82,9 @@ struct VertInfo {
     birthTime = -1;
     dist = std::numeric_limits<double>::infinity();
     isSource = false;
-    enterHalfedge = nullptr;
-    pseudoSrc = nullptr;
-    src = nullptr;
+    enterHalfedge = Halfedge();
+    pseudoSrc = Vertex();
+    src = Vertex();
   }
 };
 
@@ -134,3 +136,6 @@ private:
   bool isValidWindow(const Window& win, bool isLeftChild);
   double intersect(const Vector2& v0, const Vector2& v1, const Vector2& p0, const Vector2& p1);
 };
+
+} // namespace surface
+} // namespace geometrycentral

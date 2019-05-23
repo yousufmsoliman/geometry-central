@@ -5,6 +5,7 @@
 #include <vector>
 
 namespace geometrycentral {
+namespace surface {
 
 struct SymmetryResult {
   bool symmetryFound = false;                  // was a symmetry found? is this data valid?
@@ -31,4 +32,5 @@ SymmetryResult detectSymmetryAutoMirror(Geometry<Euclidean>* geom); // Look for 
 // Look for symmetry which is mirrored over the y and z planes
 SymmetryResult detectSymmetryDoubleMirror(Geometry<Euclidean>* geom);
 
+} // namespace surface
 } // namespace geometrycentral

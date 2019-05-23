@@ -3,6 +3,7 @@
 using namespace Eigen;
 
 namespace geometrycentral {
+namespace surface {
 
 
 Eigen::DiagonalMatrix<double, Eigen::Dynamic> buildHodge0(Geometry<Euclidean>* geometry) {
@@ -117,4 +118,5 @@ Eigen::SparseMatrix<double> buildDerivative1(HalfedgeMesh* mesh) {
   return d1;
 }
 
+} // namespace surface
 } // namespace geometrycentral

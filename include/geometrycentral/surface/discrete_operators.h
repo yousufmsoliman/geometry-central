@@ -5,6 +5,7 @@
 #include "Eigen/SparseCore"
 
 namespace geometrycentral {
+namespace surface {
 
 /*
     === Standard operators from DDG, using circumcentric dual, defined over the
@@ -44,4 +45,5 @@ Eigen::SparseMatrix<double> buildDerivative0(HalfedgeMesh* mesh);
 Eigen::SparseMatrix<double> buildDerivative1(HalfedgeMesh* mesh);
 
 
+} // namespace surface
 } // namespace geometrycentral

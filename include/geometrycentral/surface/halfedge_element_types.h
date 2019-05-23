@@ -102,7 +102,7 @@ class Element {
 
 public:
   Element();                                 // construct an empty (null) element
-  Element(HalfedgeMesh* mesh_, size_t ind_); // construct pointing to the i'th element of that type on a mesh.
+  Element(HalfedgeMesh* mesh, size_t ind);   // construct pointing to the i'th element of that type on a mesh.
   Element(const DynamicElement<T>& e);       // construct from a dynamic element of matching type
 
   inline bool operator==(const Element<T>& other) const;
@@ -137,7 +137,7 @@ std::ostream& operator<<(std::ostream& output, const Element<T>& e);
 // The equivalent dynamic pointers. These should be rarely used, but are guaranteed to be preserved through _all_ mesh
 // operations, including compress().
 template <typename S>
-class DynamicElement {
+class DynamicElement : public S{
 public:
   DynamicElement();                                 // construct an empty (null) element
   DynamicElement(HalfedgeMesh* mesh_, size_t ind_); // construct from an index as usual

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "geometrycentral/surface/dependent_quantity.h"
-#include "geometrycentral/surface/intrinsic_geometry.h"
 #include "geometrycentral/surface/halfedge_mesh.h"
+#include "geometrycentral/surface/intrinsic_geometry.h"
 #include "geometrycentral/utilities/unit_vector3.h"
 #include "geometrycentral/utilities/vector2.h"
 #include "geometrycentral/utilities/vector3.h"
@@ -12,6 +12,7 @@
 #include <iostream>
 
 namespace geometrycentral {
+namespace surface {
 
 
 class EdgeLengthGeometry : public IntrinsicGeometry {
@@ -36,4 +37,5 @@ private:
   EdgeData<double> geodesicEdgeLengths;
 };
 
+} // namespace surface
 } // namespace geometrycentral

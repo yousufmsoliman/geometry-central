@@ -6,6 +6,7 @@ using std::cout;
 using std::endl;
 
 namespace geometrycentral {
+namespace surface {
 
 MeshRayTracer::MeshRayTracer(Geometry<Euclidean>* geometry_) {
   mesh = geometry_->getMesh();
@@ -19,7 +20,7 @@ void MeshRayTracer::buildBVH() {
 
   nanort::BVHBuildOptions<double> options; // Use default options
 
-  if (!mesh->isSimplicial()) {
+  if (!mesh->isTriangular()) {
     throw std::runtime_error("Can only trace rays on triangle meshes.");
   }
 
@@ -94,4 +95,5 @@ RayHitResult MeshRayTracer::trace(Vector3 start, Vector3 dir) {
   }
 }
 
+} // namespace surface
 }; // namespace geometrycentral

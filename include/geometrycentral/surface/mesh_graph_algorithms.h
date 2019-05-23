@@ -1,10 +1,11 @@
 #pragma once
 
+#include "geometrycentral/surface/halfedge_mesh.h"
 #include "geometrycentral/surface/edge_length_geometry.h"
 #include "geometrycentral/surface/geometry.h"
-#include "geometrycentral/surface/halfedge_data_types.h"
 
 namespace geometrycentral {
+namespace surface {
 
 // Find a subset of edges which connects all vertices
 // Return value holds 'true' for an edge if it is in the tree
@@ -16,5 +17,5 @@ EdgeData<char> minimalSpanningTree(EdgeLengthGeometry* geometry);
 // NP-hard Steiner tree problem
 EdgeData<char> spanningTreeBetweenVertices(Geometry<Euclidean>* geometry, const std::vector<Vertex>& requiredVertices);
 
-
+} // namespace surface
 } // namespace geometrycentral

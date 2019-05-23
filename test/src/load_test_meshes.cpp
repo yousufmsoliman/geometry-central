@@ -1,20 +1,9 @@
 #include "load_test_meshes.h"
 
-#include "geometrycentral/mesh/polygon_soup_mesh.h"
+#include "geometrycentral/surface/polygon_soup_mesh.h"
 
 using namespace geometrycentral;
-
-
-std::unique_ptr<geometrycentral::HalfedgeMesh> mesh_from_soup(const std::vector<Vector3>& vertexPositions,
-                                                              const std::vector<std::vector<size_t>>& faceIndices) {
-
-  PolygonSoupMesh soup(faceIndices, vertexPositions);
-  Geometry<Euclidean>* geom;
-  std::unique_ptr<HalfedgeMesh> mesh(new HalfedgeMesh(soup, geom));
-  delete geom;
-  return mesh;
-}
-
+using namespace geometrycentral::surface;
 
 
 std::unique_ptr<HalfedgeMesh> load_tet() {
@@ -34,5 +23,5 @@ std::unique_ptr<HalfedgeMesh> load_tet() {
   };
   // clang-format on
 
-  return mesh_from_soup(vertexPositions, faceIndices);
+  return std::unique_ptr<HalfedgeMesh>(new HalfedgeMesh(faceIndices));
 }

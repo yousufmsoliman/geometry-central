@@ -1,13 +1,16 @@
-#include <iostream>
-#include <string>
 
-#include "gtest/gtest.h"
+#include "geometrycentral/surface/halfedge_mesh.h"
 
 #include "load_test_meshes.h"
 
-#include "geometrycentral/mesh/halfedge_mesh.h"
+#include "gtest/gtest.h"
+
+#include <iostream>
+#include <string>
+
 
 using namespace geometrycentral;
+using namespace geometrycentral::surface;
 using std::cout;
 using std::endl;
 

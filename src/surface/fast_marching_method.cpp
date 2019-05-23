@@ -5,6 +5,7 @@
 
 
 namespace geometrycentral {
+namespace surface {
 
 VertexData<double> FMMDistance(Geometry<Euclidean>* geometry,
                                const std::vector<std::pair<Vertex, double>>& initialDistances) {
@@ -70,7 +71,7 @@ VertexData<double> FMMDistance(HalfedgeMesh* mesh, const std::vector<std::pair<V
       }
 
       // Check the third point of the "left" triangle straddling this edge
-      if (he.isReal()) {
+      if (he.isInterior()) {
         Vertex newVert = he.next().next().vertex();
         if (!finalized[newVert]) {
 
@@ -91,7 +92,7 @@ VertexData<double> FMMDistance(HalfedgeMesh* mesh, const std::vector<std::pair<V
 
       // Check the third point of the "right" triangle straddling this edge
       Halfedge heT = he.twin();
-      if (heT.isReal()) {
+      if (heT.isInterior()) {
         Vertex newVert = heT.next().next().vertex();
         if (!finalized[newVert]) {
 
@@ -156,4 +157,5 @@ double eikonalDistanceSubroutine(double a, double b, double theta, double dA, do
 }
 
 
+} // namespace surface
 } // namespace geometrycentral

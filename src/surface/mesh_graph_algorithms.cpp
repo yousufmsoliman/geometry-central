@@ -7,6 +7,7 @@
 #include <vector>
 
 namespace geometrycentral {
+namespace surface {
 
 // Note: Assumes mesh is a single connected component
 EdgeData<char> minimalSpanningTree(Geometry<Euclidean>* geometry) {
@@ -189,5 +190,5 @@ EdgeData<char> spanningTreeBetweenVertices(Geometry<Euclidean>* geometry, const 
   return spanningTree;
 }
 
-
+} // namespace surface
 } // namespace geometrycentral

@@ -1,9 +1,12 @@
 #pragma once
 
 #include "geometrycentral/surface/geometry.h"
+
+
 #include "nanort/nanort.h"
 
 namespace geometrycentral {
+namespace surface {
 
 struct RayHitResult {
   bool hit;
@@ -38,4 +41,5 @@ private:
   double tFar;
 };
 
+} // namespace surface
 }; // namespace geometrycentral

@@ -14,11 +14,6 @@ inline HalfedgeMesh* Geometry<T>::getMesh(void) {
 // Vertex attributes (primal)
 
 template <class T>
-inline T& Geometry<T>::position(Vertex v) {
-  return p[v];
-}
-
-template <class T>
 inline T Geometry<T>::position(Vertex v) const {
   return p[v];
 }

@@ -13,6 +13,7 @@ using std::cout;
 using std::endl;
 
 namespace geometrycentral {
+namespace surface {
 
 namespace {
 
@@ -379,4 +380,5 @@ SymmetryResult detectSymmetryDoubleMirror(Geometry<Euclidean>* geom) {
   return r;
 }
 
+} // namespace surface
 } // namespace geometrycentral

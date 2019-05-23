@@ -34,10 +34,10 @@ inline size_t HalfedgeMesh::faceIndToBoundaryLoopInd(size_t iF) const { return n
 inline size_t HalfedgeMesh::boundaryLoopIndToFaceInd(size_t iB) const { return nFacesCapacityCount - 1 - iB;}
 
 // Detect dead elements
-bool HalfedgeMesh::vertexIsDead(size_t iV)      const { return vHalfedge[iV] == INVALID_IND; }
-bool HalfedgeMesh::halfedgeIsDead(size_t iHe)   const { return heNext[iHe] == INVALID_IND; }
-bool HalfedgeMesh::edgeIsDead(size_t iE)        const { return heNext[eHalfedge(iE)] == INVALID_IND; }
-bool HalfedgeMesh::faceIsDead(size_t iF)        const { return fHalfedge[iF] == INVALID_IND;}
+inline bool HalfedgeMesh::vertexIsDead(size_t iV)      const { return vHalfedge[iV] == INVALID_IND; }
+inline bool HalfedgeMesh::halfedgeIsDead(size_t iHe)   const { return heNext[iHe] == INVALID_IND; }
+inline bool HalfedgeMesh::edgeIsDead(size_t iE)        const { return heNext[eHalfedge(iE)] == INVALID_IND; }
+inline bool HalfedgeMesh::faceIsDead(size_t iF)        const { return fHalfedge[iF] == INVALID_IND;}
 
 // Methods for iterating over mesh elements w/ range-based for loops ===========
 

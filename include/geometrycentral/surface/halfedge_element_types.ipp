@@ -11,6 +11,15 @@ namespace surface {
 // ================      Base Element      ==================
 // ==========================================================
 
+// Constructors
+template<typename T> 
+Element<T>::Element() {}
+template<typename T> 
+Element<T>::Element(HalfedgeMesh* mesh_, size_t ind_) : mesh(mesh_), ind(ind_) {}
+template<typename T> 
+Element<T>::Element(const DynamicElement<T>& e) : mesh(e.getMesh()), ind(e.getIndex()) {}
+
+// Comparators
 template<typename T> 
 inline bool Element<T>::operator==(const Element<T>& other) const { return ind == other.ind; }
 template<typename T> 
@@ -34,6 +43,43 @@ template <typename T>
 inline ::std::ostream& operator<<(::std::ostream& output, const Element<T>& e) {
   output << typeShortName<T>() << "_" << e.ind;
   return output;
+}
+
+// Dynamic element
+template<typename S> 
+DynamicElement<S>::DynamicElement() {}
+
+template<typename S> 
+DynamicElement<S>::DynamicElement(HalfedgeMesh* mesh_, size_t ind_) : S(mesh_, ind_) {
+
+}
+
+template<typename S> 
+DynamicElement<S>::DynamicElement(const S& e) : S(e) {
+
+}
+
+template<typename S> 
+DynamicElement<S>::~DynamicElement(const S& e) : S(e) {
+}
+
+template<typename S> 
+void DynamicElement<S>::registerWithMesh() {
+  
+  // Callback function on permutation
+  std::function<void(const std::vector<size_t>&)> permuteFunc = [this](const std::vector<size_t>& perm) {
+    data = applyPermutation(data, perm);
+  };
+
+
+  // Callback function on mesh delete
+  std::function<void()> deleteFunc = [this]() {
+    // Ensures that we don't try to remove with iterators on deconstruct of this object
+    mesh = nullptr;
+  };
+
+  permuteCallbackIt = getPermuteCallbackList<E>(mesh).insert(getPermuteCallbackList<E>(mesh).end(), permuteFunc);
+  deleteCallbackIt = mesh->meshDeleteCallbackList.insert(mesh->meshDeleteCallbackList.end(), deleteFunc);
 }
 
 
