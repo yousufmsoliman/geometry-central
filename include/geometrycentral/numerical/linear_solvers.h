@@ -8,7 +8,7 @@
 
 // Suitesparse includes, as needed
 #ifdef HAVE_SUITESPARSE
-#include "geometrycentral/suitesparse_utilities.h"
+#include "geometrycentral/numerical/suitesparse_utilities.h"
 #include <SuiteSparseQR.hpp>
 #include <cholmod.h>
 #endif

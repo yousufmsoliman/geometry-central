@@ -3,7 +3,7 @@
 #include "geometrycentral/numerical/linear_algebra_utilities.h"
 
 #ifdef HAVE_SUITESPARSE
-#include "geometrycentral/suitesparse_utilities.h"
+#include "geometrycentral/numerical/suitesparse_utilities.h"
 #include <umfpack.h>
 #endif
 

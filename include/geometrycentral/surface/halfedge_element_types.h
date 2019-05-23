@@ -137,11 +137,17 @@ std::ostream& operator<<(std::ostream& output, const Element<T>& e);
 // The equivalent dynamic pointers. These should be rarely used, but are guaranteed to be preserved through _all_ mesh
 // operations, including compress().
 template <typename S>
-class DynamicElement : public S{
+class DynamicElement : public S {
 public:
   DynamicElement();                                 // construct an empty (null) element
   DynamicElement(HalfedgeMesh* mesh_, size_t ind_); // construct from an index as usual
   DynamicElement(const S& e);                       // construct from a non-dynamic element
+
+
+  DynamicElement(const DynamicElement& other);
+  DynamicElement(DynamicElement&& other);
+  DynamicElement& operator=(const DynamicElement<S>& other);
+  DynamicElement& operator=(DynamicElement<S>&& other) noexcept;
 
   ~DynamicElement();
 
@@ -152,6 +158,9 @@ private:
   // References to the callbacks which keep the element valid. Keep these around to de-register on destruction.
   std::list<std::function<void(const std::vector<size_t>&)>>::iterator permuteCallbackIt;
   std::list<std::function<void()>>::iterator deleteCallbackIt;
+
+  void registerWithMesh();
+  void deregisterWithMesh();
 };
 
 

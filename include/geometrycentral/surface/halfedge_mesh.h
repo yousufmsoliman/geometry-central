@@ -145,16 +145,16 @@ public:
 
   // == Callbacks that will be invoked on mutation to keep containers/iterators/etc valid.
   // Expansion callbacks
-  // Argument is the new size of the element list. Elements up to this index (aka offset from base) may now be used (but
-  // _might_ not be)
+  // Argument is the new size of the element list. Elements up to this index may now be used (but _might_ not be immediately)
   std::list<std::function<void(size_t)>> vertexExpandCallbackList;
   std::list<std::function<void(size_t)>> faceExpandCallbackList;
   std::list<std::function<void(size_t)>> edgeExpandCallbackList;
   std::list<std::function<void(size_t)>> halfedgeExpandCallbackList;
 
   // Compression callbacks
-  // Argument is a permutation to a apply, such that d_new[i] = d_old[p[i]]. New size may be smaller, in which case
-  // capacity may be shrunk to that size.
+  // Argument is a permutation to a apply, such that d_new[i] = d_old[p[i]]
+  // TODO FIXME there's a big problem here, in that this format of callbacks does not allow DynamicElement update in O(1)
+  // TODO think about capacity rules with callbacks: old rule was that new size may be smaller
   std::list<std::function<void(const std::vector<size_t>&)>> vertexPermuteCallbackList;
   std::list<std::function<void(const std::vector<size_t>&)>> facePermuteCallbackList;
   std::list<std::function<void(const std::vector<size_t>&)>> edgePermuteCallbackList;
