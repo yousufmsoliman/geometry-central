@@ -89,6 +89,11 @@ Note that our halfedge mesh _does not_ require that faces be triangles or quads;
 
 ### Properties
 
+??? func "`#!cpp bool HalfedgeMesh::hasBoundary()`"
+    Returns true if the mesh has boundary, that is if it is not _closed_.
+    
+    Complexity $\mathcal{O}(1)$.
+
 ??? func "`#!cpp int HalfedgeMesh::eulerCharacteristic()`"
     Returns the Euler characteristic of the surface. Computed in O(1) from element counts. 
     

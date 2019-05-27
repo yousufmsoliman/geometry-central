@@ -11,7 +11,7 @@ inline size_t HalfedgeMesh::nInteriorHalfedges() const { return nInteriorHalfedg
 inline size_t HalfedgeMesh::nExteriorHalfedges() const { return nHalfedgesCount - nInteriorHalfedgesCount; }
 inline size_t HalfedgeMesh::nCorners()           const { return nInteriorHalfedgesCount; }
 inline size_t HalfedgeMesh::nVertices()          const { return nVerticesCount; }
-inline size_t HalfedgeMesh::nEdges()             const { return nEdgesCount; }
+inline size_t HalfedgeMesh::nEdges()             const { return nHalfedgesCount / 2; }
 inline size_t HalfedgeMesh::nFaces()             const { return nFacesCount; }
 inline size_t HalfedgeMesh::nBoundaryLoops()     const { return nBoundaryLoopsCount; }
 
@@ -28,7 +28,7 @@ inline size_t HalfedgeMesh::eHalfedge(size_t iE) { return 2 * iE; }
 inline size_t HalfedgeMesh::nEdgesFillCount() const { return nHalfedgesFillCount/2; }
 
 // Other getters
-inline bool HalfedgeMesh::heIsInterior(size_t iHe) const { return faceIsBoundaryLoop(heFace[iHe]); }
+inline bool HalfedgeMesh::heIsInterior(size_t iHe) const { return !faceIsBoundaryLoop(heFace[iHe]); }
 inline bool HalfedgeMesh::faceIsBoundaryLoop(size_t iF) const { return iF >= nFacesFillCount; }
 inline size_t HalfedgeMesh::faceIndToBoundaryLoopInd(size_t iF) const { return nFacesCapacityCount - 1 - iF;}
 inline size_t HalfedgeMesh::boundaryLoopIndToFaceInd(size_t iB) const { return nFacesCapacityCount - 1 - iB;}
@@ -41,14 +41,14 @@ inline bool HalfedgeMesh::faceIsDead(size_t iF)        const { return fHalfedge[
 
 // Methods for iterating over mesh elements w/ range-based for loops ===========
 
-inline VertexSet HalfedgeMesh::vertices()                       { return VertexSet(this, 0, nVerticesFillCount); }
-inline HalfedgeSet HalfedgeMesh::halfedges()                    { return HalfedgeSet(this, 0, nHalfedgesFillCount); }
-inline HalfedgeInteriorSet HalfedgeMesh::interiorHalfedges()    { return HalfedgeInteriorSet(this, 0, nHalfedgesFillCount); }
-inline HalfedgeExteriorSet HalfedgeMesh::exteriorHalfedges()    { return HalfedgeExteriorSet(this, 0, nHalfedgesFillCount); }
-inline CornerSet HalfedgeMesh::corners()                        { return CornerSet(this, 0, nHalfedgesFillCount); }
-inline EdgeSet HalfedgeMesh::edges()                            { return EdgeSet(this, 0, nEdgesFillCount()); }
-inline FaceSet HalfedgeMesh::faces()                            { return FaceSet(this, 0, nFacesFillCount); }
-inline BoundaryLoopSet HalfedgeMesh::boundaryLoops()            { return BoundaryLoopSet(this, 0, nBoundaryLoopsFillCount); }
+inline VertexSet HalfedgeMesh::vertices()                        { return VertexSet(this, 0, nVerticesFillCount); }
+inline HalfedgeSet HalfedgeMesh::halfedges()                     { return HalfedgeSet(this, 0, nHalfedgesFillCount); }
+inline HalfedgeInteriorSet HalfedgeMesh::interiorHalfedges()     { return HalfedgeInteriorSet(this, 0, nHalfedgesFillCount); }
+inline HalfedgeExteriorSet HalfedgeMesh::exteriorHalfedges()     { return HalfedgeExteriorSet(this, 0, nHalfedgesFillCount); }
+inline CornerSet HalfedgeMesh::corners()                         { return CornerSet(this, 0, nHalfedgesFillCount); }
+inline EdgeSet HalfedgeMesh::edges()                             { return EdgeSet(this, 0, nEdgesFillCount()); }
+inline FaceSet HalfedgeMesh::faces()                             { return FaceSet(this, 0, nFacesFillCount); }
+inline BoundaryLoopSet HalfedgeMesh::boundaryLoops()             { return BoundaryLoopSet(this, 0, nBoundaryLoopsFillCount); }
 
 // Methods for accessing elements by index =====================================
 // Note that these are only valid when the mesh is compressed.
@@ -62,10 +62,12 @@ inline BoundaryLoop HalfedgeMesh::boundaryLoop(size_t index) { return BoundaryLo
 
 // Misc utility methods =====================================
 
-inline bool HalfedgeMesh::isCompressed() { return isCompressedFlag; }
-inline bool HalfedgeMesh::isCanonical() { return isCanonicalFlag; }
+inline bool HalfedgeMesh::isCompressed() const { return isCompressedFlag; }
+inline bool HalfedgeMesh::isCanonical() const { return isCanonicalFlag; }
+inline bool HalfedgeMesh::hasBoundary() const { return nBoundaryLoopsCount > 0; }
 
 // clang-format on
+
 
 } // namespace surface
 } // namespace geometrycentral

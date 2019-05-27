@@ -30,7 +30,29 @@ MeshAsset::MeshAsset(std::string localPath) {
   cout << "  -- info: Loading mesh asset " << name << " from " << fullPath << endl;
   sourcePath = fullPath;
   std::tie(mesh, geometry) = loadMesh(fullPath);
+
+  hasBoundary = mesh->hasBoundary();
 }
+
+MeshAsset MeshAsset::copy() const {
+  MeshAsset newM;
+
+  newM.name = name;
+  newM.sourcePath = sourcePath;
+  newM.mesh = mesh->copy();
+  if (geometry) {
+    // TODO
+    // newM.geometry = geometry;
+  }
+
+  newM.hasBoundary = hasBoundary;
+  newM.isTriangular = isTriangular;
+  newM.isPolygonalComplex = isPolygonalComplex;
+
+  return newM;
+}
+
+void MeshAsset::printThyName() { cout << "  testing on mesh: " << name << endl; }
 
 // Static storage for mesh assets
 std::vector<MeshAsset> MeshAssetSuite::allMeshAssets;
@@ -40,6 +62,44 @@ void MeshAssetSuite::SetUpTestSuite() {
   allMeshAssets.emplace_back("spot.ply");
   allMeshAssets.emplace_back("bob_small.ply");
   allMeshAssets.emplace_back("lego.ply");
+}
+
+
+MeshAsset MeshAssetSuite::getAsset(std::string name) {
+  for (MeshAsset& a : allMeshAssets) {
+    if (a.name == name) {
+      return a.copy();
+    }
+  }
+  throw std::runtime_error("no mesh asset named " + name);
+}
+
+std::vector<MeshAsset> MeshAssetSuite::allMeshes(bool includeNoGeom) {
+  std::vector<MeshAsset> result;
+  for (MeshAsset& a : allMeshAssets) {
+    if (includeNoGeom || a.geometry) result.push_back(a.copy());
+  }
+  return result;
+}
+
+std::vector<MeshAsset> MeshAssetSuite::closedMeshes(bool includeNoGeom) {
+  std::vector<MeshAsset> result;
+  for (MeshAsset& a : allMeshAssets) {
+    if (!a.hasBoundary) {
+      if (includeNoGeom || a.geometry) result.push_back(a.copy());
+    }
+  }
+  return result;
+}
+
+std::vector<MeshAsset> MeshAssetSuite::boundaryMeshes(bool includeNoGeom) {
+  std::vector<MeshAsset> result;
+  for (MeshAsset& a : allMeshAssets) {
+    if (a.hasBoundary) {
+      if (includeNoGeom || a.geometry) result.push_back(a.copy());
+    }
+  }
+  return result;
 }
 
 /*

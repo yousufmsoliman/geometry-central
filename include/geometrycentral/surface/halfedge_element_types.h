@@ -101,9 +101,9 @@ template <typename T>
 class Element {
 
 public:
-  Element();                                 // construct an empty (null) element
-  Element(HalfedgeMesh* mesh, size_t ind);   // construct pointing to the i'th element of that type on a mesh.
-  Element(const DynamicElement<T>& e);       // construct from a dynamic element of matching type
+  Element();                               // construct an empty (null) element
+  Element(HalfedgeMesh* mesh, size_t ind); // construct pointing to the i'th element of that type on a mesh.
+  Element(const DynamicElement<T>& e);     // construct from a dynamic element of matching type
 
   inline bool operator==(const Element<T>& other) const;
   inline bool operator!=(const Element<T>& other) const;
@@ -128,7 +128,7 @@ protected:
 
   // Friends
   friend std::ostream& operator<<<>(std::ostream& output, const Element<T>& e);
-  friend struct std::hash<T>;
+  friend struct std::hash<Element<T>>;
 };
 
 template <typename T>

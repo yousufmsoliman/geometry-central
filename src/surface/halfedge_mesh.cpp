@@ -196,7 +196,7 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
       currHe = heTwin(heNext[heTwin(currHe)]);
       size_t loopCountInnter = 0;
       while (heFace[currHe] != INVALID_IND) {
-				if(currHe == iHe) break;
+        if (currHe == iHe) break;
         currHe = heTwin(heNext[currHe]);
         loopCountInnter++;
         GC_SAFETY_ASSERT(loopCountInnter < nHalfedgesCount, "boundary infinite loop orbit");
@@ -216,13 +216,12 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
   // SOMEDAY: could shrink_to_fit() std::vectors here, at the cost of a copy. What's preferable?
 
   // Set capacities and other properties
-  nEdgesCount = nHalfedgesCount / 2;
   nVerticesCapacityCount = nVerticesCount;
   nHalfedgesCapacityCount = nHalfedgesCount;
   nFacesCapacityCount = nFacesCount + nBoundaryLoopsCount;
   nVerticesFillCount = nVerticesCount;
   nHalfedgesFillCount = nHalfedgesCount;
-  nFacesFillCount = nFacesCapacityCount;
+  nFacesFillCount = nFacesCount;
   nBoundaryLoopsFillCount = nBoundaryLoopsCount;
   isCanonicalFlag = true;
   isCompressedFlag = true;
@@ -256,12 +255,7 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
 
   // Print some nice statistics
   if (verbose) {
-    std::cout << "Constructed halfedge mesh with: " << std::endl;
-    std::cout << "    # verts =  " << nVertices() << std::endl;
-    std::cout << "    # edges =  " << nEdges() << std::endl;
-    std::cout << "    # faces =  " << nFaces() << std::endl;
-    std::cout << "    # halfedges =  " << nHalfedges() << std::endl;
-    std::cout << "      and " << nBoundaryLoops() << " boundary components. " << std::endl;
+    printStatistics();
     std::cout << "Construction took " << pretty_time(FINISH_TIMING(construction)) << std::endl;
   }
 }
@@ -278,7 +272,16 @@ HalfedgeMesh::~HalfedgeMesh() {
 // ================       Utilities        ==================
 // ==========================================================
 
-// Returns true if and only if all faces are triangles
+void HalfedgeMesh::printStatistics() const {
+  std::cout << "Halfedge mesh with: " << std::endl;
+  std::cout << "    # verts =  " << nVertices() << std::endl;
+  std::cout << "    # edges =  " << nEdges() << std::endl;
+  std::cout << "    # faces =  " << nFaces() << std::endl;
+  std::cout << "    # halfedges =  " << nHalfedges() << "  (" << nInteriorHalfedges() << " interior, "
+            << nExteriorHalfedges() << " exterior)" << std::endl;
+  std::cout << "      and " << nBoundaryLoops() << " boundary components. " << std::endl;
+}
+
 bool HalfedgeMesh::isTriangular() {
   for (Face f : faces()) {
     if (f.degree() != 3) {
@@ -312,13 +315,13 @@ size_t HalfedgeMesh::nInteriorVertices() {
 }
 
 
-int HalfedgeMesh::eulerCharacteristic() {
+int HalfedgeMesh::eulerCharacteristic() const {
   // be sure to do intermediate arithmetic with large *signed* integers
   return static_cast<int>(static_cast<long long int>(nVertices()) - static_cast<long long int>(nEdges()) +
                           static_cast<long long int>(nFaces() + nBoundaryLoops()));
 }
 
-int HalfedgeMesh::genus() {
+int HalfedgeMesh::genus() const {
   int chi = eulerCharacteristic();
   int boundaryLoops = nBoundaryLoops();
   return (2 - boundaryLoops - chi) / 2;
@@ -388,9 +391,38 @@ CornerData<size_t> HalfedgeMesh::getCornerIndices() {
   return indices;
 }
 
-std::unique_ptr<HalfedgeMesh> HalfedgeMesh::copy() {
+std::unique_ptr<HalfedgeMesh> HalfedgeMesh::copy() const {
   HalfedgeMesh* newMesh = new HalfedgeMesh();
-  // TODO implement
+
+
+  // == Copy _all_ the fields!
+
+  // Raw data buffers (underlying std::vectors duplicate storage automatically)
+  newMesh->heNext = heNext;
+  newMesh->heVertex = heVertex;
+  newMesh->heFace = heFace;
+  newMesh->vHalfedge = vHalfedge;
+  newMesh->fHalfedge = fHalfedge;
+
+  // counts and flags
+  newMesh->nHalfedgesCount = nHalfedgesCount;
+  newMesh->nInteriorHalfedgesCount = nInteriorHalfedgesCount;
+  newMesh->nVerticesCount = nVerticesCount;
+  newMesh->nFacesCount = nFacesCount;
+  newMesh->nBoundaryLoopsCount = nBoundaryLoopsCount;
+  newMesh->nVerticesCapacityCount = nVerticesCapacityCount;
+  newMesh->nHalfedgesCapacityCount = nHalfedgesCapacityCount;
+  newMesh->nFacesCapacityCount = nFacesCapacityCount;
+  newMesh->nVerticesFillCount = nVerticesFillCount;
+  newMesh->nHalfedgesFillCount = nHalfedgesFillCount;
+  newMesh->nFacesFillCount = nFacesFillCount;
+  newMesh->nBoundaryLoopsFillCount = nBoundaryLoopsFillCount;
+  newMesh->isCanonicalFlag = isCanonicalFlag;
+  newMesh->isCompressedFlag = isCompressedFlag;
+
+
+  // Note: _don't_ copy callbacks lists! New mesh has new callbacks
+
   return std::unique_ptr<HalfedgeMesh>(newMesh);
 }
 
@@ -1317,6 +1349,19 @@ std::vector<Face> HalfedgeMesh::triangulate(Face f) {
 
 void HalfedgeMesh::validateConnectivity() {
 
+  // Sanity check sizes and counts
+  if (nInteriorHalfedges() + nExteriorHalfedges() != nHalfedges())
+    throw std::logic_error("nInterior + nImaginary != nTotal halfedges");
+  if (nHalfedgesCount > nHalfedgesFillCount) throw std::logic_error("halfedge count > halfedge fill");
+  if (nHalfedgesFillCount > nHalfedgesCapacityCount) throw std::logic_error("halfedge fill > halfedge capacity");
+
+  if (nVerticesCount > nVerticesFillCount) throw std::logic_error("vertex count > vertex fill");
+  if (nVerticesFillCount > nVerticesCapacityCount) throw std::logic_error("vertex fill > vertex capacity");
+
+  if (nFacesCount > nFacesFillCount) throw std::logic_error("face count > face fill");
+  if (nFacesFillCount + nBoundaryLoopsCount > nFacesCapacityCount)
+    throw std::logic_error("face + bl fill > face capacity");
+
   // Helpers to check the validity of references
   auto validateVertex = [&](size_t iV, std::string msg) {
     if (iV >= nVerticesFillCount || vertexIsDead(iV)) throw std::logic_error(msg + " - bad vertex reference");
@@ -1385,10 +1430,14 @@ void HalfedgeMesh::validateConnectivity() {
 
   // Check face & next sanity
   for (BoundaryLoop b : boundaryLoops()) {
+    if (!b.halfedge().face().isBoundaryLoop()) throw std::logic_error("bl.halfedge().face() is not a boundary loop");
+
     Halfedge currHe = b.halfedge();
     Halfedge firstHe = b.halfedge();
     size_t count = 0;
     do {
+      if (!currHe.face().isBoundaryLoop())
+        throw std::logic_error("walking around boundary loop yielded he.face() which is not a boundary loop");
       if (currHe.face().asBoundaryLoop() != b)
         throw std::logic_error("(boundary loop) face.halfedge doesn't match halfedge.face");
       currHe = currHe.next();

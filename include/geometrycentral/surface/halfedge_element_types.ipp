@@ -121,7 +121,7 @@ void DynamicElement<S>::deregisterWithMesh() {
 // Base iterators
 template <typename F>
 inline RangeIteratorBase<F>::RangeIteratorBase(HalfedgeMesh* mesh_, size_t iStart_, size_t iEnd_) : mesh(mesh_), iCurr(iStart_), iEnd(iEnd_) {
-  if (iCurr != iEnd && F::elementOkay(*mesh, iCurr)) {
+  if (iCurr != iEnd && !F::elementOkay(*mesh, iCurr)) {
     this->operator++();
   }
 }
@@ -129,7 +129,7 @@ inline RangeIteratorBase<F>::RangeIteratorBase(HalfedgeMesh* mesh_, size_t iStar
 template <typename F>
 inline const RangeIteratorBase<F>& RangeIteratorBase<F>::operator++() {
   iCurr++;
-  while (iCurr != iEnd && F::elementOkay(*mesh, iCurr)) {
+  while (iCurr != iEnd && !F::elementOkay(*mesh, iCurr)) {
     iCurr++;
   }
   return *this;
@@ -166,7 +166,7 @@ inline Halfedge Vertex::halfedge() const    { return Halfedge(mesh, mesh->vHalfe
 inline Corner Vertex::corner() const        { return halfedge().corner(); }
 
 // Properties
-inline bool Vertex::isBoundary() const { return halfedge().twin().isInterior(); }
+inline bool Vertex::isBoundary() const { return !halfedge().twin().isInterior(); }
 
 // Navigation iterators 
 inline NavigationSetBase<VertexIncomingHalfedgeNavigator> Vertex::incomingHalfedges() const { 
@@ -245,7 +245,7 @@ inline bool Edge::isBoundary() const { return !halfedge().isInterior() || !halfe
 
 // Range iterators
 inline bool EdgeRangeF::elementOkay(const HalfedgeMesh& mesh, size_t ind) {
-  return !mesh.edgeIsDead(ind) && mesh.heIsInterior(ind);
+  return !mesh.edgeIsDead(ind);
 }
 
 
@@ -327,15 +327,16 @@ inline bool BoundaryLoopRangeF::elementOkay(const HalfedgeMesh& mesh, size_t ind
 
 namespace std {
 
-template <typename T>
-struct hash<geometrycentral::surface::Element<T>> {
-  std::size_t operator()(const geometrycentral::surface::Element<T>& e) const {
-    return std::hash<size_t>{}(e.getIndex());
-  }
-};
-// template <>
-// struct hash<geometrycentral::Vertex> {
-// std::size_t operator()(const geometrycentral::Vertex& v) const { return std::hash<size_t>{}(v.ptr->ID); }
-//};
+// For lookup reasons I don't entirely understand, need to list these out explicitly, template on base does not resolve
+
+// clang-format off
+template <> struct hash<geometrycentral::surface::Vertex>         { std::size_t operator()(const geometrycentral::surface::Vertex& e)         const { return std::hash<size_t>{}(e.getIndex()); } };
+template <> struct hash<geometrycentral::surface::Halfedge>       { std::size_t operator()(const geometrycentral::surface::Halfedge& e)       const { return std::hash<size_t>{}(e.getIndex()); } };
+template <> struct hash<geometrycentral::surface::Corner>         { std::size_t operator()(const geometrycentral::surface::Corner& e)         const { return std::hash<size_t>{}(e.getIndex()); } };
+template <> struct hash<geometrycentral::surface::Edge>           { std::size_t operator()(const geometrycentral::surface::Edge& e)           const { return std::hash<size_t>{}(e.getIndex()); } };
+template <> struct hash<geometrycentral::surface::Face>           { std::size_t operator()(const geometrycentral::surface::Face& e)           const { return std::hash<size_t>{}(e.getIndex()); } };
+template <> struct hash<geometrycentral::surface::BoundaryLoop>   { std::size_t operator()(const geometrycentral::surface::BoundaryLoop& e)   const { return std::hash<size_t>{}(e.getIndex()); } };
+
+// clang-format on
 
 } // namespace std

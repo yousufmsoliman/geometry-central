@@ -73,7 +73,7 @@ Index parseFaceIndex(const std::string& token) {
 
 // Read a .obj file containing a polygon mesh
 void PolygonSoupMesh::readMeshFromFile(std::string filename) {
-  std::cout << "Reading mesh from file: " << filename << std::endl;
+  //std::cout << "Reading mesh from file: " << filename << std::endl;
 
   polygons.clear();
   vertexCoordinates.clear();
