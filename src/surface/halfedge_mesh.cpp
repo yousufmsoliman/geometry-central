@@ -61,25 +61,20 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
 
   START_TIMING(construction)
 
-  // Flatten in the input list and measure some element counts
+  // Check input list and measure some element counts
   nFacesCount = polygons.size();
   nVerticesCount = 0;
-  std::vector<size_t> flatFaces;
-  std::vector<size_t> faceDegrees;
-  faceDegrees.reserve(nFacesCount);
-  for (auto poly : polygons) {
+  for (const std::vector<size_t>& poly : polygons) {
     GC_SAFETY_ASSERT(poly.size() >= 3, "faces must have degree >= 3");
-    faceDegrees.push_back(poly.size());
     for (auto i : poly) {
       nVerticesCount = std::max(nVerticesCount, i);
-      flatFaces.push_back(i);
     }
   }
   nVerticesCount++; // 0-based means count is max+1
 
   // Pre-allocate face and vertex arrays
   vHalfedge = std::vector<size_t>(nVerticesCount, INVALID_IND);
-  fHalfedge = std::vector<size_t>(nVerticesCount, INVALID_IND);
+  fHalfedge = std::vector<size_t>(nFacesCount, INVALID_IND);
 
   // Track halfedges which have already been created
   // TODO replace with compressed list for performance
@@ -92,17 +87,17 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
   };
 
   // Walk the faces, creating halfedges and hooking up pointers
-  size_t iFlatHeStart = 0;
   for (size_t iFace = 0; iFace < nFacesCount; iFace++) {
+    const std::vector<size_t>& poly = polygons[iFace];
 
     // Walk around this face
-    size_t faceDegree = faceDegrees[iFace];
+    size_t faceDegree = poly.size();
     size_t prevHeInd = INVALID_IND;
     size_t firstHeInd = INVALID_IND;
     for (size_t iFaceHe = 0; iFaceHe < faceDegree; iFaceHe++) {
 
-      size_t indTail = iFace + iFaceHe;
-      size_t indTip = iFace + (iFaceHe + 1) % faceDegree;
+      size_t indTail = poly[iFaceHe];
+      size_t indTip = poly[(iFaceHe + 1) % faceDegree];
 
       // Get an index for this halfedge
       std::tuple<size_t, size_t> heKey{indTail, indTip};
@@ -126,8 +121,8 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
         // Grow arrays to make space
         heNext.push_back(INVALID_IND);
         heNext.push_back(INVALID_IND);
-        heVertex.push_back(INVALID_IND);
-        heVertex.push_back(INVALID_IND);
+        heVertex.push_back(indTail);
+        heVertex.push_back(indTip);
         heFace.push_back(INVALID_IND);
         heFace.push_back(INVALID_IND);
       } else {
@@ -137,7 +132,6 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
 
       // Hook up a bunch of pointers
       heFace[halfedgeInd] = iFace;
-      heVertex[halfedgeInd] = indTail;
       vHalfedge[indTail] = halfedgeInd;
       if (iFaceHe == 0) {
         fHalfedge[iFace] = halfedgeInd;
@@ -149,9 +143,6 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
     }
 
     heNext[prevHeInd] = firstHeInd; // hook up the first next() pointer, which we missed in the loop above
-
-    // Prepare to loop again
-    iFlatHeStart += faceDegree;
   }
 
 
@@ -203,8 +194,12 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
       // Advance to the next halfedge along the boundary
       prevHe = currHe;
       currHe = heTwin(heNext[heTwin(currHe)]);
-      while (heFace[iHe] != INVALID_IND) {
-        currHe = heNext[heTwin(currHe)];
+      size_t loopCountInnter = 0;
+      while (heFace[currHe] != INVALID_IND) {
+				if(currHe == iHe) break;
+        currHe = heTwin(heNext[currHe]);
+        loopCountInnter++;
+        GC_SAFETY_ASSERT(loopCountInnter < nHalfedgesCount, "boundary infinite loop orbit");
       }
 
       // Set the next pointer around the boundary loop
@@ -214,6 +209,7 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
       // input. I don't _think_ it can happen, but there might be some non-manifold input which manfests failure via an
       // infinte loop here, and such a loop is an inconvenient failure mode.
       loopCount++;
+      GC_SAFETY_ASSERT(loopCount < nHalfedgesCount, "boundary infinite loop");
     } while (currHe != iHe);
   }
 

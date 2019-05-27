@@ -87,6 +87,13 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 set_property(TARGET gtest PROPERTY CXX_STANDARD 11)
 
 
+
+### Set (hardcode) a variable for where to find the assets
+set(REL_ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets/")
+get_filename_component(ABS_ASSETS_DIR "${REL_ASSETS_DIR}" ABSOLUTE)
+add_definitions(-DGC_TEST_ASSETS_ABS_PATH=\"${ABS_ASSETS_DIR}\")
+
+
 # Build the tests
 set(TEST_SRCS 
   src/main_test.cpp

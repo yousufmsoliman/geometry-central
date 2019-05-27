@@ -1,5 +1,7 @@
 Things to not forget about:
 
+- Change format for permutation callback, DynamicElement can't update efficiently right now
+
 - Destruction order of MeshData and halfedge mesh. Can we support either being destructed first? Current MeshData must die first (I think). If not, add note to docs.
 
 - #defines to manage safety checks. Docs mention NGC_SAFETY_CHECKS.
