@@ -20,8 +20,8 @@ void ExactPolyhedralGeodesics::clear() {
   while (not winQ.empty()) winQ.pop();
   while (not pseudoSrcQ.empty()) pseudoSrcQ.pop();
 
-  splitInfos = HalfedgeData<SplitInfo>(mesh);
-  vertInfos = VertexData<VertInfo>(mesh);
+  splitInfos = HalfedgeData<SplitInfo>(*mesh);
+  vertInfos = VertexData<VertInfo>(*mesh);
 
   for (Halfedge he : mesh->halfedges()) {
     splitInfos[he].dist = std::numeric_limits<double>::infinity();
@@ -44,7 +44,7 @@ void ExactPolyhedralGeodesics::clear() {
 
   storedWindows.clear();
   keptFaces.clear();
-  allWindows = HalfedgeData<std::list<Window>>(mesh);
+  allWindows = HalfedgeData<std::list<Window>>(*mesh);
   keptAllWindows = false;
 
   numOfWinGen = 0;
@@ -489,7 +489,7 @@ VertexData<double> ExactPolyhedralGeodesics::computeDistance() {
     if (geodesicRadiusReached) break;
   }
 
-  VertexData<double> dists(mesh);
+  VertexData<double> dists(*mesh);
   for (Vertex v : mesh->vertices()) {
     dists[v] = vertInfos[v].dist;
   }

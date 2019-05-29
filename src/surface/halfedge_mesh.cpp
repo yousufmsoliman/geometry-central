@@ -328,7 +328,7 @@ int HalfedgeMesh::genus() const {
 }
 
 VertexData<size_t> HalfedgeMesh::getVertexIndices() {
-  VertexData<size_t> indices(this);
+  VertexData<size_t> indices(*this);
   size_t i = 0;
   for (Vertex v : vertices()) {
     indices[v] = i;
@@ -338,7 +338,7 @@ VertexData<size_t> HalfedgeMesh::getVertexIndices() {
 }
 
 VertexData<size_t> HalfedgeMesh::getInteriorVertexIndices() {
-  VertexData<size_t> indices(this);
+  VertexData<size_t> indices(*this);
   size_t i = 0;
   for (Vertex v : vertices()) {
     if (v.isBoundary()) {
@@ -352,7 +352,7 @@ VertexData<size_t> HalfedgeMesh::getInteriorVertexIndices() {
 }
 
 FaceData<size_t> HalfedgeMesh::getFaceIndices() {
-  FaceData<size_t> indices(this);
+  FaceData<size_t> indices(*this);
   size_t i = 0;
   for (Face f : faces()) {
     indices[f] = i;
@@ -362,7 +362,7 @@ FaceData<size_t> HalfedgeMesh::getFaceIndices() {
 }
 
 EdgeData<size_t> HalfedgeMesh::getEdgeIndices() {
-  EdgeData<size_t> indices(this);
+  EdgeData<size_t> indices(*this);
   size_t i = 0;
   for (Edge e : edges()) {
     indices[e] = i;
@@ -372,7 +372,7 @@ EdgeData<size_t> HalfedgeMesh::getEdgeIndices() {
 }
 
 HalfedgeData<size_t> HalfedgeMesh::getHalfedgeIndices() {
-  HalfedgeData<size_t> indices(this);
+  HalfedgeData<size_t> indices(*this);
   size_t i = 0;
   for (Halfedge he : halfedges()) {
     indices[he] = i;
@@ -382,7 +382,7 @@ HalfedgeData<size_t> HalfedgeMesh::getHalfedgeIndices() {
 }
 
 CornerData<size_t> HalfedgeMesh::getCornerIndices() {
-  CornerData<size_t> indices(this);
+  CornerData<size_t> indices(*this);
   size_t i = 0;
   for (Corner c : corners()) {
     indices[c] = i;

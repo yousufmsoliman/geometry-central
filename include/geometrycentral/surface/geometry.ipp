@@ -507,7 +507,7 @@ void Geometry<T>::getPrincipalDirections(VertexData<Complex>& principalDirection
 
 template <class T>
 void Geometry<T>::getEdgeLengths(EdgeData<double>& edgeLength) {
-  edgeLength = EdgeData<double>(&mesh);
+  edgeLength = EdgeData<double>(mesh);
   for (Edge e : mesh.edges()) {
     edgeLength[e] = length(e);
   }
@@ -515,7 +515,7 @@ void Geometry<T>::getEdgeLengths(EdgeData<double>& edgeLength) {
 
 template <class T>
 void Geometry<T>::getEdgeCotanWeights(EdgeData<double>& edgeCotanWeight) {
-  edgeCotanWeight = EdgeData<double>(&mesh);
+  edgeCotanWeight = EdgeData<double>(mesh);
   for (Edge e : mesh.edges()) {
     edgeCotanWeight[e] = cotanWeight(e);
   }
@@ -523,7 +523,7 @@ void Geometry<T>::getEdgeCotanWeights(EdgeData<double>& edgeCotanWeight) {
 
 template <class T>
 void Geometry<T>::getFaceAreas(FaceData<double>& faceArea) {
-  faceArea = FaceData<double>(&mesh);
+  faceArea = FaceData<double>(mesh);
   for (Face f : mesh.faces()) {
     faceArea[f] = area(f);
   }
@@ -532,7 +532,7 @@ void Geometry<T>::getFaceAreas(FaceData<double>& faceArea) {
 
 template <class T>
 void Geometry<T>::getFaceNormals(FaceData<Vector3>& faceNormal) {
-  faceNormal = FaceData<Vector3>(&mesh);
+  faceNormal = FaceData<Vector3>(mesh);
   for (Face f : mesh.faces()) {
     faceNormal[f] = normal(f);
   }
@@ -540,7 +540,7 @@ void Geometry<T>::getFaceNormals(FaceData<Vector3>& faceNormal) {
 
 template <class T>
 void Geometry<T>::getFaceBarycenters(FaceData<T>& faceBarycenter) {
-  faceBarycenter = FaceData<T>(&mesh);
+  faceBarycenter = FaceData<T>(mesh);
   for (Face f : mesh.faces()) {
     faceBarycenter[f] = barycenter(f);
   }
@@ -548,7 +548,7 @@ void Geometry<T>::getFaceBarycenters(FaceData<T>& faceBarycenter) {
 
 template <class T>
 void Geometry<T>::getHalfedgeVectors(HalfedgeData<T>& halfedgeVector) {
-  halfedgeVector = HalfedgeData<T>(&mesh);
+  halfedgeVector = HalfedgeData<T>(mesh);
   for (Halfedge h : mesh.halfedges()) {
     halfedgeVector[h] = vector(h);
   }
@@ -556,7 +556,7 @@ void Geometry<T>::getHalfedgeVectors(HalfedgeData<T>& halfedgeVector) {
 
 template <class T>
 void Geometry<T>::getHalfedgeAngles(HalfedgeData<double>& halfedgeAngle) {
-  halfedgeAngle = HalfedgeData<double>(&mesh);
+  halfedgeAngle = HalfedgeData<double>(mesh);
   for (Halfedge h : mesh.halfedges()) {
     halfedgeAngle[h] = angle(h);
   }
@@ -564,7 +564,7 @@ void Geometry<T>::getHalfedgeAngles(HalfedgeData<double>& halfedgeAngle) {
 
 template <class T>
 void Geometry<T>::getCornerAngles(CornerData<double>& cornerAngle) {
-  cornerAngle = CornerData<double>(&mesh);
+  cornerAngle = CornerData<double>(mesh);
   for (Corner c : mesh.corners()) {
     cornerAngle[c] = angle(c);
   }
@@ -572,7 +572,7 @@ void Geometry<T>::getCornerAngles(CornerData<double>& cornerAngle) {
 
 template <class T>
 void Geometry<T>::getHalfedgeCotans(HalfedgeData<double>& halfedgeCotan) {
-  halfedgeCotan = HalfedgeData<double>(&mesh, 0.);
+  halfedgeCotan = HalfedgeData<double>(mesh, 0.);
   for (Halfedge h : mesh.interiorHalfedges()) {
     halfedgeCotan[h] = cotan(h);
   }
@@ -580,7 +580,7 @@ void Geometry<T>::getHalfedgeCotans(HalfedgeData<double>& halfedgeCotan) {
 
 template <class T>
 void Geometry<T>::getAngularCoordinates(HalfedgeData<double>& angularCoordinates) {
-  angularCoordinates = HalfedgeData<double>(&mesh);
+  angularCoordinates = HalfedgeData<double>(mesh);
   for (Halfedge h : mesh.halfedges()) {
     angularCoordinates[h] = angularCoordinate(h);
   }

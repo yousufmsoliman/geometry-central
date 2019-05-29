@@ -45,11 +45,11 @@ private:
   void deregisterWithMesh();
 
 public:
-  MeshData() {}
-  MeshData(HalfedgeMesh* parentMesh);
-  MeshData(HalfedgeMesh* parentMesh, T initVal);
-  MeshData(HalfedgeMesh* parentMesh, const Eigen::Matrix<T, Eigen::Dynamic, 1>& vector);
-  MeshData(HalfedgeMesh* parentMesh, const Eigen::Matrix<T, Eigen::Dynamic, 1>& vector,
+  MeshData();
+  MeshData(HalfedgeMesh& parentMesh);
+  MeshData(HalfedgeMesh& parentMesh, T initVal);
+  MeshData(HalfedgeMesh& parentMesh, const Eigen::Matrix<T, Eigen::Dynamic, 1>& vector);
+  MeshData(HalfedgeMesh& parentMesh, const Eigen::Matrix<T, Eigen::Dynamic, 1>& vector,
            const MeshData<E, size_t>& indexer);
 
   // Rule of 5
@@ -80,6 +80,9 @@ public:
   Eigen::Matrix<T, Eigen::Dynamic, 1> toVector(const MeshData<E, size_t>& indexer) const;
   void fromVector(const Eigen::Matrix<T, Eigen::Dynamic, 1>& vector);
   void fromVector(const Eigen::Matrix<T, Eigen::Dynamic, 1>& vector, const MeshData<E, size_t>& indexer);
+
+  // Naively reinterpret the data as residing on another mesh, constructing a new container
+  MeshData<E, T> reinterpretTo(HalfedgeMesh& targetMesh);
 };
 
 // === Typdefs for the usual VertexData<> etc

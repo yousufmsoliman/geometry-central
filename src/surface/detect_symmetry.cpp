@@ -63,7 +63,7 @@ SymmetryResult detectSymmetryMirror(Geometry<Euclidean>* geom, Vector3 planeNorm
 
   SymmetryResult result;
   result.symmetryFound = false;
-  result.symmetrySet = VertexData<std::vector<Vertex>>(mesh, std::vector<Vertex>());
+  result.symmetrySet = VertexData<std::vector<Vertex>>(*mesh, std::vector<Vertex>());
 
   for (Vertex v : mesh->vertices()) {
     // Compute the symmetric point
@@ -111,7 +111,7 @@ SymmetryResult detectSymmetryRotation(Geometry<Euclidean>* geom, Vector3 rotAxis
 
   SymmetryResult result;
   result.symmetryFound = false;
-  result.symmetrySet = VertexData<std::vector<Vertex>>(mesh, std::vector<Vertex>());
+  result.symmetrySet = VertexData<std::vector<Vertex>>(*mesh, std::vector<Vertex>());
 
   for (Vertex v : mesh->vertices()) {
     // Compute the symmetric point
@@ -157,7 +157,7 @@ SymmetryResult detectSymmetryDoubleMirror(Geometry<Euclidean>* geom, KdTree* tre
 
   SymmetryResult result;
   result.symmetryFound = false;
-  result.symmetrySet = VertexData<std::vector<Vertex>>(mesh, std::vector<Vertex>());
+  result.symmetrySet = VertexData<std::vector<Vertex>>(*mesh, std::vector<Vertex>());
 
   for (Vertex v : mesh->vertices()) {
     // Compute the symmetric point

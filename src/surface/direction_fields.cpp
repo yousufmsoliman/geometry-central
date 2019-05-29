@@ -115,7 +115,7 @@ VertexData<Complex> computeSmoothestVertexDirectionField_noBoundary(Geometry<Euc
   }
 
   // Copy the result to a VertexData vector
-  VertexData<Complex> toReturn(mesh);
+  VertexData<Complex> toReturn(*mesh);
   for (Vertex v : mesh->vertices()) {
     toReturn[v] = solution[gc.vertexIndices[v]] / std::abs(solution[gc.vertexIndices[v]]);
   }
@@ -136,7 +136,7 @@ VertexData<Complex> computeSmoothestVertexDirectionField_boundary(Geometry<Eucli
   gc.requireVertexDualAreas();
 
   // Compute the boundary values
-  VertexData<std::complex<double>> boundaryValues(mesh);
+  VertexData<std::complex<double>> boundaryValues(*mesh);
   for (Vertex v : mesh->vertices()) {
     if (v.isBoundary()) {
       Vector3 b = geometry->boundaryNormal(v);
@@ -257,7 +257,7 @@ VertexData<Complex> computeSmoothestVertexDirectionField_boundary(Geometry<Eucli
   }
 
   // Copy the result to a VertexData vector for both the boudary and interior
-  VertexData<Complex> toReturn(mesh);
+  VertexData<Complex> toReturn(*mesh);
   for (Vertex v : mesh->vertices()) {
     if (v.isBoundary()) {
       toReturn[v] = boundaryValues[v];
@@ -408,7 +408,7 @@ FaceData<Complex> computeSmoothestFaceDirectionField_noBoundary(Geometry<Euclide
 
 
   // Copy the result to a FaceData object
-  FaceData<Complex> field(mesh);
+  FaceData<Complex> field(*mesh);
   for (Face f : mesh->faces()) {
     field[f] = solution[gc.faceIndices[f]] / std::abs(solution[gc.faceIndices[f]]);
   }
@@ -430,8 +430,8 @@ FaceData<Complex> computeSmoothestFaceDirectionField_boundary(Geometry<Euclidean
 
   // Index interior faces
   size_t nInteriorFace = 0;
-  FaceData<size_t> interiorFaceInd(mesh, -77);
-  FaceData<char> isInterior(mesh);
+  FaceData<size_t> interiorFaceInd(*mesh, -77);
+  FaceData<char> isInterior(*mesh);
   for (Face f : mesh->faces()) {
     bool isBoundary = false;
     for (Edge e : f.adjacentEdges()) {
@@ -444,7 +444,7 @@ FaceData<Complex> computeSmoothestFaceDirectionField_boundary(Geometry<Euclidean
   }
 
   // Compute boundary values
-  FaceData<Complex> boundaryValues(mesh);
+  FaceData<Complex> boundaryValues(*mesh);
   for (Face f : mesh->faces()) {
     if (isInterior[f]) {
       boundaryValues[f] = 0;
@@ -573,7 +573,7 @@ FaceData<Complex> computeSmoothestFaceDirectionField_boundary(Geometry<Euclidean
 
 
   // Copy the result to a FaceData object
-  FaceData<Complex> field(mesh);
+  FaceData<Complex> field(*mesh);
   for (Face f : mesh->faces()) {
     if (isInterior[f]) {
       field[f] = unit(solution[interiorFaceInd[f]]);
@@ -620,7 +620,7 @@ FaceData<int> computeFaceIndex(Geometry<Euclidean>* geometry, VertexData<Complex
   gc.requireFaceTransportCoefs();
 
   // Store the result here
-  FaceData<int> indices(mesh);
+  FaceData<int> indices(*mesh);
 
   // TODO haven't tested that this correctly reports the index when it is larger
   // than +-1
@@ -660,7 +660,7 @@ VertexData<int> computeVertexIndex(Geometry<Euclidean>* geometry, FaceData<Compl
   gc.requireFaceTransportCoefs();
 
   // Store the result here
-  VertexData<int> indices(mesh);
+  VertexData<int> indices(*mesh);
 
   // TODO haven't tested that this correctly reports the index when it is larger
   // than +-1

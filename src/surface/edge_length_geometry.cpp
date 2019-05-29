@@ -18,7 +18,7 @@ EdgeLengthGeometry::EdgeLengthGeometry(HalfedgeMesh* mesh_, EdgeData<double>& ed
 EdgeLengthGeometry::EdgeLengthGeometry(HalfedgeMesh* mesh_, VertexData<Vector3>& vertexPositions)
     : IntrinsicGeometry(mesh_) {
 
-  geodesicEdgeLengths = EdgeData<double>(mesh);
+  geodesicEdgeLengths = EdgeData<double>(*mesh);
   for (Edge e : mesh->edges()) {
     geodesicEdgeLengths[e] =
         norm(vertexPositions[e.halfedge().vertex()] - vertexPositions[e.halfedge().twin().vertex()]);

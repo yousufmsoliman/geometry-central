@@ -27,7 +27,7 @@ MeshData<E, T> PlyHalfedgeMeshData::getElementProperty(std::string propertyName)
     throw std::runtime_error("Property " + propertyName + " does not have size equal to number of " + eName);
   }
 
-  MeshData<E, T> result(&mesh);
+  MeshData<E, T> result(mesh);
   size_t i = 0;
   for (E e : iterateElements<E>(&mesh)) {
     result[e] = rawData[i];

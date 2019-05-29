@@ -19,7 +19,7 @@ EdgeData<char> minimalSpanningTree(Geometry<Euclidean>* geometry) {
   VertexData<size_t> vInd = mesh->getVertexIndices();
 
   // Store result here
-  EdgeData<char> spanningTree(mesh, false);
+  EdgeData<char> spanningTree(*mesh, false);
 
   // Track which vertices have been connected
   DisjointSets dj(mesh->nVertices());
@@ -67,7 +67,7 @@ EdgeData<char> minimalSpanningTree(EdgeLengthGeometry* geometry) {
   VertexData<size_t> vInd = mesh->getVertexIndices();
 
   // Store result here
-  EdgeData<char> spanningTree(mesh, false);
+  EdgeData<char> spanningTree(*mesh, false);
 
   // Track which vertices have been connected
   DisjointSets dj(mesh->nVertices());
@@ -118,7 +118,7 @@ EdgeData<char> spanningTreeBetweenVertices(Geometry<Euclidean>* geometry, const 
 
   // Handle special case of no required vertices
   if (requiredVertices.size() == 0) {
-    return EdgeData<char>(mesh, false);
+    return EdgeData<char>(*mesh, false);
   }
 
   // Find a spanning tree amongst all vertices in the graph
@@ -129,14 +129,14 @@ EdgeData<char> spanningTreeBetweenVertices(Geometry<Euclidean>* geometry, const 
 
   // = Initialize
   // Mark needed vertices for O(1) lookup
-  VertexData<char> vertexNeeded(mesh, false);
+  VertexData<char> vertexNeeded(*mesh, false);
   for (Vertex v : requiredVertices) {
     vertexNeeded[v] = true;
   }
 
   // Initialize a count of vertex degrees in the spanning tree
   std::vector<Vertex> degree1Verts;
-  VertexData<int> vDegree(mesh);
+  VertexData<int> vDegree(*mesh);
   for (Vertex v : mesh->vertices()) {
     int treeDegree = 0;
     for (Edge e : v.adjacentEdges()) {

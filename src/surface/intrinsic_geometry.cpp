@@ -78,7 +78,7 @@ void IntrinsicGeometry::computeFaceAreas() {
   // TODO try these for better accuracy in near-degenerate triangles?
   // "Miscalculating Area and Angles of a Needle-like Triangle" https://www.cs.unc.edu/~snoeyink/c/c205/Triangle.pdf
 
-  faceAreas = FaceData<double>(mesh);
+  faceAreas = FaceData<double>(*mesh);
   for (Face f : mesh->faces()) {
 
     // Herons formulat
@@ -96,7 +96,7 @@ void IntrinsicGeometry::computeFaceAreas() {
 
 
 void IntrinsicGeometry::computeVertexDualAreas() {
-  vertexDualAreas = VertexData<double>(mesh);
+  vertexDualAreas = VertexData<double>(*mesh);
   for (Vertex v : mesh->vertices()) {
     double A = 0;
     for (Face f : v.adjacentFaces()) {
@@ -108,7 +108,7 @@ void IntrinsicGeometry::computeVertexDualAreas() {
 
 void IntrinsicGeometry::computeHalfedgeFaceCoords() {
   verifyTriangular(mesh);
-  halfedgeFaceCoords = HalfedgeData<Complex>(mesh);
+  halfedgeFaceCoords = HalfedgeData<Complex>(*mesh);
 
   for (Face f : mesh->faces()) {
 
@@ -137,7 +137,7 @@ void IntrinsicGeometry::computeHalfedgeFaceCoords() {
 
 void IntrinsicGeometry::computeFaceTransportCoefs() {
 
-  faceTransportCoefs = HalfedgeData<Complex>(mesh);
+  faceTransportCoefs = HalfedgeData<Complex>(*mesh);
 
   for (Halfedge he : mesh->interiorHalfedges()) {
     if (he.twin().isInterior()) {
@@ -150,7 +150,7 @@ void IntrinsicGeometry::computeFaceTransportCoefs() {
 
 void IntrinsicGeometry::computeVertexTransportCoefs() {
 
-  vertexTransportCoefs = HalfedgeData<Complex>(mesh);
+  vertexTransportCoefs = HalfedgeData<Complex>(*mesh);
 
   for (Halfedge he : mesh->halfedges()) {
     Complex angleInSource = halfedgeVertexCoords[he];
@@ -163,7 +163,7 @@ void IntrinsicGeometry::computeVertexTransportCoefs() {
 void IntrinsicGeometry::computeHalfedgeOppositeAngles() {
   verifyTriangular(mesh);
 
-  halfedgeOppositeAngles = HalfedgeData<double>(mesh);
+  halfedgeOppositeAngles = HalfedgeData<double>(*mesh);
   for (Halfedge he : mesh->halfedges()) {
     if (he.isInterior()) {
 
@@ -184,7 +184,7 @@ void IntrinsicGeometry::computeHalfedgeOppositeAngles() {
 
 
 void IntrinsicGeometry::computeHalfedgeCotanWeights() {
-  halfedgeCotanWeights = HalfedgeData<double>(mesh);
+  halfedgeCotanWeights = HalfedgeData<double>(*mesh);
   for (Halfedge he : mesh->halfedges()) {
     if (he.isInterior()) {
       halfedgeCotanWeights[he] = std::tan(PI / 2.0 - halfedgeOppositeAngles[he]);
@@ -196,7 +196,7 @@ void IntrinsicGeometry::computeHalfedgeCotanWeights() {
 
 
 void IntrinsicGeometry::computeEdgeCotanWeights() {
-  edgeCotanWeights = EdgeData<double>(mesh);
+  edgeCotanWeights = EdgeData<double>(*mesh);
   for (Edge e : mesh->edges()) {
     double weight = halfedgeCotanWeights[e.halfedge()];
     if (e.halfedge().twin().isInterior()) {
@@ -210,7 +210,7 @@ void IntrinsicGeometry::computeEdgeCotanWeights() {
 void IntrinsicGeometry::computeVertexAngleDefects() {
   verifyTriangular(mesh);
 
-  vertexAngleDefects = VertexData<double>(mesh);
+  vertexAngleDefects = VertexData<double>(*mesh);
   for (Vertex v : mesh->vertices()) {
     if (v.isBoundary()) {
       // Convention: no curvature at boundary
@@ -227,7 +227,7 @@ void IntrinsicGeometry::computeVertexAngleDefects() {
 
 
 void IntrinsicGeometry::computeHalfedgeRescaledOppositeAngles() {
-  halfedgeRescaledOppositeAngles = HalfedgeData<double>(mesh);
+  halfedgeRescaledOppositeAngles = HalfedgeData<double>(*mesh);
   for (Halfedge he : mesh->interiorHalfedges()) {
     double origSum = 2. * PI - vertexAngleDefects[he.next().next().vertex()];
     halfedgeRescaledOppositeAngles[he] = halfedgeOppositeAngles[he] * 2. * PI / origSum;
@@ -238,7 +238,7 @@ void IntrinsicGeometry::computeHalfedgeRescaledOppositeAngles() {
 void IntrinsicGeometry::computeHalfedgeVertexCoords() {
   verifyTriangular(mesh);
 
-  halfedgeVertexCoords = HalfedgeData<Complex>(mesh);
+  halfedgeVertexCoords = HalfedgeData<Complex>(*mesh);
 
   for (Vertex v : mesh->vertices()) {
 

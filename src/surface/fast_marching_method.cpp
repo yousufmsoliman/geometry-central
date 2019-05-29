@@ -27,8 +27,8 @@ VertexData<double> FMMDistance(HalfedgeMesh* mesh, const std::vector<std::pair<V
   typedef std::pair<double, Vertex> Entry;
 
   // Initialize
-  VertexData<double> distances(mesh, std::numeric_limits<double>::infinity());
-  VertexData<char> finalized(mesh, false);
+  VertexData<double> distances(*mesh, std::numeric_limits<double>::infinity());
+  VertexData<char> finalized(*mesh, false);
 
   std::priority_queue<Entry, std::vector<Entry>, std::greater<Entry>> frontierPQ;
   for (auto& x : initialDistances) {

@@ -8,33 +8,32 @@ namespace surface {
 // === Actual function implementations
 
 template <typename E, typename T>
-MeshData<E, T>::MeshData(HalfedgeMesh* parentMesh) : mesh(parentMesh) {
-  if (parentMesh != nullptr) {
-    data.resize(elementCapacity<E>(parentMesh));
-    fill(defaultValue);
-  }
+MeshData<E, T>::MeshData() {}
+
+template <typename E, typename T>
+MeshData<E, T>::MeshData(HalfedgeMesh& parentMesh) : mesh(&parentMesh) {
+  data.resize(elementCapacity<E>(mesh));
+  fill(defaultValue);
 
   registerWithMesh();
 }
 
 template <typename E, typename T>
-MeshData<E, T>::MeshData(HalfedgeMesh* parentMesh, T initVal) : mesh(parentMesh), defaultValue(initVal) {
-  if (parentMesh != nullptr) {
-    data.resize(elementCapacity<E>(parentMesh));
-    fill(defaultValue);
-  }
+MeshData<E, T>::MeshData(HalfedgeMesh& parentMesh, T initVal) : mesh(&parentMesh), defaultValue(initVal) {
+  data.resize(elementCapacity<E>(mesh));
+  fill(defaultValue);
 
   registerWithMesh();
 }
 
 template <typename E, typename T>
-MeshData<E, T>::MeshData(HalfedgeMesh* parentMesh, const Eigen::Matrix<T, Eigen::Dynamic, 1>& vector)
+MeshData<E, T>::MeshData(HalfedgeMesh& parentMesh, const Eigen::Matrix<T, Eigen::Dynamic, 1>& vector)
     : MeshData(parentMesh) {
   fromVector(vector);
 }
 
 template <typename E, typename T>
-MeshData<E, T>::MeshData(HalfedgeMesh* parentMesh, const Eigen::Matrix<T, Eigen::Dynamic, 1>& vector,
+MeshData<E, T>::MeshData(HalfedgeMesh& parentMesh, const Eigen::Matrix<T, Eigen::Dynamic, 1>& vector,
                          const MeshData<E, size_t>& indexer)
     : MeshData(parentMesh) {
   fromVector(vector, indexer);
@@ -217,4 +216,5 @@ inline size_t MeshData<E, T>::size() const {
   return nElements<E>(mesh);
 }
 
-}}
+} // namespace surface
+} // namespace geometrycentral

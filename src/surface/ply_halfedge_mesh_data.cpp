@@ -78,7 +78,7 @@ std::unique_ptr<Geometry<Euclidean>> PlyHalfedgeMeshData::getGeometry() {
 
 VertexData<Vector3> PlyHalfedgeMeshData::getVertexColors() {
 
-  VertexData<Vector3> color(&mesh);
+  VertexData<Vector3> color(mesh);
 
   try {
     // Try uchar first
