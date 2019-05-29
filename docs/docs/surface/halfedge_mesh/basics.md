@@ -12,7 +12,7 @@ As the name suggests, the primary type in a halfedge mesh is a _halfedge_, in ad
 - `Halfedge::edge()` the incident edge
 - `Halfedge::face()` the incident face
 
-![halfedge pointers](../media/halfedge_pointers.png)
+![halfedge pointers](../../media/halfedge_pointers.png)
 
 Each vertex, edge, and face need just one relationship:
 
@@ -38,7 +38,7 @@ Manifoldness means that our surface must locally look like a plane in any neighb
 
 Furthermore the halfedge mesh implies a combinatorial _orientation_ of the surface, indicated by the clockwise ordering of halfedges around each face (see figure below). Because the halfedge mesh implies an orientation, it cannot represent non-orientable surfaces, like a Klein bottle.
 
-![halfedge orientation](../media/halfedge_orientation.png)
+![halfedge orientation](../../media/halfedge_orientation.png)
 
 These properties are invariants which always hold for any meaningful halfedge mesh; in practice we check them during construction and ensure that all operations preserve them.
 

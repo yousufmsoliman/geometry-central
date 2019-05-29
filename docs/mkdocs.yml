@@ -27,30 +27,31 @@ extra_javascript:
 repo_name: 'nmwsharp/geometry-central'
 repo_url: 'https://github.com/nmwsharp/geometry-central'
 
-pages:
+nav:
   - Home: 'index.md'
   - Build: 
     - 'Building' : 'build/build.md'
     - 'Tests' : 'build/tests.md'
-  - Halfedge Mesh: 
-    - 'Basics' : 'halfedge_mesh/basics.md'
-    - 'Boundaries' : 'halfedge_mesh/boundaries.md'
-    - 'Navigation and Iteration' : 'halfedge_mesh/navigation.md'
-    - 'Containers' : 'halfedge_mesh/containers.md'
-    - 'I/O' : 'halfedge_mesh/io.md'
-    - 'Mutation' : 'halfedge_mesh/mutation.md'
-    - 'Delta Complexes' : 'halfedge_mesh/delta_complex.md'
-    - 'Internals' : 'halfedge_mesh/internals.md'
-  - Geometry: 
-    - 'Intrinsic Geometry' : 'geometry/intrinsic_geometry.md'
+  - Surface:
+    - Halfedge Mesh: 
+      - 'Basics' : 'surface/halfedge_mesh/basics.md'
+      - 'Boundaries' : 'surface/halfedge_mesh/boundaries.md'
+      - 'Navigation and Iteration' : 'surface/halfedge_mesh/navigation.md'
+      - 'Containers' : 'surface/halfedge_mesh/containers.md'
+      - 'I/O' : 'surface/halfedge_mesh/io.md'
+      - 'Mutation' : 'surface/halfedge_mesh/mutation.md'
+      - 'Delta Complexes' : 'surface/halfedge_mesh/delta_complex.md'
+      - 'Internals' : 'surface/halfedge_mesh/internals.md'
+    - Geometry: 
+      - 'Intrinsic Geometry' : 'surface/geometry/intrinsic_geometry.md'
+    - Algorithms: 
+      - 'Direction Fields' : 'surface/algorithms/direction_fields.md'
+      - 'Distance' : 'surface/algorithms/distance.md'
+      - 'Mesh Graph Algorithms' : 'surface/algorithms/mesh_graph_algorithms.md'
   - Linear Algebra: 
     - 'Matrix Types' : 'linear_algebra/matrix_types.md'
     - 'Utilities' : 'linear_algebra/utilities.md'
     - 'Solvers' : 'linear_algebra/solvers.md'
-  - Algorithms: 
-    - 'Direction Fields' : 'algorithms/direction_fields.md'
-    - 'Distance' : 'algorithms/distance.md'
-    - 'Mesh Graph Algorithms' : 'algorithms/mesh_graph_algorithms.md'
   - Utilities: 
     - 'Vector Types' : 'utilities/vector_types.md'
 

@@ -84,7 +84,7 @@ Thus at any point in time, some indices may be invalid elements, left from previ
 
 The following diagram lays out what this index space might look like.
 
-![halfedge index diagram](../media/halfedge_index_diagram.svg)
+![halfedge index diagram](../../media/halfedge_index_diagram.svg)
 
 ### Exterior boundary elements
 

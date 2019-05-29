@@ -19,7 +19,7 @@ However, the $\Delta$-complex still requires that every faces has 3 sides, and t
 
 The following surfaces are $\Delta$-complexes but not simplicial complexes:
 
-![Delta complex examples](../media/delta_complex_examples.svg)
+![Delta complex examples](../../media/delta_complex_examples.svg)
 
 ## That sounds complicated, why would you do that? 
 
