@@ -37,7 +37,7 @@ TEST_F(HalfedgeMeshSuite, ValidateBoundaryMeshTest) {
 }
 
 // ============================================================
-// =============== Basic iterator tests
+// =============== Range iterator tests
 // ============================================================
 
 TEST_F(HalfedgeMeshSuite, IterateVerticesTest) {
@@ -143,3 +143,63 @@ TEST_F(HalfedgeMeshSuite, IterateBoundaryLoopsTest) {
     EXPECT_EQ(seenElements.size(), a.mesh->nBoundaryLoops());
   }
 }
+
+
+// ============================================================
+// =============== Utility and status functions
+// ============================================================
+
+TEST_F(HalfedgeMeshSuite, HasBoundaryTest) {
+  for (MeshAsset& a : closedMeshes()) {
+    a.printThyName();
+    EXPECT_FALSE(a.mesh->hasBoundary());
+  }
+  for (MeshAsset& a : boundaryMeshes()) {
+    a.printThyName();
+    EXPECT_TRUE(a.mesh->hasBoundary());
+  }
+}
+
+
+TEST_F(HalfedgeMeshSuite, IsTriangularTest) {
+  EXPECT_EQ(getAsset("tet.obj").mesh->isTriangular(), true);
+  EXPECT_EQ(getAsset("spot.ply").mesh->isTriangular(), true);
+  EXPECT_EQ(getAsset("dodecahedron_poly.obj").mesh->isTriangular(), false);
+  EXPECT_EQ(getAsset("platonic_shelf.obj").mesh->isTriangular(), false);
+  EXPECT_EQ(getAsset("bob_small.ply").mesh->isTriangular(), true);
+  EXPECT_EQ(getAsset("lego.ply").mesh->isTriangular(), true);
+}
+
+TEST_F(HalfedgeMeshSuite, EulerCharacteristicTest) {
+  EXPECT_EQ(getAsset("tet.obj").mesh->eulerCharacteristic(), 2);
+  EXPECT_EQ(getAsset("spot.ply").mesh->eulerCharacteristic(), 2);
+  EXPECT_EQ(getAsset("dodecahedron_poly.obj").mesh->eulerCharacteristic(), 2);
+  EXPECT_EQ(getAsset("bob_small.ply").mesh->eulerCharacteristic(), 0);
+}
+
+TEST_F(HalfedgeMeshSuite, GenusTest) {
+  EXPECT_EQ(getAsset("tet.obj").mesh->genus(), 0);
+  EXPECT_EQ(getAsset("spot.ply").mesh->genus(), 0);
+  EXPECT_EQ(getAsset("dodecahedron_poly.obj").mesh->genus(), 0);
+  EXPECT_EQ(getAsset("bob_small.ply").mesh->genus(), 1);
+}
+
+TEST_F(HalfedgeMeshSuite, ConnectedComponentsTest) {
+  EXPECT_EQ(getAsset("tet.obj").mesh->nConnectedComponents(), 1);
+  EXPECT_EQ(getAsset("spot.ply").mesh->nConnectedComponents(), 1);
+  EXPECT_EQ(getAsset("dodecahedron_poly.obj").mesh->nConnectedComponents(), 1);
+  EXPECT_EQ(getAsset("platonic_shelf.obj").mesh->nConnectedComponents(), 5);
+  EXPECT_EQ(getAsset("bob_small.ply").mesh->nConnectedComponents(), 1);
+  EXPECT_EQ(getAsset("lego.ply").mesh->nConnectedComponents(), 1);
+}
+
+
+// ============================================================
+// =============== Containers
+// ============================================================
+
+
+// ============================================================
+// =============== Navigators
+// ============================================================
+

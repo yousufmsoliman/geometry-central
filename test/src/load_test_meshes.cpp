@@ -32,6 +32,7 @@ MeshAsset::MeshAsset(std::string localPath) {
   std::tie(mesh, geometry) = loadMesh(fullPath);
 
   hasBoundary = mesh->hasBoundary();
+  isTriangular = mesh->isTriangular();
 }
 
 MeshAsset MeshAsset::copy() const {
@@ -62,6 +63,8 @@ void MeshAssetSuite::SetUpTestSuite() {
   allMeshAssets.emplace_back("spot.ply");
   allMeshAssets.emplace_back("bob_small.ply");
   allMeshAssets.emplace_back("lego.ply");
+  allMeshAssets.emplace_back("dodecahedron_poly.obj");
+  allMeshAssets.emplace_back("platonic_shelf.obj");
 }
 
 

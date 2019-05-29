@@ -12,8 +12,7 @@
 // NOTE: ipp includes at bottom of file
 
 namespace geometrycentral {
-namespace surface {
-
+namespace surface { 
 // Foward declare some return types from below
 // template<typename T> class VertexData;
 // template<> class VertexData<size_t>;
@@ -146,6 +145,7 @@ public:
   void canonicalize();
 
   // == Callbacks that will be invoked on mutation to keep containers/iterators/etc valid.
+
   // Expansion callbacks
   // Argument is the new size of the element list. Elements up to this index may now be used (but _might_ not be
   // immediately)
@@ -176,6 +176,9 @@ public:
   size_t nEdgesCapacity() const;
   size_t nFacesCapacity() const;
   size_t nBoundaryLoopsCapacity() const;
+
+
+  // == Debugging, etc
 
   // Performs a sanity checks on halfedge structure; throws on fail
   void validateConnectivity();
@@ -237,10 +240,10 @@ private:
   HalfedgeMesh& operator=(HalfedgeMesh&& other) = delete;
 
   // Used to resize the halfedge mesh. Expands and shifts vectors as necessary.
-  Halfedge* getNewHalfedge(bool interior = true);
-  Vertex* getNewVertex();
-  Edge* getNewEdge();
-  Face* getNewFace();
+  //Halfedge* getNewHalfedge(bool interior = true);
+  //Vertex* getNewVertex();
+  //Edge* getNewEdge();
+  //Face* getNewFace();
 
   // Detect dead elements
   bool vertexIsDead(size_t iV) const;
