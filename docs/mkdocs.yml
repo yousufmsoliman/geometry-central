@@ -43,7 +43,11 @@ nav:
       - 'Delta Complexes' : 'surface/halfedge_mesh/delta_complex.md'
       - 'Internals' : 'surface/halfedge_mesh/internals.md'
     - Geometry: 
+      - 'Overview' : 'surface/geometry/geometry.md'
       - 'Intrinsic Geometry' : 'surface/geometry/intrinsic_geometry.md'
+      - 'Lengths, areas, and angles' : 'surface/geometry/lengths_areas_angles.md'
+      - 'Tangent vectors and transport' : 'surface/geometry/tangent_vectors_transport.md'
+      - 'Operators' : 'surface/geometry/operators.md'
     - Algorithms: 
       - 'Direction Fields' : 'surface/algorithms/direction_fields.md'
       - 'Distance' : 'surface/algorithms/distance.md'

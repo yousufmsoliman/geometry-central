@@ -39,10 +39,52 @@ Boundary loops in separate index space
   - Only weirdness: exteriorHe.face() yields a face which should really be a boundary loop. User must do BoundaryLoopPtr(exteriorHe.face()) 
   
 
-# Organization
+# Geometry
 
-Problem: almost everything that currently exists is surface mesh (really, halfedge mesh) based.
+- Intrinsic
+  
+  // Lengths and angles 
+  - edge length
+  - face area
+  - vertex dual area
+  - corner angles
+  - corner scaled angles
+  - vertex angle sum
+  - vertex gaussian curvature
+  - face gaussian curvature
+  - halfedge cotan weights
+  - edge cotan weights
 
+  // Vectors and transport
+  - halfedgeVectorInFaceBasis
+  - halfedgeVectorInVertexBasis
+  - transportAcrossHalfedge
+  - tansportAlongHalfedge
 
-- numerical
-- utilities
+  // Indices
+  - vertex indices
+  - interior vertex indices
+  - halfedge indices
+  - corner indices
+  - edge indices
+  - face indices
+  - boundary loop indices
+ 
+  // DEC
+  - hodge 012
+  - hodge inv 012
+  - d 01
+  - dT 01
+  - L
+  - connection D
+  - connection L
+
+- Extrinsic
+  - dihedral angles
+  - mean curvatures
+
+- Embedded
+   - face normal
+   - vertex normal
+   - face basis
+   - vertex basis
