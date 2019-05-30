@@ -1,7 +1,9 @@
  
-This section clarifies some formal mathematical ideas that may arise in advanced usage of the halfedge mesh class. **If you are simply loading up a triangle mesh and running an ordinary geometry processing algorithm, you need not worry about these details---everything will behave as expected**.
+!!! TLDR "TL;DR"
 
-If you are implementing intrinsic triangulation algorithms, doing an unreasonable number of edge flips, or are simply curious: read on!
+    This section clarifies some formal mathematical ideas that may arise in advanced usage of the halfedge mesh class. **If you are simply loading up a triangle mesh and running an ordinary geometry processing algorithm, you need not worry about these details---everything will behave as expected**.
+
+    If you are implementing intrinsic triangulation algorithms, doing an unreasonable number of edge flips, or are simply curious: read on!
 
 
 ## Introduction

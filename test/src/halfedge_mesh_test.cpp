@@ -199,6 +199,23 @@ TEST_F(HalfedgeMeshSuite, ConnectedComponentsTest) {
 // ============================================================
 
 
+// Make sure that nothing explodes if we delete the mesh before the container
+TEST_F(HalfedgeMeshSuite, ContainerMeshDestructTest) {
+  std::unique_ptr<HalfedgeMesh> mesh = getAsset("spot.ply").mesh;
+
+  {
+    VertexData<double> testD(*mesh);
+    for (Vertex v : mesh->vertices()) {
+      testD[v] = 42.0;
+    }
+
+    mesh.reset(); // delete mesh
+
+  } // scope block triggers testD delete
+
+  ASSERT_EQ(2+2, 4); // debugging is easier if failure isn't last
+}
+
 // ============================================================
 // =============== Navigators
 // ============================================================
