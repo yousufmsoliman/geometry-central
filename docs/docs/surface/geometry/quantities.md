@@ -32,7 +32,7 @@ for(Face f : mesh->faces()) {
 
 ## Lengths, areas, and intrinsic angles
 
-Defined for any `IntrinsicGeometry`, which is the base class of all other geometry objects---these quantities will always be available on any kind of geometry.
+These quantities are defined for any `IntrinsicGeometry`, which is the base class of all other geometry objects---they will always be available on any kind of geometry.
 
 ??? func "edge length"
 
@@ -119,7 +119,7 @@ Defined for any `IntrinsicGeometry`, which is the base class of all other geomet
 
 ??? func "halfedge cotan weight"
 
-    The "cotangent weight" of an interior halfedge, defined as $\frac{1}{2} \cot(\theta)$, where $\theta$ is the corner angle opposite the halfedge. Defined to be $0$ for exterior faces.
+    The "cotangent weight" of an interior halfedge, defined as $\frac{1}{2} \cot(\theta)$, where $\theta$ is the corner angle opposite the halfedge. Defined to be $0$ for exterior halfedges.
 
     Can be computed directly from edge lengths, or more efficiently in an embedded triangle via $\cot(\theta) = \frac{u \cdot v}{||u \times v||}$, where $u$ and $v$ are the edge vectors emanating from the opposite corner.
 
@@ -137,19 +137,101 @@ Defined for any `IntrinsicGeometry`, which is the base class of all other geomet
     - **member:** `EdgeData<double> IntrinsicGeometry::edgeCotanWeights`
     - **require:** `void IntrinsicGeometry::requireEdgeCotanWeights()`
 
-??? func "halfedge intrinsic vectors"
 
-    Vectors for each halfedge in the coordinate frame of the face in which they sit. Computed by laying out the face isometrically in the plane via its edge lengths.
+## Tangent vectors and transport
 
-    This isometric layout can be used compute many other intrinsic geometry quantities, since it is well-defined even with purely intrinsic geometries.
+These quantities are defined for any `IntrinsicGeometry`, which is the base class of all other geometry objects---they will always be available on any kind of geometry. Tangent vectors and transport are defined in terms of tangent spaces at faces and vertices, as defined below.
+
+Recall that our `Vector2` types obey the multiplication and division rules of complex arithmetic, and thus can be used to represent rotations. For instance, a 2D vector representing a rotation can be used to rotate another vector like:
+```cpp
+Vector2 v = /* your vector */
+Vector2 r = Vector2{std::cos(PI/4), std::sin(PI/4)}; // rotation by 45 degrees
+Vector2 vRot = r * v;
+```
+This is fundamentally no different from using 2x2 rotation matrices, but leads to much cleaner code.
+
+#### Face tangent spaces
+
+To represent vectors that sit in flat mesh faces, we define a 2D coordinate frame tangent to each face. By default, this frame is aligned such that `face.halfedge()` points along the $x$-axis. All vectors in faces are then expressed via $(x,y)$ `Vector2D` coordinates in this frame. Crucially, this basis is well-defined even if the geometry does not have vertex positions.
+
+#### Vertex tangent spaces
+
+To represent vectors that sit at mesh faces, we consider a polar coordinate frame at each vertex. This frame is defined by measuring angles according to the rescaled corner angles as in `cornerScaledAngles`. By default, this frame is aligned such that `vertex.halfedge()` points along the $\phi=0$ $x$-axis. Of course, rather than using polar coordinates we can equivalently work in Cartesian frame---tangent vectors at vertices are then expressed via $(x,y)$ `Vector2D` coordinates in this frame. Crucially, this basis does not require picking a vertex normal, and is well-defined even if the geometry does not have vertex positions.
+
+![vertex tangent coordinates diagram](../../../media/vertex_tangent_coordinates.svg)
+
+??? func "halfedge vectors in face"
+
+    Vectors for each halfedge in the coordinate frame of the face in which they sit. See the description of face tangent spaces above for a definition.
 
     Only valid on triangular meshes.
 
-    - **member:** `HalfedgeData<Vector2> IntrinsicGeometry::halfedgeIntrinsicVectors`
-    - **require:** `void IntrinsicGeometry::requireHalfedgeIntrinsicVectors()`
+    - **member:** `HalfedgeData<Vector2> IntrinsicGeometry::halfedgeVectorsInFace`
+    - **require:** `void IntrinsicGeometry::requireHalfedgeVectorsInFace()`
 
 
-## Tangent vectors and transport
+??? func "halfedge vectors in vertex"
+
+    Vectors for each halfedge in the coordinate frame of the vertex from which the emanate (in `halfedge.vertex()`). See the description of vertex tangent spaces above for a definition.
+
+    Only valid on triangular meshes.
+
+    - **member:** `HalfedgeData<Vector2> IntrinsicGeometry::halfedgeVectorsInVertex`
+    - **require:** `void IntrinsicGeometry::requireHalfedgeVectorsInVertex()`
+
+??? func "transport vector across halfedge"
+
+    Rotations which transport tangent vectors **across** a halfedge, rotating a vector from the tangent space of `halfedge.face()` to the tangent space `halfedge.twin().face()`.
+
+    Always a unit vector, which can be multiplied by any other vector to compute the rotation. (recall our `Vector2`s multiply like complex numbers)
+
+    Only valid on triangular meshes. Not defined for halfedges (interior or exterior) incident on boundary edges, these boundary values are set to NaN so errors can be caught quickly.
+
+    - **member:** `HalfedgeData<Vector2> IntrinsicGeometry::transportVectorAcrossHalfedge`
+    - **require:** `void IntrinsicGeometry::requireTransportVectorAcrossHalfedge()`
+    
+    Example usage:
+    ```cpp
+    geometry.requireTransportVectorAcrossHalfedge();
+
+    Face f = /* ... */;        // a face of interest
+    Vector2 myVec = /* ... */; // tangent vector in face f
+    
+    for(Halfedge he : f.adjacentHalfedges()) {
+
+      Vertex neighborFace = he.twin().face();
+      Vector2 rot = geometry.transportVectorAcrossHalfedge[he];
+      Vector2 neighVec = rot * myVec;    // now in the basis of neighborFace
+    }
+
+    ```
+
+??? func "transport vector along halfedge"
+
+    Rotations which transport tangent vectors **along** a halfedge, rotating a vector from the tangent space of `halfedge.vertex()` to the tangent space `halfedge.twin().vertex()`.
+
+    Always a unit vector, which can be multiplied by any other vector to compute the rotation. (recall our `Vector2`s multiply like complex numbers)
+
+    Only valid on triangular meshes.
+
+    - **member:** `HalfedgeData<Vector2> IntrinsicGeometry::transportVectorAlongHalfedge`
+    - **require:** `void IntrinsicGeometry::requireTransportVectorAlongHalfedge()`
+    
+    Example usage:
+    ```cpp
+    geometry.requireTransportVectorAlongHalfedge();
+
+    Vertex v = /* ... */;        // a vertex of interest
+    Vector2 myVec = /* ... */;   // tangent vector in vertex v
+    
+    for(Halfedge he : v.outgoingHalfedges()) {
+      Vertex neighborVertex = he.twin().vertex();
+      Vector2 rot = geometry.transportVectorAlongHalfedge[he];
+      Vector2 neighVec = rot * myVec;    // now in the basis of neighborVertex
+    }
+
+    ```
+
 
 ## Operators
 
