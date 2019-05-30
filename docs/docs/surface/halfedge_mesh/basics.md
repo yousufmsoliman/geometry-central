@@ -102,7 +102,7 @@ Note that our halfedge mesh _does not_ require that faces be triangles or quads;
 ??? func "`#!cpp int HalfedgeMesh::genus()`"
     Returns the genus of the surface. Computed in O(1) from element counts.
     
-    **Note:** always computed by naively applying [Euler's polyhedron formula](https://en.wikipedia.org/wiki/Euler_characteristic#Polyhedra), which might not do what you want in the case of multiple-connected components.
+    **Note:** always computed by naively applying [Euler's polyhedron formula](https://en.wikipedia.org/wiki/Euler_characteristic#Polyhedra), which might not do what you want in the case of multiple connected components.
 
 ??? func "`#!cpp bool HalfedgeMesh::isTriangular()`"
     Returns true if all faces in the mesh have 3 sides. 

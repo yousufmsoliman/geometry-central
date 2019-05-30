@@ -156,7 +156,7 @@ The corresponding vectors are indexed according to the indices of the underlying
 ### Oriented edge data 
 
 <!--TODO reword...-->
-Scalar values on edges often carry meaning with respect to some oriented direction along the edge--- common examples include differences between values at vertices, or more generally 1-forms in discrete differential geometry. In such settings, a scalar value is concisely stored along edges, but its sign should flip when accessed "along" the opposite direction.
+Scalar values on edges often carry meaning with respect to some oriented direction along the edge--- common examples include differences between values at vertices, the integral of a vector field along an edge, or more generally any 1-form in discrete differential geometry. In such settings, a scalar value is concisely stored along edges, but its sign should flip when accessed "along" the opposite direction.
 
 `EdgeData<T>` containers offer a pair of special additional accessors for oriented data, which handle the sign flips automatically. Note that they cannot be instantiated unless the scalar type `T` supports a unary `-` operator.
 
