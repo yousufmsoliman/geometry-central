@@ -1,8 +1,7 @@
 This page enumerates the surface geometry quantities available in geometry central.
 
-Recall that these quantities are each associated with a [geometry interface](geometry.md#geometry-hierarchy) specifying what can be computed from the given input data. Instantiating a geometry from data, like a `VertexPositionGeometry` extends these interfaces and gives access to all of the quantities therein.  Quantities should usually be accessed via [managed caches](geometry.md#managed-quantities).
+Recall that these quantities are each associated with a [geometry interface](geometry.md#geometry-hierarchy) specifying what can be computed from the given input data. Instantiating a geometry from data, like a `VertexPositionGeometry` extends these interfaces and gives access to all of the quantities therein.  Quantities should usually be accessed via the [managed caches](geometry.md#managed-quantities), as in the example below.
 
-Typical usage:
 ```cpp
 #include "geometrycentral/surface/geometry.h"
 #include "geometrycentral/surface/meshio.h"
@@ -35,6 +34,8 @@ for(Face f : mesh->faces()) {
 These quantities are defined for any `IntrinsicGeometry`, which is the base class of all other geometry objects---they will always be available on any kind of geometry.
 
 ??? func "edge length"
+    
+    ##### edge length
 
     The length of an edge in the mesh, as a non-negative real number.
 
@@ -43,6 +44,8 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
     - **immediate:** `double IntrinsicGeometry::computeEdgeLength(Edge e)`
 
 ??? func "face area"
+    
+    ##### face area
 
     The area of a face, as a non-negative real number.
 
@@ -56,6 +59,8 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
 
 ??? func "vertex dual area"
 
+    ##### vertex dual area
+
     An area associated with each vertex, as a non-negative real number.
 
     Only valid on triangular meshes.
@@ -66,6 +71,8 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
     - **require:** `void IntrinsicGeometry::requireVertexDualAreas()`
 
 ??? func "corner angles"
+    
+    ##### corner angles
 
     The angle between incident edges at each corner of a mesh.
 
@@ -76,6 +83,8 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
     - **immediate:** `double IntrinsicGeometry::computeCornerAngle(Corner c)`
 
 ??? func "corner scaled angles"
+    
+    ##### corner scaled angles
 
     The angle between incident edges at each corner of a mesh, linearly rescaled such that the angles around every vertex sum to $2 \pi$. At boundary vertices, no scaling will be performed.
 
@@ -85,6 +94,8 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
     - **require:** `void IntrinsicGeometry::requireCornerScaledAngles()`
 
 ??? func "vertex angle sum"
+    
+    ##### vertex angle sum
 
     The sum of corner angles around a vertex.
 
@@ -94,6 +105,8 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
     - **require:** `void IntrinsicGeometry::requireVertexAngleSums()`
 
 ??? func "vertex Gaussian curvature"
+    
+    ##### vertex Gaussian curvature
 
     The [_Gaussian curvature_](https://en.wikipedia.org/wiki/Gaussian_curvature) $K$ at a vertex, defined via the angle defect $K_v = 2 \pi - \sum \theta_i$, where $\sum \theta_i$ is the `vertexAngleSum` as above.
 
@@ -105,6 +118,8 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
     - **require:** `void IntrinsicGeometry::requireVertexGaussianCurvatures()`
 
 ??? func "face Gaussian curvature"
+    
+    ##### face Gaussian curvature
 
     The [_Gaussian curvature_](https://en.wikipedia.org/wiki/Gaussian_curvature) $K$ at a face, defined via the rescaled angle defect in the face $K_f = \pi - \sum \tilde{\theta}_i$, where $\tilde{\theta}_i$ are the _rescaled_ corner angles (as in `cornerScaledAngles`) incident on the face.
 
@@ -118,6 +133,8 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
     - **require:** `void IntrinsicGeometry::requireFaceGaussianCurvatures()`
 
 ??? func "halfedge cotan weight"
+    
+    ##### halfedge cotan weight
 
     The "cotangent weight" of an interior halfedge, defined as $\frac{1}{2} \cot(\theta)$, where $\theta$ is the corner angle opposite the halfedge. Defined to be $0$ for exterior halfedges.
 
@@ -128,7 +145,10 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
     - **member:** `HalfedgeData<double> IntrinsicGeometry::halfedgeCotanWeights`
     - **require:** `void IntrinsicGeometry::requireHalfedgeCotanWeights()`
 
+
 ??? func "edge cotan weight"
+
+    ##### edge cotan weight
 
     The "cotangent weight" of an edge, defined as the sum of halfedge cotan weights for incident interior halfedges.
 
@@ -148,19 +168,15 @@ Vector2 v = /* your vector */
 Vector2 r = Vector2{std::cos(PI/4), std::sin(PI/4)}; // rotation by 45 degrees
 Vector2 vRot = r * v;
 ```
-This is fundamentally no different from using 2x2 rotation matrices, but leads to much cleaner code.
+This is fundamentally no different from using 2x2 rotation matrices, but leads to much cleaner code (try using division to compute relative rotations!).
 
 #### Face tangent spaces
 
 To represent vectors that sit in flat mesh faces, we define a 2D coordinate frame tangent to each face. By default, this frame is aligned such that `face.halfedge()` points along the $x$-axis. All vectors in faces are then expressed via $(x,y)$ `Vector2D` coordinates in this frame. Crucially, this basis is well-defined even if the geometry does not have vertex positions.
 
-#### Vertex tangent spaces
-
-To represent vectors that sit at mesh faces, we consider a polar coordinate frame at each vertex. This frame is defined by measuring angles according to the rescaled corner angles as in `cornerScaledAngles`. By default, this frame is aligned such that `vertex.halfedge()` points along the $\phi=0$ $x$-axis. Of course, rather than using polar coordinates we can equivalently work in Cartesian frame---tangent vectors at vertices are then expressed via $(x,y)$ `Vector2D` coordinates in this frame. Crucially, this basis does not require picking a vertex normal, and is well-defined even if the geometry does not have vertex positions.
-
-![vertex tangent coordinates diagram](../../../media/vertex_tangent_coordinates.svg)
-
 ??? func "halfedge vectors in face"
+    
+    ##### halfedge vectors in face
 
     Vectors for each halfedge in the coordinate frame of the face in which they sit. See the description of face tangent spaces above for a definition.
 
@@ -170,16 +186,9 @@ To represent vectors that sit at mesh faces, we consider a polar coordinate fram
     - **require:** `void IntrinsicGeometry::requireHalfedgeVectorsInFace()`
 
 
-??? func "halfedge vectors in vertex"
-
-    Vectors for each halfedge in the coordinate frame of the vertex from which the emanate (in `halfedge.vertex()`). See the description of vertex tangent spaces above for a definition.
-
-    Only valid on triangular meshes.
-
-    - **member:** `HalfedgeData<Vector2> IntrinsicGeometry::halfedgeVectorsInVertex`
-    - **require:** `void IntrinsicGeometry::requireHalfedgeVectorsInVertex()`
-
 ??? func "transport vector across halfedge"
+    
+    ##### transport vector across halfedge
 
     Rotations which transport tangent vectors **across** a halfedge, rotating a vector from the tangent space of `halfedge.face()` to the tangent space `halfedge.twin().face()`.
 
@@ -206,7 +215,29 @@ To represent vectors that sit at mesh faces, we consider a polar coordinate fram
 
     ```
 
+
+#### Vertex tangent spaces
+
+To represent vectors that sit at mesh faces, we consider a polar coordinate frame at each vertex. This frame is defined by measuring angles according to the rescaled corner angles as in `cornerScaledAngles`. By default, this frame is aligned such that `vertex.halfedge()` points along the $\phi=0$ $x$-axis. Of course, rather than using polar coordinates we can equivalently work in the corresponding Cartesian frame---tangent vectors at vertices are then expressed via $(x,y)$ `Vector2D` coordinates in this frame. Crucially, this basis does not require picking a vertex normal, and is well-defined even if the geometry does not have vertex positions.
+
+![vertex tangent coordinates diagram](../../../media/vertex_tangent_coordinates.svg)
+
+
+??? func "halfedge vectors in vertex"
+    
+    ##### halfedge vectors in vertex
+
+    Vectors for each halfedge in the coordinate frame of the vertex from which the emanate (in `halfedge.vertex()`). See the description of vertex tangent spaces above for a definition.
+
+    Only valid on triangular meshes.
+
+    - **member:** `HalfedgeData<Vector2> IntrinsicGeometry::halfedgeVectorsInVertex`
+    - **require:** `void IntrinsicGeometry::requireHalfedgeVectorsInVertex()`
+
+
 ??? func "transport vector along halfedge"
+    
+    ##### transport vector along halfedge
 
     Rotations which transport tangent vectors **along** a halfedge, rotating a vector from the tangent space of `halfedge.vertex()` to the tangent space `halfedge.twin().vertex()`.
 
@@ -234,6 +265,93 @@ To represent vectors that sit at mesh faces, we consider a polar coordinate fram
 
 
 ## Operators
+
+
+These quantities are defined for any `IntrinsicGeometry`, which is the base class of all other geometry objects---they will always be available on any kind of geometry. A full explanation of these operators is beyond the scope of these docs; see [these course notes](https://www.cs.cmu.edu/~kmcrane/Projects/DDG/paper.pdf) for one introduction.
+
+All operators are indexed over mesh elements according to the natural iteration order of the elements, or equivalently the indices from `HalfedgeMesh::getVertexIndices()` (etc).
+
+??? func "cotangent Laplacian"
+    
+    ##### cotangent laplacian
+
+    The discrete Laplace operator, discretized via cotangent weights.
+
+    A $|V| \times |V|$ real matrix. Always symmetric and positive semi-definite. If and only the underlying geometry is _Delaunay_, the matrix will furthermore have all negative off-diagonal entries, satisfy a maximum principle, and be an _M-matrix_.
+
+    This is the _weak_ Laplace operator, if we use it to evalutae $\mathsf{y} \leftarrow \mathsf{L} \mathsf{x}$, $\mathsf{x}$ should hold _pointwise_ quantities at vertices, and the result $\mathsf{y}$ will contain _integrated_ values of the result in the neighborhood of each vertex. If used to solve a Poisson problem, a mass matrix (such as the lumped or Galerkin mass matrices below) are likely necessary on the right hand side.
+
+    Only valid on triangular meshes.
+
+    - **member:** `Eigen::SparseMatrix<double> IntrinsicGeometry::laplacian`
+    - **require:** `void IntrinsicGeometry::requireLaplacian()`
+
+??? func "vertex lumped mass matrix"
+
+    ##### vertex lumped mass matrix
+
+    A mass matrix at vertices, where vertex area is $1/3$ the incident face areas as in `vertexDualAreas`.
+
+    A $|V| \times |V|$ real diagonal matrix. Generally less-accurate than the Galerkin mass matrix below, but can be easily inverted since it is a diagonal matrix.
+
+    Only valid on triangular meshes.
+
+    - **member:** `Eigen::SparseMatrix<double> IntrinsicGeometry::vertexLumpedMassMatrix`
+    - **require:** `void IntrinsicGeometry::requireVertexLumpedMassMatrix()`
+
+
+??? func "vertex Galerkin mass matrix"
+
+    ##### vertex Galerkin mass matrix
+
+    A mass matrix at vertices, supported at all neighbors of a vertex via integration of piecewise-linear elements.
+
+    A $|V| \times |V|$ real matrix. Generally more accurate than the lumped mass matrix above, should be preferred unless the mass matrix needs to be inverted.
+
+    Only valid on triangular meshes.
+
+    - **member:** `Eigen::SparseMatrix<double> IntrinsicGeometry::vertexGalerkinMassMatrix`
+    - **require:** `void IntrinsicGeometry::requireVertexGalerkinMassMatrix()`
+
+??? func "vertex connection Laplacian"
+
+    ##### vertex connection Laplacian
+
+    A discrete connection Laplacian operator, which applies to vector fields defined in vertex tangent spaces. Essentially defined as the scalar cotangent Laplacian, augmented with rotations given by the rotations in `transportVectorAlongHalfedge`; see [The Vector Heat Method, Sec 5.3](http://www.cs.cmu.edu/~kmcrane/Projects/VectorHeatMethod/paper.pdf) for more explanation and definition.
+
+    A $|V| \times |V|$ complex matrix. Always Hermitian, but positive semi-definite if and only the underlying geometry is _Delaunay_.  This is a _weak_ Laplace operator, the application of which outputs integrated values in vertex neighborhood.
+
+    Given a complex vector $\mathsf{x}$ of tangent vectors at vertices, apply the operator by multiplying $\mathsf{L} * \mathsf{x}$.
+
+    Only valid on triangular meshes.
+
+    - **member:** `Eigen::SparseMatrix<double> IntrinsicGeometry::vertexGalerkinMassMatrix`
+    - **require:** `void IntrinsicGeometry::requireVertexGalerkinMassMatrix()`
+
+??? func "DEC operators"
+
+    ##### DEC operators
+
+    These operators are the basic building blocks for _discrete exterior calculus_ on surfaces.
+
+    **Note:** These quantities slightly deviate from the usual naming scheme for quantities. Rather than `requireD0()`, `requireD1()`, etc, there is a single `requireDECOperators()` function which manages all 8 of the operators listed below.
+
+    The following members are constructed:
+
+    - `Eigen::SparseMatrix<double> IntrinsicGeometry::hodge0` A $|V| \times |V|$ diagonal matrix
+    - `Eigen::SparseMatrix<double> IntrinsicGeometry::hodge0Inverse` A $|V| \times |V|$ diagonal matrix
+    - `Eigen::SparseMatrix<double> IntrinsicGeometry::hodge1` An $|E| \times |E|$ diagonal matrix
+    - `Eigen::SparseMatrix<double> IntrinsicGeometry::hodge1Inverse` An $|E| \times |E|$ diagonal matrix
+    - `Eigen::SparseMatrix<double> IntrinsicGeometry::hodge2` An $|F| \times |F|$ diagonal matrix
+    - `Eigen::SparseMatrix<double> IntrinsicGeometry::hodge2Inverse` An $|F| \times |F|$ diagonal matrix
+    - `Eigen::SparseMatrix<double> IntrinsicGeometry::d0` An $|E| \times |V|$ matrix with $\{-1, 0, 1\}$ entries
+    - `Eigen::SparseMatrix<double> IntrinsicGeometry::d1` An $|F| \times |E|$ matrix with $\{-1, 0, 1\}$ entries
+
+    Only valid on triangular meshes.
+
+    - **require:** `void IntrinsicGeometry::requireDECOperators()`
+
+
 
 ## Extrinsic angles
 

@@ -30,7 +30,7 @@ The following diagram outlines the interfaces and realizations currently availab
 In the most basic usage, geometric quantities can be immediately computed for a given element from input data. For instance, `double IntrinsicGeometry::faceArea(Face f)` will compute the area of a face.  However, this is _not_ the typical intended method for working with geometric quantities in geometry central.
 
 ### Managed quantities
-A common pattern in geometry code is to maintain precomputed arrays of values that are used repeatedly (e.g. vertex normals). However, this pattern requires the programmer to coordinate these arrays throughout their codebase, or risk computing and storing the same array many times in distant subroutines. Geometry central embraces this pattern, and provides automatic support for it.
+A common pattern in geometry code is to maintain precomputed arrays of values that are used repeatedly (e.g. vertex normals). However, naive use of this pattern requires the programmer to coordinate these arrays throughout their codebase, or risk computing and storing the same array many times in distant subroutines. Geometry central embraces this pattern, and provides automatic support for it.
 
 All geometry objects automatically maintain of system of caches for geometric quantities; the user can simply call (for instance) `geometry.requireFaceAreas()` at the beginning of a subroutine to ensure that the face area buffer is populated, then access `geometry.faceAreas[f]` in any subsequent code. This strategy keep storage and computation to a minimum by sharing repeated values across any use of the geometry object.
 
@@ -65,7 +65,7 @@ To minimize memory usage, invoke `geometry.unrequireFaceNormals()` at the conclu
 
 `#include "geometrycentral/surface/geometry.h"` to get all geometry interfaces.
 
-All quantities offer two methods and storage following the same naming pattern. For a quantity named `YYYs` (e.g. `faceAreas`), which is defined in an interface `GeometryInterface` (e.g. `IntrinsicGeometry` these will be:
+All quantities offer methods and storage following the same naming pattern. For a quantity named `YYYs` (e.g. `faceAreas`), which is defined in an interface `GeometryInterface` (e.g. `IntrinsicGeometry`) the pattern is given below. All available quantities are listed in [quantities](quantities.md).
 
 ??? func "`#!cpp MeshData<> GeometryInterface::YYYs`"
     The member variable array for quantity YYY. Initially empty, but can be populated with `requireYYYs()` below.
@@ -108,4 +108,5 @@ In addition, the caching system provides two methods.
     Should be called, for instance if a vertex is moved or the underlying mesh is mutated.
 
     Note: most users find that un-requiring and purging quantities is not necessary, and one can simply allow them to accumulate and eventually be deleted with the geometry object. This functionality can be used only if reducing memory usage is very important.
+
 
