@@ -2,10 +2,7 @@
 
 Use these routines to iterate over all of the elements in the mesh.
 
-!!! note 
-    Conveniently, these routines will work as expected if elements are _added_ to the mesh during iteration: the new elements will be iterated over after all pre-existing elements.
-
-    However, _removing_ elements from the mesh in the midst of iteration, or calling `compress()` is not supported.
+**Note:** Generally, modifying the mesh in the midst of iteration is not supported.
 
 ---
 
@@ -64,10 +61,15 @@ Use these routines to iterate over all of the elements in the mesh.
 
 Use these routines to iterate over the neighbors of a mesh element.
 
----
 
-!!! note
-    The iterators in this section may have unexpected behavior in the case of a $\Delta$-complex, when there are (e.g.) self-edges, or multiple edges between a pair of vertices. Of course, for ordinary triangle mesh simplicial complexes they will behave as expected. See the [Delta complex](delta_complex.md) section for more information.
+??? note "Note: neighborhoods on $\Delta$-complexes"
+    The iterators in this section may have unexpected behavior in the advanced case of a $\Delta$-complex, when there are (e.g.) self-edges, or multiple edges between a pair of vertices. Essentially, these iterators always naively traverse the local neighborhood, even if that neighborhood might include duplicate elements. 
+    
+    For instance, if a $\Delta$-complex has multiple edges connecting vertex `va` to vertex `vb`, then iterating `va.adjacentVertices()` will return `vb` multiple times.
+    
+    Of course, for ordinary triangle mesh they will behave as expected. See the [Delta complex](delta_complex.md) section for more information.
+
+---
 
 ### Around a vertex
 

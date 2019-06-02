@@ -56,7 +56,7 @@ These managed quantities are the primary intended method for working with geomet
 In addition, dependencies between these quantities are managed internally; for instance, if vertex normals are requested, face normals will be internally populated and used to compute vertex normals. However, these dependencies are internal and subject to change; the programmer should always explicitly call `geometry.requireFaceNormals()` if they intend to access face normals.
 
 #### Updating
-If the underlying geometric data changes (e.g., a vertex is moved or the mesh is mutated), invoking `geometry->refreshQuantities()` will recompute all required values.
+If the underlying geometric data changes (e.g., vertices are moved or the mesh is mutated), invoking `geometry->refreshQuantities()` will recompute all required values.
 
 #### Minimizing storage usage
 To minimize memory usage, invoke `geometry.unrequireFaceNormals()` at the conclusion of a subroutine to indicate that the quantity is no longer needed, decrementing an internal counter. The quantity is not instantly deleted after being un-required, but invoking `geometry.purgeQuantities()` will delete any quantities that are not currently required, reducing memory usage. Most users find that un-requiring and purging quantities is not necessary, and one can simply allow them to accumulate and eventually be deleted with the geometry object.
@@ -100,12 +100,12 @@ In addition, the caching system provides two methods.
 ??? func "`#!cpp void GeometryInterface::refreshQuantities()`"
     Recompute all required quantities from the input geometric data.
 
-    Should be called, for instance if a vertex is moved or the underlying mesh is mutated.
+    Should be called, for instance if vertices are moved or the underlying mesh is mutated.
 
 ??? func "`#!cpp void GeometryInterface::purgeQuantities()`"
     Recompute all required quantities from the input geometric data.
 
-    Should be called, for instance if a vertex is moved or the underlying mesh is mutated.
+    Should be called, for instance if vertices are moved or the underlying mesh is mutated.
 
     Note: most users find that un-requiring and purging quantities is not necessary, and one can simply allow them to accumulate and eventually be deleted with the geometry object. This functionality can be used only if reducing memory usage is very important.
 

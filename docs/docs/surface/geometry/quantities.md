@@ -29,7 +29,7 @@ for(Face f : mesh->faces()) {
 }
 ```
 
-## Lengths, areas, and intrinsic angles
+## Lengths, areas, and angles
 
 These quantities are defined for any `IntrinsicGeometry`, which is the base class of all other geometry objects---they will always be available on any kind of geometry.
 
@@ -174,6 +174,8 @@ This is fundamentally no different from using 2x2 rotation matrices, but leads t
 
 To represent vectors that sit in flat mesh faces, we define a 2D coordinate frame tangent to each face. By default, this frame is aligned such that `face.halfedge()` points along the $x$-axis. All vectors in faces are then expressed via $(x,y)$ `Vector2D` coordinates in this frame. Crucially, this basis is well-defined even if the geometry does not have vertex positions.
 
+See [face tangent basis](#face-tangent-basis) to convert these vectors to world coordinates (if your mesh has vertex positions).
+
 ??? func "halfedge vectors in face"
     
     ##### halfedge vectors in face
@@ -219,6 +221,8 @@ To represent vectors that sit in flat mesh faces, we define a 2D coordinate fram
 #### Vertex tangent spaces
 
 To represent vectors that sit at mesh faces, we consider a polar coordinate frame at each vertex. This frame is defined by measuring angles according to the rescaled corner angles as in `cornerScaledAngles`. By default, this frame is aligned such that `vertex.halfedge()` points along the $\phi=0$ $x$-axis. Of course, rather than using polar coordinates we can equivalently work in the corresponding Cartesian frame---tangent vectors at vertices are then expressed via $(x,y)$ `Vector2D` coordinates in this frame. Crucially, this basis does not require picking a vertex normal, and is well-defined even if the geometry does not have vertex positions.
+
+See [vertex tangent basis](#vertex-tangent-basis) to convert these tangent vectors to world coordinates (if your mesh has vertex positions).
 
 ![vertex tangent coordinates diagram](../../../media/vertex_tangent_coordinates.svg)
 
@@ -334,7 +338,7 @@ All operators are indexed over mesh elements according to the natural iteration 
 
     These operators are the basic building blocks for _discrete exterior calculus_ on surfaces.
 
-    **Note:** These quantities slightly deviate from the usual naming scheme for quantities. Rather than `requireD0()`, `requireD1()`, etc, there is a single `requireDECOperators()` function which manages all 8 of the operators listed below.
+    **Note:** These quantities slightly deviate from the usual naming scheme for quantities. Rather than `requireD0()`, `requireD1()`, etc, there is a single `requireDECOperators()` function which manages all 8 of the members listed below.
 
     The following members are constructed:
 
@@ -352,7 +356,146 @@ All operators are indexed over mesh elements according to the natural iteration 
     - **require:** `void IntrinsicGeometry::requireDECOperators()`
 
 
-
 ## Extrinsic angles
 
+These quantities depend on extrinsic angles, but are still rotation-invariant, and independent of a particular embeddeding. They are defined for `ExtrinsicGeometry` and classes that extend it, including the `EmbeddedGeometry` one usually constructs from vertex positions. Currently there is no realization that constructs an `ExtrinsicGeometry` from input data which is not also an `EmbeddedGeometry`, but such a class could be implemented in the future.
+
+
+??? func "edge dihedral angle"
+
+    ##### edge dihedral angle 
+
+    The dihedral angle at an edge, in radians. Defined to be $\pi$ if the edge is flat, $ < \pi$ at a convex edge, and $ > \pi$ at a nonconvex edge.
+
+    Only valid on triangular meshes.
+
+    - **member:** `EdgeData<double> ExtrinsicGeometry::edgeDihedralAngles`
+    - **require:** `void ExtrinsicGeometry::requireEdgeDihedralAngles()`
+
+??? func "vertex principal curvature"
+
+    ##### vertex principal curvature
+
+    A 2-symmetric tangent vector field at vertices. The direction corresponds to the first principal direction, and the magnitude corresponds to the ratio of the 1st and 2nd principal curvatures (e.g., if $\kappa_1 \approx \kappa_2$), the magnitude of the field will be near $0$).
+
+    Only valid on triangular meshes.
+
+    - **member:** `VertexData<Vector2> ExtrinsicGeometry::vertexPrincipalCurvatureDirections`
+    - **require:** `void ExtrinsicGeometry::requireVertexPrincipalCurvatureDirections()`
+
+
 ## Embedded positions and normals
+
+These quantities depend explicitly on an embedding in 3D space (better known as vertex positions). They are defined for `EmbeddedGeometry` (which is usually instantiated as a `VertexPositionGeometry`). Don't forget, `EmbeddedGeometry` extends the `IntrinsicGeometry` and `ExtrinsicGeometry`, so all of the quantities above are also accessible.
+
+
+??? func "vertex position"
+
+    ##### vertex position
+
+    Vertex positions in 3D.
+
+    Note that this member is distinct from the `VertexPositionGeometry::inputVertexPositions` field. This field is a derived quantity treated just like any other, it needs to be `require()`'d, etc. It just so happens that this quantity coincides with some input data commonly used to define a geometry (`inputVertexPositions`), but this field does not get any special treatment as such. If you want to update vertex positions on a mesh, you should modify `inputVertexPositions`, not this quantity.
+
+    - **member:** `VertexData<Vector3> EmbeddedGeometry::vertexPositions`
+    - **require:** `void EmbeddedGeometry::requireVertexPositions()`
+    - **immediate:** `Vector3 EmbeddedGeometry::vertexPosition(Vertex v)`
+
+??? func "halfedge vector"
+
+    ##### halfedge vector
+
+    The vector along each halfedge, that is the vector from the vertex at the tail of the halfedge to the vertex at the tip. 
+
+    Defined as:
+    ```cpp
+    Vertex vTail = halfedge.vertex();
+    Vertex vTip = halfedge.twin().vertex();
+    Vector3 halfedgeVector = vertexPositions[vTip] - vertexPositions[vTail]
+    ```
+
+    - **member:** `HalfedgeData<Vector3> EmbeddedGeometry::halfedgeVectors`
+    - **require:** `void EmbeddedGeometry::requireHalfedgeVectors()`
+    - **immediate:** `Vector3 EmbeddedGeometry::halfedgeVector(Halfedge he)`
+
+
+??? func "face normal"
+
+    ##### face normal
+
+    A normal vector for each face.
+
+    - **member:** `FaceData<Vector3> EmbeddedGeometry::faceNormals`
+    - **require:** `void EmbeddedGeometry::requireFaceNormals()`
+    - **immediate:** `Vector3 EmbeddedGeometry::faceNormal(Face f)`
+
+
+??? func "vertex normal"
+
+    ##### vertex normal
+
+    A normal vector for each vertex. Defined as the corner-angle weighted average of incident face normals.
+
+    - **member:** `VertexData<Vector3> EmbeddedGeometry::faceNormals`
+    - **require:** `void EmbeddedGeometry::requireFaceNormals()`
+
+??? func "face tangent basis"
+
+    ##### face tangent basis
+
+    An $x$-axis and $y$-axis 3D basis vectors in world space, corresponding to the [intrinsic tangent space](#face-tangent-spaces) for the face. Always orthogonal to the face normal.
+
+    Example:
+
+    ```cpp
+ 
+    HalfedgeMesh& mesh = /* ... */ 
+    VertexPositionGeometry& geometry = /* ... */;    
+    FaceData<Vector2> myTangentVectorField;
+  
+    geometry.requireFaceTangentBasis();
+
+    for(Face f : mesh.faces()) {
+      Vector2 field = myTangentVectorField[f];
+
+      Vector3 basisX = geometry.faceTangentBasis[f];
+      Vector3 basisY = geometry.faceTangentBasis[f];
+
+      Vector3 fieldInWorldCoords = basisX * field.x + basisY * field.y;
+    }
+
+    ```
+
+    - **member:** `FaceData<std::array<Vector3,2>> EmbeddedGeometry::faceTangentBasis`
+    - **require:** `void EmbeddedGeometry::requireFaceTangentBasis()`
+
+
+??? func "vertex tangent basis"
+
+    ##### vertex tangent basis
+
+    An $x$-axis and $y$-axis 3D basis vectors in world space, corresponding to the [intrinsic tangent space](#vertex-tangent-spaces) for the vertex. Always orthogonal to the vertex normal.
+
+    Example:
+
+    ```cpp
+ 
+    HalfedgeMesh& mesh = /* ... */ 
+    VertexPositionGeometry& geometry = /* ... */;    
+    VertexData<Vector2> myTangentVectorField;
+  
+    geometry.requireFaceTangentBasis();
+
+    for(Vertex v : mesh.vertices()) {
+      Vector2 field = myTangentVectorField[v];
+
+      Vector3 basisX = geometry.vertexTangentBasis[v];
+      Vector3 basisY = geometry.vertexTangentBasis[v];
+
+      Vector3 fieldInWorldCoords = basisX * field.x + basisY * field.y;
+    }
+
+    ```
+
+    - **member:** `VertexData<std::array<Vector3,2>> EmbeddedGeometry::vertexTangentBasis`
+    - **require:** `void EmbeddedGeometry::requireVertexTangentBasis()`

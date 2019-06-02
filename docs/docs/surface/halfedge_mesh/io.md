@@ -31,9 +31,7 @@ TODO
 
 ## Serializing containers 
 
-Data stored in `MeshData<>` containers can be automatically written and loaded from file. Internally, data is stored as additional custom fields of a `.ply` file.
-
-Here, we're using the `.ply` format as a general container for structured data. Other software will not automatically understand the additional fields in these files; the only guarantee really offered is that geometry central can consistently read and write from these files.
+Data stored in `MeshData<>` containers can be automatically written and loaded from file. Internally, data is stored as additional custom fields of a `.ply` file.  Here, we're using the `.ply` format as a general container for structured data---other software may not automatically understand the additional fields in these files.
 
 The `PlyHalfedgeMeshData` class is used to read and write these souped-up `.ply` files, and is distinct from the simple mesh-loading `.ply` interface above.
 
