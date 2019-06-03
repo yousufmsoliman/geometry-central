@@ -19,8 +19,8 @@ namespace surface {
 
 // Mesh loader helpers
 namespace {
-std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<Geometry<Euclidean>>> loadMesh_PLY(std::string filename,
-                                                                                             bool verbose) {
+std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<GeometryBase>> loadMesh_PLY(std::string filename,
+                                                                                      bool verbose) {
 
   happly::PLYData plyData(filename);
 
@@ -40,15 +40,15 @@ std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<Geometry<Euclidean>>> 
   return makeHalfedgeAndGeometry(faceIndices, vertexPositions, verbose);
 }
 
-std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<Geometry<Euclidean>>> loadMesh_OBJ(std::string filename,
-                                                                                             bool verbose) {
+std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<GeometryBase>> loadMesh_OBJ(std::string filename,
+                                                                                      bool verbose) {
   PolygonSoupMesh soup(filename);
   return makeHalfedgeAndGeometry(soup.polygons, soup.vertexCoordinates, verbose);
 }
 } // namespace
 
-std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<Geometry<Euclidean>>>
-loadMesh(std::string filename, bool verbose, std::string type) {
+std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<GeometryBase>> loadMesh(std::string filename, bool verbose,
+                                                                                  std::string type) {
 
   // Check if file exists
   std::ifstream testStream(filename);
@@ -148,7 +148,8 @@ std::unique_ptr<HalfedgeMesh> loadConnectivity(std::string filename, bool verbos
 
 // ======= Output =======
 
-bool WavefrontOBJ::write(std::string filename, Geometry<Euclidean>& geometry) {
+/*
+bool WavefrontOBJ::write(std::string filename, GeometryEuclidean>& geometry) {
   std::ofstream out;
   if (!openStream(out, filename)) return false;
 
@@ -248,6 +249,7 @@ void WavefrontOBJ::writeFaces(std::ofstream& out, Geometry<Euclidean>& geometry,
     }
   }
 }
+*/
 
 
 } // namespace surface

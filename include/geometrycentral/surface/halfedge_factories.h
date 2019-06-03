@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "geometrycentral/surface/geometry.h"
+#include "geometrycentral/surface/geometry_base.h"
 #include "geometrycentral/surface/halfedge_mesh.h"
 
 #include <memory>
@@ -19,7 +19,7 @@ namespace surface {
 //  constructing the mesh. This is necessary if there may be such unused elements, because the halfedge mesh cannot
 //  understand/represent them.
 //  - verbose: a verbose flag to pass on to the halfedge constructor
-std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<Geometry<Euclidean>>>
+std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<GeometryBase>>
 makeHalfedgeAndGeometry(const std::vector<std::vector<size_t>>& polygons, const std::vector<Vector3> vertexPositions,
                         bool compressIndices = true, bool verbose = false);
 
