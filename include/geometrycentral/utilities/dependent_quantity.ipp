@@ -1,14 +1,12 @@
-#include "geometrycentral/surface/dependent_quantity.h"
-
 namespace geometrycentral {
 
-void DependentQuantity::ensureHaveIfRequired() {
+inline void DependentQuantity::ensureHaveIfRequired() {
   if (requireCount > 0) {
     ensureHave();
   }
 }
 
-void DependentQuantity::ensureHave() {
+inline void DependentQuantity::ensureHave() {
 
   // If the quantity is already populated, early out
   if (computed) {
@@ -26,17 +24,24 @@ void DependentQuantity::ensureHave() {
   computed = true;
 };
 
-void DependentQuantity::require() {
+inline void DependentQuantity::require() {
   requireCount++;
   ensureHave();
 }
 
-void DependentQuantity::unrequire() {
+inline void DependentQuantity::unrequire() {
   requireCount--;
 
   if (requireCount < 0) {
     throw std::logic_error("Quantity was unrequire()'d more than than it was require()'d");
     requireCount = 0;
+  }
+}
+
+template <typename D>
+void DependentQuantityD<D>::clearIfNotRequired() {
+  if (requireCount <= 0 && dataBuffer != nullptr) {
+    clearBuffer(dataBuffer);
   }
 }
 

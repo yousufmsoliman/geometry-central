@@ -8,7 +8,13 @@
 namespace geometrycentral {
 namespace surface {
 
-IntrinsicGeometry::IntrinsicGeometry(HalfedgeMesh* mesh_) : mesh(mesh_) {}
+IntrinsicGeometry::IntrinsicGeometry(HalfedgeMesh* mesh_) : 
+  mesh(mesh_),
+  vertexIndicesQ({}, std::bind(&IntrinsicGeometry::computeVertexIndices, this));
+  
+  
+  
+  {}
 
 void IntrinsicGeometry::buildDependencies() {
 
@@ -63,8 +69,8 @@ void IntrinsicGeometry::recomputeQuantities() {
 }
 
 void IntrinsicGeometry::verifyTriangular(HalfedgeMesh* m) {
-#ifndef NDEBUG // for now, this is O(n), so don't want to do it constantly
-  if (!m->isTriangular()) {
+#ifndef NDEBUG // right now this is O(n), so don't want to do it constantly
+  if (!m->isTriangular()) j
     throw std::logic_error("Only implemented for triangular meshes");
   }
 #endif

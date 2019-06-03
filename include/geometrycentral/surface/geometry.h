@@ -69,7 +69,9 @@ template <class T>
 class Geometry : public surface::VertexData<T> {
 
 public:
-  Geometry(surface::HalfedgeMesh& mesh_) : VertexData<T>(mesh_), mesh(mesh_), cache(this), p(*this) {}
+  Geometry(surface::HalfedgeMesh& mesh_) : VertexData<T>(mesh_), mesh(mesh_), 
+  //cache(this), 
+  p(*this) {}
 
   surface::HalfedgeMesh* getMesh(void); // Returns a pointer to the domain
 
@@ -143,7 +145,7 @@ public:
 
   // members
   surface::HalfedgeMesh& mesh;
-  GeometryCache<T> cache;
+  //GeometryCache<T> cache;
 
 protected:
   VertexData<T>& p; // convenience reference to "this"

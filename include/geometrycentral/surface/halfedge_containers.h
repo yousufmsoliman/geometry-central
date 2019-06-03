@@ -1,5 +1,7 @@
 #pragma once
 
+#include "geometrycentral/utilities/dependent_quantity.h"
+
 #include "geometrycentral/surface/halfedge_element_types.h"
 
 #include "Eigen/Core"

@@ -217,4 +217,13 @@ inline size_t MeshData<E, T>::size() const {
 }
 
 } // namespace surface
+
+// Specialization of clear for meshdata containers -- see dependent_quantity.h
+// TODO is this actually resolving when needed?
+template <typename E, typename T>
+void clearBuffer(surface::MeshData<E, T>* buff) {
+  (*buff) = surface::MeshData<E, T>();
+}
+
+
 } // namespace geometrycentral

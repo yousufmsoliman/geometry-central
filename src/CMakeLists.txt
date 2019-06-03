@@ -7,32 +7,33 @@ endif()
 
 # List of .cpp files to be compiled
 SET(SRCS
+  
 
   surface/halfedge_mesh.cpp
   surface/halfedge_factories.cpp
   surface/meshio.cpp
   surface/polygon_soup_mesh.cpp
   surface/ply_halfedge_mesh_data.cpp
+  surface/geometry_base.cpp
+
   surface/geometry.cpp
-  surface/intrinsic_geometry.cpp
-  surface/geometry_cache.cpp 
-  surface/edge_length_geometry.cpp
-  surface/dependent_quantity.cpp
-  surface/mesh_graph_algorithms.cpp
-  surface/discrete_operators.cpp
-  surface/detect_symmetry.cpp
-  surface/mesh_ray_tracer.cpp
-  surface/direction_fields.cpp
-  surface/exact_polyhedral_geodesics.cpp
-  surface/fast_marching_method.cpp
+  #surface/intrinsic_geometry.cpp
+  #surface/geometry_cache.cpp 
+  #surface/edge_length_geometry.cpp
+  #surface/mesh_graph_algorithms.cpp
+  #surface/discrete_operators.cpp
+  #surface/detect_symmetry.cpp
+  #surface/mesh_ray_tracer.cpp
+  #surface/direction_fields.cpp
+  #surface/exact_polyhedral_geodesics.cpp
+  #surface/fast_marching_method.cpp
 
-  numerical/suitesparse_utilities.cpp
-  numerical/linear_solvers.cpp
-  numerical/eigenproblem_solvers.cpp
-  numerical/qr_solvers.cpp
-  numerical/square_solvers.cpp
-  numerical/positive_definite_solvers.cpp
-
+  #numerical/suitesparse_utilities.cpp
+  #numerical/linear_solvers.cpp
+  #numerical/eigenproblem_solvers.cpp
+  #numerical/qr_solvers.cpp
+  #numerical/square_solvers.cpp
+  #numerical/positive_definite_solvers.cpp
 
   utilities/unit_vector3.cpp
   utilities/vector3.cpp

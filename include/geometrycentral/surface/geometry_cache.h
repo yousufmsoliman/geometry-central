@@ -1,6 +1,6 @@
 #pragma once
 
-#include "geometrycentral/surface/dependent_quantity.h"
+#include "geometrycentral/utilities/dependent_quantity.h"
 #include "geometrycentral/surface/geometry.h"
 #include "geometrycentral/surface/halfedge_containers.h"
 #include "geometrycentral/surface/halfedge_mesh.h"
