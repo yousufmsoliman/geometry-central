@@ -7,19 +7,21 @@ endif()
 
 # List of .cpp files to be compiled
 SET(SRCS
-  
 
   surface/halfedge_mesh.cpp
   surface/halfedge_factories.cpp
   surface/meshio.cpp
   surface/polygon_soup_mesh.cpp
   surface/ply_halfedge_mesh_data.cpp
-  surface/geometry_base.cpp
-
+  
+  surface/base_geometry_interface.cpp
+  surface/intrinsic_geometry_interface.cpp
+  surface/extrinsic_geometry_interface.cpp
+  surface/embedded_geometry_interface.cpp
+  surface/edge_length_geometry.cpp
+  surface/vertex_position_geometry.cpp
   surface/geometry.cpp
-  #surface/intrinsic_geometry.cpp
   #surface/geometry_cache.cpp 
-  #surface/edge_length_geometry.cpp
   #surface/mesh_graph_algorithms.cpp
   #surface/discrete_operators.cpp
   #surface/detect_symmetry.cpp

@@ -1,20 +1,21 @@
 #pragma once
 
 #include <functional>
-#include <vector>
 #include <iostream>
+#include <vector>
 
 namespace geometrycentral {
 
 class DependentQuantity {
 
 public:
-  DependentQuantity(std::vector<DependentQuantity*> dependencies_, std::function<void()> evaluateFunc_)
-      : dependencies(dependencies_), evaluateFunc(evaluateFunc_) {}
+  DependentQuantity(std::function<void()> evaluateFunc_, std::vector<DependentQuantity*>& listToJoin)
+      : evaluateFunc(evaluateFunc_) {
+    listToJoin.push_back(this);
+  }
 
   virtual ~DependentQuantity(){};
 
-  std::vector<DependentQuantity*> dependencies;
   std::function<void()> evaluateFunc;
   bool computed = false;
   int requireCount = 0;
@@ -44,8 +45,8 @@ public:
   DependentQuantityD(){};
   virtual ~DependentQuantityD(){};
 
-  DependentQuantityD(D* dataBuffer_, std::function<void()> evaluateFunc_, std::vector<DependentQuantity*> dependencies_)
-      : DependentQuantity(dependencies_, evaluateFunc_), dataBuffer(dataBuffer_) {}
+  DependentQuantityD(D* dataBuffer_, std::function<void()> evaluateFunc_, std::vector<DependentQuantity*>& listToJoin)
+      : DependentQuantity(evaluateFunc_, listToJoin), dataBuffer(dataBuffer_) {}
 
   D* dataBuffer = nullptr;
 

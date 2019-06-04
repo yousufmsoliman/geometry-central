@@ -130,6 +130,7 @@ void MeshData<E, T>::fill(T val) {
 
 template <typename E, typename T>
 inline void MeshData<E, T>::clear() {
+  deregisterWithMesh();
   mesh = nullptr;
   defaultValue = T();
   data.clear();

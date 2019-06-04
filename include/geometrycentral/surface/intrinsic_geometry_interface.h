@@ -1,32 +1,36 @@
 #pragma once
 
-#include "geometrycentral/surface/dependent_quantity.h"
-#include "geometrycentral/surface/geometry_base.h"
+#include "geometrycentral/surface/base_geometry_interface.h"
 #include "geometrycentral/surface/halfedge_mesh.h"
 #include "geometrycentral/utilities/vector2.h"
 
 #include <Eigen/SparseCore>
 
-#include <iostream>
-
 namespace geometrycentral {
 namespace surface {
 
 
-class IntrinsicGeometry : public GeometryBase {
+class IntrinsicGeometryInterface : public BaseGeometryInterface {
+
+protected:
+  // Constructor is protected, because this class is an interface which is not meant to be instantiated directly.
+  // Instantiate it via some realization which encapsulates input data, like EdgeLengthGeometry or
+  // VertexPositionGeometry.
+  IntrinsicGeometryInterface(HalfedgeMesh& mesh_);
+  virtual ~IntrinsicGeometryInterface() {}
 
 public:
-  // Constructor (doesn't do much)
-  IntrinsicGeometry(HalfedgeMesh* mesh_);
+  // == Lengths, areas, and angles
 
-  // == Members
-  HalfedgeMesh* mesh = nullptr;
+  // Edge lengths
+  inline void requireEdgeLengths();
+  EdgeData<double> edgeLengths;
 
-  // == Utility methods
-  void recomputeQuantities();
+  // Face areas
+  inline void requireFaceAreas();
+  FaceData<double> faceAreas;
 
-  // == Basic geometric quantities
-
+  /*
   // Face areas
   inline void requireFaceAreas() { faceAreasQ.require(); }
   FaceData<double> faceAreas;
@@ -82,24 +86,6 @@ public:
   HalfedgeData<Complex> vertexTransportCoefs;
 
 
-  // == Indices
-
-  inline void requireVertexIndices() { vertexIndicesQ.require(); }
-  VertexData<size_t> vertexIndices;
-
-  inline void requireInteriorVertexIndices() { interiorVertexIndicesQ.require(); }
-  VertexData<size_t> interiorVertexIndices;
-
-  inline void requireFaceIndices() { faceIndicesQ.require(); }
-  FaceData<size_t> faceIndices;
-
-  inline void requireEdgeIndices() { edgeIndicesQ.require(); }
-  EdgeData<size_t> edgeIndices;
-
-  inline void requireHalfedgeIndices() { halfedgeIndicesQ.require(); }
-  HalfedgeData<size_t> halfedgeIndices;
-
-
   // == Operators
   // Note: These don't quite follow the usual naming scheme, for the sake of grouping common operators
   // TODO factorizations?
@@ -113,13 +99,22 @@ public:
   // Remember, this DOES NOT include the mass matrix (hodge0)
   inline void requireZeroFormWeakLaplacian() { zeroFormWeakLaplacianQ.require(); }
   Eigen::SparseMatrix<double> zeroFormWeakLaplacian;
+  */
 
 protected:
-  std::vector<DependentQuantity*> allQuantities;
+  // == Lengths, areas, and angles
 
-  // === Internal interface for all quantities
-  virtual void buildDependencies();
+  // Edge lengths
+  // Note that computeEdgeLengths() is pure virtual: some input data class which extends this interface must supply a
+  // method for computing edge lengths (EdgeLengthGeometry serves this purpose)
+  DependentQuantityD<EdgeData<double>> edgeLengthsQ;
+  virtual void computeEdgeLengths() = 0;
 
+  // Face areas
+  DependentQuantityD<FaceData<double>> faceAreasQ;
+  virtual void computeFaceAreas();
+
+  /*
   // == Basic geometric quantities
 
   DependentQuantity faceAreasQ;
@@ -186,10 +181,7 @@ protected:
   DependentQuantity zeroFormWeakLaplacianQ;
   virtual void computeZeroFormWeakLaplacian();
 
-  // == Helpers
-
-  // Throws an error if mesh is not triangular
-  void verifyTriangular(HalfedgeMesh* m);
+  */
 };
 
 } // namespace surface

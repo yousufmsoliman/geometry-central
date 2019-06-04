@@ -8,11 +8,11 @@
 namespace geometrycentral {
 namespace surface {
 
-class GeometryBase {
+class BaseGeometryInterface {
 
 public:
-  GeometryBase(HalfedgeMesh& mesh, std::vector<DependentQuantity*> childQuantities = {});
-  // virtual ~GeometryBase();
+  BaseGeometryInterface(HalfedgeMesh& mesh);
+  virtual ~BaseGeometryInterface();
 
   // == Members
   HalfedgeMesh& mesh;
@@ -29,7 +29,7 @@ public:
 
   // Construct a geometry object on another mesh identical to this one
   // TODO move this to exist in realizations only
-  std::unique_ptr<GeometryBase> reinterpretTo(HalfedgeMesh& targetMesh);
+  std::unique_ptr<BaseGeometryInterface> reinterpretTo(HalfedgeMesh& targetMesh);
 
 
   // === Quantities

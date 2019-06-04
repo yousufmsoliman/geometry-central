@@ -19,7 +19,7 @@ namespace surface {
 
 // Mesh loader helpers
 namespace {
-std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<GeometryBase>> loadMesh_PLY(std::string filename,
+std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<VertexPositionGeometry>> loadMesh_PLY(std::string filename,
                                                                                       bool verbose) {
 
   happly::PLYData plyData(filename);
@@ -40,14 +40,14 @@ std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<GeometryBase>> loadMes
   return makeHalfedgeAndGeometry(faceIndices, vertexPositions, verbose);
 }
 
-std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<GeometryBase>> loadMesh_OBJ(std::string filename,
+std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<VertexPositionGeometry>> loadMesh_OBJ(std::string filename,
                                                                                       bool verbose) {
   PolygonSoupMesh soup(filename);
   return makeHalfedgeAndGeometry(soup.polygons, soup.vertexCoordinates, verbose);
 }
 } // namespace
 
-std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<GeometryBase>> loadMesh(std::string filename, bool verbose,
+std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<VertexPositionGeometry>> loadMesh(std::string filename, bool verbose,
                                                                                   std::string type) {
 
   // Check if file exists

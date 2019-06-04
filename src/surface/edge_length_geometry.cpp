@@ -8,36 +8,10 @@
 namespace geometrycentral {
 namespace surface {
 
-EdgeLengthGeometry::EdgeLengthGeometry(HalfedgeMesh* mesh_, EdgeData<double>& edgeLengths_)
-    : IntrinsicGeometry(mesh_), geodesicEdgeLengths(edgeLengths_)
+EdgeLengthGeometry::EdgeLengthGeometry(HalfedgeMesh& mesh_, EdgeData<double>& inputEdgeLengths_)
+    : IntrinsicGeometryInterface(mesh_), inputEdgeLengths(inputEdgeLengths_) {}
 
-{
-  buildDependencies();
-}
-
-EdgeLengthGeometry::EdgeLengthGeometry(HalfedgeMesh* mesh_, VertexData<Vector3>& vertexPositions)
-    : IntrinsicGeometry(mesh_) {
-
-  geodesicEdgeLengths = EdgeData<double>(*mesh);
-  for (Edge e : mesh->edges()) {
-    geodesicEdgeLengths[e] =
-        norm(vertexPositions[e.halfedge().vertex()] - vertexPositions[e.halfedge().twin().vertex()]);
-  }
-
-  buildDependencies();
-}
-
-EdgeLengthGeometry::~EdgeLengthGeometry(){};
-
-// Set new edgelengths to define the geometry, immediately recalculating any quantities that have been required.
-void EdgeLengthGeometry::update(EdgeData<double> edgeLengths) {
-  geodesicEdgeLengths = edgeLengths;
-  recomputeQuantities();
-}
-
-// === Quantity implementations
-
-void EdgeLengthGeometry::computeEdgeLengths() { edgeLengths = geodesicEdgeLengths; }
+void EdgeLengthGeometry::computeEdgeLengths() { edgeLengths = inputEdgeLengths; }
 
 } // namespace surface
 } // namespace geometrycentral

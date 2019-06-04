@@ -12,7 +12,7 @@ std::unique_ptr<HalfedgeMesh> mesh;
 std::unique_ptr<VertexPositionGeometry> positionGeometry;
 std::tie<mesh, positionGeometry> = loadMesh("spot.obj");
 
-// For the sake of the example, bind to an interface that offers
+// For the sake of the example, use an interface type that offers
 // only the quantities which we will actually use below.
 IntrinsicGeometry& geometry = *positionGeometry;
 

@@ -1,6 +1,13 @@
-#include "geometrycentral/surface/geometry_base.h"
+
 #include "geometrycentral/surface/halfedge_mesh.h"
 #include "geometrycentral/surface/meshio.h"
+
+#include "geometrycentral/surface/base_geometry_interface.h"
+#include "geometrycentral/surface/intrinsic_geometry_interface.h"
+#include "geometrycentral/surface/extrinsic_geometry_interface.h"
+#include "geometrycentral/surface/embedded_geometry_interface.h"
+#include "geometrycentral/surface/edge_length_geometry.h"
+#include "geometrycentral/surface/vertex_position_geometry.h"
 
 #include "load_test_meshes.h"
 
@@ -29,7 +36,7 @@ TEST_F(HalfedgeGeometrySuite, RefreshTest) {
 TEST_F(HalfedgeGeometrySuite, PurgeTest) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
-  GeometryBase& geometry = *asset.geometry;
+  BaseGeometryInterface& geometry = *asset.geometry;
 
   // Make sure the size is zero when empty
   EXPECT_EQ(geometry.vertexIndices.size(), 0);
@@ -57,7 +64,7 @@ TEST_F(HalfedgeGeometrySuite, PurgeTest) {
 TEST_F(HalfedgeGeometrySuite, VertexIndicesTest) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
-  GeometryBase& geometry = *asset.geometry;
+  BaseGeometryInterface& geometry = *asset.geometry;
 
   geometry.requireVertexIndices();
   for (Vertex v : mesh.vertices()) {
@@ -69,7 +76,7 @@ TEST_F(HalfedgeGeometrySuite, VertexIndicesTest) {
 TEST_F(HalfedgeGeometrySuite, HalfedgeIndicesTest) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
-  GeometryBase& geometry = *asset.geometry;
+  BaseGeometryInterface& geometry = *asset.geometry;
 
   geometry.requireHalfedgeIndices();
   for (Halfedge e : mesh.halfedges()) {
@@ -81,7 +88,7 @@ TEST_F(HalfedgeGeometrySuite, HalfedgeIndicesTest) {
 TEST_F(HalfedgeGeometrySuite, CornerIndicesTest) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
-  GeometryBase& geometry = *asset.geometry;
+  BaseGeometryInterface& geometry = *asset.geometry;
 
   geometry.requireCornerIndices();
   for (Corner e : mesh.corners()) {
@@ -93,7 +100,7 @@ TEST_F(HalfedgeGeometrySuite, CornerIndicesTest) {
 TEST_F(HalfedgeGeometrySuite, EdgeIndicesTest) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
-  GeometryBase& geometry = *asset.geometry;
+  BaseGeometryInterface& geometry = *asset.geometry;
 
   geometry.requireEdgeIndices();
   for (Edge e : mesh.edges()) {
@@ -105,7 +112,7 @@ TEST_F(HalfedgeGeometrySuite, EdgeIndicesTest) {
 TEST_F(HalfedgeGeometrySuite, FaceIndicesTest) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
-  GeometryBase& geometry = *asset.geometry;
+  BaseGeometryInterface& geometry = *asset.geometry;
 
   geometry.requireFaceIndices();
   for (Face e : mesh.faces()) {
@@ -117,11 +124,22 @@ TEST_F(HalfedgeGeometrySuite, FaceIndicesTest) {
 TEST_F(HalfedgeGeometrySuite, BoundaryLoopIndicesTest) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
-  GeometryBase& geometry = *asset.geometry;
+  BaseGeometryInterface& geometry = *asset.geometry;
 
   geometry.requireBoundaryLoopIndices();
   for (BoundaryLoop e : mesh.boundaryLoops()) {
     EXPECT_GE(geometry.boundaryLoopIndices[e], 0);
     EXPECT_LT(geometry.boundaryLoopIndices[e], mesh.nBoundaryLoops());
   }
+}
+
+
+TEST_F(HalfedgeGeometrySuite, EdgeLengthsTest) {
+  auto asset = getAsset("bob_small.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  BaseGeometryInterface& geometry = *asset.geometry;
+
+
+  EdgeData<double> lengths(mesh, 77.);
+  EdgeLengthGeometry geom(mesh, lengths);
 }

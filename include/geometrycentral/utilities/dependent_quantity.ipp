@@ -13,11 +13,6 @@ inline void DependentQuantity::ensureHave() {
     return;
   }
 
-  // Resolve all of the dependencies
-  for (auto x : dependencies) {
-    x->ensureHave();
-  }
-
   // Compute this quantity
   evaluateFunc();
 
@@ -40,7 +35,7 @@ inline void DependentQuantity::unrequire() {
 
 // Helper template
 // Note: if/when we start using more types in these quantities, we might need to generalize this mechanism. But for the
-// current set of uses (scalars and MeshData<>), it works just fine.
+// current set of uses (scalars and MeshData<>), this works just fine.
 namespace {
 
 template <typename T>

@@ -3,7 +3,7 @@
 
 namespace geometrycentral {
 namespace surface {
-std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<GeometryBase>>
+std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<VertexPositionGeometry>>
 makeHalfedgeAndGeometry(const std::vector<std::vector<size_t>>& polygons, const std::vector<Vector3> vertexPositions,
                         bool compressIndices, bool verbose) {
 
@@ -43,11 +43,10 @@ makeHalfedgeAndGeometry(const std::vector<std::vector<size_t>>& polygons, const 
 
     // Construct
     std::unique_ptr<HalfedgeMesh> mesh(new HalfedgeMesh(newPolygons, verbose));
-    std::unique_ptr<GeometryBase> geometry(new GeometryBase(*mesh));
+    std::unique_ptr<VertexPositionGeometry> geometry(new VertexPositionGeometry(*mesh));
     for (Vertex v : mesh->vertices()) {
-      // FIXME
       // Use the low-level indexers here since we're constructing
-      //(*geometry)[v] = newVertexPositions[v.getIndex()];
+      (*geometry).inputVertexPositions[v] = newVertexPositions[v.getIndex()];
     }
 
     return std::make_tuple(std::move(mesh), std::move(geometry));
@@ -56,11 +55,10 @@ makeHalfedgeAndGeometry(const std::vector<std::vector<size_t>>& polygons, const 
 
     // Construct
     std::unique_ptr<HalfedgeMesh> mesh(new HalfedgeMesh(polygons, verbose));
-    std::unique_ptr<GeometryBase> geometry(new GeometryBase(*mesh));
+    std::unique_ptr<VertexPositionGeometry> geometry(new VertexPositionGeometry(*mesh));
     for (Vertex v : mesh->vertices()) {
-      // FIXME
       // Use the low-level indexers here since we're constructing
-      //(*geometry)[v] = vertexPositions[v.getIndex()];
+      (*geometry).inputVertexPositions[v] = vertexPositions[v.getIndex()];
     }
 
     return std::make_tuple(std::move(mesh), std::move(geometry));
