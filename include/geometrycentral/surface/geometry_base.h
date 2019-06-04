@@ -11,7 +11,7 @@ namespace surface {
 class GeometryBase {
 
 public:
-  GeometryBase(HalfedgeMesh& mesh);
+  GeometryBase(HalfedgeMesh& mesh, std::vector<DependentQuantity*> childQuantities = {});
   virtual ~GeometryBase();
 
   // == Members
@@ -26,6 +26,10 @@ public:
 
   // Clear out any cached quantities which were previously computed but are not currently required.
   void purgeQuantities();
+
+  // Construct a geometry object on another mesh identical to this one
+  // TODO move this to exist in realizations only
+  std::unique_ptr<GeometryBase> reinterpretTo(HalfedgeMesh& targetMesh);
 
 
   // === Quantities
@@ -57,9 +61,9 @@ public:
   inline void requireFaceIndices() { faceIndicesQ.require(); }
   inline void unrequireFaceIndices() { faceIndicesQ.unrequire(); }
 
-  //BoundaryLoopData<size_t> boundaryLoopIndices;
-  //inline void requireBoundaryLoopIndices() { boundaryLoopIndicesQ.require(); }
-  //inline void unrequireBoundaryLoopIndices() { boundaryLoopIndicesQ.unrequire(); }
+  BoundaryLoopData<size_t> boundaryLoopIndices;
+  inline void requireBoundaryLoopIndices() { boundaryLoopIndicesQ.require(); }
+  inline void unrequireBoundaryLoopIndices() { boundaryLoopIndicesQ.unrequire(); }
 
 protected:
 
@@ -88,8 +92,8 @@ protected:
   DependentQuantityD<FaceData<size_t>> faceIndicesQ;
   virtual void computeFaceIndices();
 
-  //DependentQuantityD<BoundaryLoopData<size_t>> boundaryLoopIndicesQ;
-  //virtual void computeBoundaryLoopIndices();
+  DependentQuantityD<BoundaryLoopData<size_t>> boundaryLoopIndicesQ;
+  virtual void computeBoundaryLoopIndices();
 };
 
 } // namespace surface

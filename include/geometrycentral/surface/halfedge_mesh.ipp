@@ -16,10 +16,11 @@ inline size_t HalfedgeMesh::nFaces()             const { return nFacesCount; }
 inline size_t HalfedgeMesh::nBoundaryLoops()     const { return nBoundaryLoopsCount; }
 
 // Capacities
-inline size_t HalfedgeMesh::nHalfedgesCapacity() const { return nHalfedgesCapacityCount; }
-inline size_t HalfedgeMesh::nVerticesCapacity()  const { return nVerticesCapacityCount; }
-inline size_t HalfedgeMesh::nEdgesCapacity()     const { return nHalfedgesCapacityCount / 2; }
-inline size_t HalfedgeMesh::nFacesCapacity()     const { return nFacesCapacityCount; }
+inline size_t HalfedgeMesh::nHalfedgesCapacity()        const { return nHalfedgesCapacityCount; }
+inline size_t HalfedgeMesh::nVerticesCapacity()         const { return nVerticesCapacityCount; }
+inline size_t HalfedgeMesh::nEdgesCapacity()            const { return nHalfedgesCapacityCount / 2; }
+inline size_t HalfedgeMesh::nFacesCapacity()            const { return nFacesCapacityCount; }
+inline size_t HalfedgeMesh::nBoundaryLoopsCapacity()    const { return nFacesCapacityCount - nFacesFillCount; }
 
 // Implicit relationships
 inline size_t HalfedgeMesh::heTwin(size_t iHe)   { return iHe ^ 1; }

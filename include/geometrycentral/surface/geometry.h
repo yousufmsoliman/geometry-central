@@ -48,7 +48,7 @@
 //       If you want to store non-triangular faces, be careful.
 
 
-#include "geometrycentral/surface/geometry_cache.h"
+//#include "geometrycentral/surface/geometry_cache.h"
 #include "geometrycentral/surface/halfedge_mesh.h"
 #include "geometrycentral/utilities/unit_vector3.h"
 #include "geometrycentral/utilities/vector2.h"
@@ -69,9 +69,10 @@ template <class T>
 class Geometry : public surface::VertexData<T> {
 
 public:
-  Geometry(surface::HalfedgeMesh& mesh_) : VertexData<T>(mesh_), mesh(mesh_), 
-  //cache(this), 
-  p(*this) {}
+  Geometry(surface::HalfedgeMesh& mesh_)
+      : VertexData<T>(mesh_), mesh(mesh_),
+        // cache(this),
+        p(*this) {}
 
   surface::HalfedgeMesh* getMesh(void); // Returns a pointer to the domain
 
@@ -145,7 +146,7 @@ public:
 
   // members
   surface::HalfedgeMesh& mesh;
-  //GeometryCache<T> cache;
+  // GeometryCache<T> cache;
 
 protected:
   VertexData<T>& p; // convenience reference to "this"

@@ -2,12 +2,9 @@
 
 #include <functional>
 #include <vector>
+#include <iostream>
 
 namespace geometrycentral {
-
-// Helper function which clears out a buffer of data. Can be overridden with clearing methods as appropriate.
-template <typename D>
-void clearBuffer(D* buff){};
 
 class DependentQuantity {
 
@@ -48,7 +45,7 @@ public:
   virtual ~DependentQuantityD(){};
 
   DependentQuantityD(D* dataBuffer_, std::function<void()> evaluateFunc_, std::vector<DependentQuantity*> dependencies_)
-      : DependentQuantity(dependencies, evaluateFunc_), dataBuffer(dataBuffer_) {}
+      : DependentQuantity(dependencies_, evaluateFunc_), dataBuffer(dataBuffer_) {}
 
   D* dataBuffer = nullptr;
 

@@ -351,26 +351,6 @@ VertexData<size_t> HalfedgeMesh::getInteriorVertexIndices() {
   return indices;
 }
 
-FaceData<size_t> HalfedgeMesh::getFaceIndices() {
-  FaceData<size_t> indices(*this);
-  size_t i = 0;
-  for (Face f : faces()) {
-    indices[f] = i;
-    i++;
-  }
-  return indices;
-}
-
-EdgeData<size_t> HalfedgeMesh::getEdgeIndices() {
-  EdgeData<size_t> indices(*this);
-  size_t i = 0;
-  for (Edge e : edges()) {
-    indices[e] = i;
-    i++;
-  }
-  return indices;
-}
-
 HalfedgeData<size_t> HalfedgeMesh::getHalfedgeIndices() {
   HalfedgeData<size_t> indices(*this);
   size_t i = 0;
@@ -390,6 +370,38 @@ CornerData<size_t> HalfedgeMesh::getCornerIndices() {
   }
   return indices;
 }
+
+EdgeData<size_t> HalfedgeMesh::getEdgeIndices() {
+  EdgeData<size_t> indices(*this);
+  size_t i = 0;
+  for (Edge e : edges()) {
+    indices[e] = i;
+    i++;
+  }
+  return indices;
+}
+
+
+FaceData<size_t> HalfedgeMesh::getFaceIndices() {
+  FaceData<size_t> indices(*this);
+  size_t i = 0;
+  for (Face f : faces()) {
+    indices[f] = i;
+    i++;
+  }
+  return indices;
+}
+
+BoundaryLoopData<size_t> HalfedgeMesh::getBoundaryLoopIndices() {
+  BoundaryLoopData<size_t> indices(*this);
+  size_t i = 0;
+  for (BoundaryLoop bl : boundaryLoops()) {
+    indices[bl] = i;
+    i++;
+  }
+  return indices;
+}
+
 
 std::unique_ptr<HalfedgeMesh> HalfedgeMesh::copy() const {
   HalfedgeMesh* newMesh = new HalfedgeMesh();

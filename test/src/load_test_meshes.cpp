@@ -42,8 +42,7 @@ MeshAsset MeshAsset::copy() const {
   newM.sourcePath = sourcePath;
   newM.mesh = mesh->copy();
   if (geometry) {
-    // TODO
-    // newM.geometry = geometry;
+     newM.geometry = geometry->reinterpretTo(*newM.mesh);
   }
 
   newM.hasBoundary = hasBoundary;

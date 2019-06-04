@@ -120,10 +120,11 @@ public:
   // (Note that in some situations, custom indices might instead be needed)
   VertexData<size_t> getVertexIndices();
   VertexData<size_t> getInteriorVertexIndices();
-  FaceData<size_t> getFaceIndices();
-  EdgeData<size_t> getEdgeIndices();
   HalfedgeData<size_t> getHalfedgeIndices();
   CornerData<size_t> getCornerIndices();
+  EdgeData<size_t> getEdgeIndices();
+  FaceData<size_t> getFaceIndices();
+  BoundaryLoopData<size_t> getBoundaryLoopIndices();
 
   // == Utility functions
   bool hasBoundary() const;        // does the mesh have boundary? (aka not closed)

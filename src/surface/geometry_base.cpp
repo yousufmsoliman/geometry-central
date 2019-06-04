@@ -5,7 +5,7 @@ namespace surface {
 
 
 // clang-format off
-GeometryBase::GeometryBase(HalfedgeMesh& mesh_)
+GeometryBase::GeometryBase(HalfedgeMesh& mesh_, std::vector<DependentQuantity*> childQuantities)
     : mesh(mesh_),
       
   // Construct the dependency graph of managed quantities and their callbacks
@@ -15,14 +15,17 @@ GeometryBase::GeometryBase(HalfedgeMesh& mesh_)
   edgeIndicesQ             (&edgeIndices,           std::bind(&GeometryBase::computeEdgeIndices, this),             {}),
   halfedgeIndicesQ         (&halfedgeIndices,       std::bind(&GeometryBase::computeHalfedgeIndices, this),         {}),
   cornerIndicesQ           (&cornerIndices,         std::bind(&GeometryBase::computeCornerIndices, this),           {}),
-  faceIndicesQ             (&faceIndices,           std::bind(&GeometryBase::computeFaceIndices, this),             {})
-  //boundaryLoopIndicesQ     (&boundaryLoopIndices,   std::bind(&GeometryBase::computeBoundaryLoopIndices, this),     {})
+  faceIndicesQ             (&faceIndices,           std::bind(&GeometryBase::computeFaceIndices, this),             {}),
+  boundaryLoopIndicesQ     (&boundaryLoopIndices,   std::bind(&GeometryBase::computeBoundaryLoopIndices, this),     {})
 
   {
-
     quantities.push_back(&vertexIndicesQ);
-
-    std::cout << "constructed geometry_base!" << std::endl;
+    quantities.push_back(&interiorVertexIndicesQ);
+    quantities.push_back(&edgeIndicesQ);
+    quantities.push_back(&halfedgeIndicesQ);
+    quantities.push_back(&cornerIndicesQ);
+    quantities.push_back(&faceIndicesQ);
+    quantities.push_back(&boundaryLoopIndicesQ);
   }
 // clang-format on
 
@@ -42,6 +45,11 @@ void GeometryBase::purgeQuantities() {
     q->clearIfNotRequired();
   }
 }
+  
+std::unique_ptr<GeometryBase> GeometryBase::reinterpretTo(HalfedgeMesh& targetMesh) {
+  std::unique_ptr<GeometryBase> newGeom(new GeometryBase(targetMesh));
+  return newGeom; 
+}
 
 
 // == Indices
@@ -52,6 +60,7 @@ void GeometryBase::computeEdgeIndices() { edgeIndices = mesh.getEdgeIndices(); }
 void GeometryBase::computeHalfedgeIndices() { halfedgeIndices = mesh.getHalfedgeIndices(); }
 void GeometryBase::computeCornerIndices() { cornerIndices = mesh.getCornerIndices(); }
 void GeometryBase::computeFaceIndices() { faceIndices = mesh.getFaceIndices(); }
+void GeometryBase::computeBoundaryLoopIndices() { boundaryLoopIndices = mesh.getBoundaryLoopIndices(); }
 
 
 } // namespace surface

@@ -38,10 +38,30 @@ inline void DependentQuantity::unrequire() {
   }
 }
 
+// Helper template
+// Note: if/when we start using more types in these quantities, we might need to generalize this mechanism. But for the
+// current set of uses (scalars and MeshData<>), it works just fine.
+namespace {
+
+template <typename T>
+void clearBuffer(T* buffer) {
+  buffer->clear();
+}
+
+template <>
+void clearBuffer(double* buffer) {}
+template <>
+void clearBuffer(size_t* buffer) {}
+template <>
+void clearBuffer(int* buffer) {}
+
+} // namespace
+
 template <typename D>
 void DependentQuantityD<D>::clearIfNotRequired() {
-  if (requireCount <= 0 && dataBuffer != nullptr) {
+  if (requireCount <= 0 && dataBuffer != nullptr && computed) {
     clearBuffer(dataBuffer);
+    computed = false;
   }
 }
 

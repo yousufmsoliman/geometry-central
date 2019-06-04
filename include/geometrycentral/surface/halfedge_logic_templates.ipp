@@ -42,17 +42,19 @@ template<> inline EdgeSet           iterateElements<Edge        >(HalfedgeMesh* 
 template<> inline FaceSet           iterateElements<Face        >(HalfedgeMesh* mesh)   { return mesh->faces();         }
 template<> inline BoundaryLoopSet   iterateElements<BoundaryLoop>(HalfedgeMesh* mesh)   { return mesh->boundaryLoops(); }
 
-template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<Vertex  >(HalfedgeMesh* mesh)   { return mesh->vertexExpandCallbackList;   }
-template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<Face    >(HalfedgeMesh* mesh)   { return mesh->faceExpandCallbackList;   }
-template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<Edge    >(HalfedgeMesh* mesh)   { return mesh->edgeExpandCallbackList;   }
-template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<Halfedge>(HalfedgeMesh* mesh)   { return mesh->halfedgeExpandCallbackList;   }
-template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<Corner  >(HalfedgeMesh* mesh)   { return mesh->halfedgeExpandCallbackList;   }
+template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<Vertex      >(HalfedgeMesh* mesh)   { return mesh->vertexExpandCallbackList;   }
+template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<Halfedge    >(HalfedgeMesh* mesh)   { return mesh->halfedgeExpandCallbackList;   }
+template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<Corner      >(HalfedgeMesh* mesh)   { return mesh->halfedgeExpandCallbackList;   }
+template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<Edge        >(HalfedgeMesh* mesh)   { return mesh->edgeExpandCallbackList;   }
+template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<Face        >(HalfedgeMesh* mesh)   { return mesh->faceExpandCallbackList;   }
+template<> inline std::list<std::function<void(size_t)>>& getExpandCallbackList<BoundaryLoop>(HalfedgeMesh* mesh)   { return mesh->faceExpandCallbackList;   }
 
-template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<Vertex  >(HalfedgeMesh* mesh)   { return mesh->vertexPermuteCallbackList;   }
-template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<Face    >(HalfedgeMesh* mesh)   { return mesh->facePermuteCallbackList;   }
-template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<Edge    >(HalfedgeMesh* mesh)   { return mesh->edgePermuteCallbackList;   }
-template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<Halfedge>(HalfedgeMesh* mesh)   { return mesh->halfedgePermuteCallbackList;   }
-template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<Corner  >(HalfedgeMesh* mesh)   { return mesh->halfedgePermuteCallbackList;   }
+template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<Vertex       >(HalfedgeMesh* mesh)   { return mesh->vertexPermuteCallbackList;   }
+template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<Halfedge     >(HalfedgeMesh* mesh)   { return mesh->halfedgePermuteCallbackList;   }
+template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<Corner       >(HalfedgeMesh* mesh)   { return mesh->halfedgePermuteCallbackList;   }
+template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<Edge         >(HalfedgeMesh* mesh)   { return mesh->edgePermuteCallbackList;   }
+template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<Face         >(HalfedgeMesh* mesh)   { return mesh->facePermuteCallbackList;   }
+template<> inline std::list<std::function<void(const std::vector<size_t>&)>>& getPermuteCallbackList<BoundaryLoop >(HalfedgeMesh* mesh)   { return mesh->facePermuteCallbackList;   }
 
 template<> inline std::string typeShortName<Vertex       >()            { return "v";    }
 template<> inline std::string typeShortName<Halfedge     >()            { return "he";   }

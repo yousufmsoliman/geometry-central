@@ -129,6 +129,13 @@ void MeshData<E, T>::fill(T val) {
 }
 
 template <typename E, typename T>
+inline void MeshData<E, T>::clear() {
+  mesh = nullptr;
+  defaultValue = T();
+  data.clear();
+}
+
+template <typename E, typename T>
 Eigen::Matrix<T, Eigen::Dynamic, 1> MeshData<E, T>::toVector() const {
   Eigen::Matrix<T, Eigen::Dynamic, 1> result(nElements<E>(mesh));
   size_t i = 0;
@@ -213,17 +220,9 @@ inline const T& MeshData<E, T>::operator[](size_t i) const {
 
 template <typename E, typename T>
 inline size_t MeshData<E, T>::size() const {
+  if (mesh == nullptr) return 0;
   return nElements<E>(mesh);
 }
 
 } // namespace surface
-
-// Specialization of clear for meshdata containers -- see dependent_quantity.h
-// TODO is this actually resolving when needed?
-template <typename E, typename T>
-void clearBuffer(surface::MeshData<E, T>* buff) {
-  (*buff) = surface::MeshData<E, T>();
-}
-
-
 } // namespace geometrycentral

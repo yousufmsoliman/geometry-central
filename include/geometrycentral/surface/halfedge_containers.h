@@ -77,6 +77,10 @@ public:
   // Fill with some value
   void fill(T val);
 
+  // Clear out storage.
+  // Essentially resets to MeshData<>(), can no longer be used to hold data.
+  void clear();
+
   // Convert to and from vector types
   Eigen::Matrix<T, Eigen::Dynamic, 1> toVector() const;
   Eigen::Matrix<T, Eigen::Dynamic, 1> toVector(const MeshData<E, size_t>& indexer) const;
