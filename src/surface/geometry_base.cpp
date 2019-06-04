@@ -29,7 +29,7 @@ GeometryBase::GeometryBase(HalfedgeMesh& mesh_, std::vector<DependentQuantity*> 
   }
 // clang-format on
 
-GeometryBase::~GeometryBase() {}
+// GeometryBase::~GeometryBase() {}
 
 void GeometryBase::refreshQuantities() {
   for (DependentQuantity* q : quantities) {
@@ -45,22 +45,51 @@ void GeometryBase::purgeQuantities() {
     q->clearIfNotRequired();
   }
 }
-  
+
 std::unique_ptr<GeometryBase> GeometryBase::reinterpretTo(HalfedgeMesh& targetMesh) {
   std::unique_ptr<GeometryBase> newGeom(new GeometryBase(targetMesh));
-  return newGeom; 
+  return newGeom;
 }
 
 
 // == Indices
 
+// Vertex indices
 void GeometryBase::computeVertexIndices() { vertexIndices = mesh.getVertexIndices(); }
+void GeometryBase::requireVertexIndices() { vertexIndicesQ.require(); }
+void GeometryBase::unrequireVertexIndices() { vertexIndicesQ.unrequire(); }
+
+// Interior vertex indices
 void GeometryBase::computeInteriorVertexIndices() { interiorVertexIndices = mesh.getInteriorVertexIndices(); }
+void GeometryBase::requireInteriorVertexIndices() { interiorVertexIndicesQ.require(); }
+void GeometryBase::unrequireInteriorVertexIndices() { interiorVertexIndicesQ.unrequire(); }
+
+// Edge indices
 void GeometryBase::computeEdgeIndices() { edgeIndices = mesh.getEdgeIndices(); }
+void GeometryBase::requireEdgeIndices() { edgeIndicesQ.require(); }
+void GeometryBase::unrequireEdgeIndices() { edgeIndicesQ.unrequire(); }
+
+// Halfedge indices
 void GeometryBase::computeHalfedgeIndices() { halfedgeIndices = mesh.getHalfedgeIndices(); }
+void GeometryBase::requireHalfedgeIndices() { halfedgeIndicesQ.require(); }
+void GeometryBase::unrequireHalfedgeIndices() { halfedgeIndicesQ.unrequire(); }
+
+// Corner indices
 void GeometryBase::computeCornerIndices() { cornerIndices = mesh.getCornerIndices(); }
+void GeometryBase::requireCornerIndices() { cornerIndicesQ.require(); }
+void GeometryBase::unrequireCornerIndices() { cornerIndicesQ.unrequire(); }
+
+
+// Face indices
 void GeometryBase::computeFaceIndices() { faceIndices = mesh.getFaceIndices(); }
+void GeometryBase::requireFaceIndices() { faceIndicesQ.require(); }
+void GeometryBase::unrequireFaceIndices() { faceIndicesQ.unrequire(); }
+
+
+// Boundary loop indices
 void GeometryBase::computeBoundaryLoopIndices() { boundaryLoopIndices = mesh.getBoundaryLoopIndices(); }
+void GeometryBase::requireBoundaryLoopIndices() { boundaryLoopIndicesQ.require(); }
+void GeometryBase::unrequireBoundaryLoopIndices() { boundaryLoopIndicesQ.unrequire(); }
 
 
 } // namespace surface

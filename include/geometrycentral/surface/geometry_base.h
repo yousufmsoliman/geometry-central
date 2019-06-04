@@ -12,7 +12,7 @@ class GeometryBase {
 
 public:
   GeometryBase(HalfedgeMesh& mesh, std::vector<DependentQuantity*> childQuantities = {});
-  virtual ~GeometryBase();
+  // virtual ~GeometryBase();
 
   // == Members
   HalfedgeMesh& mesh;
@@ -36,37 +36,46 @@ public:
 
 
   // == Indices
+  // Note: These don't depend on any geometric information, and are no different than the getVertexIndices() offered by
+  // the mesh class. However, its useful to offer them here so they can be used with the caching system.
 
+  // Vertex indices
   VertexData<size_t> vertexIndices;
-  inline void requireVertexIndices() { vertexIndicesQ.require(); }
-  inline void unrequireVertexIndices() { vertexIndicesQ.unrequire(); }
+  void requireVertexIndices();
+  void unrequireVertexIndices();
 
+  // Interior vertex indices
   VertexData<size_t> interiorVertexIndices;
-  inline void requireInteriorVertexIndices() { interiorVertexIndicesQ.require(); }
-  inline void unrequireInteriorVertexIndices() { interiorVertexIndicesQ.unrequire(); }
+  void requireInteriorVertexIndices();
+  void unrequireInteriorVertexIndices();
 
+  // Edge indices
   EdgeData<size_t> edgeIndices;
-  inline void requireEdgeIndices() { edgeIndicesQ.require(); }
-  inline void unrequireEdgeIndices() { edgeIndicesQ.unrequire(); }
+  void requireEdgeIndices();
+  void unrequireEdgeIndices();
 
+  // Halfedge indices
   HalfedgeData<size_t> halfedgeIndices;
-  inline void requireHalfedgeIndices() { halfedgeIndicesQ.require(); }
-  inline void unrequireHalfedgeIndices() { halfedgeIndicesQ.unrequire(); }
+  void requireHalfedgeIndices();
+  void unrequireHalfedgeIndices();
 
+  // Corner indices
   CornerData<size_t> cornerIndices;
-  inline void requireCornerIndices() { cornerIndicesQ.require(); }
-  inline void unrequireCornerIndices() { cornerIndicesQ.unrequire(); }
+  void requireCornerIndices();
+  void unrequireCornerIndices();
 
+  // Face indices
   FaceData<size_t> faceIndices;
-  inline void requireFaceIndices() { faceIndicesQ.require(); }
-  inline void unrequireFaceIndices() { faceIndicesQ.unrequire(); }
+  void requireFaceIndices();
+  void unrequireFaceIndices();
 
+  // Boundary loop indices
   BoundaryLoopData<size_t> boundaryLoopIndices;
-  inline void requireBoundaryLoopIndices() { boundaryLoopIndicesQ.require(); }
-  inline void unrequireBoundaryLoopIndices() { boundaryLoopIndicesQ.unrequire(); }
+  void requireBoundaryLoopIndices();
+  void unrequireBoundaryLoopIndices();
+
 
 protected:
-
   // All of the quantities available (subclasses will also add quantities to this list)
   std::vector<DependentQuantity*> quantities;
 

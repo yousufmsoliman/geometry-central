@@ -1,11 +1,9 @@
 #pragma once
 
 #include "geometrycentral/surface/dependent_quantity.h"
-#include "geometrycentral/surface/geometry.h"
+#include "geometrycentral/surface/geometry_base.h"
 #include "geometrycentral/surface/halfedge_mesh.h"
-#include "geometrycentral/utilities/unit_vector3.h"
 #include "geometrycentral/utilities/vector2.h"
-#include "geometrycentral/utilities/vector3.h"
 
 #include <Eigen/SparseCore>
 
@@ -15,7 +13,7 @@ namespace geometrycentral {
 namespace surface {
 
 
-class IntrinsicGeometry {
+class IntrinsicGeometry : public GeometryBase {
 
 public:
   // Constructor (doesn't do much)

@@ -52,7 +52,7 @@ TEST_F(HalfedgeGeometrySuite, PurgeTest) {
 // =============== Quantity tests
 // ============================================================
 
-// TODO change these to not explicitly construct the base object
+// == Basic indices
 
 TEST_F(HalfedgeGeometrySuite, VertexIndicesTest) {
   auto asset = getAsset("bob_small.ply");
@@ -75,5 +75,53 @@ TEST_F(HalfedgeGeometrySuite, HalfedgeIndicesTest) {
   for (Halfedge e : mesh.halfedges()) {
     EXPECT_GE(geometry.halfedgeIndices[e], 0);
     EXPECT_LT(geometry.halfedgeIndices[e], mesh.nHalfedges());
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, CornerIndicesTest) {
+  auto asset = getAsset("bob_small.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  GeometryBase& geometry = *asset.geometry;
+
+  geometry.requireCornerIndices();
+  for (Corner e : mesh.corners()) {
+    EXPECT_GE(geometry.cornerIndices[e], 0);
+    EXPECT_LT(geometry.cornerIndices[e], mesh.nCorners());
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, EdgeIndicesTest) {
+  auto asset = getAsset("bob_small.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  GeometryBase& geometry = *asset.geometry;
+
+  geometry.requireEdgeIndices();
+  for (Edge e : mesh.edges()) {
+    EXPECT_GE(geometry.edgeIndices[e], 0);
+    EXPECT_LT(geometry.edgeIndices[e], mesh.nEdges());
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, FaceIndicesTest) {
+  auto asset = getAsset("bob_small.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  GeometryBase& geometry = *asset.geometry;
+
+  geometry.requireFaceIndices();
+  for (Face e : mesh.faces()) {
+    EXPECT_GE(geometry.faceIndices[e], 0);
+    EXPECT_LT(geometry.faceIndices[e], mesh.nFaces());
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, BoundaryLoopIndicesTest) {
+  auto asset = getAsset("bob_small.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  GeometryBase& geometry = *asset.geometry;
+
+  geometry.requireBoundaryLoopIndices();
+  for (BoundaryLoop e : mesh.boundaryLoops()) {
+    EXPECT_GE(geometry.boundaryLoopIndices[e], 0);
+    EXPECT_LT(geometry.boundaryLoopIndices[e], mesh.nBoundaryLoops());
   }
 }
