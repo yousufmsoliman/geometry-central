@@ -93,6 +93,7 @@ inline double angleInPlane(const Vector3& u, const Vector3& v, const Vector3& no
 }
 
 inline bool Vector3::isFinite() const { return ::std::isfinite(x) && ::std::isfinite(y) && ::std::isfinite(z); }
+inline bool isfinite(const Vector3& v) { return v.isFinite(); }
 
 inline bool Vector3::isDefined() const { return (!::std::isnan(x)) && (!::std::isnan(y)) && (!::std::isnan(z)); }
 

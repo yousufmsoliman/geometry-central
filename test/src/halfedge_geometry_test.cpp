@@ -259,6 +259,58 @@ TEST_F(HalfedgeGeometrySuite, EdgeCotanWeightsTest) {
   }
 }
 
+TEST_F(HalfedgeGeometrySuite, HalfedgeVectorsInFaceTest) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireHalfedgeVectorsInFace();
+  for (Halfedge he : mesh.halfedges()) {
+    if (he.isInterior()) {
+      EXPECT_TRUE(isfinite(geometry.halfedgeVectorsInFace[he]));
+    } else {
+      EXPECT_FALSE(isfinite(geometry.halfedgeVectorsInFace[he]));
+    }
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, TransportVectorsAcrossHalfedge) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireTransportVectorsAcrossHalfedge();
+  for (Halfedge he : mesh.halfedges()) {
+    if (he.edge().isBoundary()) {
+      EXPECT_FALSE(isfinite(geometry.transportVectorsAcrossHalfedge[he]));
+    } else {
+      EXPECT_TRUE(isfinite(geometry.transportVectorsAcrossHalfedge[he]));
+    }
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, HalfedgeVectorsInVertexTest) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireHalfedgeVectorsInVertex();
+  for (Halfedge he : mesh.halfedges()) {
+    EXPECT_TRUE(isfinite(geometry.halfedgeVectorsInVertex[he]));
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, TransportVectorsAlongHalfedge) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireTransportVectorsAlongHalfedge();
+  for (Halfedge he : mesh.halfedges()) {
+    EXPECT_TRUE(isfinite(geometry.transportVectorsAlongHalfedge[he]));
+  }
+}
+
 
 // ============================================================
 // =============== Geometry tests

@@ -67,7 +67,7 @@ Vector3 cross(const Vector3& u, const Vector3& v);
 double angle(const Vector3& u, const Vector3& v);
 double angleInPlane(const Vector3& u, const Vector3& v, const Vector3& normal);
 double dot(const Vector3& u, const Vector3& v);
-bool isFinite(const Vector3& u);
+bool isfinite(const Vector3& u); // break camel case rule to match std
 Vector3 componentwiseMin(const Vector3& u, const Vector3& v);
 Vector3 componentwiseMax(const Vector3& u, const Vector3& v);
 

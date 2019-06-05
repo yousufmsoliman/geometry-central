@@ -46,6 +46,7 @@ struct Vector2 {
   Vector2& pow(double p);  // complex power
   Vector2& pow(Vector2 p); // complex to complex power
   Vector2& conj();
+  Vector2& inv();
 
   double arg() const;
   double norm() const;
@@ -83,7 +84,7 @@ Vector3 cross3(const Vector2& u, const Vector2& v); // assumes arguments are in 
 
 Vector2 unit(const Vector2& v);
 
-bool isFinite(const Vector2& u);
+bool isfinite(const Vector2& u); // break camel case rule to match std
 bool isDefined(const Vector2& u);
 Vector2 componentwiseMin(const Vector2& u, const Vector2& v);
 Vector2 componentwiseMax(const Vector2& u, const Vector2& v);

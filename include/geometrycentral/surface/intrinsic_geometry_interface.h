@@ -72,8 +72,28 @@ public:
   void requireEdgeCotanWeights();
   void unrequireEdgeCotanWeights();
 
+
   // == Tangent vectors and transport
+ 
+  // Halfedge vectors in face tangent space
+  HalfedgeData<Vector2> halfedgeVectorsInFace;
+  void requireHalfedgeVectorsInFace();
+  void unrequireHalfedgeVectorsInFace();
+
+  // Face tangent vector transport across halfedges
+  HalfedgeData<Vector2> transportVectorsAcrossHalfedge;
+  void requireTransportVectorsAcrossHalfedge();
+  void unrequireTransportVectorsAcrossHalfedge();
   
+  // Halfedge vectors in vertex tangent space
+  HalfedgeData<Vector2> halfedgeVectorsInVertex;
+  void requireHalfedgeVectorsInVertex();
+  void unrequireHalfedgeVectorsInVertex();
+
+  // Vertex transport across halfedges
+  HalfedgeData<Vector2> transportVectorsAlongHalfedge;
+  void requireTransportVectorsAlongHalfedge();
+  void unrequireTransportVectorsAlongHalfedge();
 
 protected:
 
@@ -121,6 +141,24 @@ protected:
   DependentQuantityD<EdgeData<double>> edgeCotanWeightsQ;
   virtual void computeEdgeCotanWeights();
 
+
+  // == Tangent vectors and transport
+  
+  // Halfedge vectors in face
+  DependentQuantityD<HalfedgeData<Vector2>> halfedgeVectorsInFaceQ;
+  virtual void computeHalfedgeVectorsInFace();
+  
+  // Face tangent vector transport across halfedges
+  DependentQuantityD<HalfedgeData<Vector2>> transportVectorsAcrossHalfedgeQ;
+  virtual void computeTransportVectorsAcrossHalfedge();
+  
+  // Halfedge vectors in vertex tangent space
+  DependentQuantityD<HalfedgeData<Vector2>> halfedgeVectorsInVertexQ;
+  virtual void computeHalfedgeVectorsInVertex();
+  
+  // Vertex transport across halfedges
+  DependentQuantityD<HalfedgeData<Vector2>> transportVectorsAlongHalfedgeQ;
+  virtual void computeTransportVectorsAlongHalfedge();
 
   /*
   // == Basic geometric quantities

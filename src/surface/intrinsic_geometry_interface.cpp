@@ -24,7 +24,12 @@ IntrinsicGeometryInterface::IntrinsicGeometryInterface(HalfedgeMesh& mesh_) :
   vertexGaussianCurvaturesQ (&vertexGaussianCurvatures,     std::bind(&IntrinsicGeometryInterface::computeVertexGaussianCurvatures, this),  quantities),
   faceGaussianCurvaturesQ   (&faceGaussianCurvatures,       std::bind(&IntrinsicGeometryInterface::computeFaceGaussianCurvatures, this),    quantities),
   halfedgeCotanWeightsQ     (&halfedgeCotanWeights,         std::bind(&IntrinsicGeometryInterface::computeHalfedgeCotanWeights, this),      quantities),
-  edgeCotanWeightsQ         (&edgeCotanWeights,             std::bind(&IntrinsicGeometryInterface::computeEdgeCotanWeights, this),          quantities)
+  edgeCotanWeightsQ         (&edgeCotanWeights,             std::bind(&IntrinsicGeometryInterface::computeEdgeCotanWeights, this),          quantities),
+  
+  halfedgeVectorsInFaceQ            (&halfedgeVectorsInFace,            std::bind(&IntrinsicGeometryInterface::computeHalfedgeVectorsInFace, this),             quantities),
+  transportVectorsAcrossHalfedgeQ   (&transportVectorsAcrossHalfedge,   std::bind(&IntrinsicGeometryInterface::computeTransportVectorsAcrossHalfedge, this),    quantities),
+  halfedgeVectorsInVertexQ          (&halfedgeVectorsInVertex,          std::bind(&IntrinsicGeometryInterface::computeHalfedgeVectorsInVertex, this),           quantities),
+  transportVectorsAlongHalfedgeQ    (&transportVectorsAlongHalfedge,    std::bind(&IntrinsicGeometryInterface::computeTransportVectorsAlongHalfedge, this),     quantities)
   
   { }
 // clang-format on
@@ -288,6 +293,133 @@ void IntrinsicGeometryInterface::computeEdgeCotanWeights() {
 }
 void IntrinsicGeometryInterface::requireEdgeCotanWeights() { edgeCotanWeightsQ.require(); }
 void IntrinsicGeometryInterface::unrequireEdgeCotanWeights() { edgeCotanWeightsQ.unrequire(); }
+
+
+// Halfedge vectors in face
+void IntrinsicGeometryInterface::computeHalfedgeVectorsInFace() {
+  edgeLengthsQ.ensureHave();
+  faceAreasQ.ensureHave();
+
+  halfedgeVectorsInFace = HalfedgeData<Vector2>(mesh);
+
+  for (Face f : mesh.faces()) {
+
+    // Gather some values
+    Halfedge heAB = f.halfedge();
+    Halfedge heBC = heAB.next();
+    Halfedge heCA = heBC.next();
+    GC_SAFETY_ASSERT(heCA.next() == heAB, "faces must be triangular");
+
+    double lAB = edgeLengths[heAB.edge()];
+    double lBC = edgeLengths[heBC.edge()];
+    double lCA = edgeLengths[heCA.edge()];
+
+    // Assign positions to all three vertices
+    // Vector2 pA{0., 0.}; // used implicitly
+    Vector2 pB{lAB, 0.};
+
+    // pC is the hard one:
+
+    double tArea = faceAreas[f];
+
+    // Compute width and height of right triangle formed via altitude from C
+    double h = 2. * tArea / lAB;
+    double w = std::sqrt(std::max(0., lCA * lCA - h * h));
+
+    // Take the closer of the positive and negative solutions
+    if (lBC * lBC > (lAB * lAB + lCA * lCA)) w *= -1.0;
+
+    // Project some vectors to get the actual position
+    Vector2 pC{w, h};
+
+    // Now, all halfedge vectors are just coordinates
+    halfedgeVectorsInFace[heAB] = pB;
+    halfedgeVectorsInFace[heBC] = pC - pB;
+    halfedgeVectorsInFace[heCA] = -pC;
+  }
+
+  // Set all the exterior ones to NaN
+  for (Halfedge he : mesh.exteriorHalfedges()) {
+    halfedgeVectorsInFace[he] = Vector2::undefined();
+  }
+}
+void IntrinsicGeometryInterface::requireHalfedgeVectorsInFace() { halfedgeVectorsInFaceQ.require(); }
+void IntrinsicGeometryInterface::unrequireHalfedgeVectorsInFace() { halfedgeVectorsInFaceQ.unrequire(); }
+
+// Transport vectors across halfedge
+void IntrinsicGeometryInterface::computeTransportVectorsAcrossHalfedge() {
+  halfedgeVectorsInFaceQ.ensureHave();
+
+  transportVectorsAcrossHalfedge = HalfedgeData<Vector2>(mesh, Vector2::undefined());
+
+  for (Edge e : mesh.edges()) {
+    if (e.isBoundary()) continue;
+
+    Halfedge heA = e.halfedge();
+    Halfedge heB = heA.twin();
+
+    Vector2 vecA = halfedgeVectorsInFace[heA];
+    Vector2 vecB = halfedgeVectorsInFace[heB];
+    Vector2 rot = unit(-vecB / vecA);
+
+    transportVectorsAcrossHalfedge[heA] = rot;
+    transportVectorsAcrossHalfedge[heB] = rot.inv();
+  }
+}
+void IntrinsicGeometryInterface::requireTransportVectorsAcrossHalfedge() { transportVectorsAcrossHalfedgeQ.require(); }
+void IntrinsicGeometryInterface::unrequireTransportVectorsAcrossHalfedge() {
+  transportVectorsAcrossHalfedgeQ.unrequire();
+}
+
+
+// Halfedge vectors in vertex
+void IntrinsicGeometryInterface::computeHalfedgeVectorsInVertex() {
+  edgeLengthsQ.ensureHave();
+  cornerScaledAnglesQ.ensureHave();
+
+  halfedgeVectorsInVertex = HalfedgeData<Vector2>(mesh);
+
+  for (Vertex v : mesh.vertices()) {
+    double coordSum = 0.0;
+
+    // Custom loop to orbit CCW
+    Halfedge firstHe = v.halfedge();
+    Halfedge currHe = firstHe;
+    do {
+      halfedgeVectorsInVertex[currHe] = Vector2::fromAngle(coordSum) * edgeLengths[currHe.edge()];
+      coordSum += cornerScaledAngles[currHe.corner()];
+      if (!currHe.isInterior()) break;
+      currHe = currHe.next().next().twin();
+    } while (currHe != firstHe);
+  }
+}
+void IntrinsicGeometryInterface::requireHalfedgeVectorsInVertex() { halfedgeVectorsInVertexQ.require(); }
+void IntrinsicGeometryInterface::unrequireHalfedgeVectorsInVertex() { halfedgeVectorsInVertexQ.unrequire(); }
+
+
+// Transport vectors along halfedge
+void IntrinsicGeometryInterface::computeTransportVectorsAlongHalfedge() {
+  halfedgeVectorsInVertexQ.ensureHave();
+
+  transportVectorsAlongHalfedge = HalfedgeData<Vector2>(mesh);
+
+  for (Edge e : mesh.edges()) {
+
+    Halfedge heA = e.halfedge();
+    Halfedge heB = heA.twin();
+
+    Vector2 vecA = halfedgeVectorsInVertex[heA];
+    Vector2 vecB = halfedgeVectorsInVertex[heB];
+    Vector2 rot = unit(-vecB / vecA);
+
+    transportVectorsAlongHalfedge[heA] = rot;
+    transportVectorsAlongHalfedge[heB] = rot.inv();
+  }
+}
+void IntrinsicGeometryInterface::requireTransportVectorsAlongHalfedge() { transportVectorsAlongHalfedgeQ.require(); }
+void IntrinsicGeometryInterface::unrequireTransportVectorsAlongHalfedge() {
+  transportVectorsAlongHalfedgeQ.unrequire();
+}
 
 /*
 void IntrinsicGeometryInterface::computeHalfedgeFaceCoords() {

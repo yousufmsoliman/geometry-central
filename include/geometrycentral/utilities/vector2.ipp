@@ -104,6 +104,10 @@ inline Vector2& Vector2::conj() {
   return *this;
 }
 
+inline Vector2& Vector2::inv() {
+  *this = Vector2{1., 0.} / *this;
+  return *this;
+}
 
 inline double Vector2::arg() const { return std::atan2(y, x); }
 inline double arg(const Vector2& v) { return std::atan2(v.y, v.x); }
@@ -123,7 +127,7 @@ inline double cross(const Vector2& u, const Vector2& v) { return u.x * v.y - u.y
 inline Vector3 cross3(const Vector2& u, const Vector2& v) { return Vector3{0., 0., u.x * v.y - u.y * v.x}; }
 
 inline bool Vector2::isFinite() const { return std::isfinite(x) && std::isfinite(y); }
-inline bool isFinite(const Vector2& v) { return v.isFinite(); }
+inline bool isfinite(const Vector2& v) { return v.isFinite(); }
 inline bool Vector2::isDefined() const { return (!std::isnan(x)) && (!std::isnan(y)); }
 inline bool isDefined(const Vector2& v) { return v.isDefined(); }
 
