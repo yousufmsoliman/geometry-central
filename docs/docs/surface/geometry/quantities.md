@@ -82,17 +82,6 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
     - **require:** `void IntrinsicGeometry::requireCornerAngles()`
     - **immediate:** `double IntrinsicGeometry::computeCornerAngle(Corner c)`
 
-??? func "corner scaled angles"
-    
-    ##### corner scaled angles
-
-    The angle between incident edges at each corner of a mesh, linearly rescaled such that the angles around every vertex sum to $2 \pi$. At boundary vertices, no scaling will be performed.
-
-    Only valid on triangular meshes.
-
-    - **member:** `CornerData<double> IntrinsicGeometry::cornerScaledAngles`
-    - **require:** `void IntrinsicGeometry::requireCornerScaledAngles()`
-
 ??? func "vertex angle sum"
     
     ##### vertex angle sum
@@ -103,6 +92,17 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
 
     - **member:** `VertexData<double> IntrinsicGeometry::vertexAngleSums`
     - **require:** `void IntrinsicGeometry::requireVertexAngleSums()`
+
+??? func "corner scaled angles"
+    
+    ##### corner scaled angles
+
+    The angle between incident edges at each corner of a mesh, linearly rescaled such that the angles around every vertex sum to $2 \pi$. At boundary vertices, no scaling will be performed.
+
+    Only valid on triangular meshes.
+
+    - **member:** `CornerData<double> IntrinsicGeometry::cornerScaledAngles`
+    - **require:** `void IntrinsicGeometry::requireCornerScaledAngles()`
 
 ??? func "vertex Gaussian curvature"
     
@@ -116,6 +116,7 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
 
     - **member:** `VertexData<double> IntrinsicGeometry::vertexGaussianCurvatures`
     - **require:** `void IntrinsicGeometry::requireVertexGaussianCurvatures()`
+
 
 ??? func "face Gaussian curvature"
     

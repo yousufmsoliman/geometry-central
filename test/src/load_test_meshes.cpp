@@ -58,6 +58,10 @@ void MeshAsset::printThyName() { cout << "  testing on mesh: " << name << endl; 
 std::vector<MeshAsset> MeshAssetSuite::allMeshAssets;
 
 void MeshAssetSuite::SetUpTestSuite() {
+  // no need to set up more than once
+  if(allMeshAssets.size() > 0) return;
+
+
   allMeshAssets.emplace_back("tet.obj");
   allMeshAssets.emplace_back("spot.ply");
   allMeshAssets.emplace_back("bob_small.ply");

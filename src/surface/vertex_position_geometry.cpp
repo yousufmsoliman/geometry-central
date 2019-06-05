@@ -21,6 +21,7 @@ std::unique_ptr<VertexPositionGeometry> VertexPositionGeometry::copy() {
 
 std::unique_ptr<VertexPositionGeometry> VertexPositionGeometry::reinterpretTo(HalfedgeMesh& targetMesh) {
   std::unique_ptr<VertexPositionGeometry> newGeom(new VertexPositionGeometry(targetMesh));
+  newGeom->inputVertexPositions = inputVertexPositions.reinterpretTo(targetMesh);
   return newGeom;
 }
 

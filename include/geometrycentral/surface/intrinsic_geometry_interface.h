@@ -23,83 +23,54 @@ public:
   // == Lengths, areas, and angles
 
   // Edge lengths
-  inline void requireEdgeLengths();
   EdgeData<double> edgeLengths;
+  void requireEdgeLengths();
+  void unrequireEdgeLengths();
 
   // Face areas
-  inline void requireFaceAreas();
   FaceData<double> faceAreas;
-
-  /*
-  // Face areas
-  inline void requireFaceAreas() { faceAreasQ.require(); }
-  FaceData<double> faceAreas;
+  void requireFaceAreas();
+  void unrequireFaceAreas();
 
   // Vertex dual areas
-  inline void requireVertexDualAreas() { vertexDualAreasQ.require(); }
   VertexData<double> vertexDualAreas;
+  void requireVertexDualAreas();
+  void unrequireVertexDualAreas();
 
-  // Edge lengths
-  inline void requireEdgeLengths() { edgeLengthsQ.require(); }
-  EdgeData<double> edgeLengths;
+  // Corner angles
+  CornerData<double> cornerAngles;
+  void requireCornerAngles();
+  void unrequireCornerAngles();
 
-  // Halfedge cotan weights
-  inline void requireHalfedgeCotanWeights() { halfedgeCotanWeightsQ.require(); }
+  // Vertex angle sums
+  VertexData<double> vertexAngleSums;
+  void requireVertexAngleSums();
+  void unrequireVertexAngleSums();
+
+  // Corner scaled angles
+  CornerData<double> cornerScaledAngles;
+  void requireCornerScaledAngles();
+  void unrequireCornerScaledAngles();
+
+  // Vertex gaussian curvature
+  VertexData<double> vertexGaussianCurvatures;
+  void requireVertexGaussianCurvatures();
+  void unrequireVertexGaussianCurvatures();
+
+  // Face gaussian curvature
+  FaceData<double> faceGaussianCurvatures;
+  void requireFaceGaussianCurvatures();
+  void unrequireFaceGaussianCurvatures();
+
+  // Halfedge cotan weight
   HalfedgeData<double> halfedgeCotanWeights;
+  void requireHalfedgeCotanWeights();
+  void unrequireHalfedgeCotanWeights();
 
-  // Edge cotan weights
-  inline void requireEdgeCotanWeights() { edgeCotanWeightsQ.require(); }
+  // Edge cotan weight
   EdgeData<double> edgeCotanWeights;
-
-  // Angle defect at vertices
-  inline void requireVertexAngleDefects() { vertexAngleDefectsQ.require(); }
-  VertexData<double> vertexAngleDefects;
-
-
-  // == Vector fields, angles, and transport
-
-  // The coordinate of each halfedge in the basis of he.face()
-  // NOTE: These HAVE magnitude, unlike the vertex version (confusingly)
-  inline void requireHalfedgeFaceCoords() { halfedgeFaceCoordsQ.require(); }
-  HalfedgeData<Complex> halfedgeFaceCoords;
-
-  // Transport an intrinsic vector field in he.face() to he.twin().face() by multiplying
-  // by complex z = e^(theta I) given here
-  inline void requireFaceTransportCoefs() { faceTransportCoefsQ.require(); }
-  HalfedgeData<Complex> faceTransportCoefs;
-
-  // Halfedge opposite angles
-  inline void requireHalfedgeOppositeAngles() { halfedgeOppositeAnglesQ.require(); }
-  HalfedgeData<double> halfedgeOppositeAngles;
-
-  // Halfedge opposite angles (scaled by the angle defect to sum to 2 PI at each vertex)
-  inline void requireHalfedgeRescaledOppositeAngles() { halfedgeRescaledOppositeAnglesQ.require(); }
-  HalfedgeData<double> halfedgeRescaledOppositeAngles;
-
-  // The coordinate of each halfedge in the basis of he.vertex(), rescaled so the sum around each vertex is 2*PI
-  inline void requireHalfedgeVertexCoords() { halfedgeVertexCoordsQ.require(); }
-  HalfedgeData<Complex> halfedgeVertexCoords;
-
-  // Transport an intrinsic vector field in he.vertex() to he.twin().vertex() by multiplying
-  // by complex z = e^(theta I) given here
-  inline void requireVertexTransportCoefs() { vertexTransportCoefsQ.require(); }
-  HalfedgeData<Complex> vertexTransportCoefs;
-
-
-  // == Operators
-  // Note: These don't quite follow the usual naming scheme, for the sake of grouping common operators
-  // TODO factorizations?
-
-  // All of the basic DEC operators and their inverses
-  inline void requireBasicDECOperators() { basicDECOperatorsQ.require(); }
-  Eigen::SparseMatrix<double> d0, d1, hodge0, hodge1, hodge2;
-  Eigen::SparseMatrix<double> hodge0Inv, hodge1Inv, hodge2Inv;
-
-  // Cotan-laplace operator
-  // Remember, this DOES NOT include the mass matrix (hodge0)
-  inline void requireZeroFormWeakLaplacian() { zeroFormWeakLaplacianQ.require(); }
-  Eigen::SparseMatrix<double> zeroFormWeakLaplacian;
-  */
+  void requireEdgeCotanWeights();
+  void unrequireEdgeCotanWeights();
 
 protected:
   // == Lengths, areas, and angles
@@ -113,6 +84,38 @@ protected:
   // Face areas
   DependentQuantityD<FaceData<double>> faceAreasQ;
   virtual void computeFaceAreas();
+
+  // Vertex dual area
+  DependentQuantityD<VertexData<double>> vertexDualAreasQ;
+  virtual void computeVertexDualAreas();
+  
+  // Corner angles
+  DependentQuantityD<CornerData<double>> cornerAnglesQ;
+  virtual void computeCornerAngles();
+
+  // Vertex angle sums
+  DependentQuantityD<VertexData<double>> vertexAngleSumsQ;
+  virtual void computeVertexAngleSums();  
+  
+  // Corner scaled angles
+  DependentQuantityD<CornerData<double>> cornerScaledAnglesQ;
+  virtual void computeCornerScaledAngles();
+   
+  // Vertex gaussian curvature
+  DependentQuantityD<VertexData<double>> vertexGaussianCurvaturesQ;
+  virtual void computeVertexGaussianCurvatures();
+  
+  // Face gaussian curvature
+  DependentQuantityD<FaceData<double>> faceGaussianCurvaturesQ;
+  virtual void computeFaceGaussianCurvatures();
+  
+  // Halfedge cotan weight
+  DependentQuantityD<HalfedgeData<double>> halfedgeCotanWeightsQ;
+  virtual void computeHalfedgeCotanWeights();
+  
+  // Edge cotan weight
+  DependentQuantityD<EdgeData<double>> edgeCotanWeightsQ;
+  virtual void computeEdgeCotanWeights();
 
   /*
   // == Basic geometric quantities

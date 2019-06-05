@@ -10,6 +10,10 @@ Things to not forget about:
 
 - many geometry functions are only defined for triangular meshes, but could possibly have definitions on polygonal surfaces
 
+- more quantities:
+  - surface area (and test to check dual area and face area sum to surface area)
+  - many intrinsic quantities should probably be computed from halfedge vectors in face
+
 Test to write:
 
 - Make sure iterators work in empty case where possible. In particular, face.adjacentFaces() for single face

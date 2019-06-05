@@ -14,11 +14,11 @@ class EdgeLengthGeometry : public IntrinsicGeometryInterface {
 public:
   EdgeLengthGeometry(HalfedgeMesh& mesh_, EdgeData<double>& inputEdgeLengths);
   virtual ~EdgeLengthGeometry() {}
-  
+
   EdgeData<double> inputEdgeLengths;
 
-protected:
 
+protected:
   // Override the compute edge lengths method from intrinsic geometry.
   virtual void computeEdgeLengths() override;
 

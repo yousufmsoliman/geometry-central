@@ -225,5 +225,15 @@ inline size_t MeshData<E, T>::size() const {
   return nElements<E>(mesh);
 }
 
+
+template <typename E, typename T>
+inline MeshData<E, T> MeshData<E, T>::reinterpretTo(HalfedgeMesh& targetMesh) {
+  GC_SAFETY_ASSERT(nElements<E>(mesh) == nElements<E>(&targetMesh),
+                   "meshes must have same number of elements to reinterpret");
+  MeshData<E, T> newData(targetMesh, defaultValue);
+  newData.data = data;
+  return newData;
+}
+
 } // namespace surface
 } // namespace geometrycentral

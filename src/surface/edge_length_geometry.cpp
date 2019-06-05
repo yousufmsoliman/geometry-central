@@ -8,6 +8,7 @@
 namespace geometrycentral {
 namespace surface {
 
+
 EdgeLengthGeometry::EdgeLengthGeometry(HalfedgeMesh& mesh_, EdgeData<double>& inputEdgeLengths_)
     : IntrinsicGeometryInterface(mesh_), inputEdgeLengths(inputEdgeLengths_) {}
 
