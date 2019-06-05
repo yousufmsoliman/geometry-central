@@ -42,17 +42,17 @@ public:
   Quaternion(const Quaternion& q);
   // initializes from existing quaternion
 
-  Quaternion(double s, double vi, double vj, double vk);
+  explicit Quaternion(double s, double vi, double vj, double vk);
   // initializes with specified real (s) and imaginary (v) components
 
-  Quaternion(double s, const Vector3& v);
+  explicit Quaternion(double s, const Vector3& v);
   // initializes with specified real (s) and imaginary (v) components
 
-  Quaternion(double s);
+  explicit Quaternion(double s);
   // initializes purely real quaternion with specified real (s) component
   // (imaginary part is zero)
 
-  Quaternion(const Vector3& v);
+  explicit Quaternion(const Vector3& v);
   // initializes purely imaginary quaternion with specified imaginary (v)
   // component (real part is zero)
 

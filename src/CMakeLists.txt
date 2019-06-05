@@ -38,8 +38,6 @@ SET(SRCS
   #numerical/positive_definite_solvers.cpp
 
   utilities/unit_vector3.cpp
-  utilities/vector3.cpp
-  utilities/vector2.cpp
   utilities/utilities.cpp
   utilities/quaternion.cpp
   utilities/disjoint_sets.cpp

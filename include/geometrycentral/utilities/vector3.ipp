@@ -5,11 +5,12 @@
 
 namespace geometrycentral {
 
-inline void Vector3::normalize(void) {
+inline Vector3& Vector3::normalize() {
   double r = 1. / sqrt(x * x + y * y + z * z);
   x *= r;
   y *= r;
   z *= r;
+  return *this;
 }
 
 inline Vector3 Vector3::operator+(const Vector3& v) const { return Vector3{x + v.x, y + v.y, z + v.z}; }
@@ -103,7 +104,30 @@ inline Vector3 componentwiseMax(const Vector3& u, const Vector3& v) {
   return Vector3{fmax(u.x, v.x), fmax(u.y, v.y), fmax(u.z, v.z)};
 }
 
-inline Vector3 fromGLM(const glm::vec3& v) { return Vector3{v.x, v.y, v.z}; }
+inline Vector3& Vector3::rotate_around(Vector3 axis, double theta) {
+  Vector3 thisV = {x, y, z};
+  Vector3 axisN = unit(axis);
+  Vector3 parallelComp = axisN * dot(thisV, axisN);
+  Vector3 tangentComp = thisV - parallelComp;
+
+  if (norm2(tangentComp) > 0.0) {
+    Vector3 basisX = unit(tangentComp);
+    Vector3 basisY = cross(axisN, basisX);
+
+    double tangentMag = norm(tangentComp);
+
+    Vector3 rotatedV = tangentMag * (cos(theta) * basisX + sin(theta) * basisY);
+    *this = rotatedV + parallelComp;
+  } else {
+    *this = parallelComp;
+  }
+  return *this;
+}
+
+inline std::ostream& operator<<(std::ostream& output, const Vector3& v) {
+  output << "<" << v.x << ", " << v.y << ", " << v.z << ">";
+  return output;
+}
 
 } // namespace geometrycentral
 
@@ -112,4 +136,5 @@ inline std::size_t std::hash<geometrycentral::Vector3>::operator()(const geometr
   return std::hash<double>{}(v.x) ^ (std::hash<double>{}(v.y) + (std::hash<double>{}(v.y) << 2)) ^
          (std::hash<double>{}(v.z) + (std::hash<double>{}(v.z) << 4));
 }
+
 } // namespace std

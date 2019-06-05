@@ -10,36 +10,53 @@ namespace geometrycentral {
 struct Vector2 {
   double x, y;
 
+  static Vector2 zero() { return Vector2{0., 0.}; }
+  static Vector2 constant(double c) { return Vector2{c, c}; }
+  static Vector2 fromAngle(double theta) { return Vector2{std::cos(theta), std::sin(theta)}; }
+
   // Access-by-index
   double& operator[](int index) { return (&x)[index]; }
   double operator[](int index) const { return (&x)[index]; };
 
   // Overloaded operators
+  // Multiplication & division are in the sense of complex numbers
   Vector2 operator+(const Vector2& v) const;
   Vector2 operator-(const Vector2& v) const;
+  Vector2 operator*(const Vector2& v) const;
+  Vector2 operator/(const Vector2& v) const;
   Vector2 operator*(double s) const;
   Vector2 operator/(double s) const;
   Vector2& operator+=(const Vector2& other);
   Vector2& operator-=(const Vector2& other);
+  Vector2& operator*=(const Vector2& other);
+  Vector2& operator/=(const Vector2& other);
   Vector2& operator*=(const double& s);
   Vector2& operator/=(const double& s);
   bool operator==(const Vector2& v) const;
   bool operator!=(const Vector2& v) const;
   const Vector2 operator-() const;
-  void normalize(void);
-  Vector2 rotate(double theta) const;
 
+  // Notice that all of these functions modify the vector in-place (but return a reference for chaining)
+  // The non-member functions below return a new vector
 
-  static Vector2 constant(double c) { return Vector2{c, c}; }
+  Vector2& normalize();
+  Vector2& rotate(double theta);
 
-  static Vector2 zero(void) { return Vector2{0., 0.}; }
+  // Complex functions
+  Vector2& pow(double p);  // complex power
+  Vector2& pow(Vector2 p); // complex to complex power
+  Vector2& conj();
 
-  static Vector2 infinity(void) {
+  double arg() const;
+  double norm() const;
+  double norm2() const;
+
+  static Vector2 infinity() {
     const double inf = std::numeric_limits<double>::infinity();
     return Vector2{inf, inf};
   }
 
-  static Vector2 undefined(void) {
+  static Vector2 undefined() {
     const double nan = std::numeric_limits<double>::quiet_NaN();
     return Vector2{nan, nan};
   }
@@ -52,14 +69,22 @@ Vector2 operator*(const double s, const Vector2& v);
 
 ::std::ostream& operator<<(std::ostream& output, const Vector2& v);
 
+// Notice that all of these functions return a new vector when applicable.
+// The member functions above modify in place
+
+double arg(const Vector2& v);
 double norm(const Vector2& v);
 double norm2(const Vector2& v);
-Vector2 unit(const Vector2& v);
+
 double angle(const Vector2& u, const Vector2& v);
 double dot(const Vector2& u, const Vector2& v);
-Vector3 cross(const Vector2& u,
-              const Vector2& v); // assumes arguments are in x-y plane
+double cross(const Vector2& u, const Vector2& v);
+Vector3 cross3(const Vector2& u, const Vector2& v); // assumes arguments are in x-y plane
+
+Vector2 unit(const Vector2& v);
+
 bool isFinite(const Vector2& u);
+bool isDefined(const Vector2& u);
 Vector2 componentwiseMin(const Vector2& u, const Vector2& v);
 Vector2 componentwiseMax(const Vector2& u, const Vector2& v);
 

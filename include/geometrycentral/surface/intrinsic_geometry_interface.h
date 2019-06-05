@@ -72,7 +72,11 @@ public:
   void requireEdgeCotanWeights();
   void unrequireEdgeCotanWeights();
 
+  // == Tangent vectors and transport
+  
+
 protected:
+
   // == Lengths, areas, and angles
 
   // Edge lengths
@@ -116,6 +120,7 @@ protected:
   // Edge cotan weight
   DependentQuantityD<EdgeData<double>> edgeCotanWeightsQ;
   virtual void computeEdgeCotanWeights();
+
 
   /*
   // == Basic geometric quantities
