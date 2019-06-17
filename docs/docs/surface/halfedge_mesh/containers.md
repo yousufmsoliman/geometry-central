@@ -40,7 +40,7 @@ Most functionality is identical between all of these classes, so the sections be
     
     Elements will be initialized with `initVal`, and any newly-created mesh elements will have their default values set to `initVal`.
 
-Additionally, see the vector-based initializers in [vector interop](containers.md#vector-interop).
+Additionally, see the vector-based initializers in [vector interoperability](containers.md#vector-interoperability).
 
 
 ## Accessors
@@ -95,6 +95,32 @@ To support easy common-case linear algebra operations, `MeshData<>` containers s
 The corresponding vectors are indexed according to the indices of the underlying mesh elements, or by a user-supplied index map which maps each elements to a dense set of zero-based indices.
 
 
+**Construct from a vector:**
+
+??? func "`#!cpp MeshData<E,T>::MeshData<E,T>(HalfedgeMesh& mesh Eigen::Matrix<T, Eigen::Dynamic, 1> vec)`"
+
+    Construct a new container over a mesh, with the contents of `vec`.
+  
+
+??? func "`#!cpp MeshData<E,T>::MeshData<E,T>(HalfedgeMesh& mesh Eigen::Matrix<T, Eigen::Dynamic, 1> vec, MeshData<E, size_t>& indexer)`"
+
+    Construct a new container over a mesh, with the contents of `vec`, indexed according to `indexer`.
+
+
+**Fill from a vector:**
+
+??? func "`#!cpp void MeshData<E,T>::fromVector(Eigen::Matrix<T, Eigen::Dynamic, 1> vec)`"
+
+    Fill this container with the contents of `vec`.
+    
+
+??? func "`#!cpp void MeshData<E,T>::fromVector(Eigen::Matrix<T, Eigen::Dynamic, 1> vec, MeshData<E, size_t>& indexer)`"
+
+    Fill this container with the contents of `vec`, indexed according to `indexer`.
+
+
+**Convert to a vector:**
+
 ??? func "`#!cpp Eigen::Matrix<T, Eigen::Dynamic, 1> MeshData<E,T>::toVector()`"
 
     Return a new vector which holds the contents of this container.
@@ -105,27 +131,7 @@ The corresponding vectors are indexed according to the indices of the underlying
     Return a new vector which holds the contents of this container, indexed according to `indexer`.
     
 
-
-??? func "`#!cpp void MeshData<E,T>::fromVector(Eigen::Matrix<T, Eigen::Dynamic, 1> vec)`"
-
-    Fill this container with the contents of `vec`.
     
-
-??? func "`#!cpp void MeshData<E,T>::fromVector(Eigen::Matrix<T, Eigen::Dynamic, 1> vec, MeshData<E, size_t>& indexer)`"
-
-    Fill this container with the contents of `vec`, indexed according to `indexer`.
-    
-
-
-??? func "`#!cpp MeshData<E,T>::MeshData<E,T>(HalfedgeMesh& mesh Eigen::Matrix<T, Eigen::Dynamic, 1> vec)`"
-
-    Construct a new container over a mesh, with the contents of `vec`.
-  
-
-??? func "`#!cpp MeshData<E,T>::MeshData<E,T>(HalfedgeMesh& mesh Eigen::Matrix<T, Eigen::Dynamic, 1> vec, MeshData<E, size_t>& indexer)`"
-
-    Construct a new container over a mesh, with the contents of `vec`, indexed according to `indexer`.
- 
 
 
 ## Transferring data

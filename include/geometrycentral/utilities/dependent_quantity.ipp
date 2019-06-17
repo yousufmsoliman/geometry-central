@@ -33,37 +33,38 @@ inline void DependentQuantity::unrequire() {
   }
 }
 
-// Helper template
+// Helper functions to clear data
 // Note: if/when we start using more types in these quantities, we might need to generalize this mechanism. But for the
-// current set of uses (scalars and MeshData<>), this works just fine.
+// current set of uses (scalars, MeshData<>, Eigen types), this works just fine.
 namespace {
 
+// General method: call a clear function
 template <typename T>
 void clearBuffer(T* buffer) {
   buffer->clear();
 }
 
+// Scalars
+void clearBuffer(double* buffer) {}
+void clearBuffer(size_t* buffer) {}
+void clearBuffer(int* buffer) {}
+
+
+// Eigen sparse matrices
 template <typename F>
 void clearBuffer(Eigen::SparseMatrix<F>* buffer) {
   *buffer = Eigen::SparseMatrix<F>();
 }
 
-// Clear an array of values be applying the approriate clearBuffer() to each element.
-template <typename A, unsigned int N>
+// Array of any otherwise clearable type
+template <typename A, size_t N>
 void clearBuffer(std::array<A*, N>* buffer) {
-  for(size_t i = 0; i < N; i++) {
+  for (size_t i = 0; i < N; i++) {
     // Recurse to an approriate version of this template
     A* elem = (*buffer)[i];
-    clearBuffer<A>(elem);
+    clearBuffer(elem);
   }
 }
-
-template <>
-void clearBuffer(double* buffer) {}
-template <>
-void clearBuffer(size_t* buffer) {}
-template <>
-void clearBuffer(int* buffer) {}
 
 } // namespace
 

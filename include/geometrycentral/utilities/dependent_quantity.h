@@ -7,6 +7,7 @@
 #include <functional>
 #include <iostream>
 #include <vector>
+#include <array>
 
 
 namespace geometrycentral {

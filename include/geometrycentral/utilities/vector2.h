@@ -36,6 +36,9 @@ struct Vector2 {
   bool operator!=(const Vector2& v) const;
   const Vector2 operator-() const;
 
+  // Conversion to std::complex
+  operator std::complex<double>() const;
+
   // Notice that all of these functions modify the vector in-place (but return a reference for chaining)
   // The non-member functions below return a new vector
 

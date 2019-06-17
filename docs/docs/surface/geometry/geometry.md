@@ -103,9 +103,7 @@ In addition, the caching system provides two methods.
     Should be called, for instance if vertices are moved or the underlying mesh is mutated.
 
 ??? func "`#!cpp void GeometryInterface::purgeQuantities()`"
-    Recompute all required quantities from the input geometric data.
-
-    Should be called, for instance if vertices are moved or the underlying mesh is mutated.
+    Delete all cached quantities which are not currently `require()`'d, reducing memory usage.
 
     Note: most users find that un-requiring and purging quantities is not necessary, and one can simply allow them to accumulate and eventually be deleted with the geometry object. This functionality can be used only if reducing memory usage is very important.
 

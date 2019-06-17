@@ -32,14 +32,14 @@ IntrinsicGeometryInterface::IntrinsicGeometryInterface(HalfedgeMesh& mesh_) :
   transportVectorsAlongHalfedgeQ    (&transportVectorsAlongHalfedge,    std::bind(&IntrinsicGeometryInterface::computeTransportVectorsAlongHalfedge, this),     quantities),
 
   cotanLaplacianQ               (&cotanLaplacian,               std::bind(&IntrinsicGeometryInterface::computeCotanLaplacian, this),                quantities),
-  vertexLumpedMassMatrixQ       (&vertexLumpedMassMatrixQ,      std::bind(&IntrinsicGeometryInterface::computeVertexLumpedMassMatrix, this),        quantities),
-  vertexGalerkinMassMatrixQ     (&vertexGalerkinMassMatrixQ,    std::bind(&IntrinsicGeometryInterface::computeVertexGalerkinMassMatrix, this),      quantities),
-  vertexConnectionLaplacianQ    (&vertexConnectionLaplacianQ,   std::bind(&IntrinsicGeometryInterface::computeVertexConnectionLaplacian, this),     quantities),
+  vertexLumpedMassMatrixQ       (&vertexLumpedMassMatrix,       std::bind(&IntrinsicGeometryInterface::computeVertexLumpedMassMatrix, this),        quantities),
+  vertexGalerkinMassMatrixQ     (&vertexGalerkinMassMatrix,     std::bind(&IntrinsicGeometryInterface::computeVertexGalerkinMassMatrix, this),      quantities),
+  vertexConnectionLaplacianQ    (&vertexConnectionLaplacian,    std::bind(&IntrinsicGeometryInterface::computeVertexConnectionLaplacian, this),     quantities),
 
 
   // DEC operators need some extra work since 8 members are grouped under one require
   DECOperatorArray{&hodge0, &hodge0Inverse, &hodge1, &hodge1Inverse, &hodge2, &hodge2Inverse, &d0, &d1},
-  DECOperatorsQ(&DECOperators, std::bind(&IntrinsicGeometryInterface::computeDECOperators, this), quantities)
+  DECOperatorsQ(&DECOperatorArray, std::bind(&IntrinsicGeometryInterface::computeDECOperators, this), quantities)
 
 
   { }
@@ -284,7 +284,6 @@ void IntrinsicGeometryInterface::computeHalfedgeVectorsInFace() {
     // Assign positions to all three vertices
     // Vector2 pA{0., 0.}; // used implicitly
     Vector2 pB{lAB, 0.};
-
     // pC is the hard one:
 
     double tArea = faceAreas[f];
@@ -390,35 +389,114 @@ void IntrinsicGeometryInterface::unrequireTransportVectorsAlongHalfedge() {
 
 
 // Cotan Laplacian
-void IntrinsicGeometryInterface::computeCotanLaplacian() { cotanLaplacian = }
+void IntrinsicGeometryInterface::computeCotanLaplacian() {
+  // TODO build this directly rather than from DEC operators, since we often don't need all of them.
+  DECOperatorsQ.ensureHave();
+
+  cotanLaplacian = d0.transpose() * hodge1 * d0;
+}
 void IntrinsicGeometryInterface::requireCotanLaplacian() { cotanLaplacianQ.require(); }
 void IntrinsicGeometryInterface::unrequireCotanLaplacian() { cotanLaplacianQ.unrequire(); }
 
 
 // Vertex lumped mass matrix
-void IntrinsicGeometryInterface::computeVertexLumpedMassMatrix() { vertexLumpedMassMatrix = }
+void IntrinsicGeometryInterface::computeVertexLumpedMassMatrix() {
+  vertexDualAreasQ.ensureHave();
+
+  size_t nVerts = mesh.nVertices();
+  Eigen::VectorXd hodge0V(nVerts);
+  size_t iV = 0;
+  for (Vertex v : mesh.vertices()) {
+    double dualArea = vertexDualAreas[v];
+    hodge0V[iV] = dualArea;
+    iV++;
+  }
+  vertexLumpedMassMatrix = hodge0V.asDiagonal();
+}
 void IntrinsicGeometryInterface::requireVertexLumpedMassMatrix() { vertexLumpedMassMatrixQ.require(); }
 void IntrinsicGeometryInterface::unrequireVertexLumpedMassMatrix() { vertexLumpedMassMatrixQ.unrequire(); }
 
 
 // Vertex Galerkin mass matrix
-void IntrinsicGeometryInterface::computeVertexGalerkinMassMatrix() { vertexGalerkinMassMatrix = }
+void IntrinsicGeometryInterface::computeVertexGalerkinMassMatrix() {
+  vertexIndicesQ.ensureHave();
+  faceAreasQ.ensureHave();
+
+  std::vector<Eigen::Triplet<double>> triplets;
+  for (Face f : mesh.faces()) {
+    double area = faceAreas[f];
+
+    // Gather indices for vertices on faces
+    Halfedge he = f.halfedge();
+    Vertex vA = he.vertex();
+    he = he.next();
+    Vertex vB = he.vertex();
+    he = he.next();
+    Vertex vC = he.vertex();
+    GC_SAFETY_ASSERT(he.next() == f.halfedge(), "faces must be triangular");
+
+    std::array<size_t, 3> indices{vertexIndices[vA], vertexIndices[vB], vertexIndices[vC]};
+
+    // Set entries
+    for (int root = 0; root < 3; root++) {
+      size_t i = indices[root];
+      size_t j = indices[(root + 1) % 3];
+      size_t k = indices[(root + 2) % 3];
+      triplets.emplace_back(i, i, area / 6.);
+      triplets.emplace_back(i, j, area / 12.);
+      triplets.emplace_back(i, k, area / 12.);
+    }
+  }
+
+  vertexGalerkinMassMatrix = Eigen::SparseMatrix<double>(mesh.nFaces(), mesh.nFaces());
+  vertexGalerkinMassMatrix.setFromTriplets(triplets.begin(), triplets.end());
+}
 void IntrinsicGeometryInterface::requireVertexGalerkinMassMatrix() { vertexGalerkinMassMatrixQ.require(); }
 void IntrinsicGeometryInterface::unrequireVertexGalerkinMassMatrix() { vertexGalerkinMassMatrixQ.unrequire(); }
 
 
 // Vertex connection Laplacian
-void IntrinsicGeometryInterface::computeVertexConnectionLaplacian() { vertexConnectionLaplacian = }
+void IntrinsicGeometryInterface::computeVertexConnectionLaplacian() {
+  vertexIndicesQ.ensureHave();
+  edgeCotanWeightsQ.ensureHave();
+  transportVectorsAlongHalfedgeQ.ensureHave();
+
+
+  std::vector<Eigen::Triplet<std::complex<double>>> triplets;
+  for (Halfedge he : mesh.halfedges()) {
+
+    size_t iTail = vertexIndices[he.vertex()];
+    size_t iTip = vertexIndices[he.twin().vertex()];
+
+    double weight = edgeCotanWeights[he.edge()];
+    Vector2 rot = transportVectorsAlongHalfedge[he];
+
+    triplets.emplace_back(iTail, iTail, weight);
+    triplets.emplace_back(iTail, iTip, -weight * rot);
+  }
+
+  vertexConnectionLaplacian = Eigen::SparseMatrix<std::complex<double>>(mesh.nVertices(), mesh.nVertices());
+  vertexConnectionLaplacian.setFromTriplets(triplets.begin(), triplets.end());
+}
 void IntrinsicGeometryInterface::requireVertexConnectionLaplacian() { vertexConnectionLaplacianQ.require(); }
 void IntrinsicGeometryInterface::unrequireVertexConnectionLaplacian() { vertexConnectionLaplacianQ.unrequire(); }
 
-/*
-void IntrinsicGeometryInterface::computeBasicDECOperators() {
+
+void IntrinsicGeometryInterface::computeDECOperators() {
+  vertexIndicesQ.ensureHave();
+  edgeIndicesQ.ensureHave();
+  faceIndicesQ.ensureHave();
+  vertexDualAreasQ.ensureHave();
+  edgeCotanWeightsQ.ensureHave();
+  faceAreasQ.ensureHave();
+
+  size_t nVerts = mesh.nVertices();
+  size_t nEdges = mesh.nEdges();
+  size_t nFaces = mesh.nFaces();
 
   { // Hodge 0
-    size_t nVerts = mesh->nVertices();
     Eigen::VectorXd hodge0V(nVerts);
-    for (Vertex v : mesh->vertices()) {
+    for (Vertex v : mesh.vertices()) {
       double primalArea = 1.0;
       double dualArea = vertexDualAreas[v];
       double ratio = dualArea / primalArea;
@@ -427,27 +505,25 @@ void IntrinsicGeometryInterface::computeBasicDECOperators() {
     }
 
     hodge0 = hodge0V.asDiagonal();
-    hodge0Inv = hodge0V.asDiagonal().inverse();
+    hodge0Inverse = hodge0V.asDiagonal().inverse();
   }
 
 
   { // Hodge 1
-    size_t nEdges = mesh->nEdges();
     Eigen::VectorXd hodge1V(nEdges);
-    for (Edge e : mesh->edges()) {
+    for (Edge e : mesh.edges()) {
       double ratio = edgeCotanWeights[e];
       size_t iE = edgeIndices[e];
       hodge1V[iE] = ratio;
     }
 
     hodge1 = hodge1V.asDiagonal();
-    hodge1Inv = hodge1V.asDiagonal().inverse();
+    hodge1Inverse = hodge1V.asDiagonal().inverse();
   }
 
   { // Hodge 2
-    size_t nFaces = mesh->nFaces();
     Eigen::VectorXd hodge2V(nFaces);
-    for (Face f : mesh->faces()) {
+    for (Face f : mesh.faces()) {
       double primalArea = faceAreas[f];
       double dualArea = 1.0;
       double ratio = dualArea / primalArea;
@@ -456,20 +532,49 @@ void IntrinsicGeometryInterface::computeBasicDECOperators() {
       hodge2V[iF] = ratio;
     }
     hodge2 = hodge2V.asDiagonal();
-    hodge2Inv = hodge2V.asDiagonal().inverse();
+    hodge2Inverse = hodge2V.asDiagonal().inverse();
   }
 
 
-  d0 = buildDerivative0(mesh);
-  d1 = buildDerivative1(mesh);
+  { // D0
+    Eigen::SparseMatrix<double> d0 = Eigen::SparseMatrix<double>(nEdges, nVerts);
+    std::vector<Eigen::Triplet<double>> tripletList;
+
+    for (Edge e : mesh.edges()) {
+      size_t iEdge = edgeIndices[e];
+      Halfedge he = e.halfedge();
+      Vertex vTail = he.vertex();
+      Vertex vHead = he.twin().vertex();
+
+      size_t iVHead = vertexIndices[vHead];
+      tripletList.emplace_back(iEdge, iVHead, 1.0);
+
+      size_t iVTail = vertexIndices[vTail];
+      tripletList.emplace_back(iEdge, iVTail, -1.0);
+    }
+
+    d0.setFromTriplets(tripletList.begin(), tripletList.end());
+  }
+
+  { // D1
+    Eigen::SparseMatrix<double> d1 = Eigen::SparseMatrix<double>(nFaces, nEdges);
+    std::vector<Eigen::Triplet<double>> tripletList;
+
+    for (Face f : mesh.faces()) {
+      size_t iFace = faceIndices[f];
+
+      for (Halfedge he : f.adjacentHalfedges()) {
+        size_t iEdge = edgeIndices[he.edge()];
+        double sign = (he == he.edge().halfedge()) ? (1.0) : (-1.0);
+        tripletList.emplace_back(iFace, iEdge, sign);
+      }
+    }
+
+    d1.setFromTriplets(tripletList.begin(), tripletList.end());
+  }
 }
-
-
-void IntrinsicGeometryInterface::computeZeroFormWeakLaplacian() {
-  zeroFormWeakLaplacian = d0.transpose() * hodge1 * d0;
-}
-*/
-
+void IntrinsicGeometryInterface::requireDECOperators() { DECOperatorsQ.require(); }
+void IntrinsicGeometryInterface::unrequireDECOperators() { DECOperatorsQ.unrequire(); }
 
 } // namespace surface
 } // namespace geometrycentral

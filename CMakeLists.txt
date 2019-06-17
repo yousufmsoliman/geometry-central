@@ -92,9 +92,3 @@ add_subdirectory(deps)
 
 ### Recurse to the source code
 add_subdirectory(src)
-
-### Tests
-option(BUILD_TESTS "Build tests" FALSE)
-if (${BUILD_TESTS})
-  add_subdirectory(test)
-endif ()

@@ -14,6 +14,10 @@ Things to not forget about:
   - surface area (and test to check dual area and face area sum to surface area)
   - many intrinsic quantities should probably be computed from halfedge vectors in face
 
+- do we reallllly want implicit conversion from Vector2 to std::complex?
+
+- delete discrete_operators
+
 Test to write:
 
 - Make sure iterators work in empty case where possible. In particular, face.adjacentFaces() for single face

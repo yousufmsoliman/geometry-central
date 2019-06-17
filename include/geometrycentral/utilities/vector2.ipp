@@ -63,6 +63,11 @@ inline bool Vector2::operator==(const Vector2& other) const { return x == other.
 
 inline bool Vector2::operator!=(const Vector2& other) const { return !(*this == other); }
 
+
+inline Vector2::operator std::complex<double>() const {
+  return std::complex<double>{x, y};
+}
+
 inline Vector2& Vector2::normalize() {
   double r = 1. / sqrt(x * x + y * y);
   x /= r;

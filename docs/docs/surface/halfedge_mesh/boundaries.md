@@ -1,4 +1,4 @@
-Mesh boundaries in halfedge meshes are modelled by logically treating each _boundary loop_ as if it were a face with an associated set of halfedges. These halfedges incident on boundary loops are referred to as _exterior halfedges_, while halfedges incident on faces actually present in the mesh are _interior halfedges_. Any boundary edge of the mesh will have one interior and one exterior halfedge incident upon it.
+Mesh boundaries in halfedge meshes are modelled by logically treating each _boundary loop_ as if it were a face with an associated set of halfedges. These halfedges incident on boundary loops are referred to as _exterior halfedges_, while the usual halfedges incident on faces actually present in the mesh are _interior halfedges_. Any boundary edge of the mesh will have one interior and one exterior halfedge incident upon it.
 
 ![halfedge boundary diagram](../../media/halfedge_boundary_diagram.svg)
 

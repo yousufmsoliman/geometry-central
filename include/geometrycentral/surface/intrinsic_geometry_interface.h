@@ -6,6 +6,8 @@
 
 #include <Eigen/SparseCore>
 
+#include <complex>
+
 namespace geometrycentral {
 namespace surface {
 
