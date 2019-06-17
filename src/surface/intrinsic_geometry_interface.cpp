@@ -29,54 +29,21 @@ IntrinsicGeometryInterface::IntrinsicGeometryInterface(HalfedgeMesh& mesh_) :
   halfedgeVectorsInFaceQ            (&halfedgeVectorsInFace,            std::bind(&IntrinsicGeometryInterface::computeHalfedgeVectorsInFace, this),             quantities),
   transportVectorsAcrossHalfedgeQ   (&transportVectorsAcrossHalfedge,   std::bind(&IntrinsicGeometryInterface::computeTransportVectorsAcrossHalfedge, this),    quantities),
   halfedgeVectorsInVertexQ          (&halfedgeVectorsInVertex,          std::bind(&IntrinsicGeometryInterface::computeHalfedgeVectorsInVertex, this),           quantities),
-  transportVectorsAlongHalfedgeQ    (&transportVectorsAlongHalfedge,    std::bind(&IntrinsicGeometryInterface::computeTransportVectorsAlongHalfedge, this),     quantities)
-  
+  transportVectorsAlongHalfedgeQ    (&transportVectorsAlongHalfedge,    std::bind(&IntrinsicGeometryInterface::computeTransportVectorsAlongHalfedge, this),     quantities),
+
+  cotanLaplacianQ               (&cotanLaplacian,               std::bind(&IntrinsicGeometryInterface::computeCotanLaplacian, this),                quantities),
+  vertexLumpedMassMatrixQ       (&vertexLumpedMassMatrixQ,      std::bind(&IntrinsicGeometryInterface::computeVertexLumpedMassMatrix, this),        quantities),
+  vertexGalerkinMassMatrixQ     (&vertexGalerkinMassMatrixQ,    std::bind(&IntrinsicGeometryInterface::computeVertexGalerkinMassMatrix, this),      quantities),
+  vertexConnectionLaplacianQ    (&vertexConnectionLaplacianQ,   std::bind(&IntrinsicGeometryInterface::computeVertexConnectionLaplacian, this),     quantities),
+
+
+  // DEC operators need some extra work since 8 members are grouped under one require
+  DECOperatorArray{&hodge0, &hodge0Inverse, &hodge1, &hodge1Inverse, &hodge2, &hodge2Inverse, &d0, &d1},
+  DECOperatorsQ(&DECOperators, std::bind(&IntrinsicGeometryInterface::computeDECOperators, this), quantities)
+
+
   { }
 // clang-format on
-
-/*
-void IntrinsicGeometryInterface::buildDependencies() {
-
-
-  // === ALL the quantities
-  // clang-format off
-  //          quantity manager            dependencies                                  compute function
-  //
-  // == Basic geometric quantities
-  addQuantity(faceAreasQ,                 {&edgeLengthsQ}, &IntrinsicGeometryInterface::computeFaceAreas);
-  addQuantity(vertexDualAreasQ,           {&faceAreasQ}, &IntrinsicGeometryInterface::computeVertexDualAreas);
-  addQuantity(edgeLengthsQ,               {}, &IntrinsicGeometryInterface::computeEdgeLengths);
-  addQuantity(halfedgeCotanWeightsQ,      {&halfedgeOppositeAnglesQ},
-&IntrinsicGeometryInterface::computeHalfedgeCotanWeights); addQuantity(edgeCotanWeightsQ, {&halfedgeCotanWeightsQ},
-&IntrinsicGeometryInterface::computeEdgeCotanWeights); addQuantity(vertexAngleDefectsQ, {&halfedgeOppositeAnglesQ},
-&IntrinsicGeometryInterface::computeVertexAngleDefects);
-
-  // == Vector fields, angles, and transport
-  addQuantity(halfedgeFaceCoordsQ,              {&halfedgeOppositeAnglesQ, &edgeLengthsQ},
-&IntrinsicGeometryInterface::computeHalfedgeFaceCoords); addQuantity(faceTransportCoefsQ, {&halfedgeFaceCoordsQ},
-&IntrinsicGeometryInterface::computeFaceTransportCoefs); addQuantity(halfedgeOppositeAnglesQ,          {&edgeLengthsQ},
-&IntrinsicGeometryInterface::computeHalfedgeOppositeAngles); addQuantity(halfedgeRescaledOppositeAnglesQ,
-{&vertexAngleDefectsQ, &halfedgeOppositeAnglesQ},   &IntrinsicGeometryInterface::computeHalfedgeRescaledOppositeAngles);
-  addQuantity(halfedgeVertexCoordsQ,            {&halfedgeRescaledOppositeAnglesQ},
-&IntrinsicGeometryInterface::computeHalfedgeVertexCoords); addQuantity(vertexTransportCoefsQ, {&halfedgeVertexCoordsQ},
-&IntrinsicGeometryInterface::computeVertexTransportCoefs);
-
-  // == Indices
-  addQuantity(vertexIndicesQ,             {}, &IntrinsicGeometryInterface::computeVertexIndices);
-  addQuantity(interiorVertexIndicesQ,     {}, &IntrinsicGeometryInterface::computeInteriorVertexIndices);
-  addQuantity(faceIndicesQ,               {}, &IntrinsicGeometryInterface::computeFaceIndices);
-  addQuantity(edgeIndicesQ,               {}, &IntrinsicGeometryInterface::computeEdgeIndices);
-  addQuantity(halfedgeIndicesQ,           {}, &IntrinsicGeometryInterface::computeHalfedgeIndices);
-
-  // == Operators
-  addQuantity(basicDECOperatorsQ,         {&vertexDualAreasQ, &edgeCotanWeightsQ, &faceAreasQ, &vertexIndicesQ,
-&faceIndicesQ, &edgeIndicesQ},      &IntrinsicGeometryInterface::computeBasicDECOperators);
-  addQuantity(zeroFormWeakLaplacianQ,     {&basicDECOperatorsQ},
-&IntrinsicGeometryInterface::computeZeroFormWeakLaplacian);
-  // clang-format on
-}
-*/
-
 
 // === Quantity implementations
 
@@ -421,152 +388,31 @@ void IntrinsicGeometryInterface::unrequireTransportVectorsAlongHalfedge() {
   transportVectorsAlongHalfedgeQ.unrequire();
 }
 
+
+// Cotan Laplacian
+void IntrinsicGeometryInterface::computeCotanLaplacian() { cotanLaplacian = }
+void IntrinsicGeometryInterface::requireCotanLaplacian() { cotanLaplacianQ.require(); }
+void IntrinsicGeometryInterface::unrequireCotanLaplacian() { cotanLaplacianQ.unrequire(); }
+
+
+// Vertex lumped mass matrix
+void IntrinsicGeometryInterface::computeVertexLumpedMassMatrix() { vertexLumpedMassMatrix = }
+void IntrinsicGeometryInterface::requireVertexLumpedMassMatrix() { vertexLumpedMassMatrixQ.require(); }
+void IntrinsicGeometryInterface::unrequireVertexLumpedMassMatrix() { vertexLumpedMassMatrixQ.unrequire(); }
+
+
+// Vertex Galerkin mass matrix
+void IntrinsicGeometryInterface::computeVertexGalerkinMassMatrix() { vertexGalerkinMassMatrix = }
+void IntrinsicGeometryInterface::requireVertexGalerkinMassMatrix() { vertexGalerkinMassMatrixQ.require(); }
+void IntrinsicGeometryInterface::unrequireVertexGalerkinMassMatrix() { vertexGalerkinMassMatrixQ.unrequire(); }
+
+
+// Vertex connection Laplacian
+void IntrinsicGeometryInterface::computeVertexConnectionLaplacian() { vertexConnectionLaplacian = }
+void IntrinsicGeometryInterface::requireVertexConnectionLaplacian() { vertexConnectionLaplacianQ.require(); }
+void IntrinsicGeometryInterface::unrequireVertexConnectionLaplacian() { vertexConnectionLaplacianQ.unrequire(); }
+
 /*
-void IntrinsicGeometryInterface::computeHalfedgeFaceCoords() {
-  verifyTriangular(mesh);
-  halfedgeFaceCoords = HalfedgeData<Complex>(*mesh);
-
-  for (Face f : mesh->faces()) {
-
-    Halfedge he0 = f.halfedge();
-    Halfedge he1 = he0.next();
-    Halfedge he2 = he1.next();
-
-    // Angles measured against he0
-    halfedgeFaceCoords[he0] = Complex(edgeLengths[he0.edge()], 0.0);
-
-    // Second halfedge
-    double theta1 = PI - halfedgeOppositeAngles[he2];
-    halfedgeFaceCoords[he1] = std::exp(IM_I * theta1) * Complex(edgeLengths[he1.edge()], 0.0);
-
-    // Third halfedge
-    double theta2 = halfedgeOppositeAngles[he1];
-    halfedgeFaceCoords[he2] = -std::exp(IM_I * theta2) * Complex(edgeLengths[he2.edge()], 0.0);
-  }
-
-  for (Halfedge he : mesh->exteriorHalfedges()) {
-    halfedgeFaceCoords[he] =
-        std::numeric_limits<double>::quiet_NaN(); // using this basis is never a good idea, so NaN-out
-  }
-}
-
-
-void IntrinsicGeometryInterface::computeFaceTransportCoefs() {
-
-  faceTransportCoefs = HalfedgeData<Complex>(*mesh);
-
-  for (Halfedge he : mesh->interiorHalfedges()) {
-    if (he.twin().isInterior()) {
-      Complex angleInSource = halfedgeFaceCoords[he];
-      Complex desiredAngleInTarget = -halfedgeFaceCoords[he.twin()];
-      faceTransportCoefs[he] = desiredAngleInTarget / angleInSource;
-    }
-  }
-}
-
-void IntrinsicGeometryInterface::computeVertexTransportCoefs() {
-
-  vertexTransportCoefs = HalfedgeData<Complex>(*mesh);
-
-  for (Halfedge he : mesh->halfedges()) {
-    Complex angleInSource = halfedgeVertexCoords[he];
-    Complex desiredAngleInTarget = -halfedgeVertexCoords[he.twin()];
-    vertexTransportCoefs[he] = desiredAngleInTarget / angleInSource;
-  }
-}
-
-
-void IntrinsicGeometryInterface::computeHalfedgeCotanWeights() {
-  halfedgeCotanWeights = HalfedgeData<double>(*mesh);
-  for (Halfedge he : mesh->halfedges()) {
-    if (he.isInterior()) {
-      halfedgeCotanWeights[he] = std::tan(PI / 2.0 - halfedgeOppositeAngles[he]);
-    } else {
-      halfedgeCotanWeights[he] = std::numeric_limits<double>::quiet_NaN();
-    }
-  }
-}
-
-
-void IntrinsicGeometryInterface::computeEdgeCotanWeights() {
-  edgeCotanWeights = EdgeData<double>(*mesh);
-  for (Edge e : mesh->edges()) {
-    double weight = halfedgeCotanWeights[e.halfedge()];
-    if (e.halfedge().twin().isInterior()) {
-      weight += halfedgeCotanWeights[e.halfedge().twin()];
-    }
-    edgeCotanWeights[e] = 0.5 * weight;
-  }
-}
-
-
-
-void IntrinsicGeometryInterface::computeHalfedgeRescaledOppositeAngles() {
-  halfedgeRescaledOppositeAngles = HalfedgeData<double>(*mesh);
-  for (Halfedge he : mesh->interiorHalfedges()) {
-    double origSum = 2. * PI - vertexAngleDefects[he.next().next().vertex()];
-    halfedgeRescaledOppositeAngles[he] = halfedgeOppositeAngles[he] * 2. * PI / origSum;
-  }
-}
-
-
-void IntrinsicGeometryInterface::computeHalfedgeVertexCoords() {
-  verifyTriangular(mesh);
-
-  halfedgeVertexCoords = HalfedgeData<Complex>(*mesh);
-
-  for (Vertex v : mesh->vertices()) {
-
-    if (v.isBoundary()) {
-
-      // First, check what angle we associated with the boundary wedge
-      // (recall that in a manifold triangle mesh, there can be at most one boundary wedge)
-      double angleSum = 0;
-      Halfedge afterBoundaryHe;
-      for (Halfedge he : v.outgoingHalfedges()) {
-        if (he.isInterior()) {
-          angleSum += halfedgeRescaledOppositeAngles[he.next()];
-        }
-        if (!he.twin().isInterior()) {
-          afterBoundaryHe = he;
-        }
-      }
-      double boundaryAngle = 2 * PI - angleSum;
-
-      // Now, loop like in the usual case, but substitute the boundary value when needed
-      double coordSum = 0.0;
-
-      // Custom loop to orbit CCW
-      Halfedge firstHe = v.halfedge();
-      Halfedge currHe = firstHe;
-      do {
-        halfedgeVertexCoords[currHe] = std::exp(coordSum * IM_I);
-        if (currHe.isInterior()) {
-          coordSum += halfedgeRescaledOppositeAngles[currHe.next()];
-          currHe = currHe.next().next().twin();
-        } else {
-          coordSum += boundaryAngle;
-          currHe = afterBoundaryHe;
-        }
-      } while (currHe != firstHe);
-
-
-    } else {
-      double coordSum = 0.0;
-
-      // Custom loop to orbit CCW
-      Halfedge firstHe = v.halfedge();
-      Halfedge currHe = firstHe;
-      do {
-        halfedgeVertexCoords[currHe] = std::exp(coordSum * IM_I);
-        coordSum += halfedgeRescaledOppositeAngles[currHe.next()];
-        currHe = currHe.next().next().twin();
-      } while (currHe != firstHe);
-    }
-  }
-}
-
-
 void IntrinsicGeometryInterface::computeBasicDECOperators() {
 
   { // Hodge 0

@@ -1,8 +1,13 @@
 #pragma once
 
+// Would be great not to include Eigen here, but seems necessary to specialize clearBuffer() in the .ipp. Suggestions
+// for an easy workaround are welcome.
+#include <Eigen/SparseCore>
+
 #include <functional>
 #include <iostream>
 #include <vector>
+
 
 namespace geometrycentral {
 

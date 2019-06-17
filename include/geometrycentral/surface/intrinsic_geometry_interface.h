@@ -74,7 +74,7 @@ public:
 
 
   // == Tangent vectors and transport
- 
+
   // Halfedge vectors in face tangent space
   HalfedgeData<Vector2> halfedgeVectorsInFace;
   void requireHalfedgeVectorsInFace();
@@ -84,7 +84,7 @@ public:
   HalfedgeData<Vector2> transportVectorsAcrossHalfedge;
   void requireTransportVectorsAcrossHalfedge();
   void unrequireTransportVectorsAcrossHalfedge();
-  
+
   // Halfedge vectors in vertex tangent space
   HalfedgeData<Vector2> halfedgeVectorsInVertex;
   void requireHalfedgeVectorsInVertex();
@@ -95,8 +95,35 @@ public:
   void requireTransportVectorsAlongHalfedge();
   void unrequireTransportVectorsAlongHalfedge();
 
-protected:
 
+  // == Operators
+
+  // Cotan laplacian
+  Eigen::SparseMatrix<double> cotanLaplacian;
+  void requireCotanLaplacian();
+  void unrequireCotanLaplacian();
+
+  // Vertex lumped mass matrix
+  Eigen::SparseMatrix<double> vertexLumpedMassMatrix;
+  void requireVertexLumpedMassMatrix();
+  void unrequireVertexLumpedMassMatrix();
+
+  // Vertex Galerkin Mass Matrix
+  Eigen::SparseMatrix<double> vertexGalerkinMassMatrix;
+  void requireVertexGalerkinMassMatrix();
+  void unrequireVertexGalerkinMassMatrix();
+
+  // Vertex connection Laplacian
+  Eigen::SparseMatrix<std::complex<double>> vertexConnectionLaplacian;
+  void requireVertexConnectionLaplacian();
+  void unrequireVertexConnectionLaplacian();
+
+  // DEC Operators
+  Eigen::SparseMatrix<double> hodge0, hodge0Inverse, hodge1, hodge1Inverse, hodge2, hodge2Inverse, d0, d1;
+  void requireDECOperators();
+  void unrequireDECOperators();
+
+protected:
   // == Lengths, areas, and angles
 
   // Edge lengths
@@ -112,122 +139,79 @@ protected:
   // Vertex dual area
   DependentQuantityD<VertexData<double>> vertexDualAreasQ;
   virtual void computeVertexDualAreas();
-  
+
   // Corner angles
   DependentQuantityD<CornerData<double>> cornerAnglesQ;
   virtual void computeCornerAngles();
 
   // Vertex angle sums
   DependentQuantityD<VertexData<double>> vertexAngleSumsQ;
-  virtual void computeVertexAngleSums();  
-  
+  virtual void computeVertexAngleSums();
+
   // Corner scaled angles
   DependentQuantityD<CornerData<double>> cornerScaledAnglesQ;
   virtual void computeCornerScaledAngles();
-   
+
   // Vertex gaussian curvature
   DependentQuantityD<VertexData<double>> vertexGaussianCurvaturesQ;
   virtual void computeVertexGaussianCurvatures();
-  
+
   // Face gaussian curvature
   DependentQuantityD<FaceData<double>> faceGaussianCurvaturesQ;
   virtual void computeFaceGaussianCurvatures();
-  
+
   // Halfedge cotan weight
   DependentQuantityD<HalfedgeData<double>> halfedgeCotanWeightsQ;
   virtual void computeHalfedgeCotanWeights();
-  
+
   // Edge cotan weight
   DependentQuantityD<EdgeData<double>> edgeCotanWeightsQ;
   virtual void computeEdgeCotanWeights();
 
 
   // == Tangent vectors and transport
-  
+
   // Halfedge vectors in face
   DependentQuantityD<HalfedgeData<Vector2>> halfedgeVectorsInFaceQ;
   virtual void computeHalfedgeVectorsInFace();
-  
+
   // Face tangent vector transport across halfedges
   DependentQuantityD<HalfedgeData<Vector2>> transportVectorsAcrossHalfedgeQ;
   virtual void computeTransportVectorsAcrossHalfedge();
-  
+
   // Halfedge vectors in vertex tangent space
   DependentQuantityD<HalfedgeData<Vector2>> halfedgeVectorsInVertexQ;
   virtual void computeHalfedgeVectorsInVertex();
-  
+
   // Vertex transport across halfedges
   DependentQuantityD<HalfedgeData<Vector2>> transportVectorsAlongHalfedgeQ;
   virtual void computeTransportVectorsAlongHalfedge();
 
-  /*
-  // == Basic geometric quantities
-
-  DependentQuantity faceAreasQ;
-  virtual void computeFaceAreas();
-
-  DependentQuantity vertexDualAreasQ;
-  virtual void computeVertexDualAreas();
-
-  DependentQuantity edgeLengthsQ;
-  virtual void computeEdgeLengths() = 0;
-
-  DependentQuantity halfedgeCotanWeightsQ;
-  virtual void computeHalfedgeCotanWeights();
-
-  DependentQuantity edgeCotanWeightsQ;
-  virtual void computeEdgeCotanWeights();
-
-  DependentQuantity vertexAngleDefectsQ;
-  virtual void computeVertexAngleDefects();
-
-  // == Vector fields, angles, and transport
-
-  DependentQuantity halfedgeFaceCoordsQ;
-  virtual void computeHalfedgeFaceCoords();
-
-  DependentQuantity faceTransportCoefsQ;
-  virtual void computeFaceTransportCoefs();
-
-  DependentQuantity halfedgeOppositeAnglesQ;
-  virtual void computeHalfedgeOppositeAngles();
-
-  DependentQuantity halfedgeRescaledOppositeAnglesQ;
-  virtual void computeHalfedgeRescaledOppositeAngles();
-
-  DependentQuantity halfedgeVertexCoordsQ;
-  virtual void computeHalfedgeVertexCoords();
-
-  DependentQuantity vertexTransportCoefsQ;
-  virtual void computeVertexTransportCoefs();
-
-
-  // == Indices
-
-  DependentQuantity vertexIndicesQ;
-  virtual void computeVertexIndices();
-
-  DependentQuantity interiorVertexIndicesQ;
-  virtual void computeInteriorVertexIndices();
-
-  DependentQuantity faceIndicesQ;
-  virtual void computeFaceIndices();
-
-  DependentQuantity edgeIndicesQ;
-  virtual void computeEdgeIndices();
-
-  DependentQuantity halfedgeIndicesQ;
-  virtual void computeHalfedgeIndices();
 
   // == Operators
 
-  DependentQuantity basicDECOperatorsQ;
-  virtual void computeBasicDECOperators();
+  // Cotan laplacian
+  DependentQuantityD<Eigen::SparseMatrix<double>> cotanLaplacianQ;
+  virtual void computeCotanLaplacian();
 
-  DependentQuantity zeroFormWeakLaplacianQ;
-  virtual void computeZeroFormWeakLaplacian();
+  // Vertex lumped mass matrix
+  DependentQuantityD<Eigen::SparseMatrix<double>> vertexLumpedMassMatrixQ;
+  virtual void computeVertexLumpedMassMatrix();
 
-  */
+  // Vertex Galerkin Mass Matrix
+  DependentQuantityD<Eigen::SparseMatrix<double>> vertexGalerkinMassMatrixQ;
+  virtual void computeVertexGalerkinMassMatrix();
+
+  // Vertex connection Laplacian
+  DependentQuantityD<Eigen::SparseMatrix<std::complex<double>>> vertexConnectionLaplacianQ;
+  virtual void computeVertexConnectionLaplacian();
+
+  // DEC Operators
+  // Note: The DEC operators deviate from the convention of one member per quantity. This extra array allows the
+  // DependentQuantityD<> helper type to still manage and clear out these members.
+  std::array<Eigen::SparseMatrix<double>*, 8> DECOperatorArray;
+  DependentQuantityD<std::array<Eigen::SparseMatrix<double>*, 8>> DECOperatorsQ;
+  virtual void computeDECOperators();
 };
 
 } // namespace surface

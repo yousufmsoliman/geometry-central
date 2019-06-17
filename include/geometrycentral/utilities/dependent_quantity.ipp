@@ -43,6 +43,21 @@ void clearBuffer(T* buffer) {
   buffer->clear();
 }
 
+template <typename F>
+void clearBuffer(Eigen::SparseMatrix<F>* buffer) {
+  *buffer = Eigen::SparseMatrix<F>();
+}
+
+// Clear an array of values be applying the approriate clearBuffer() to each element.
+template <typename A, unsigned int N>
+void clearBuffer(std::array<A*, N>* buffer) {
+  for(size_t i = 0; i < N; i++) {
+    // Recurse to an approriate version of this template
+    A* elem = (*buffer)[i];
+    clearBuffer<A>(elem);
+  }
+}
+
 template <>
 void clearBuffer(double* buffer) {}
 template <>
