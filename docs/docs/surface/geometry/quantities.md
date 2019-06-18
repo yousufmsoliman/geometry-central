@@ -1,6 +1,6 @@
 This page enumerates the surface geometry quantities available in geometry central.
 
-Recall that these quantities are each associated with a [geometry interface](geometry.md#geometry-hierarchy) specifying what can be computed from the given input data. Instantiating a geometry from data, like a `VertexPositionGeometry` extends these interfaces and gives access to all of the quantities therein.  Quantities should usually be accessed via the [managed caches](geometry.md#managed-quantities), as in the example below.
+Recall that these quantities are each associated with a [geometry interface](geometry.md#geometry-hierarchy) specifying what can be computed from the given input data. Instantiating a geometry from data, classes like `VertexPositionGeometry` extend these interfaces and give access to all of the quantities therein.  Quantities should usually be accessed via the [managed caches](geometry.md#managed-quantities), as in the example below.
 
 ```cpp
 #include "geometrycentral/surface/geometry.h"
@@ -21,11 +21,13 @@ geometry.requireFaceAreas();
 
 for(Face f : mesh->faces()) {
 
-  // access managed array holding quantity
+  // Managed array holding quantity
   double area = geometry.faceAreas[f];
 
-  // immediate computation: generally discouraged
-  area = geometry.faceArea(f);
+  // Immediate computation, computes directly from 
+  // input data without touching caches.
+  // Generally discouraged but occasionally useful.
+  area = positionGeometry->faceArea(f);
 }
 ```
 
@@ -192,7 +194,7 @@ This is fundamentally no different from using 2x2 rotation matrices, but leads t
 
 #### Face tangent spaces
 
-To represent vectors that sit in flat mesh faces, we define a 2D coordinate frame tangent to each face. By default, this frame is aligned such that `face.halfedge()` points along the $x$-axis. All vectors in faces are then expressed via $(x,y)$ `Vector2D` coordinates in this frame. Crucially, this basis is well-defined even if the geometry does not have vertex positions.
+To represent vectors that sit in flat mesh faces, we define a 2D coordinate frame tangent to each face. By default, this frame is aligned such that `face.halfedge()` points along the $x$-axis (but subclasses might change this convention). All vectors in faces are then expressed via $(x,y)$ `Vector2D` coordinates in this frame. Crucially, this basis is well-defined even if the geometry does not have vertex positions.
 
 See [face tangent basis](#face-tangent-basis) to convert these vectors to world coordinates (if your mesh has vertex positions).
 
@@ -240,7 +242,7 @@ See [face tangent basis](#face-tangent-basis) to convert these vectors to world 
 
 #### Vertex tangent spaces
 
-To represent vectors that sit at mesh faces, we consider a polar coordinate frame at each vertex. This frame is defined by measuring angles according to the rescaled corner angles as in `cornerScaledAngles`. By default, this frame is aligned such that `vertex.halfedge()` points along the $\phi=0$ $x$-axis. Of course, rather than using polar coordinates we can equivalently work in the corresponding Cartesian frame---tangent vectors at vertices are then expressed via $(x,y)$ `Vector2D` coordinates in this frame. Crucially, this basis does not require picking a vertex normal, and is well-defined even if the geometry does not have vertex positions.
+To represent vectors that sit at mesh faces, we consider a polar coordinate frame at each vertex. This frame is defined by measuring angles according to the rescaled corner angles as in `cornerScaledAngles`. By default, this frame is aligned such that `vertex.halfedge()` points along the $\phi=0$ $x$-axis (but subclasses might change this convention). Of course, rather than using polar coordinates we can equivalently work in the corresponding Cartesian frame---tangent vectors at vertices are then expressed via $(x,y)$ `Vector2D` coordinates in this frame. Crucially, this basis does not require picking a vertex normal, and is well-defined even if the geometry does not have vertex positions.
 
 See [vertex tangent basis](#vertex-tangent-basis) to convert these tangent vectors to world coordinates (if your mesh has vertex positions).
 

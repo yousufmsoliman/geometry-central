@@ -23,7 +23,6 @@ public:
 
   // Construct a new geometry which is exactly the same as this one, on the same mesh.
   // This is a deep copy, no quantites are shared, etc. Require counts/computed quantities are not copied.
-  // The meshes must be in correspondence (have the same connectivity).
   std::unique_ptr<VertexPositionGeometry> copy();
 
   // Construct a new geometry which is exactly the same as this one, on another mesh.
