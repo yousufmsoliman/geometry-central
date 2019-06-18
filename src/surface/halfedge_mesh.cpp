@@ -284,7 +284,7 @@ void HalfedgeMesh::printStatistics() const {
 
 bool HalfedgeMesh::isTriangular() {
   for (Face f : faces()) {
-    if (f.degree() != 3) {
+    if (!f.isTriangle()) {
       return false;
     }
   }

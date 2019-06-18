@@ -261,6 +261,10 @@ inline BoundaryLoop Face::asBoundaryLoop() const {
 }
 
 // Properties
+inline bool Face::isTriangle() const {
+  Halfedge he = halfedge();
+  return he == he.next().next().next();
+}
 inline size_t Face::degree() const {
   size_t k = 0;
   for (Halfedge h : adjacentHalfedges()) { k++; }

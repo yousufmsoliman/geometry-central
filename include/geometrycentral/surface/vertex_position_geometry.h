@@ -37,6 +37,9 @@ public:
   // The actual input data which defines the geometry
   VertexData<Vector3> inputVertexPositions;
 
+  // == Immediate overrides
+  virtual Vector3 vertexPosition(Vertex v) const override;
+
 protected:
   // Override the compute vertex positions method for embedded geometry
   virtual void computeVertexPositions() override;

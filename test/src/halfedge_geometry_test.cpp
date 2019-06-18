@@ -29,11 +29,11 @@ class HalfedgeGeometrySuite : public MeshAssetSuite {};
 // =============== Quantity management tests
 // ============================================================
 
-TEST_F(HalfedgeGeometrySuite, RefreshTest) {
+TEST_F(HalfedgeGeometrySuite, Refresh) {
   // TODO
 }
 
-TEST_F(HalfedgeGeometrySuite, PurgeTest) {
+TEST_F(HalfedgeGeometrySuite, Purge) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   BaseGeometryInterface& geometry = *asset.geometry;
@@ -86,7 +86,7 @@ TEST_F(HalfedgeGeometrySuite, PurgeTestDEC) {
 
 // == Basic indices
 
-TEST_F(HalfedgeGeometrySuite, VertexIndicesTest) {
+TEST_F(HalfedgeGeometrySuite, VertexIndices) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   BaseGeometryInterface& geometry = *asset.geometry;
@@ -98,7 +98,7 @@ TEST_F(HalfedgeGeometrySuite, VertexIndicesTest) {
   }
 }
 
-TEST_F(HalfedgeGeometrySuite, HalfedgeIndicesTest) {
+TEST_F(HalfedgeGeometrySuite, HalfedgeIndices) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   BaseGeometryInterface& geometry = *asset.geometry;
@@ -110,7 +110,7 @@ TEST_F(HalfedgeGeometrySuite, HalfedgeIndicesTest) {
   }
 }
 
-TEST_F(HalfedgeGeometrySuite, CornerIndicesTest) {
+TEST_F(HalfedgeGeometrySuite, CornerIndices) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   BaseGeometryInterface& geometry = *asset.geometry;
@@ -122,7 +122,7 @@ TEST_F(HalfedgeGeometrySuite, CornerIndicesTest) {
   }
 }
 
-TEST_F(HalfedgeGeometrySuite, EdgeIndicesTest) {
+TEST_F(HalfedgeGeometrySuite, EdgeIndices) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   BaseGeometryInterface& geometry = *asset.geometry;
@@ -134,7 +134,7 @@ TEST_F(HalfedgeGeometrySuite, EdgeIndicesTest) {
   }
 }
 
-TEST_F(HalfedgeGeometrySuite, FaceIndicesTest) {
+TEST_F(HalfedgeGeometrySuite, FaceIndices) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   BaseGeometryInterface& geometry = *asset.geometry;
@@ -146,7 +146,7 @@ TEST_F(HalfedgeGeometrySuite, FaceIndicesTest) {
   }
 }
 
-TEST_F(HalfedgeGeometrySuite, BoundaryLoopIndicesTest) {
+TEST_F(HalfedgeGeometrySuite, BoundaryLoopIndices) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   BaseGeometryInterface& geometry = *asset.geometry;
@@ -160,7 +160,7 @@ TEST_F(HalfedgeGeometrySuite, BoundaryLoopIndicesTest) {
 
 // == Intrinsic geometry
 
-TEST_F(HalfedgeGeometrySuite, EdgeLengthsTest) {
+TEST_F(HalfedgeGeometrySuite, EdgeLengths) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   IntrinsicGeometryInterface& geometry = *asset.geometry;
@@ -172,8 +172,25 @@ TEST_F(HalfedgeGeometrySuite, EdgeLengthsTest) {
   }
 }
 
+TEST_F(HalfedgeGeometrySuite, EdgeLengthsImmediate) {
+  auto asset = getAsset("bob_small.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& geometry = *asset.geometry;
 
-TEST_F(HalfedgeGeometrySuite, FaceAreasTest) {
+  EdgeData<double> edgeLengthsImmediate(mesh);
+  for (Edge e : mesh.edges()) {
+    edgeLengthsImmediate[e] = geometry.edgeLength(e);
+  }
+
+
+  geometry.requireEdgeLengths();
+  for (Edge e : mesh.edges()) {
+    EXPECT_NEAR(geometry.edgeLengths[e], edgeLengthsImmediate[e], 1e-6);
+  }
+}
+
+
+TEST_F(HalfedgeGeometrySuite, FaceAreas) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   IntrinsicGeometryInterface& geometry = *asset.geometry;
@@ -185,7 +202,23 @@ TEST_F(HalfedgeGeometrySuite, FaceAreasTest) {
   }
 }
 
-TEST_F(HalfedgeGeometrySuite, VertexDualAreasTest) {
+TEST_F(HalfedgeGeometrySuite, FaceAreasImmediate) {
+  auto asset = getAsset("bob_small.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& geometry = *asset.geometry;
+
+  FaceData<double> faceAreaImmediate(mesh);
+  for (Face e : mesh.faces()) {
+    faceAreaImmediate[e] = geometry.faceArea(e);
+  }
+
+  geometry.requireFaceAreas();
+  for (Face e : mesh.faces()) {
+    EXPECT_NEAR(geometry.faceAreas[e], faceAreaImmediate[e], 1e-6);
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, VertexDualAreas) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   IntrinsicGeometryInterface& geometry = *asset.geometry;
@@ -198,7 +231,7 @@ TEST_F(HalfedgeGeometrySuite, VertexDualAreasTest) {
 }
 
 
-TEST_F(HalfedgeGeometrySuite, CornerAnglesTest) {
+TEST_F(HalfedgeGeometrySuite, CornerAngles) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   IntrinsicGeometryInterface& geometry = *asset.geometry;
@@ -210,7 +243,23 @@ TEST_F(HalfedgeGeometrySuite, CornerAnglesTest) {
   }
 }
 
-TEST_F(HalfedgeGeometrySuite, VertexAngleSumsTest) {
+TEST_F(HalfedgeGeometrySuite, CornerAnglesImmediate) {
+  auto asset = getAsset("bob_small.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& geometry = *asset.geometry;
+
+  CornerData<double> cornerAnglesImmediate(mesh);
+  for (Corner e : mesh.corners()) {
+    cornerAnglesImmediate[e] = geometry.cornerAngle(e);
+  }
+
+  geometry.requireCornerAngles();
+  for (Corner e : mesh.corners()) {
+    EXPECT_NEAR(geometry.cornerAngles[e], cornerAnglesImmediate[e], 1e-6);
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, VertexAngleSums) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   IntrinsicGeometryInterface& geometry = *asset.geometry;
@@ -223,7 +272,7 @@ TEST_F(HalfedgeGeometrySuite, VertexAngleSumsTest) {
 }
 
 
-TEST_F(HalfedgeGeometrySuite, CornerScaledAnglesTest) {
+TEST_F(HalfedgeGeometrySuite, CornerScaledAngles) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   IntrinsicGeometryInterface& geometry = *asset.geometry;
@@ -236,7 +285,7 @@ TEST_F(HalfedgeGeometrySuite, CornerScaledAnglesTest) {
 }
 
 
-TEST_F(HalfedgeGeometrySuite, VertexGaussianCurvaturesTest) {
+TEST_F(HalfedgeGeometrySuite, VertexGaussianCurvatures) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   IntrinsicGeometryInterface& geometry = *asset.geometry;
@@ -248,7 +297,7 @@ TEST_F(HalfedgeGeometrySuite, VertexGaussianCurvaturesTest) {
 }
 
 
-TEST_F(HalfedgeGeometrySuite, FaceGaussianCurvaturesTest) {
+TEST_F(HalfedgeGeometrySuite, FaceGaussianCurvatures) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   IntrinsicGeometryInterface& geometry = *asset.geometry;
@@ -259,7 +308,7 @@ TEST_F(HalfedgeGeometrySuite, FaceGaussianCurvaturesTest) {
   }
 }
 
-TEST_F(HalfedgeGeometrySuite, HalfedgeCotanWeightsTest) {
+TEST_F(HalfedgeGeometrySuite, HalfedgeCotanWeights) {
   auto asset = getAsset("lego.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   IntrinsicGeometryInterface& geometry = *asset.geometry;
@@ -271,7 +320,7 @@ TEST_F(HalfedgeGeometrySuite, HalfedgeCotanWeightsTest) {
 }
 
 
-TEST_F(HalfedgeGeometrySuite, EdgeCotanWeightsTest) {
+TEST_F(HalfedgeGeometrySuite, EdgeCotanWeights) {
   auto asset = getAsset("lego.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   IntrinsicGeometryInterface& geometry = *asset.geometry;
@@ -282,7 +331,23 @@ TEST_F(HalfedgeGeometrySuite, EdgeCotanWeightsTest) {
   }
 }
 
-TEST_F(HalfedgeGeometrySuite, HalfedgeVectorsInFaceTest) {
+TEST_F(HalfedgeGeometrySuite, EdgeCotanWeightsImmediate) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& geometry = *asset.geometry;
+
+  EdgeData<double> edgeCotanWeightsImmediate(mesh);
+  for (Edge e : mesh.edges()) {
+    edgeCotanWeightsImmediate[e] = geometry.edgeCotanWeight(e);
+  }
+
+  geometry.requireEdgeCotanWeights();
+  for (Edge e : mesh.edges()) {
+    EXPECT_NEAR(geometry.edgeCotanWeights[e], edgeCotanWeightsImmediate[e], 1e-6);
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, HalfedgeVectorsInFace) {
   auto asset = getAsset("lego.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   IntrinsicGeometryInterface& geometry = *asset.geometry;
@@ -312,7 +377,7 @@ TEST_F(HalfedgeGeometrySuite, TransportVectorsAcrossHalfedge) {
   }
 }
 
-TEST_F(HalfedgeGeometrySuite, HalfedgeVectorsInVertexTest) {
+TEST_F(HalfedgeGeometrySuite, HalfedgeVectorsInVertex) {
   auto asset = getAsset("lego.ply");
   HalfedgeMesh& mesh = *asset.mesh;
   IntrinsicGeometryInterface& geometry = *asset.geometry;
@@ -411,6 +476,75 @@ TEST_F(HalfedgeGeometrySuite, DECOperators) {
   dimensionCheck(geometry.d1, mesh.nFaces(), mesh.nEdges());
 }
 
+TEST_F(HalfedgeGeometrySuite, EdgeDihedralAngles) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  ExtrinsicGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireEdgeDihedralAngles();
+  for (Edge e : mesh.edges()) {
+    EXPECT_TRUE(isfinite(geometry.edgeDihedralAngles[e]));
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, VertexPrincipalCurvatureDirections) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  ExtrinsicGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireVertexPrincipalCurvatureDirections();
+  for (Vertex v : mesh.vertices()) {
+    EXPECT_TRUE(isfinite(geometry.vertexPrincipalCurvatureDirections[v]));
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, FaceNormal) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  EmbeddedGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireFaceNormals();
+  for (Face f : mesh.faces()) {
+    EXPECT_TRUE(isfinite(geometry.faceNormals[f]));
+    EXPECT_NEAR(norm(geometry.faceNormals[f]), 1., 1e-6);
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, VertexNormal) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  EmbeddedGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireVertexNormals();
+  for (Vertex v : mesh.vertices()) {
+    EXPECT_TRUE(isfinite(geometry.vertexNormals[v]));
+    EXPECT_NEAR(norm(geometry.vertexNormals[v]), 1., 1e-6);
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, FaceTangentBasis) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  EmbeddedGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireFaceTangentBasis();
+  for (Face f : mesh.faces()) {
+    EXPECT_NEAR(norm(geometry.faceTangentBasis[f][0]), 1., 1e-6);
+    EXPECT_NEAR(norm(geometry.faceTangentBasis[f][1]), 1., 1e-6);
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, VertexTangentBasis) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  EmbeddedGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireVertexTangentBasis();
+  for (Vertex v : mesh.vertices()) {
+    EXPECT_NEAR(norm(geometry.vertexTangentBasis[v][0]), 1., 1e-6);
+    EXPECT_NEAR(norm(geometry.vertexTangentBasis[v][1]), 1., 1e-6);
+  }
+}
 
 // ============================================================
 // =============== Geometry tests
@@ -420,7 +554,7 @@ TEST_F(HalfedgeGeometrySuite, DECOperators) {
 
 
 // Check that the vertex curvatures return the value expected by Gauss-Bonnet
-TEST_F(HalfedgeGeometrySuite, VertexGaussianCurvaturesSumTest) {
+TEST_F(HalfedgeGeometrySuite, VertexGaussianCurvaturesSum) {
   for (auto& asset : closedMeshes()) {
     if (!asset.isTriangular) continue;
 
@@ -441,7 +575,7 @@ TEST_F(HalfedgeGeometrySuite, VertexGaussianCurvaturesSumTest) {
 }
 
 // Check that the face curvatures return the value expected by Gauss-Bonnet
-TEST_F(HalfedgeGeometrySuite, FaceGaussianCurvaturesSumTest) {
+TEST_F(HalfedgeGeometrySuite, FaceGaussianCurvaturesSum) {
   for (auto& asset : closedMeshes()) {
     if (!asset.isTriangular) continue;
 
@@ -527,5 +661,105 @@ TEST_F(HalfedgeGeometrySuite, CotanLaplacianEquivalence) {
     double difference = (geometry.cotanLaplacian - weak1FormLaplace).cwiseAbs().sum();
 
     EXPECT_LT(difference, 1e-6);
+  }
+}
+
+// Make sure that principal curature direction is near-zero on flat and spherical meshes
+TEST_F(HalfedgeGeometrySuite, VertexPrincipalCurvatureDirectionsUmbilic) {
+
+  { // flat mesh (with boundary)
+    auto asset = getAsset("lego.ply");
+    HalfedgeMesh& mesh = *asset.mesh;
+    ExtrinsicGeometryInterface& geometry = *asset.geometry;
+
+    geometry.requireVertexPrincipalCurvatureDirections();
+    for (Vertex v : mesh.vertices()) {
+      EXPECT_LT(norm(geometry.vertexPrincipalCurvatureDirections[v]), 1e-5);
+    }
+  }
+
+  { // sphere mesh
+    auto asset = getAsset("sphere_small.ply");
+    HalfedgeMesh& mesh = *asset.mesh;
+    ExtrinsicGeometryInterface& geometry = *asset.geometry;
+
+    geometry.requireVertexPrincipalCurvatureDirections();
+    for (Vertex v : mesh.vertices()) {
+      EXPECT_LT(norm(geometry.vertexPrincipalCurvatureDirections[v]), 1e-2);
+    }
+  }
+}
+
+// Verify that the normal and tangent directions for each face form an orthonormal frame
+TEST_F(HalfedgeGeometrySuite, FaceTangentOrthonormal) {
+  for (auto& asset : allMeshes()) {
+    if (!asset.isTriangular) continue;
+
+    asset.printThyName();
+    HalfedgeMesh& mesh = *asset.mesh;
+    EmbeddedGeometryInterface& geometry = *asset.geometry;
+
+    geometry.requireFaceNormals();
+    geometry.requireFaceTangentBasis();
+
+    double tol = 1e-6;
+
+    for (Face f : mesh.faces()) {
+
+      Vector3 normal = geometry.faceNormals[f];
+      Vector3 basisX = geometry.faceTangentBasis[f][0];
+      Vector3 basisY = geometry.faceTangentBasis[f][1];
+
+      // Check unit
+      EXPECT_NEAR(norm(normal), 1., tol);
+      EXPECT_NEAR(norm(basisX), 1., tol);
+      EXPECT_NEAR(norm(basisY), 1., tol);
+
+      // Check orthogonal
+      EXPECT_NEAR(dot(normal, basisX), 0., tol);
+      EXPECT_NEAR(dot(normal, basisY), 0., tol);
+      EXPECT_NEAR(dot(basisX, basisY), 0., tol);
+
+      // Check handed-ness
+      Vector3 crossV = cross(basisX, basisY);
+      EXPECT_NEAR(norm(normal - crossV), 0., tol);
+    }
+  }
+}
+
+// Verify that the normal and tangent directions for each vertex form an orthonormal frame
+TEST_F(HalfedgeGeometrySuite, VertexTangentOrthonormal) {
+  for (auto& asset : allMeshes()) {
+    if (!asset.isTriangular) continue;
+
+    asset.printThyName();
+    HalfedgeMesh& mesh = *asset.mesh;
+    EmbeddedGeometryInterface& geometry = *asset.geometry;
+
+    geometry.requireVertexNormals();
+    geometry.requireVertexTangentBasis();
+    
+    double tol = 1e-6;
+
+    for (Vertex v : mesh.vertices()) {
+
+      Vector3 normal = geometry.vertexNormals[v];
+      Vector3 basisX = geometry.vertexTangentBasis[v][0];
+      Vector3 basisY = geometry.vertexTangentBasis[v][1];
+
+      // Check unit
+      EXPECT_NEAR(norm(normal), 1., tol);
+      EXPECT_NEAR(norm(basisX), 1., tol);
+      EXPECT_NEAR(norm(basisY), 1., tol);
+
+      // Check orthogonal
+      EXPECT_NEAR(dot(normal, basisX), 0., tol);
+      EXPECT_NEAR(dot(normal, basisY), 0., tol);
+      EXPECT_NEAR(dot(basisX, basisY), 0., tol);
+
+      // Check handed-ness
+      Vector3 crossV = cross(basisX, basisY);
+      EXPECT_NEAR(norm(normal - crossV), 0., tol);
+    }
   }
 }

@@ -14,5 +14,7 @@ EdgeLengthGeometry::EdgeLengthGeometry(HalfedgeMesh& mesh_, EdgeData<double>& in
 
 void EdgeLengthGeometry::computeEdgeLengths() { edgeLengths = inputEdgeLengths; }
 
+double EdgeLengthGeometry::edgeLength(Edge e) const { return inputEdgeLengths[e]; }
+
 } // namespace surface
 } // namespace geometrycentral

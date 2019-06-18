@@ -19,19 +19,27 @@ protected:
   virtual ~ExtrinsicGeometryInterface() {}
 
 public:
-  /*
-  // == Lengths, areas, and angles
 
-  // Edge lengths
-  inline void requireEdgeLengths();
-  EdgeData<double> edgeLengths;
-
-  // Face areas
-  inline void requireFaceAreas();
-  FaceData<double> faceAreas;
-  */
+  // Edge dihedral angle
+  EdgeData<double> edgeDihedralAngles;
+  void requireEdgeDihedralAngles();
+  void unrequireEdgeDihedralAngles();
+  
+  // Vertex principal curvature
+  VertexData<Vector2> vertexPrincipalCurvatureDirections;
+  void requireVertexPrincipalCurvatureDirections();
+  void unrequireVertexPrincipalCurvatureDirections();
 
 protected:
+
+  // Edge dihedral angle
+  DependentQuantityD<EdgeData<double>> edgeDihedralAnglesQ;
+  virtual void computeEdgeDihedralAngles() = 0;
+
+  // Vertex principal curvature
+  DependentQuantityD<VertexData<Vector2>> vertexPrincipalCurvatureDirectionsQ;
+  virtual void computeVertexPrincipalCurvatureDirections();
+
 };
 
 } // namespace surface

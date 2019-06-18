@@ -14,7 +14,7 @@ std::tie<mesh, positionGeometry> = loadMesh("spot.obj");
 
 // For the sake of the example, use an interface type that offers
 // only the quantities which we will actually use below.
-IntrinsicGeometry& geometry = *positionGeometry;
+IntrinsicGeometryInterface& geometry = *positionGeometry;
 
 // populate the quantity
 geometry.requireFaceAreas();
@@ -25,13 +25,13 @@ for(Face f : mesh->faces()) {
   double area = geometry.faceAreas[f];
 
   // immediate computation: generally discouraged
-  area = geometry.computeFaceArea(f);
+  area = geometry.faceArea(f);
 }
 ```
 
 ## Lengths, areas, and angles
 
-These quantities are defined for any `IntrinsicGeometry`, which is the base class of all other geometry objects---they will always be available on any kind of geometry.
+These quantities are defined for any `IntrinsicGeometryInterface`, which is the base class of all other geometry objects---they will always be available on any kind of geometry.
 
 ??? func "edge length"
     
@@ -39,9 +39,9 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
 
     The length of an edge in the mesh, as a non-negative real number.
 
-    - **member:** `EdgeData<double> IntrinsicGeometry::edgeLengths`
-    - **require:** `void IntrinsicGeometry::requireEdgeLengths()`
-    - **immediate:** `double IntrinsicGeometry::computeEdgeLength(Edge e)`
+    - **member:** `EdgeData<double> IntrinsicGeometryInterface::edgeLengths`
+    - **require:** `void IntrinsicGeometryInterface::requireEdgeLengths()`
+    - **immediate:** `double IntrinsicGeometryInterface::edgeLength(Edge e)`
 
 ??? func "face area"
     
@@ -53,9 +53,9 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
 
     Only valid on triangular meshes.
 
-    - **member:** `FaceData<double> IntrinsicGeometry::faceAreas`
-    - **require:** `void IntrinsicGeometry::requireFaceAreas()`
-    - **immediate:** `double IntrinsicGeometry::computeFaceAreas(Face f)`
+    - **member:** `FaceData<double> IntrinsicGeometryInterface::faceAreas`
+    - **require:** `void IntrinsicGeometryInterface::requireFaceAreas()`
+    - **immediate:** `double IntrinsicGeometryInterface::faceArea(Face f)`
 
 ??? func "vertex dual area"
 
@@ -67,8 +67,8 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
 
     Defined to be $1/3$ the sum of all adjacent face areas. The sum of all vertex dual areas is equal to the usual surface area of the mesh.
 
-    - **member:** `VertexData<double> IntrinsicGeometry::vertexDualAreas`
-    - **require:** `void IntrinsicGeometry::requireVertexDualAreas()`
+    - **member:** `VertexData<double> IntrinsicGeometryInterface::vertexDualAreas`
+    - **require:** `void IntrinsicGeometryInterface::requireVertexDualAreas()`
 
 ??? func "corner angles"
     
@@ -78,9 +78,9 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
 
     Only valid on triangular meshes.
 
-    - **member:** `CornerData<double> IntrinsicGeometry::cornerAngles`
-    - **require:** `void IntrinsicGeometry::requireCornerAngles()`
-    - **immediate:** `double IntrinsicGeometry::computeCornerAngle(Corner c)`
+    - **member:** `CornerData<double> IntrinsicGeometryInterface::cornerAngles`
+    - **require:** `void IntrinsicGeometryInterface::requireCornerAngles()`
+    - **immediate:** `double IntrinsicGeometryInterface::cornerAngle(Corner c)`
 
 ??? func "vertex angle sum"
     
@@ -90,8 +90,8 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
 
     Only valid on triangular meshes.
 
-    - **member:** `VertexData<double> IntrinsicGeometry::vertexAngleSums`
-    - **require:** `void IntrinsicGeometry::requireVertexAngleSums()`
+    - **member:** `VertexData<double> IntrinsicGeometryInterface::vertexAngleSums`
+    - **require:** `void IntrinsicGeometryInterface::requireVertexAngleSums()`
 
 ??? func "corner scaled angles"
     
@@ -101,8 +101,8 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
 
     Only valid on triangular meshes.
 
-    - **member:** `CornerData<double> IntrinsicGeometry::cornerScaledAngles`
-    - **require:** `void IntrinsicGeometry::requireCornerScaledAngles()`
+    - **member:** `CornerData<double> IntrinsicGeometryInterface::cornerScaledAngles`
+    - **require:** `void IntrinsicGeometryInterface::requireCornerScaledAngles()`
 
 ??? func "vertex Gaussian curvature"
     
@@ -114,8 +114,8 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
 
     Only valid on triangular meshes.
 
-    - **member:** `VertexData<double> IntrinsicGeometry::vertexGaussianCurvatures`
-    - **require:** `void IntrinsicGeometry::requireVertexGaussianCurvatures()`
+    - **member:** `VertexData<double> IntrinsicGeometryInterface::vertexGaussianCurvatures`
+    - **require:** `void IntrinsicGeometryInterface::requireVertexGaussianCurvatures()`
 
 
 ??? func "face Gaussian curvature"
@@ -130,8 +130,8 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
 
     Only valid on triangular meshes.
 
-    - **member:** `FaceData<double> IntrinsicGeometry::faceGaussianCurvatures`
-    - **require:** `void IntrinsicGeometry::requireFaceGaussianCurvatures()`
+    - **member:** `FaceData<double> IntrinsicGeometryInterface::faceGaussianCurvatures`
+    - **require:** `void IntrinsicGeometryInterface::requireFaceGaussianCurvatures()`
 
 ??? func "halfedge cotan weight"
     
@@ -143,8 +143,8 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
 
     Only valid on triangular meshes.
 
-    - **member:** `HalfedgeData<double> IntrinsicGeometry::halfedgeCotanWeights`
-    - **require:** `void IntrinsicGeometry::requireHalfedgeCotanWeights()`
+    - **member:** `HalfedgeData<double> IntrinsicGeometryInterface::halfedgeCotanWeights`
+    - **require:** `void IntrinsicGeometryInterface::requireHalfedgeCotanWeights()`
 
 
 ??? func "edge cotan weight"
@@ -155,13 +155,14 @@ These quantities are defined for any `IntrinsicGeometry`, which is the base clas
 
     Only valid on triangular meshes.
 
-    - **member:** `EdgeData<double> IntrinsicGeometry::edgeCotanWeights`
-    - **require:** `void IntrinsicGeometry::requireEdgeCotanWeights()`
+    - **member:** `EdgeData<double> IntrinsicGeometryInterface::edgeCotanWeights`
+    - **require:** `void IntrinsicGeometryInterface::requireEdgeCotanWeights()`
+    - **immediate:** `double IntrinsicGeometryInterface::edgeCotanWeight(Edge e)`
 
 
 ## Tangent vectors and transport
 
-These quantities are defined for any `IntrinsicGeometry`, which is the base class of all other geometry objects---they will always be available on any kind of geometry. Tangent vectors and transport are defined in terms of tangent spaces at faces and vertices, as defined below.
+These quantities are defined for any `IntrinsicGeometryInterface`, which is the base class of all other geometry objects---they will always be available on any kind of geometry. Tangent vectors and transport are defined in terms of tangent spaces at faces and vertices, as defined below.
 
 Recall that our `Vector2` types obey the multiplication and division rules of complex arithmetic, and thus can be used to represent rotations. For instance, a 2D vector representing a rotation can be used to rotate another vector like:
 ```cpp
@@ -185,8 +186,8 @@ See [face tangent basis](#face-tangent-basis) to convert these vectors to world 
 
     Only valid on triangular meshes.
 
-    - **member:** `HalfedgeData<Vector2> IntrinsicGeometry::halfedgeVectorsInFace`
-    - **require:** `void IntrinsicGeometry::requireHalfedgeVectorsInFace()`
+    - **member:** `HalfedgeData<Vector2> IntrinsicGeometryInterface::halfedgeVectorsInFace`
+    - **require:** `void IntrinsicGeometryInterface::requireHalfedgeVectorsInFace()`
 
 
 ??? func "transport vector across halfedge"
@@ -199,8 +200,8 @@ See [face tangent basis](#face-tangent-basis) to convert these vectors to world 
 
     Only valid on triangular meshes. Not defined for halfedges (interior or exterior) incident on boundary edges, these boundary values are set to NaN so errors can be caught quickly.
 
-    - **member:** `HalfedgeData<Vector2> IntrinsicGeometry::transportVectorAcrossHalfedge`
-    - **require:** `void IntrinsicGeometry::requireTransportVectorAcrossHalfedge()`
+    - **member:** `HalfedgeData<Vector2> IntrinsicGeometryInterface::transportVectorAcrossHalfedge`
+    - **require:** `void IntrinsicGeometryInterface::requireTransportVectorAcrossHalfedge()`
     
     Example usage:
     ```cpp
@@ -236,8 +237,8 @@ See [vertex tangent basis](#vertex-tangent-basis) to convert these tangent vecto
 
     Only valid on triangular meshes.
 
-    - **member:** `HalfedgeData<Vector2> IntrinsicGeometry::halfedgeVectorsInVertex`
-    - **require:** `void IntrinsicGeometry::requireHalfedgeVectorsInVertex()`
+    - **member:** `HalfedgeData<Vector2> IntrinsicGeometryInterface::halfedgeVectorsInVertex`
+    - **require:** `void IntrinsicGeometryInterface::requireHalfedgeVectorsInVertex()`
 
 
 ??? func "transport vector along halfedge"
@@ -250,8 +251,8 @@ See [vertex tangent basis](#vertex-tangent-basis) to convert these tangent vecto
 
     Only valid on triangular meshes.
 
-    - **member:** `HalfedgeData<Vector2> IntrinsicGeometry::transportVectorAlongHalfedge`
-    - **require:** `void IntrinsicGeometry::requireTransportVectorAlongHalfedge()`
+    - **member:** `HalfedgeData<Vector2> IntrinsicGeometryInterface::transportVectorAlongHalfedge`
+    - **require:** `void IntrinsicGeometryInterface::requireTransportVectorAlongHalfedge()`
     
     Example usage:
     ```cpp
@@ -272,7 +273,7 @@ See [vertex tangent basis](#vertex-tangent-basis) to convert these tangent vecto
 ## Operators
 
 
-These quantities are defined for any `IntrinsicGeometry`, which is the base class of all other geometry objects---they will always be available on any kind of geometry. A full explanation of these operators is beyond the scope of these docs; see [these course notes](https://www.cs.cmu.edu/~kmcrane/Projects/DDG/paper.pdf) for one introduction.
+These quantities are defined for any `IntrinsicGeometryInterface`, which is the base class of all other geometry objects---they will always be available on any kind of geometry. A full explanation of these operators is beyond the scope of these docs; see [these course notes](https://www.cs.cmu.edu/~kmcrane/Projects/DDG/paper.pdf) for one introduction.
 
 All operators are indexed over mesh elements according to the natural iteration order of the elements, or equivalently the indices from `HalfedgeMesh::getVertexIndices()` (etc).
 
@@ -288,8 +289,8 @@ All operators are indexed over mesh elements according to the natural iteration 
 
     Only valid on triangular meshes.
 
-    - **member:** `Eigen::SparseMatrix<double> IntrinsicGeometry::laplacian`
-    - **require:** `void IntrinsicGeometry::requireLaplacian()`
+    - **member:** `Eigen::SparseMatrix<double> IntrinsicGeometryInterface::laplacian`
+    - **require:** `void IntrinsicGeometryInterface::requireLaplacian()`
 
 ??? func "vertex lumped mass matrix"
 
@@ -301,8 +302,8 @@ All operators are indexed over mesh elements according to the natural iteration 
 
     Only valid on triangular meshes.
 
-    - **member:** `Eigen::SparseMatrix<double> IntrinsicGeometry::vertexLumpedMassMatrix`
-    - **require:** `void IntrinsicGeometry::requireVertexLumpedMassMatrix()`
+    - **member:** `Eigen::SparseMatrix<double> IntrinsicGeometryInterface::vertexLumpedMassMatrix`
+    - **require:** `void IntrinsicGeometryInterface::requireVertexLumpedMassMatrix()`
 
 
 ??? func "vertex Galerkin mass matrix"
@@ -315,8 +316,8 @@ All operators are indexed over mesh elements according to the natural iteration 
 
     Only valid on triangular meshes.
 
-    - **member:** `Eigen::SparseMatrix<double> IntrinsicGeometry::vertexGalerkinMassMatrix`
-    - **require:** `void IntrinsicGeometry::requireVertexGalerkinMassMatrix()`
+    - **member:** `Eigen::SparseMatrix<double> IntrinsicGeometryInterface::vertexGalerkinMassMatrix`
+    - **require:** `void IntrinsicGeometryInterface::requireVertexGalerkinMassMatrix()`
 
 ??? func "vertex connection Laplacian"
 
@@ -330,8 +331,8 @@ All operators are indexed over mesh elements according to the natural iteration 
 
     Only valid on triangular meshes.
 
-    - **member:** `Eigen::SparseMatrix<double> IntrinsicGeometry::vertexGalerkinMassMatrix`
-    - **require:** `void IntrinsicGeometry::requireVertexGalerkinMassMatrix()`
+    - **member:** `Eigen::SparseMatrix<double> IntrinsicGeometryInterface::vertexGalerkinMassMatrix`
+    - **require:** `void IntrinsicGeometryInterface::requireVertexGalerkinMassMatrix()`
 
 ??? func "DEC operators"
 
@@ -343,23 +344,23 @@ All operators are indexed over mesh elements according to the natural iteration 
 
     The following members are constructed:
 
-    - `Eigen::SparseMatrix<double> IntrinsicGeometry::hodge0` A $|V| \times |V|$ diagonal matrix
-    - `Eigen::SparseMatrix<double> IntrinsicGeometry::hodge0Inverse` A $|V| \times |V|$ diagonal matrix
-    - `Eigen::SparseMatrix<double> IntrinsicGeometry::hodge1` An $|E| \times |E|$ diagonal matrix
-    - `Eigen::SparseMatrix<double> IntrinsicGeometry::hodge1Inverse` An $|E| \times |E|$ diagonal matrix
-    - `Eigen::SparseMatrix<double> IntrinsicGeometry::hodge2` An $|F| \times |F|$ diagonal matrix
-    - `Eigen::SparseMatrix<double> IntrinsicGeometry::hodge2Inverse` An $|F| \times |F|$ diagonal matrix
-    - `Eigen::SparseMatrix<double> IntrinsicGeometry::d0` An $|E| \times |V|$ matrix with $\{-1, 0, 1\}$ entries
-    - `Eigen::SparseMatrix<double> IntrinsicGeometry::d1` An $|F| \times |E|$ matrix with $\{-1, 0, 1\}$ entries
+    - `Eigen::SparseMatrix<double> IntrinsicGeometryInterface::hodge0` A $|V| \times |V|$ diagonal matrix
+    - `Eigen::SparseMatrix<double> IntrinsicGeometryInterface::hodge0Inverse` A $|V| \times |V|$ diagonal matrix
+    - `Eigen::SparseMatrix<double> IntrinsicGeometryInterface::hodge1` An $|E| \times |E|$ diagonal matrix
+    - `Eigen::SparseMatrix<double> IntrinsicGeometryInterface::hodge1Inverse` An $|E| \times |E|$ diagonal matrix
+    - `Eigen::SparseMatrix<double> IntrinsicGeometryInterface::hodge2` An $|F| \times |F|$ diagonal matrix
+    - `Eigen::SparseMatrix<double> IntrinsicGeometryInterface::hodge2Inverse` An $|F| \times |F|$ diagonal matrix
+    - `Eigen::SparseMatrix<double> IntrinsicGeometryInterface::d0` An $|E| \times |V|$ matrix with $\{-1, 0, 1\}$ entries
+    - `Eigen::SparseMatrix<double> IntrinsicGeometryInterface::d1` An $|F| \times |E|$ matrix with $\{-1, 0, 1\}$ entries
 
     Only valid on triangular meshes.
 
-    - **require:** `void IntrinsicGeometry::requireDECOperators()`
+    - **require:** `void IntrinsicGeometryInterface::requireDECOperators()`
 
 
 ## Extrinsic angles
 
-These quantities depend on extrinsic angles, but are still rotation-invariant, and independent of a particular embeddeding. They are defined for `ExtrinsicGeometry` and classes that extend it, including the `EmbeddedGeometry` one usually constructs from vertex positions. Currently there is no realization that constructs an `ExtrinsicGeometry` from input data which is not also an `EmbeddedGeometry`, but such a class could be implemented in the future.
+These quantities depend on extrinsic angles, but are still rotation-invariant, and independent of a particular embeddeding. They are defined for `ExtrinsicGeometryInterface` and classes that extend it, including the `EmbeddedGeometryInterface` one usually constructs from vertex positions. Currently there is no realization that constructs an `ExtrinsicGeometryInterface` from input data which is not also an `EmbeddedGeometryInterface`, but such a class could be implemented in the future.
 
 
 ??? func "edge dihedral angle"
@@ -370,24 +371,26 @@ These quantities depend on extrinsic angles, but are still rotation-invariant, a
 
     Only valid on triangular meshes.
 
-    - **member:** `EdgeData<double> ExtrinsicGeometry::edgeDihedralAngles`
-    - **require:** `void ExtrinsicGeometry::requireEdgeDihedralAngles()`
+    - **member:** `EdgeData<double> ExtrinsicGeometryInterface::edgeDihedralAngles`
+    - **require:** `void ExtrinsicGeometryInterface::requireEdgeDihedralAngles()`
 
-??? func "vertex principal curvature"
+??? func "vertex principal curvature direction"
 
-    ##### vertex principal curvature
+    ##### vertex principal curvature direction
 
-    A 2-symmetric tangent vector field at vertices. The direction corresponds to the first principal direction, and the magnitude corresponds to the ratio of the 1st and 2nd principal curvatures (e.g., if $\kappa_1 \approx \kappa_2$), the magnitude of the field will be near $0$).
+    A 2-symmetric tangent vector field at vertices. The direction corresponds to the first principal direction, and the magnitude is proportional to the squared difference of the 1st and 2nd principal curvatures $(\kappa_1 - \kappa_2)^2$ (so for instance, if a surface is flat and $\kappa_1 \approx \kappa_2$, the magnitude of the field will be near $0$).
+
+    A formal description appears in section 6.1.2 of [Globally Optimal Direction Fields](http://www.cs.cmu.edu/~kmcrane/Projects/GloballyOptimalDirectionFields/paper.pdf)
 
     Only valid on triangular meshes.
 
-    - **member:** `VertexData<Vector2> ExtrinsicGeometry::vertexPrincipalCurvatureDirections`
-    - **require:** `void ExtrinsicGeometry::requireVertexPrincipalCurvatureDirections()`
+    - **member:** `VertexData<Vector2> ExtrinsicGeometryInterface::vertexPrincipalCurvatureDirections`
+    - **require:** `void ExtrinsicGeometryInterface::requireVertexPrincipalCurvatureDirections()`
 
 
 ## Embedded positions and normals
 
-These quantities depend explicitly on an embedding in 3D space (better known as vertex positions). They are defined for `EmbeddedGeometry` (which is usually instantiated as a `VertexPositionGeometry`). Don't forget, `EmbeddedGeometry` extends the `IntrinsicGeometry` and `ExtrinsicGeometry`, so all of the quantities above are also accessible.
+These quantities depend explicitly on an embedding in 3D space (better known as vertex positions). They are defined for `EmbeddedGeometryInterface` (which is usually instantiated as a `VertexPositionGeometry`). Don't forget, `EmbeddedGeometryInterface` extends the `IntrinsicGeometryInterface` and `ExtrinsicGeometryInterface`, so all of the quantities above are also accessible.
 
 
 ??? func "vertex position"
@@ -398,26 +401,9 @@ These quantities depend explicitly on an embedding in 3D space (better known as 
 
     Note that this member is distinct from the `VertexPositionGeometry::inputVertexPositions` field. This field is a derived quantity treated just like any other, it needs to be `require()`'d, etc. It just so happens that this quantity coincides with some input data commonly used to define a geometry (`inputVertexPositions`), but this field does not get any special treatment as such. If you want to update vertex positions on a mesh, you should modify `inputVertexPositions`, not this quantity.
 
-    - **member:** `VertexData<Vector3> EmbeddedGeometry::vertexPositions`
-    - **require:** `void EmbeddedGeometry::requireVertexPositions()`
-    - **immediate:** `Vector3 EmbeddedGeometry::vertexPosition(Vertex v)`
-
-??? func "halfedge vector"
-
-    ##### halfedge vector
-
-    The vector along each halfedge, that is the vector from the vertex at the tail of the halfedge to the vertex at the tip. 
-
-    Defined as:
-    ```cpp
-    Vertex vTail = halfedge.vertex();
-    Vertex vTip = halfedge.twin().vertex();
-    Vector3 halfedgeVector = vertexPositions[vTip] - vertexPositions[vTail]
-    ```
-
-    - **member:** `HalfedgeData<Vector3> EmbeddedGeometry::halfedgeVectors`
-    - **require:** `void EmbeddedGeometry::requireHalfedgeVectors()`
-    - **immediate:** `Vector3 EmbeddedGeometry::halfedgeVector(Halfedge he)`
+    - **member:** `VertexData<Vector3> EmbeddedGeometryInterface::vertexPositions`
+    - **require:** `void EmbeddedGeometryInterface::requireVertexPositions()`
+    - **immediate:** `Vector3 EmbeddedGeometryInterface::vertexPosition(Vertex v)`
 
 
 ??? func "face normal"
@@ -426,9 +412,9 @@ These quantities depend explicitly on an embedding in 3D space (better known as 
 
     A normal vector for each face.
 
-    - **member:** `FaceData<Vector3> EmbeddedGeometry::faceNormals`
-    - **require:** `void EmbeddedGeometry::requireFaceNormals()`
-    - **immediate:** `Vector3 EmbeddedGeometry::faceNormal(Face f)`
+    - **member:** `FaceData<Vector3> EmbeddedGeometryInterface::faceNormals`
+    - **require:** `void EmbeddedGeometryInterface::requireFaceNormals()`
+    - **immediate:** `Vector3 EmbeddedGeometryInterface::faceNormal(Face f)`
 
 
 ??? func "vertex normal"
@@ -437,14 +423,14 @@ These quantities depend explicitly on an embedding in 3D space (better known as 
 
     A normal vector for each vertex. Defined as the corner-angle weighted average of incident face normals.
 
-    - **member:** `VertexData<Vector3> EmbeddedGeometry::faceNormals`
-    - **require:** `void EmbeddedGeometry::requireFaceNormals()`
+    - **member:** `VertexData<Vector3> EmbeddedGeometryInterface::faceNormals`
+    - **require:** `void EmbeddedGeometryInterface::requireFaceNormals()`
 
 ??? func "face tangent basis"
 
     ##### face tangent basis
 
-    An $x$-axis and $y$-axis 3D basis vectors in world space, corresponding to the [intrinsic tangent space](#face-tangent-spaces) for the face. Always orthogonal to the face normal.
+    A pair of $x$-axis and $y$-axis 3D basis vectors in world space, corresponding to the [intrinsic tangent space](#face-tangent-spaces) for the face. Always orthogonal to the face normal.
 
     Example:
 
@@ -467,15 +453,15 @@ These quantities depend explicitly on an embedding in 3D space (better known as 
 
     ```
 
-    - **member:** `FaceData<std::array<Vector3,2>> EmbeddedGeometry::faceTangentBasis`
-    - **require:** `void EmbeddedGeometry::requireFaceTangentBasis()`
+    - **member:** `FaceData<std::array<Vector3,2>> EmbeddedGeometryInterface::faceTangentBasis`
+    - **require:** `void EmbeddedGeometryInterface::requireFaceTangentBasis()`
 
 
 ??? func "vertex tangent basis"
 
     ##### vertex tangent basis
 
-    An $x$-axis and $y$-axis 3D basis vectors in world space, corresponding to the [intrinsic tangent space](#vertex-tangent-spaces) for the vertex. Always orthogonal to the vertex normal.
+    A pair of $x$-axis and $y$-axis 3D basis vectors in world space, corresponding to the [intrinsic tangent space](#vertex-tangent-spaces) for the vertex. Always orthogonal to the vertex normal.
 
     Example:
 
@@ -498,5 +484,5 @@ These quantities depend explicitly on an embedding in 3D space (better known as 
 
     ```
 
-    - **member:** `VertexData<std::array<Vector3,2>> EmbeddedGeometry::vertexTangentBasis`
-    - **require:** `void EmbeddedGeometry::requireVertexTangentBasis()`
+    - **member:** `VertexData<std::array<Vector3,2>> EmbeddedGeometryInterface::vertexTangentBasis`
+    - **require:** `void EmbeddedGeometryInterface::requireVertexTangentBasis()`

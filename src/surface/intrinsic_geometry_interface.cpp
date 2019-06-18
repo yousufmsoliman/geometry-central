@@ -52,6 +52,22 @@ void IntrinsicGeometryInterface::requireEdgeLengths() { edgeLengthsQ.require(); 
 void IntrinsicGeometryInterface::unrequireEdgeLengths() { edgeLengthsQ.unrequire(); }
 
 // Face areas
+double IntrinsicGeometryInterface::faceArea(Face f) const {
+  // WARNING: Logic duplicated between cached and immediate version
+  Halfedge he = f.halfedge();
+  double a = edgeLength(he.edge());
+  he = he.next();
+  double b = edgeLength(he.edge());
+  he = he.next();
+  double c = edgeLength(he.edge());
+
+  GC_SAFETY_ASSERT(he.next() == f.halfedge(), "faces mush be triangular");
+
+  // Herons formula
+  double s = (a + b + c) / 2.0;
+  double area = std::sqrt(s * (s - a) * (s - b) * (s - c));
+  return area;
+}
 void IntrinsicGeometryInterface::computeFaceAreas() {
   edgeLengthsQ.ensureHave();
 
@@ -60,6 +76,7 @@ void IntrinsicGeometryInterface::computeFaceAreas() {
 
   faceAreas = FaceData<double>(mesh);
   for (Face f : mesh.faces()) {
+    // WARNING: Logic duplicated between cached and immediate version
 
     Halfedge he = f.halfedge();
     double a = edgeLengths[he.edge()];
@@ -99,12 +116,31 @@ void IntrinsicGeometryInterface::unrequireVertexDualAreas() { vertexDualAreasQ.u
 
 
 // Corner angles
+double IntrinsicGeometryInterface::cornerAngle(Corner c) const {
+  // WARNING: Logic duplicated between cached and immediate version
+  Halfedge heA = c.halfedge();
+  Halfedge heOpp = heA.next();
+  Halfedge heB = heOpp.next();
+
+  GC_SAFETY_ASSERT(heB.next() == heA, "faces mush be triangular");
+
+  double lOpp = edgeLength(heOpp.edge());
+  double lA = edgeLength(heA.edge());
+  double lB = edgeLength(heB.edge());
+
+  double q = (lA * lA + lB * lB - lOpp * lOpp) / (2. * lA * lB);
+  q = clamp(q, -1.0, 1.0);
+  double angle = std::acos(q);
+
+  return angle;
+}
 void IntrinsicGeometryInterface::computeCornerAngles() {
   edgeLengthsQ.ensureHave();
 
   cornerAngles = CornerData<double>(mesh);
 
   for (Corner c : mesh.corners()) {
+    // WARNING: Logic duplicated between cached and immediate version
     Halfedge heA = c.halfedge();
     Halfedge heOpp = heA.next();
     Halfedge heB = heOpp.next();
@@ -220,6 +256,38 @@ void IntrinsicGeometryInterface::requireHalfedgeCotanWeights() { halfedgeCotanWe
 void IntrinsicGeometryInterface::unrequireHalfedgeCotanWeights() { halfedgeCotanWeightsQ.unrequire(); }
 
 // Edge cotan weights
+double IntrinsicGeometryInterface::edgeCotanWeight(Edge e) const {
+  // WARNING: Logic duplicated between cached and immediate version
+  double cotSum = 0.;
+
+  { // First halfedge-- always real
+    Halfedge he = e.halfedge();
+    double l_ij = edgeLength(he.edge());
+    he = he.next();
+    double l_jk = edgeLength(he.edge());
+    he = he.next();
+    double l_ki = edgeLength(he.edge());
+    he = he.next();
+    GC_SAFETY_ASSERT(he == e.halfedge(), "faces mush be triangular");
+    double area = faceArea(he.face());
+    double cotValue = (-l_ij * l_ij + l_jk * l_jk + l_ki * l_ki) / (4. * area);
+    cotSum += cotValue / 2;
+  }
+
+  if (e.halfedge().twin().isInterior()) { // Second halfedge
+    Halfedge he = e.halfedge().twin();
+    double l_ij = edgeLength(he.edge());
+    he = he.next();
+    double l_jk = edgeLength(he.edge());
+    he = he.next();
+    double l_ki = edgeLength(he.edge());
+    double area = faceArea(he.face());
+    double cotValue = (-l_ij * l_ij + l_jk * l_jk + l_ki * l_ki) / (4. * area);
+    cotSum += cotValue / 2;
+  }
+
+  return cotSum;
+}
 void IntrinsicGeometryInterface::computeEdgeCotanWeights() {
   edgeLengthsQ.ensureHave();
   faceAreasQ.ensureHave();
@@ -227,6 +295,7 @@ void IntrinsicGeometryInterface::computeEdgeCotanWeights() {
   edgeCotanWeights = EdgeData<double>(mesh, 0.);
 
   for (Edge e : mesh.edges()) {
+    // WARNING: Logic duplicated between cached and immediate version
     double cotSum = 0.;
 
     { // First halfedge-- always real
@@ -390,10 +459,29 @@ void IntrinsicGeometryInterface::unrequireTransportVectorsAlongHalfedge() {
 
 // Cotan Laplacian
 void IntrinsicGeometryInterface::computeCotanLaplacian() {
-  // TODO build this directly rather than from DEC operators, since we often don't need all of them.
-  DECOperatorsQ.ensureHave();
+  vertexIndicesQ.ensureHave();
+  edgeCotanWeightsQ.ensureHave();
 
-  cotanLaplacian = d0.transpose() * hodge1 * d0;
+  cotanLaplacian = Eigen::SparseMatrix<double>(mesh.nVertices(), mesh.nVertices());
+  std::vector<Eigen::Triplet<double>> tripletList;
+
+  for (Edge e : mesh.edges()) {
+    Halfedge he = e.halfedge();
+    Vertex vTail = he.vertex();
+    Vertex vHead = he.twin().vertex();
+
+    size_t iVHead = vertexIndices[vHead];
+    size_t iVTail = vertexIndices[vTail];
+
+    double weight = edgeCotanWeights[e];
+
+    tripletList.emplace_back(iVTail, iVTail, weight);
+    tripletList.emplace_back(iVHead, iVHead, weight);
+    tripletList.emplace_back(iVTail, iVHead, -weight);
+    tripletList.emplace_back(iVHead, iVTail, -weight);
+  }
+
+  cotanLaplacian.setFromTriplets(tripletList.begin(), tripletList.end());
 }
 void IntrinsicGeometryInterface::requireCotanLaplacian() { cotanLaplacianQ.require(); }
 void IntrinsicGeometryInterface::unrequireCotanLaplacian() { cotanLaplacianQ.unrequire(); }

@@ -9,15 +9,17 @@ namespace geometrycentral {
 namespace surface {
 
 VertexPositionGeometry::VertexPositionGeometry(HalfedgeMesh& mesh_)
-    : EmbeddedGeometryInterface(mesh_), inputVertexPositions(mesh_, Vector3{0., 0., 0,}) {}
+    : EmbeddedGeometryInterface(mesh_), inputVertexPositions(mesh_, Vector3{
+                                                                        0.,
+                                                                        0.,
+                                                                        0,
+                                                                    }) {}
 
 VertexPositionGeometry::VertexPositionGeometry(HalfedgeMesh& mesh_, VertexData<Vector3>& inputVertexPositions_)
     : EmbeddedGeometryInterface(mesh_), inputVertexPositions(inputVertexPositions_) {}
 
 
-std::unique_ptr<VertexPositionGeometry> VertexPositionGeometry::copy() {
-  return reinterpretTo(mesh);
-}
+std::unique_ptr<VertexPositionGeometry> VertexPositionGeometry::copy() { return reinterpretTo(mesh); }
 
 std::unique_ptr<VertexPositionGeometry> VertexPositionGeometry::reinterpretTo(HalfedgeMesh& targetMesh) {
   std::unique_ptr<VertexPositionGeometry> newGeom(new VertexPositionGeometry(targetMesh));
@@ -26,6 +28,8 @@ std::unique_ptr<VertexPositionGeometry> VertexPositionGeometry::reinterpretTo(Ha
 }
 
 void VertexPositionGeometry::computeVertexPositions() { vertexPositions = inputVertexPositions; }
+
+Vector3 VertexPositionGeometry::vertexPosition(Vertex v) const { return inputVertexPositions[v]; }
 
 } // namespace surface
 } // namespace geometrycentral

@@ -354,6 +354,7 @@ public:
 
   // Properties
   bool isBoundaryLoop() const;
+  bool isTriangle() const;
   size_t degree() const;
 
   // Iterators

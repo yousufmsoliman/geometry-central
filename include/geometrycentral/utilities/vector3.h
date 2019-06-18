@@ -45,6 +45,7 @@ struct Vector3 {
 
   // Other functions
   Vector3& rotate_around(Vector3 axis, double theta);
+  Vector3& removeComponent(const Vector3& unitDir); // removes component in direction D
   Vector3& normalize();
 
   inline std::array<float, 3> toFloatArray() const {

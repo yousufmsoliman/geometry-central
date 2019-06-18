@@ -17,6 +17,10 @@ public:
 
   EdgeData<double> inputEdgeLengths;
 
+  // == Immediate overrides
+
+  virtual double edgeLength(Edge e) const override;
+
 
 protected:
   // Override the compute edge lengths method from intrinsic geometry.
