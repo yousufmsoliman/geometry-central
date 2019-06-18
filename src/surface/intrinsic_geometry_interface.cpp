@@ -90,7 +90,7 @@ void IntrinsicGeometryInterface::computeVertexDualAreas() {
   for (Face f : mesh.faces()) {
     double A = faceAreas[f];
     for (Vertex v : f.adjacentVertices()) {
-      vertexDualAreas[v] = A / 3.0;
+      vertexDualAreas[v] += A / 3.0;
     }
   }
 }
@@ -448,7 +448,7 @@ void IntrinsicGeometryInterface::computeVertexGalerkinMassMatrix() {
     }
   }
 
-  vertexGalerkinMassMatrix = Eigen::SparseMatrix<double>(mesh.nFaces(), mesh.nFaces());
+  vertexGalerkinMassMatrix = Eigen::SparseMatrix<double>(mesh.nVertices(), mesh.nVertices());
   vertexGalerkinMassMatrix.setFromTriplets(triplets.begin(), triplets.end());
 }
 void IntrinsicGeometryInterface::requireVertexGalerkinMassMatrix() { vertexGalerkinMassMatrixQ.require(); }
@@ -537,7 +537,7 @@ void IntrinsicGeometryInterface::computeDECOperators() {
 
 
   { // D0
-    Eigen::SparseMatrix<double> d0 = Eigen::SparseMatrix<double>(nEdges, nVerts);
+    d0 = Eigen::SparseMatrix<double>(nEdges, nVerts);
     std::vector<Eigen::Triplet<double>> tripletList;
 
     for (Edge e : mesh.edges()) {
@@ -557,7 +557,7 @@ void IntrinsicGeometryInterface::computeDECOperators() {
   }
 
   { // D1
-    Eigen::SparseMatrix<double> d1 = Eigen::SparseMatrix<double>(nFaces, nEdges);
+    d1 = Eigen::SparseMatrix<double>(nFaces, nEdges);
     std::vector<Eigen::Triplet<double>> tripletList;
 
     for (Face f : mesh.faces()) {

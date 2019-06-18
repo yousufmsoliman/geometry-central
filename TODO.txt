@@ -22,7 +22,7 @@ Test to write:
 
 - Make sure iterators work in empty case where possible. In particular, face.adjacentFaces() for single face
 
-
+- add linear algebra tests to operators (is symmetric, etc)
 
 # WTF to do with boundary loops?
 

@@ -49,11 +49,34 @@ TEST_F(HalfedgeGeometrySuite, PurgeTest) {
   geometry.unrequireVertexIndices();
   EXPECT_EQ(geometry.vertexIndices.size(), mesh.nVertices());
 
-
   // Purge actually deletes
   geometry.purgeQuantities();
   EXPECT_EQ(geometry.vertexIndices.size(), 0);
 }
+
+
+// The DEC operators use a special array to ensure they all get deleted, make sure it works
+TEST_F(HalfedgeGeometrySuite, PurgeTestDEC) {
+  auto asset = getAsset("bob_small.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& geometry = *asset.geometry;
+
+  // Make sure the size is zero when empty
+  EXPECT_EQ(geometry.d0.nonZeros(), 0);
+
+  // Populate
+  geometry.requireDECOperators();
+  EXPECT_GT(geometry.d0.nonZeros(), 0);
+
+  // Unrequire (but should not get rid of yet)
+  geometry.unrequireDECOperators();
+  EXPECT_GT(geometry.d0.nonZeros(), 0);
+
+  // Purge actually deletes
+  geometry.purgeQuantities();
+  EXPECT_EQ(geometry.d0.nonZeros(), 0);
+}
+
 
 // ============================================================
 // =============== Quantity tests
@@ -312,6 +335,83 @@ TEST_F(HalfedgeGeometrySuite, TransportVectorsAlongHalfedge) {
 }
 
 
+TEST_F(HalfedgeGeometrySuite, CotanLaplacian) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireCotanLaplacian();
+
+  EXPECT_EQ(geometry.cotanLaplacian.rows(), (long int)mesh.nVertices());
+  EXPECT_EQ(geometry.cotanLaplacian.cols(), (long int)mesh.nVertices());
+  EXPECT_EQ(geometry.cotanLaplacian.nonZeros(), (long int)(mesh.nVertices() + mesh.nHalfedges()));
+
+  EXPECT_NEAR(geometry.cotanLaplacian.sum(), 0., 1e-6);
+}
+
+TEST_F(HalfedgeGeometrySuite, VertexLumpedMassMatrix) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireVertexLumpedMassMatrix();
+
+  EXPECT_EQ(geometry.vertexLumpedMassMatrix.rows(), (long int)mesh.nVertices());
+  EXPECT_EQ(geometry.vertexLumpedMassMatrix.cols(), (long int)mesh.nVertices());
+  EXPECT_EQ(geometry.vertexLumpedMassMatrix.nonZeros(), (long int)(mesh.nVertices()));
+}
+
+TEST_F(HalfedgeGeometrySuite, VertexGalerkinMassMatrix) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireVertexGalerkinMassMatrix();
+
+  EXPECT_EQ(geometry.vertexGalerkinMassMatrix.rows(), (long int)mesh.nVertices());
+  EXPECT_EQ(geometry.vertexGalerkinMassMatrix.cols(), (long int)mesh.nVertices());
+  EXPECT_EQ(geometry.vertexGalerkinMassMatrix.nonZeros(), (long int)(mesh.nHalfedges() + mesh.nVertices()));
+}
+
+TEST_F(HalfedgeGeometrySuite, VertexConnectionLaplacian) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireVertexConnectionLaplacian();
+
+  EXPECT_EQ(geometry.vertexConnectionLaplacian.rows(), (long int)mesh.nVertices());
+  EXPECT_EQ(geometry.vertexConnectionLaplacian.cols(), (long int)mesh.nVertices());
+  EXPECT_EQ(geometry.vertexConnectionLaplacian.nonZeros(), (long int)(mesh.nHalfedges() + mesh.nVertices()));
+}
+
+TEST_F(HalfedgeGeometrySuite, DECOperators) {
+
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireDECOperators();
+
+  // Eigen::SparseMatrix<double> hodge0, hodge0Inverse, hodge1, hodge1Inverse, hodge2, hodge2Inverse, d0, d1;
+
+  // == Check dimensions
+  auto dimensionCheck = [](Eigen::SparseMatrix<double>& m, size_t nRow, size_t nCol) {
+    EXPECT_EQ(m.rows(), (long int)nRow);
+    EXPECT_EQ(m.cols(), (long int)nCol);
+  };
+
+  dimensionCheck(geometry.hodge0, mesh.nVertices(), mesh.nVertices());
+  dimensionCheck(geometry.hodge0Inverse, mesh.nVertices(), mesh.nVertices());
+  dimensionCheck(geometry.hodge1, mesh.nEdges(), mesh.nEdges());
+  dimensionCheck(geometry.hodge1Inverse, mesh.nEdges(), mesh.nEdges());
+  dimensionCheck(geometry.hodge2, mesh.nFaces(), mesh.nFaces());
+  dimensionCheck(geometry.hodge2Inverse, mesh.nFaces(), mesh.nFaces());
+  dimensionCheck(geometry.d0, mesh.nEdges(), mesh.nVertices());
+  dimensionCheck(geometry.d1, mesh.nFaces(), mesh.nEdges());
+}
+
+
 // ============================================================
 // =============== Geometry tests
 // ============================================================
@@ -336,7 +436,7 @@ TEST_F(HalfedgeGeometrySuite, VertexGaussianCurvaturesSumTest) {
 
     double gaussBonnetCurvature = 2. * PI * mesh.eulerCharacteristic();
 
-    EXPECT_NEAR(curvatureSum, gaussBonnetCurvature, 1e-2);
+    EXPECT_NEAR(curvatureSum, gaussBonnetCurvature, 1e-6);
   }
 }
 
@@ -358,5 +458,74 @@ TEST_F(HalfedgeGeometrySuite, FaceGaussianCurvaturesSumTest) {
     double gaussBonnetCurvature = 2. * PI * mesh.eulerCharacteristic();
 
     EXPECT_NEAR(curvatureSum, gaussBonnetCurvature, 1e-2);
+  }
+}
+
+// Test that a bunch of quantities which should sum to the surface area, do
+TEST_F(HalfedgeGeometrySuite, SurfaceAreaEquivalence) {
+  for (auto& asset : allMeshes()) {
+    if (!asset.isTriangular) continue;
+
+    asset.printThyName();
+    HalfedgeMesh& mesh = *asset.mesh;
+    IntrinsicGeometryInterface& geometry = *asset.geometry;
+
+    double tol = 1e-6;
+
+    // Face area
+    double surfaceArea_faces = 0.;
+    geometry.requireFaceAreas();
+    for (Face f : mesh.faces()) {
+      surfaceArea_faces += geometry.faceAreas[f];
+    }
+
+    // Vertex dual area
+    double surfaceArea_vertices = 0.;
+    geometry.requireVertexDualAreas();
+    for (Vertex v : mesh.vertices()) {
+      surfaceArea_vertices += geometry.vertexDualAreas[v];
+    }
+    EXPECT_NEAR(surfaceArea_faces, surfaceArea_vertices, tol);
+
+    // Lumped mass matrix
+    geometry.requireVertexLumpedMassMatrix();
+    double surfaceArea_vertexLumpedMass = geometry.vertexLumpedMassMatrix.sum();
+    EXPECT_NEAR(surfaceArea_vertices, surfaceArea_vertexLumpedMass, tol);
+
+    // Galerkin mass matrix
+    geometry.requireVertexGalerkinMassMatrix();
+    double surfaceArea_vertexGalerkinMass = geometry.vertexGalerkinMassMatrix.sum();
+    EXPECT_NEAR(surfaceArea_vertexLumpedMass, surfaceArea_vertexGalerkinMass, tol);
+
+    // hodge0
+    geometry.requireDECOperators();
+    double surfaceArea_hodge0 = geometry.hodge0.sum();
+    EXPECT_NEAR(surfaceArea_vertexGalerkinMass, surfaceArea_hodge0, tol);
+
+    // hodge2
+    geometry.requireDECOperators();
+    double surfaceArea_hodge2 = geometry.hodge2Inverse.sum();
+    EXPECT_NEAR(surfaceArea_hodge0, surfaceArea_hodge2, tol);
+  }
+}
+
+
+// Build the Laplacian two different ways and ensure that they match up
+TEST_F(HalfedgeGeometrySuite, CotanLaplacianEquivalence) {
+  for (auto& asset : allMeshes()) {
+    if (!asset.isTriangular) continue;
+
+    asset.printThyName();
+    HalfedgeMesh& mesh = *asset.mesh;
+    IntrinsicGeometryInterface& geometry = *asset.geometry;
+
+    geometry.requireDECOperators();
+    geometry.requireCotanLaplacian();
+
+    Eigen::SparseMatrix<double> weak1FormLaplace = geometry.d0.transpose() * geometry.hodge1 * geometry.d0;
+
+    double difference = (geometry.cotanLaplacian - weak1FormLaplace).cwiseAbs().sum();
+
+    EXPECT_LT(difference, 1e-6);
   }
 }
