@@ -23,9 +23,6 @@ EmbeddedGeometryInterface::EmbeddedGeometryInterface(HalfedgeMesh& mesh_) :
 
 
 // Edge lengths
-double EmbeddedGeometryInterface::edgeLength(Edge e) const {
-  return norm(vertexPosition(e.halfedge().vertex()) - vertexPosition(e.halfedge().twin().vertex()));
-}
 void EmbeddedGeometryInterface::computeEdgeLengths() {
   vertexPositionsQ.ensureHave();
 
@@ -57,30 +54,6 @@ void EmbeddedGeometryInterface::requireVertexPositions() { vertexPositionsQ.requ
 void EmbeddedGeometryInterface::unrequireVertexPositions() { vertexPositionsQ.unrequire(); }
 
 
-// Face normal
-Vector3 EmbeddedGeometryInterface::faceNormal(Face f) const {
-  // For general polygons, take the sum of the cross products at each corner
-  Vector3 normalSum = Vector3::zero();
-  for (Halfedge heF : f.adjacentHalfedges()) {
-
-    // Gather vertex positions for next three vertices
-    Halfedge he = heF;
-    Vector3 pA = vertexPositions[he.vertex()];
-    he = he.next();
-    Vector3 pB = vertexPositions[he.vertex()];
-    he = he.next();
-    Vector3 pC = vertexPositions[he.vertex()];
-
-    normalSum += cross(pB - pA, pC - pA);
-
-    // In the special case of a triangle, there is no need to to repeat at all three corners; the result will be the
-    // same
-    if (he.next() == heF) break;
-  }
-
-  Vector3 normal = unit(normalSum);
-  return normal;
-}
 void EmbeddedGeometryInterface::computeFaceNormals() {
   vertexPositionsQ.ensureHave();
 
@@ -207,6 +180,138 @@ void EmbeddedGeometryInterface::computeVertexTangentBasis() {
 }
 void EmbeddedGeometryInterface::requireVertexTangentBasis() { vertexTangentBasisQ.require(); }
 void EmbeddedGeometryInterface::unrequireVertexTangentBasis() { vertexTangentBasisQ.unrequire(); }
+
+
+// == Overrides to compute things better using vertex positions
+
+// Override to compute directly from vertex positions
+void EmbeddedGeometryInterface::computeFaceAreas() {
+  vertexPositionsQ.ensureHave();
+
+  faceAreas = FaceData<double>(mesh);
+
+  for (Face f : mesh.faces()) {
+
+    // WARNING: Logic duplicated between cached and immediate version
+    Halfedge he = f.halfedge();
+    Vector3 pA = vertexPositions[he.vertex()];
+    he = he.next();
+    Vector3 pB = vertexPositions[he.vertex()];
+    he = he.next();
+    Vector3 pC = vertexPositions[he.vertex()];
+
+    GC_SAFETY_ASSERT(he.next() == f.halfedge(), "faces mush be triangular");
+
+    double area = 0.5 * norm(cross(pB - pA, pC - pA));
+    faceAreas[f] = area;
+  }
+}
+
+// Override to compute directly from vertex positions
+void EmbeddedGeometryInterface::computeCornerAngles() {
+  vertexPositionsQ.ensureHave();
+
+  cornerAngles = CornerData<double>(mesh);
+
+  for (Corner c : mesh.corners()) {
+
+    // WARNING: Logic duplicated between cached and immediate version
+    Halfedge he = c.halfedge();
+    Vector3 pA = vertexPositions[he.vertex()];
+    he = he.next();
+    Vector3 pB = vertexPositions[he.vertex()];
+    he = he.next();
+    Vector3 pC = vertexPositions[he.vertex()];
+
+    GC_SAFETY_ASSERT(he.next() == c.halfedge(), "faces mush be triangular");
+
+    double q = dot(unit(pB - pA), unit(pC - pA));
+    q = clamp(q, -1.0, 1.0);
+    double angle = std::acos(q);
+
+    cornerAngles[c] = angle;
+  }
+}
+
+
+// Override to compute directly from vertex positions
+void EmbeddedGeometryInterface::computeHalfedgeCotanWeights() {
+  vertexPositionsQ.ensureHave();
+
+  halfedgeCotanWeights = HalfedgeData<double>(mesh);
+
+  for (Halfedge heI : mesh.halfedges()) {
+
+    // WARNING: Logic duplicated between cached and immediate version
+    double cotSum = 0.;
+
+    if (heI.isInterior()) {
+      Halfedge he = heI;
+      Vector3 pB = vertexPositions[he.vertex()];
+      he = he.next();
+      Vector3 pC = vertexPositions[he.vertex()];
+      he = he.next();
+      Vector3 pA = vertexPositions[he.vertex()];
+      GC_SAFETY_ASSERT(he.next() == heI, "faces mush be triangular");
+
+      Vector3 vecR = pB - pA;
+      Vector3 vecL = pC - pA;
+
+      double cotValue = dot(vecR, vecL) / norm(cross(vecR, vecL));
+      cotSum += cotValue / 2;
+    }
+
+    halfedgeCotanWeights[heI] = cotSum;
+  }
+}
+
+
+// Override to compute directly from vertex positions
+void EmbeddedGeometryInterface::computeEdgeCotanWeights() {
+  vertexPositionsQ.ensureHave();
+
+  edgeCotanWeights = EdgeData<double>(mesh);
+
+  for (Edge e : mesh.edges()) {
+
+    // WARNING: Logic duplicated between cached and immediate version
+    double cotSum = 0.;
+
+    { // First halfedge-- always real
+      Halfedge he = e.halfedge();
+      Vector3 pB = vertexPositions[he.vertex()];
+      he = he.next();
+      Vector3 pC = vertexPositions[he.vertex()];
+      he = he.next();
+      Vector3 pA = vertexPositions[he.vertex()];
+      GC_SAFETY_ASSERT(he.next() == e.halfedge(), "faces mush be triangular");
+
+      Vector3 vecR = pB - pA;
+      Vector3 vecL = pC - pA;
+
+      double cotValue = dot(vecR, vecL) / norm(cross(vecR, vecL));
+      cotSum += cotValue / 2;
+    }
+
+    if (e.halfedge().twin().isInterior()) { // Second halfedge
+      Halfedge he = e.halfedge().twin();
+      Vector3 pB = vertexPositions[he.vertex()];
+      he = he.next();
+      Vector3 pC = vertexPositions[he.vertex()];
+      he = he.next();
+      Vector3 pA = vertexPositions[he.vertex()];
+
+      Vector3 vecR = pB - pA;
+      Vector3 vecL = pC - pA;
+
+      double cotValue = dot(vecR, vecL) / norm(cross(vecR, vecL));
+      cotSum += cotValue / 2;
+    }
+
+    edgeCotanWeights[e] = cotSum;
+  }
+}
+
 
 } // namespace surface
 } // namespace geometrycentral

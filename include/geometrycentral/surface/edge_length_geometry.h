@@ -17,9 +17,11 @@ public:
 
   EdgeData<double> inputEdgeLengths;
 
-  // == Immediate overrides
-
-  virtual double edgeLength(Edge e) const override;
+  // == Immediates
+  double faceArea(Face f) const;
+  double cornerAngle(Corner c) const;
+  double halfedgeCotanWeight(Halfedge he) const;
+  double edgeCotanWeight(Edge e) const;
 
 
 protected:
@@ -32,3 +34,5 @@ private:
 
 } // namespace surface
 } // namespace geometrycentral
+
+#include "geometrycentral/surface/edge_length_geometry.ipp"

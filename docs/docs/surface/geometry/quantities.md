@@ -41,7 +41,10 @@ These quantities are defined for any `IntrinsicGeometryInterface`, which is the 
 
     - **member:** `EdgeData<double> IntrinsicGeometryInterface::edgeLengths`
     - **require:** `void IntrinsicGeometryInterface::requireEdgeLengths()`
-    - **immediate:** `double IntrinsicGeometryInterface::edgeLength(Edge e)`
+
+    The inline immediate method can alternately be used to compute this value directly from input data for a single element:
+
+    - **immediate:** `double VertexPositionGeometry::edgeLength(Edge e)`
 
 ??? func "face area"
     
@@ -55,7 +58,11 @@ These quantities are defined for any `IntrinsicGeometryInterface`, which is the 
 
     - **member:** `FaceData<double> IntrinsicGeometryInterface::faceAreas`
     - **require:** `void IntrinsicGeometryInterface::requireFaceAreas()`
-    - **immediate:** `double IntrinsicGeometryInterface::faceArea(Face f)`
+    
+    The inline immediate method can alternately be used to compute this value directly from input data for a single element:
+
+    - **immediate:** `double EdgeLengthGeometry::faceArea(Face f)`
+    - **immediate:** `double VertexPositionGeometry::faceArea(Face f)`
 
 ??? func "vertex dual area"
 
@@ -80,7 +87,11 @@ These quantities are defined for any `IntrinsicGeometryInterface`, which is the 
 
     - **member:** `CornerData<double> IntrinsicGeometryInterface::cornerAngles`
     - **require:** `void IntrinsicGeometryInterface::requireCornerAngles()`
-    - **immediate:** `double IntrinsicGeometryInterface::cornerAngle(Corner c)`
+    
+    The inline immediate method can alternately be used to compute this value directly from input data for a single element:
+
+    - **immediate:** `double EdgeLengthGeometry::cornerAngle(Corner c)`
+    - **immediate:** `double VertexPositionGeometry::cornerAngle(Corner c)`
 
 ??? func "vertex angle sum"
     
@@ -146,6 +157,10 @@ These quantities are defined for any `IntrinsicGeometryInterface`, which is the 
     - **member:** `HalfedgeData<double> IntrinsicGeometryInterface::halfedgeCotanWeights`
     - **require:** `void IntrinsicGeometryInterface::requireHalfedgeCotanWeights()`
 
+    The inline immediate method can alternately be used to compute this value directly from input data for a single element:
+
+    - **immediate:** `double EdgeLengthGeometry::halfedgeCotanWeight(Halfedge he)`
+    - **immediate:** `double VertexPositionGeometry::halfedgeCotanWeight(Halfedge he)`
 
 ??? func "edge cotan weight"
 
@@ -157,8 +172,11 @@ These quantities are defined for any `IntrinsicGeometryInterface`, which is the 
 
     - **member:** `EdgeData<double> IntrinsicGeometryInterface::edgeCotanWeights`
     - **require:** `void IntrinsicGeometryInterface::requireEdgeCotanWeights()`
-    - **immediate:** `double IntrinsicGeometryInterface::edgeCotanWeight(Edge e)`
 
+    The inline immediate method can alternately be used to compute this value directly from input data for a single element:
+
+    - **immediate:** `double EdgeLengthGeometry::edgeCotanWeight(Edge e)`
+    - **immediate:** `double VertexPositionGeometry::edgeCotanWeight(Edge e)`
 
 ## Tangent vectors and transport
 
@@ -399,11 +417,10 @@ These quantities depend explicitly on an embedding in 3D space (better known as 
 
     Vertex positions in 3D.
 
-    Note that this member is distinct from the `VertexPositionGeometry::inputVertexPositions` field. This field is a derived quantity treated just like any other, it needs to be `require()`'d, etc. It just so happens that this quantity coincides with some input data commonly used to define a geometry (`inputVertexPositions`), but this field does not get any special treatment as such. If you want to update vertex positions on a mesh, you should modify `inputVertexPositions`, not this quantity.
+    *Note:* this member is distinct from the `VertexPositionGeometry::inputVertexPositions` field. In the common case of a `VertexPositionGeometry`, this member is a copy of the input vertex positions, provided for consistency and generality (one might define embedded surfaces with data other than vertex positions). If you want to update vertex positions on a mesh, you should modify `inputVertexPositions`, not this quantity.
 
     - **member:** `VertexData<Vector3> EmbeddedGeometryInterface::vertexPositions`
     - **require:** `void EmbeddedGeometryInterface::requireVertexPositions()`
-    - **immediate:** `Vector3 EmbeddedGeometryInterface::vertexPosition(Vertex v)`
 
 
 ??? func "face normal"
@@ -414,8 +431,10 @@ These quantities depend explicitly on an embedding in 3D space (better known as 
 
     - **member:** `FaceData<Vector3> EmbeddedGeometryInterface::faceNormals`
     - **require:** `void EmbeddedGeometryInterface::requireFaceNormals()`
-    - **immediate:** `Vector3 EmbeddedGeometryInterface::faceNormal(Face f)`
 
+    The inline immediate method can alternately be used to compute this value directly from input data for a single element:
+
+    - **immediate:** `Vector3 VertexPositionGeometry::faceNormal(Face f)`
 
 ??? func "vertex normal"
 

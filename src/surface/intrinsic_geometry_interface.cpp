@@ -51,23 +51,6 @@ IntrinsicGeometryInterface::IntrinsicGeometryInterface(HalfedgeMesh& mesh_) :
 void IntrinsicGeometryInterface::requireEdgeLengths() { edgeLengthsQ.require(); }
 void IntrinsicGeometryInterface::unrequireEdgeLengths() { edgeLengthsQ.unrequire(); }
 
-// Face areas
-double IntrinsicGeometryInterface::faceArea(Face f) const {
-  // WARNING: Logic duplicated between cached and immediate version
-  Halfedge he = f.halfedge();
-  double a = edgeLength(he.edge());
-  he = he.next();
-  double b = edgeLength(he.edge());
-  he = he.next();
-  double c = edgeLength(he.edge());
-
-  GC_SAFETY_ASSERT(he.next() == f.halfedge(), "faces mush be triangular");
-
-  // Herons formula
-  double s = (a + b + c) / 2.0;
-  double area = std::sqrt(s * (s - a) * (s - b) * (s - c));
-  return area;
-}
 void IntrinsicGeometryInterface::computeFaceAreas() {
   edgeLengthsQ.ensureHave();
 
@@ -115,25 +98,6 @@ void IntrinsicGeometryInterface::requireVertexDualAreas() { vertexDualAreasQ.req
 void IntrinsicGeometryInterface::unrequireVertexDualAreas() { vertexDualAreasQ.unrequire(); }
 
 
-// Corner angles
-double IntrinsicGeometryInterface::cornerAngle(Corner c) const {
-  // WARNING: Logic duplicated between cached and immediate version
-  Halfedge heA = c.halfedge();
-  Halfedge heOpp = heA.next();
-  Halfedge heB = heOpp.next();
-
-  GC_SAFETY_ASSERT(heB.next() == heA, "faces mush be triangular");
-
-  double lOpp = edgeLength(heOpp.edge());
-  double lA = edgeLength(heA.edge());
-  double lB = edgeLength(heB.edge());
-
-  double q = (lA * lA + lB * lB - lOpp * lOpp) / (2. * lA * lB);
-  q = clamp(q, -1.0, 1.0);
-  double angle = std::acos(q);
-
-  return angle;
-}
 void IntrinsicGeometryInterface::computeCornerAngles() {
   edgeLengthsQ.ensureHave();
 
@@ -256,38 +220,6 @@ void IntrinsicGeometryInterface::requireHalfedgeCotanWeights() { halfedgeCotanWe
 void IntrinsicGeometryInterface::unrequireHalfedgeCotanWeights() { halfedgeCotanWeightsQ.unrequire(); }
 
 // Edge cotan weights
-double IntrinsicGeometryInterface::edgeCotanWeight(Edge e) const {
-  // WARNING: Logic duplicated between cached and immediate version
-  double cotSum = 0.;
-
-  { // First halfedge-- always real
-    Halfedge he = e.halfedge();
-    double l_ij = edgeLength(he.edge());
-    he = he.next();
-    double l_jk = edgeLength(he.edge());
-    he = he.next();
-    double l_ki = edgeLength(he.edge());
-    he = he.next();
-    GC_SAFETY_ASSERT(he == e.halfedge(), "faces mush be triangular");
-    double area = faceArea(he.face());
-    double cotValue = (-l_ij * l_ij + l_jk * l_jk + l_ki * l_ki) / (4. * area);
-    cotSum += cotValue / 2;
-  }
-
-  if (e.halfedge().twin().isInterior()) { // Second halfedge
-    Halfedge he = e.halfedge().twin();
-    double l_ij = edgeLength(he.edge());
-    he = he.next();
-    double l_jk = edgeLength(he.edge());
-    he = he.next();
-    double l_ki = edgeLength(he.edge());
-    double area = faceArea(he.face());
-    double cotValue = (-l_ij * l_ij + l_jk * l_jk + l_ki * l_ki) / (4. * area);
-    cotSum += cotValue / 2;
-  }
-
-  return cotSum;
-}
 void IntrinsicGeometryInterface::computeEdgeCotanWeights() {
   edgeLengthsQ.ensureHave();
   faceAreasQ.ensureHave();

@@ -37,8 +37,14 @@ public:
   // The actual input data which defines the geometry
   VertexData<Vector3> inputVertexPositions;
 
-  // == Immediate overrides
-  virtual Vector3 vertexPosition(Vertex v) const override;
+  // == Immediates
+  double edgeLength(Edge e) const;
+  double faceArea(Face f) const;
+  double cornerAngle(Corner c) const;
+  double halfedgeCotanWeight(Halfedge he) const;
+  double edgeCotanWeight(Edge e) const;
+  Vector3 faceNormal(Face f) const;
+
 
 protected:
   // Override the compute vertex positions method for embedded geometry
@@ -50,3 +56,5 @@ private:
 
 } // namespace surface
 } // namespace geometrycentral
+
+#include "geometrycentral/surface/vertex_position_geometry.ipp"

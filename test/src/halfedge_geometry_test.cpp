@@ -172,20 +172,41 @@ TEST_F(HalfedgeGeometrySuite, EdgeLengths) {
   }
 }
 
-TEST_F(HalfedgeGeometrySuite, EdgeLengthsImmediate) {
-  auto asset = getAsset("bob_small.ply");
+
+// Test immediate edge length computation from position
+TEST_F(HalfedgeGeometrySuite, EdgeLengthImmediate_Position) {
+  auto asset = getAsset("lego.ply");
   HalfedgeMesh& mesh = *asset.mesh;
-  IntrinsicGeometryInterface& geometry = *asset.geometry;
+  IntrinsicGeometryInterface& origGeometry = *asset.geometry;
 
-  EdgeData<double> edgeLengthsImmediate(mesh);
+  // Construct position geometry
+  VertexPositionGeometry& geometry = *asset.geometry;
+
+  EdgeData<double> edgeLengthImmediate(mesh);
   for (Edge e : mesh.edges()) {
-    edgeLengthsImmediate[e] = geometry.edgeLength(e);
+    edgeLengthImmediate[e] = geometry.edgeLength(e);
   }
-
 
   geometry.requireEdgeLengths();
   for (Edge e : mesh.edges()) {
-    EXPECT_NEAR(geometry.edgeLengths[e], edgeLengthsImmediate[e], 1e-6);
+    EXPECT_NEAR(geometry.edgeLengths[e], edgeLengthImmediate[e], 1e-6);
+  }
+}
+
+// Ensure overrides for computing edge length give the same result
+TEST_F(HalfedgeGeometrySuite, EdgeLengthOverrides) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  VertexPositionGeometry& origGeometry = *asset.geometry;
+
+  // Construct edge length geometry
+  origGeometry.requireEdgeLengths();
+  EdgeLengthGeometry geometry(mesh, origGeometry.edgeLengths);
+
+  geometry.requireEdgeLengths();
+  origGeometry.requireEdgeLengths();
+  for (Edge e : mesh.edges()) {
+    EXPECT_NEAR(geometry.edgeLengths[e], origGeometry.edgeLengths[e], 1e-6);
   }
 }
 
@@ -202,10 +223,59 @@ TEST_F(HalfedgeGeometrySuite, FaceAreas) {
   }
 }
 
-TEST_F(HalfedgeGeometrySuite, FaceAreasImmediate) {
+// Ensure overrides for computing face area give the same result
+TEST_F(HalfedgeGeometrySuite, FaceAreaOverrides) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  VertexPositionGeometry& origGeometry = *asset.geometry;
+
+  // Construct edge length geometry
+  origGeometry.requireEdgeLengths();
+  EdgeLengthGeometry geometry(mesh, origGeometry.edgeLengths);
+
+  geometry.requireFaceAreas();
+  origGeometry.requireFaceAreas();
+  bool allExactSame = true;
+  for (Face f : mesh.faces()) {
+    EXPECT_NEAR(geometry.faceAreas[f], origGeometry.faceAreas[f], 1e-6);
+    
+    allExactSame = allExactSame && (geometry.faceAreas[f] == origGeometry.faceAreas[f]);
+  }
+
+  // Ensure that not all of the values are exactly the same to the bit-- this tell us that the type system is behaving nicely and the override version is actually being invoked.
+  EXPECT_FALSE(allExactSame);
+}
+
+// Test the immediate face area computation from the length geometry
+TEST_F(HalfedgeGeometrySuite, FaceAreasImmediate_Length) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
-  IntrinsicGeometryInterface& geometry = *asset.geometry;
+  IntrinsicGeometryInterface& origGeometry = *asset.geometry;
+
+  // Construct edge length geometry
+  origGeometry.requireEdgeLengths();
+  EdgeLengthGeometry geometry(mesh, origGeometry.edgeLengths);
+
+
+  FaceData<double> faceAreaImmediate(mesh);
+  for (Face e : mesh.faces()) {
+    faceAreaImmediate[e] = geometry.faceArea(e);
+  }
+
+  geometry.requireFaceAreas();
+  for (Face e : mesh.faces()) {
+    EXPECT_NEAR(geometry.faceAreas[e], faceAreaImmediate[e], 1e-6);
+  }
+}
+
+// Test the immediate face area computation from the position geometry
+TEST_F(HalfedgeGeometrySuite, FaceAreasImmediate_Position) {
+  auto asset = getAsset("bob_small.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& origGeometry = *asset.geometry;
+
+  // Construct position geometry
+  VertexPositionGeometry& geometry = *asset.geometry;
 
   FaceData<double> faceAreaImmediate(mesh);
   for (Face e : mesh.faces()) {
@@ -243,10 +313,15 @@ TEST_F(HalfedgeGeometrySuite, CornerAngles) {
   }
 }
 
-TEST_F(HalfedgeGeometrySuite, CornerAnglesImmediate) {
+// Test immediate corner angles from length geometry
+TEST_F(HalfedgeGeometrySuite, CornerAnglesImmediate_Length) {
   auto asset = getAsset("bob_small.ply");
   HalfedgeMesh& mesh = *asset.mesh;
-  IntrinsicGeometryInterface& geometry = *asset.geometry;
+  IntrinsicGeometryInterface& origGeometry = *asset.geometry;
+
+  // Construct edge length geometry
+  origGeometry.requireEdgeLengths();
+  EdgeLengthGeometry geometry(mesh, origGeometry.edgeLengths);
 
   CornerData<double> cornerAnglesImmediate(mesh);
   for (Corner e : mesh.corners()) {
@@ -258,6 +333,50 @@ TEST_F(HalfedgeGeometrySuite, CornerAnglesImmediate) {
     EXPECT_NEAR(geometry.cornerAngles[e], cornerAnglesImmediate[e], 1e-6);
   }
 }
+
+// Test immediate corner angles from position geometry
+TEST_F(HalfedgeGeometrySuite, CornerAnglesImmediate_Position) {
+  auto asset = getAsset("bob_small.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& origGeometry = *asset.geometry;
+
+  // Construct position geometry
+  VertexPositionGeometry& geometry = *asset.geometry;
+
+  CornerData<double> cornerAnglesImmediate(mesh);
+  for (Corner e : mesh.corners()) {
+    cornerAnglesImmediate[e] = geometry.cornerAngle(e);
+  }
+
+  geometry.requireCornerAngles();
+  for (Corner e : mesh.corners()) {
+    EXPECT_NEAR(geometry.cornerAngles[e], cornerAnglesImmediate[e], 1e-6);
+  }
+}
+
+// Ensure overrides for computing corner angles give the same result
+TEST_F(HalfedgeGeometrySuite, CornerAngleOverrides) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  VertexPositionGeometry& origGeometry = *asset.geometry;
+
+  // Construct edge length geometry
+  origGeometry.requireEdgeLengths();
+  EdgeLengthGeometry geometry(mesh, origGeometry.edgeLengths);
+
+  geometry.requireCornerAngles();
+  origGeometry.requireCornerAngles();
+  bool allExactSame = true;
+  for (Corner c : mesh.corners()) {
+    EXPECT_NEAR(geometry.cornerAngles[c], origGeometry.cornerAngles[c], 1e-6);
+    
+    allExactSame = allExactSame && (geometry.cornerAngles[c] == origGeometry.cornerAngles[c]);
+  }
+
+  // Ensure that not all of the values are exactly the same to the bit-- this tell us that the type system is behaving nicely and the override version is actually being invoked.
+  EXPECT_FALSE(allExactSame);
+}
+
 
 TEST_F(HalfedgeGeometrySuite, VertexAngleSums) {
   auto asset = getAsset("bob_small.ply");
@@ -319,6 +438,71 @@ TEST_F(HalfedgeGeometrySuite, HalfedgeCotanWeights) {
   }
 }
 
+// Test immediate halfedge cotan computation from length
+TEST_F(HalfedgeGeometrySuite, HalfedgeCotanWeightsImmediate_Length) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& origGeometry = *asset.geometry;
+
+  // Construct edge length geometry
+  origGeometry.requireEdgeLengths();
+  EdgeLengthGeometry geometry(mesh, origGeometry.edgeLengths);
+
+  HalfedgeData<double> halfedgeCotanWeightsImmediate(mesh);
+  for (Halfedge e : mesh.halfedges()) {
+    halfedgeCotanWeightsImmediate[e] = geometry.halfedgeCotanWeight(e);
+  }
+
+  geometry.requireHalfedgeCotanWeights();
+  for (Halfedge e : mesh.halfedges()) {
+    EXPECT_NEAR(geometry.halfedgeCotanWeights[e], halfedgeCotanWeightsImmediate[e], 1e-6);
+  }
+}
+
+// Test immediate halfedge cotan computation from position
+TEST_F(HalfedgeGeometrySuite, HalfedgeCotanWeightsImmediate_Position) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& origGeometry = *asset.geometry;
+
+  // Construct position geometry
+  VertexPositionGeometry& geometry = *asset.geometry;
+
+  HalfedgeData<double> halfedgeCotanWeightsImmediate(mesh);
+  for (Halfedge e : mesh.halfedges()) {
+    halfedgeCotanWeightsImmediate[e] = geometry.halfedgeCotanWeight(e);
+  }
+
+  geometry.requireHalfedgeCotanWeights();
+  for (Halfedge e : mesh.halfedges()) {
+    EXPECT_NEAR(geometry.halfedgeCotanWeights[e], halfedgeCotanWeightsImmediate[e], 1e-6);
+  }
+}
+
+// Ensure overrides for computing halfedge cotan weights give the same result
+TEST_F(HalfedgeGeometrySuite, HalfedgeCotanWeightOverrides) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  VertexPositionGeometry& origGeometry = *asset.geometry;
+
+  // Construct edge length geometry
+  origGeometry.requireEdgeLengths();
+  EdgeLengthGeometry geometry(mesh, origGeometry.edgeLengths);
+
+  geometry.requireHalfedgeCotanWeights();
+  origGeometry.requireHalfedgeCotanWeights();
+  bool allExactSame = true;
+  for (Halfedge he : mesh.halfedges()) {
+    EXPECT_NEAR(geometry.halfedgeCotanWeights[he], origGeometry.halfedgeCotanWeights[he], 1e-6);
+    
+    allExactSame = allExactSame && (geometry.halfedgeCotanWeights[he] == origGeometry.halfedgeCotanWeights[he]);
+  }
+
+  // Ensure that not all of the values are exactly the same to the bit-- this tell us that the type system is behaving nicely and the override version is actually being invoked.
+  EXPECT_FALSE(allExactSame);
+}
+
+
 
 TEST_F(HalfedgeGeometrySuite, EdgeCotanWeights) {
   auto asset = getAsset("lego.ply");
@@ -331,10 +515,15 @@ TEST_F(HalfedgeGeometrySuite, EdgeCotanWeights) {
   }
 }
 
-TEST_F(HalfedgeGeometrySuite, EdgeCotanWeightsImmediate) {
+// Test immediate cotan computation from length
+TEST_F(HalfedgeGeometrySuite, EdgeCotanWeightsImmediate_Length) {
   auto asset = getAsset("lego.ply");
   HalfedgeMesh& mesh = *asset.mesh;
-  IntrinsicGeometryInterface& geometry = *asset.geometry;
+  IntrinsicGeometryInterface& origGeometry = *asset.geometry;
+
+  // Construct edge length geometry
+  origGeometry.requireEdgeLengths();
+  EdgeLengthGeometry geometry(mesh, origGeometry.edgeLengths);
 
   EdgeData<double> edgeCotanWeightsImmediate(mesh);
   for (Edge e : mesh.edges()) {
@@ -346,6 +535,50 @@ TEST_F(HalfedgeGeometrySuite, EdgeCotanWeightsImmediate) {
     EXPECT_NEAR(geometry.edgeCotanWeights[e], edgeCotanWeightsImmediate[e], 1e-6);
   }
 }
+
+// Test immediate cotan computation from position
+TEST_F(HalfedgeGeometrySuite, EdgeCotanWeightsImmediate_Position) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& origGeometry = *asset.geometry;
+
+  // Construct position geometry
+  VertexPositionGeometry& geometry = *asset.geometry;
+
+  EdgeData<double> edgeCotanWeightsImmediate(mesh);
+  for (Edge e : mesh.edges()) {
+    edgeCotanWeightsImmediate[e] = geometry.edgeCotanWeight(e);
+  }
+
+  geometry.requireEdgeCotanWeights();
+  for (Edge e : mesh.edges()) {
+    EXPECT_NEAR(geometry.edgeCotanWeights[e], edgeCotanWeightsImmediate[e], 1e-6);
+  }
+}
+
+// Ensure overrides for computing edge cotan weights give the same result
+TEST_F(HalfedgeGeometrySuite, EdgeCotanWeightOverrides) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  VertexPositionGeometry& origGeometry = *asset.geometry;
+
+  // Construct edge length geometry
+  origGeometry.requireEdgeLengths();
+  EdgeLengthGeometry geometry(mesh, origGeometry.edgeLengths);
+
+  geometry.requireEdgeCotanWeights();
+  origGeometry.requireEdgeCotanWeights();
+  bool allExactSame = true;
+  for (Edge e : mesh.edges()) {
+    EXPECT_NEAR(geometry.edgeCotanWeights[e], origGeometry.edgeCotanWeights[e], 1e-6);
+    
+    allExactSame = allExactSame && (geometry.edgeCotanWeights[e] == origGeometry.edgeCotanWeights[e]);
+  }
+
+  // Ensure that not all of the values are exactly the same to the bit-- this tell us that the type system is behaving nicely and the override version is actually being invoked.
+  EXPECT_FALSE(allExactSame);
+}
+
 
 TEST_F(HalfedgeGeometrySuite, HalfedgeVectorsInFace) {
   auto asset = getAsset("lego.ply");
@@ -510,6 +743,26 @@ TEST_F(HalfedgeGeometrySuite, FaceNormal) {
   }
 }
 
+// Test immediate face normal computation from position
+TEST_F(HalfedgeGeometrySuite, FaceNormalImmediate_Position) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  IntrinsicGeometryInterface& origGeometry = *asset.geometry;
+
+  // Construct position geometry
+  VertexPositionGeometry& geometry = *asset.geometry;
+
+  FaceData<Vector3> faceNormalImmediate(mesh);
+  for (Face f : mesh.faces()) {
+    faceNormalImmediate[f] = geometry.faceNormal(f);
+  }
+
+  geometry.requireFaceNormals();
+  for (Face f : mesh.faces()) {
+    EXPECT_LT(norm(geometry.faceNormals[f] - faceNormalImmediate[f]), 1e-6);
+  }
+}
+
 TEST_F(HalfedgeGeometrySuite, VertexNormal) {
   auto asset = getAsset("lego.ply");
   HalfedgeMesh& mesh = *asset.mesh;
@@ -545,6 +798,7 @@ TEST_F(HalfedgeGeometrySuite, VertexTangentBasis) {
     EXPECT_NEAR(norm(geometry.vertexTangentBasis[v][1]), 1., 1e-6);
   }
 }
+
 
 // ============================================================
 // =============== Geometry tests
@@ -738,7 +992,7 @@ TEST_F(HalfedgeGeometrySuite, VertexTangentOrthonormal) {
 
     geometry.requireVertexNormals();
     geometry.requireVertexTangentBasis();
-    
+
     double tol = 1e-6;
 
     for (Vertex v : mesh.vertices()) {

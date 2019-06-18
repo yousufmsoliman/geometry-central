@@ -26,13 +26,11 @@ public:
 
   // Edge lengths
   EdgeData<double> edgeLengths;
-  virtual double edgeLength(Edge e) const = 0;
   void requireEdgeLengths();
   void unrequireEdgeLengths();
 
   // Face areas
   FaceData<double> faceAreas;
-  virtual double faceArea(Face f) const;
   void requireFaceAreas();
   void unrequireFaceAreas();
 
@@ -43,7 +41,6 @@ public:
 
   // Corner angles
   CornerData<double> cornerAngles;
-  virtual double cornerAngle(Corner c) const;
   void requireCornerAngles();
   void unrequireCornerAngles();
 
@@ -74,7 +71,6 @@ public:
 
   // Edge cotan weight
   EdgeData<double> edgeCotanWeights;
-  virtual double edgeCotanWeight(Edge e) const;
   void requireEdgeCotanWeights();
   void unrequireEdgeCotanWeights();
 

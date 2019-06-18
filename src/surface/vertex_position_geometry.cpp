@@ -29,7 +29,6 @@ std::unique_ptr<VertexPositionGeometry> VertexPositionGeometry::reinterpretTo(Ha
 
 void VertexPositionGeometry::computeVertexPositions() { vertexPositions = inputVertexPositions; }
 
-Vector3 VertexPositionGeometry::vertexPosition(Vertex v) const { return inputVertexPositions[v]; }
 
 } // namespace surface
 } // namespace geometrycentral

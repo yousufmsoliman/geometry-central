@@ -23,13 +23,11 @@ public:
 
   // Vertex positions
   VertexData<Vector3> vertexPositions;
-  virtual Vector3 vertexPosition(Vertex v) const = 0;
   inline void requireVertexPositions();
   inline void unrequireVertexPositions();
   
   // Face normal
   FaceData<Vector3> faceNormals;
-  virtual Vector3 faceNormal(Face f) const;
   void requireFaceNormals();
   void unrequireFaceNormals();
   
@@ -48,9 +46,6 @@ public:
   void requireVertexTangentBasis();
   void unrequireVertexTangentBasis();
   
-  // == Overrides of immediates from base classes
-  virtual double edgeLength(Edge e) const override;
-
 protected:
 
   // == Implmentations of quantities from base classes
@@ -73,6 +68,12 @@ protected:
   
   DependentQuantityD<VertexData<std::array<Vector3,2>>> vertexTangentBasisQ;
   virtual void computeVertexTangentBasis();
+
+  // == Overrides to compute things better using vertex positions
+  virtual void computeFaceAreas() override;
+  virtual void computeCornerAngles() override;
+  virtual void computeHalfedgeCotanWeights() override;
+  virtual void computeEdgeCotanWeights() override;
 };
 
 
