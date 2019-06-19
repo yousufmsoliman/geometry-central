@@ -716,7 +716,7 @@ TEST_F(HalfedgeGeometrySuite, EdgeDihedralAngles) {
 
   geometry.requireEdgeDihedralAngles();
   for (Edge e : mesh.edges()) {
-    EXPECT_TRUE(isfinite(geometry.edgeDihedralAngles[e]));
+    EXPECT_TRUE(std::isfinite(geometry.edgeDihedralAngles[e]));
   }
 }
 
