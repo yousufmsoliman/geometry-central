@@ -31,6 +31,71 @@ for(Face f : mesh->faces()) {
 }
 ```
 
+## Indices
+
+These quantities are defined for the base `BaseGeometryInterface`, and will always be available. They are not actually geometric data, but it is convenient to cache the canonical arrays alongside geometric quantities, as they are often used in concert.
+
+??? func "vertex indices"
+    
+    ##### vertex indices
+
+    A dense 0-based enumeration of vertices. Equivalent to the result of `HalfedgeMesh::getVertexIndices()`.
+
+    - **member:** `VertexData<size_t> BaseGeometryInterface::vertexIndices`
+    - **require:** `void BaseGeometryInterface::requireVertexIndices()`
+
+
+??? func "halfedge indices"
+    
+    ##### halfedge indices
+
+    A dense 0-based enumeration of halfedges. Equivalent to the result of `HalfedgeMesh::getHalfedgeIndices()`.
+
+    - **member:** `HalfedgeData<size_t> BaseGeometryInterface::halfedgeIndices`
+    - **require:** `void BaseGeometryInterface::requireHalfedgeIndices()`
+
+
+??? func "corner indices"
+    
+    ##### corner indices
+
+    A dense 0-based enumeration of corners. Equivalent to the result of `HalfedgeMesh::getCornerIndices()`.
+
+    - **member:** `CornerData<size_t> BaseGeometryInterface::cornerIndices`
+    - **require:** `void BaseGeometryInterface::requireCornerIndices()`
+
+??? func "edge indices"
+    
+    ##### edge indices
+
+    A dense 0-based enumeration of edges. Equivalent to the result of `HalfedgeMesh::getEdgeIndices()`.
+
+    - **member:** `EdgeData<size_t> BaseGeometryInterface::edgeIndices`
+    - **require:** `void BaseGeometryInterface::requireEdgeIndices()`
+
+
+??? func "face indices"
+    
+    ##### face indices
+
+    A dense 0-based enumeration of faces. Equivalent to the result of `HalfedgeMesh::getFaceIndices()`.
+
+    - **member:** `FaceData<size_t> BaseGeometryInterface::faceIndices`
+    - **require:** `void BaseGeometryInterface::requireFaceIndices()`
+
+
+??? func "boundary loop indices"
+    
+    ##### boundary loop indices
+
+    A dense 0-based enumeration of [boundary loops](../../halfedge_mesh/boundaries). Equivalent to the result of `HalfedgeMesh::getBoundaryLoopIndices()`.
+
+    - **member:** `BoundaryLoopData<size_t> BaseGeometryInterface::boundaryLoopIndices`
+    - **require:** `void BaseGeometryInterface::requireBoundaryLoopIndices()`
+
+
+
+
 ## Lengths, areas, and angles
 
 These quantities are defined for any `IntrinsicGeometryInterface`, which is the base class of all other geometry objects---they will always be available on any kind of geometry.
