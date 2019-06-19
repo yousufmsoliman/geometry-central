@@ -121,23 +121,16 @@ These operations do not change the vector on which they are called.
     Also available as `v.norm()`.
 
 
-??? func "`#!cpp Vector2 unit(Vector2 v)`"
+??? func "`#!cpp double norm2(Vector2 v)`"
 
-    Returns normalized copy of the vector.
-
-
-??? func "`#!cpp double norm(Vector2 v)`"
-
-    Returns the magnitude of the vector.
+    Returns the squared magnitude of the vector.
 
     Also available as `v.norm()`.
 
 
-??? func "`#!cpp double norm2(Vector2 v)`"
+??? func "`#!cpp Vector2 unit(Vector2 v)`"
 
-    Returns the magnitude of the vector.
-
-    Also available as `v.norm2()`.
+    Returns normalized copy of the vector.
 
 
 ??? func "`#!cpp double arg(Vector2 v)`"

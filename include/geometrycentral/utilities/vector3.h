@@ -5,8 +5,6 @@
 #include <iostream>
 #include <limits>
 
-#include "glm/vec3.hpp"
-
 namespace geometrycentral {
 
 // Note: this class avoids any constructors so that it is a POD type
@@ -15,8 +13,8 @@ struct Vector3 {
   double x, y, z;
 
 
-  static Vector3 constant(double c) { return Vector3{c, c, c}; }
   static Vector3 zero() { return Vector3{0., 0., 0.}; }
+  static Vector3 constant(double c) { return Vector3{c, c, c}; }
   static Vector3 infinity() {
     const double inf = ::std::numeric_limits<double>::infinity();
     return Vector3{inf, inf, inf};
@@ -48,10 +46,6 @@ struct Vector3 {
   Vector3& removeComponent(const Vector3& unitDir); // removes component in direction D
   Vector3& normalize();
 
-  inline std::array<float, 3> toFloatArray() const {
-    return {{static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)}};
-  }
-
   bool isFinite() const;
   bool isDefined() const;
 };
@@ -69,10 +63,9 @@ double angle(const Vector3& u, const Vector3& v);
 double angleInPlane(const Vector3& u, const Vector3& v, const Vector3& normal);
 double dot(const Vector3& u, const Vector3& v);
 bool isfinite(const Vector3& u); // break camel case rule to match std
+bool isDefined(const Vector3& u); 
 Vector3 componentwiseMin(const Vector3& u, const Vector3& v);
 Vector3 componentwiseMax(const Vector3& u, const Vector3& v);
-
-Vector3 fromGLM(const glm::vec3& v);
 
 
 } // namespace geometrycentral
