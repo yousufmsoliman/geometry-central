@@ -9,7 +9,7 @@ The halfedge mesh structure is designed to simultaneously satisfy two core princ
 
 The solution to these two requirements is a dynamically-resizing, array-based mesh. Like a `std::vector`, elements are stored in contiguous buffers of memory, which are transparently expanded and copied sporadically. Of course, this expansion is largely hidden from the user.
 
-Philosophically, our halfmesh aims to be _as-implicit-as-possible_: whenever we can, we represent connectivity and properties implicitly by indices. Although this strategy runs the risk of being "overly clever" programming, it has proven effective for two reasons. First, anything tracked explicitly and stored an array is a liability if that array is not updated properly---conversely implicit relationships can be abstracted away behind helper functions, and need not be carefully maintained. Second, implicit relationships tend to lead fast implementations out of the box, avoiding performance hacking which runs a huge risk of breaking correctness.
+Philosophically, our halfedge mesh aims to be _as-implicit-as-possible_: whenever we can, we represent connectivity and properties implicitly by indices. Although this strategy runs the risk of being "overly clever" programming, it has proven effective for two reasons. First, anything tracked explicitly and stored an array is a liability if that array is not updated properly---conversely implicit relationships can be abstracted away behind helper functions, and need not be carefully maintained. Second, implicit relationships tend to lead fast implementations out of the box, avoiding performance hacking which runs a huge risk of breaking correctness.
 
 ## Permutation halfedge mesh
 
@@ -65,7 +65,7 @@ class Halfedge {
 In addition to the basic properties of the `twin()` and `next()` maps, the halfedge mesh data structure offers a few useful invariants about its indexing scheme which must be maintained by all operations.
 
   - on a boundary edge, `e.halfedge()` is the interior halfedge
-  - on a boundary vertex, `v.vertex()` is the unique real interior halfedge along the boundary (so traversing in CCW order walks the wedge)
+  - on a boundary vertex, `v.halfedge()` is the unique real interior halfedge along the boundary (so `v.halfedge().twin()` is necessarily exterior, and traversing in CCW order walks the wedge)
 
 
 The `validateConnectivity()` function is extremely useful for checking invariants while developing the data structure.
@@ -78,7 +78,7 @@ The `validateConnectivity()` function is extremely useful for checking invariant
 
 To enable (amortized) $\mathcal{O}(1)$ mutation, the buffers containing mesh data are lazily reallocated like a `std::vector` when needed. As such the actual buffers like `mesh.heNext` might be larger than the current number of elements in the mesh; we separately track the count of real, valid elements to avoid accessing the extra regions of the array. The special index value `INVALID_IND` (which happens to be `std::numeric_limits<size_t>::max()`) is used to fill index values that have no meaning.
 
-A similar issues arises with deletion. When a mesh element is deleted, it would be too expensive to shift the indices of all subsequent elements. Instead, we simply mark the element as deleted, leaving a hole in our index space. Deleted halfedges and their edges are implicitly encoded by `heNext[he] == INVALID_IND`, while deleted edges and vertices are encoded by `vHalfedge[v] == INVALID_IND` and `fHalfedge[f] == INVALID_IND`.
+A similar issue arises with deletion. When a mesh element is deleted, it would be too expensive to shift the indices of all subsequent elements. Instead, we simply mark the element as deleted, leaving a hole in our index space. Deleted halfedges and their edges are implicitly encoded by `heNext[he] == INVALID_IND`, while deleted edges and vertices are encoded by `vHalfedge[v] == INVALID_IND` and `fHalfedge[f] == INVALID_IND`.
 
 Thus at any point in time, some indices may be invalid elements, left from previous deletions, and other array entries might correspond to extra elements allocated during the last resizing, waiting to be used. In all iterators and counts, explicit logic ensures that invalid elements are skipped. Traversal functions do not need any such logic, as it should be impossible to traverse from a valid element to an invalid element. The `HalfedgeMesh::compress()` function is provided to re-index all mesh elements, and ensure a dense packing with no deleted elements.
 

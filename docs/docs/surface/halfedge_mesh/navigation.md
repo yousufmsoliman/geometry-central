@@ -172,12 +172,40 @@ Use these routines to iterate over the neighbors of a mesh element.
     }
     ```
 
+
+### Around a boundary loop
+
+??? func "`#!cpp BoundaryLoop::adjacentVertices()`"
+    Iterate over the vertices adjacent to a boundary loop.
+    ```cpp
+    for(Vertex v : boundaryLoop.adjacentVertices()) {
+      // do science here
+    }
+    ```
+
+??? func "`#!cpp BoundaryLoop::adjacentHalfedges()`"
+    Iterate over the (exterior) halfedges incident on a boundary loop.
+    ```cpp
+    for(Halfedge he : boundaryLoop.adjacentHalfedges()) {
+      // do science here
+    }
+    ```
+
+??? func "`#!cpp BoundaryLoop::adjacentEdges()`"
+    Iterate over the edges on the boundary of a boundary loop.
+    ```cpp
+    for(Edge e : boundaryLoop.adjacentEdges()) {
+      // do science here
+    }
+    ```
+
+
 ## Accessors 
 
 Use these routines to access elements of the mesh by their index.
 
 !!! warning
-    The indexing routines in the section are only valid when the mesh is _compressed_.
+    The indexing routines in the section are only valid when the mesh is [compressed](mutation.md#compressed-mode).
 
 ---
 

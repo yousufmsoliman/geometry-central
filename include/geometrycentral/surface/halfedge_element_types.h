@@ -211,8 +211,8 @@ public:
 
   // Properties
   bool isBoundary() const;
-  size_t degree();
-  size_t faceDegree();
+  size_t degree() const;
+  size_t faceDegree() const;
 
   // Iterators
   NavigationSetBase<VertexAdjacentVertexNavigator> adjacentVertices() const;

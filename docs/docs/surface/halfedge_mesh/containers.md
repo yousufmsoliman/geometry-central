@@ -23,6 +23,7 @@ The mesh data types are all templated on a common base class: `MeshData<E,T>`, w
 
 - `VertexData<T>` data at vertices
 - `HalfedgeData<T>` data at (interior and exterior) halfedges 
+- `CornerData<T>` data at corners
 - `EdgeData<T>` data at edges 
 - `FaceData<T>` data at faces 
 - `BoundaryLoopData<T>` data at boundary loops

@@ -167,6 +167,19 @@ inline Corner Vertex::corner() const        { return halfedge().corner(); }
 
 // Properties
 inline bool Vertex::isBoundary() const { return !halfedge().twin().isInterior(); }
+inline size_t Vertex::degree() const {
+  size_t k = 0;
+  for (Halfedge h : outgoingHalfedges()) { k++; }
+  return k;
+}
+inline size_t Vertex::faceDegree() const {
+  size_t d = degree();
+  if(isBoundary()) {
+    return d - 1;
+  } else {
+    return d;
+  }
+}
 
 // Navigation iterators 
 inline NavigationSetBase<VertexIncomingHalfedgeNavigator> Vertex::incomingHalfedges() const { 

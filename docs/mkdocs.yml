@@ -36,6 +36,7 @@ nav:
   - Surface:
     - Halfedge Mesh: 
       - 'Basics' : 'surface/halfedge_mesh/basics.md'
+      - 'Elements' : 'surface/halfedge_mesh/elements.md'
       - 'Boundaries' : 'surface/halfedge_mesh/boundaries.md'
       - 'Navigation and Iteration' : 'surface/halfedge_mesh/navigation.md'
       - 'Containers' : 'surface/halfedge_mesh/containers.md'
