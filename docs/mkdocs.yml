@@ -56,5 +56,6 @@ nav:
     - 'Utilities' : 'linear_algebra/utilities.md'
     - 'Solvers' : 'linear_algebra/solvers.md'
   - Utilities: 
+    - 'misc' : 'utilities/misc.md'
     - 'Vector Types' : 'utilities/vector_types.md'
 

@@ -24,90 +24,12 @@
 
 namespace geometrycentral {
 
+// === Constants
+
 const size_t INVALID_IND = std::numeric_limits<size_t>::max();
 const double PI = 3.1415926535897932384;
 
-// Lightweight class for holding 3-tuples of unsigned ints
-union uint3 {
-  struct {
-    unsigned int first;
-    unsigned int second;
-    unsigned int third;
-  };
-  unsigned int v[3];
-};
-
-// Complex numbers are useful
-using Complex = ::std::complex<double>;
-const Complex IM_I(0.0, 1.0);
-inline double dot(Complex x, Complex y) { return x.real() * y.real() + x.imag() * y.imag(); }
-
-inline Complex inv(Complex c) { return ::std::conj(c) / ::std::norm(c); }
-inline Complex unit(Complex c) { return c / ::std::abs(c); }
-inline double cross(Complex u, Complex v) { return u.real() * v.imag() - u.imag() * v.real(); }
-
-// Various functions
-template <typename T>
-T clamp(T val, T low, T high);
-Vector3 clamp(Vector3 val, Vector3 low, Vector3 high);
-template <typename T>
-bool approxEqualsAbsolute(T a, T b, double eps = 1e-6);
-double regularizeAngle(double theta); // Map theta in to [0,2pi)
-
-template <typename T>
-T sqr(T x) {
-  return x * x;
-}
-
-// === Inline implementations
-template <typename T>
-inline T clamp(T val, T low, T high) {
-  if (val > high) return high;
-  if (val < low) return low;
-  return val;
-}
-inline Vector3 clamp(Vector3 val, Vector3 low, Vector3 high) {
-  double x = clamp(val.x, low.x, high.x);
-  double y = clamp(val.y, low.y, high.y);
-  double z = clamp(val.z, low.z, high.z);
-  return Vector3{x, y, z};
-}
-
-template <typename T>
-inline bool approxEqualsAbsolute(T a, T b, double eps) {
-  double absA = ::std::abs(a);
-  double absB = ::std::abs(b);
-  double absDiff = ::std::abs(a - b);
-
-  if (a == b) {
-    return true;
-  } else {
-    return absDiff < eps;
-  }
-}
-
-inline double regularizeAngle(double theta) { return theta - 2 * PI * ::std::floor(theta / (2 * PI)); }
-
-// Applies a permutation such that d_new[i] = d_old[p[i]].
-// Permutation should be injection to [0,sourceData.size()). Return vector has length permOldToNew.size().
-template <typename T>
-std::vector<T> applyPermutation(const std::vector<T>& sourceData, const std::vector<size_t>& permOldToNew) {
-  std::vector<T> retVal(permOldToNew.size());
-  for (size_t i = 0; i < permOldToNew.size(); i++) {
-    retVal[i] = sourceData[permOldToNew[i]];
-  }
-  return retVal;
-}
-
-template <typename T>
-std::string typeNameString(T& x) {
-  return std::string(typeid(x).name());
-}
-
-template <typename T>
-std::string typeNameString(T* x) {
-  return std::string(typeid(x).name());
-}
+// === Memory management
 
 template <typename T>
 void safeDelete(T*& x) {
@@ -125,7 +47,61 @@ void safeDeleteArray(T*& x) {
   }
 }
 
-// Random number generation -----------------------------------------
+// === Type names
+
+template <typename T>
+std::string typeNameString(T& x) {
+  return std::string(typeid(x).name());
+}
+
+template <typename T>
+std::string typeNameString(T* x) {
+  return std::string(typeid(x).name());
+}
+
+// === Arithmetic
+
+// Clamp
+template <typename T>
+T clamp(T val, T low, T high);
+Vector3 clamp(Vector3 val, Vector3 low, Vector3 high); // TODO move to vector3
+
+double regularizeAngle(double theta); // Map theta in to [0,2pi)
+
+// Complex numbers are useful
+// TODO delete
+using Complex = ::std::complex<double>;
+const Complex IM_I(0.0, 1.0);
+inline double dot(Complex x, Complex y) { return x.real() * y.real() + x.imag() * y.imag(); }
+
+inline Complex inv(Complex c) { return ::std::conj(c) / ::std::norm(c); }
+inline Complex unit(Complex c) { return c / ::std::abs(c); }
+inline double cross(Complex u, Complex v) { return u.real() * v.imag() - u.imag() * v.real(); }
+
+
+// === Inline implementations
+template <typename T>
+inline T clamp(T val, T low, T high) {
+  if (val > high) return high;
+  if (val < low) return low;
+  return val;
+}
+
+inline double regularizeAngle(double theta) { return theta - 2 * PI * ::std::floor(theta / (2 * PI)); }
+
+// Applies a permutation such that d_new[i] = d_old[p[i]].
+// Permutation should be injection to [0,sourceData.size()). Return vector has length permOldToNew.size().
+template <typename T>
+std::vector<T> applyPermutation(const std::vector<T>& sourceData, const std::vector<size_t>& permOldToNew) {
+  std::vector<T> retVal(permOldToNew.size());
+  for (size_t i = 0; i < permOldToNew.size(); i++) {
+    retVal[i] = sourceData[permOldToNew[i]];
+  }
+  return retVal;
+}
+
+// === Random number generation ===
+
 extern std::random_device util_random_device;
 extern std::mt19937 util_mersenne_twister;
 
@@ -171,18 +147,13 @@ inline std::string to_string(std::vector<T> const& v) {
   return ss.str();
 }
 
-// === Custom error types
-class FunctionalityException : public std::runtime_error {
-public:
-  FunctionalityException(std::string msg) : std::runtime_error("Missing functionaliy: " + msg){};
-};
-
+// Printf to a std::string
+template <typename... Args>
+std::string str_printf(const std::string& format, Args... args) {
+  size_t size = std::snprintf(nullptr, 0, format.c_str(), args...) + 1;
+  std::unique_ptr<char[]> buf(new char[size]);
+  std::snprintf(buf.get(), size, format.c_str(), args...);
+  return std::string(buf.get(), buf.get() + size - 1);
+}
 
 } // namespace geometrycentral
-
-namespace std {
-// NOTE: Technically, the lines below are illegal, because specializing standard
-// library functions is ONLY allowed for user-defined types. That being said, I
-// don't think this will crash any planes.
-inline bool isfinite(const ::std::complex<double> c) { return isfinite(c.real()) && isfinite(c.imag()); }
-} // namespace std
