@@ -2,11 +2,11 @@
 
 #include <cmath>
 #include <complex>
-#include <exception>
 #include <limits>
 #include <random>
 #include <string>
 #include <typeinfo>
+#include <memory>
 
 // Error checking macro. CONDITION should be true if life is good (like in assert(CONDITION))
 #ifdef NGC_SAFTEY_CHECKS

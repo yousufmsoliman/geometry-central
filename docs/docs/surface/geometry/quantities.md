@@ -311,7 +311,7 @@ To represent vectors that sit at mesh faces, we consider a polar coordinate fram
 
 See [vertex tangent basis](#vertex-tangent-basis) to convert these tangent vectors to world coordinates (if your mesh has vertex positions).
 
-![vertex tangent coordinates diagram](../../../media/vertex_tangent_coordinates.svg)
+![vertex tangent coordinates diagram](../../media/vertex_tangent_coordinates.svg)
 
 
 ??? func "halfedge vectors in vertex"
