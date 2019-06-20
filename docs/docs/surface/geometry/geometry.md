@@ -124,6 +124,9 @@ For the full list of the managed quantities that can be computed by these interf
 
     `#!cpp #include "geometrycentral/surface/base_geometry_interface.h"`
 
+    blah?
+
+
 ??? func "Intrinsic Geometry"
 
     #### Intrinsic Geometry
@@ -136,6 +139,7 @@ For the full list of the managed quantities that can be computed by these interf
 
     - `EdgeLengthGeometry`
     - `VertexPositionGeometry` (additionally inherits from the child `EmbeddedGeometryInterface`)
+
 
 ??? func "Extrinsic Geometry"
 
@@ -150,6 +154,7 @@ For the full list of the managed quantities that can be computed by these interf
     - `VertexPositionGeometry` (additionally inherits from the child `EmbeddedGeometryInterface`)
 
     Note that there is not currently any realization which instantiates an `ExtrinsicGeometryInterface` which is not also an `EmbeddedGeometryInterface`, but such a realization might one day exist.
+
 
 ??? func "Embedded Geometry"
 

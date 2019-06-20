@@ -13,6 +13,16 @@ struct Vector2 {
   static Vector2 zero() { return Vector2{0., 0.}; }
   static Vector2 constant(double c) { return Vector2{c, c}; }
   static Vector2 fromAngle(double theta) { return Vector2{std::cos(theta), std::sin(theta)}; }
+  static Vector2 infinity() {
+    const double inf = std::numeric_limits<double>::infinity();
+    return Vector2{inf, inf};
+  }
+
+  static Vector2 undefined() {
+    const double nan = std::numeric_limits<double>::quiet_NaN();
+    return Vector2{nan, nan};
+  }
+
 
   // Access-by-index
   double& operator[](int index) { return (&x)[index]; }
@@ -54,16 +64,6 @@ struct Vector2 {
   double arg() const;
   double norm() const;
   double norm2() const;
-
-  static Vector2 infinity() {
-    const double inf = std::numeric_limits<double>::infinity();
-    return Vector2{inf, inf};
-  }
-
-  static Vector2 undefined() {
-    const double nan = std::numeric_limits<double>::quiet_NaN();
-    return Vector2{nan, nan};
-  }
 
   bool isFinite() const;
   bool isDefined() const;

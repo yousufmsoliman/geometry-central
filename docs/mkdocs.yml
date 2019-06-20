@@ -58,4 +58,7 @@ nav:
   - Utilities: 
     - 'misc' : 'utilities/misc.md'
     - 'Vector Types' : 'utilities/vector_types.md'
+    - 'Miscellaneous' : 'utilities/miscellaneous.md'
+    - 'Vector2' : 'utilities/vector2.md'
+    - 'Vector3' : 'utilities/vector3.md'
 

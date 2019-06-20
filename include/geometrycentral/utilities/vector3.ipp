@@ -96,6 +96,7 @@ inline bool Vector3::isFinite() const { return ::std::isfinite(x) && ::std::isfi
 inline bool isfinite(const Vector3& v) { return v.isFinite(); }
 
 inline bool Vector3::isDefined() const { return (!::std::isnan(x)) && (!::std::isnan(y)) && (!::std::isnan(z)); }
+inline bool isDefined(const Vector3& v) { return v.isDefined(); }
 
 inline Vector3 componentwiseMin(const Vector3& u, const Vector3& v) {
   return Vector3{fmin(u.x, v.x), fmin(u.y, v.y), fmin(u.z, v.z)};
