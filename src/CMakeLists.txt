@@ -54,7 +54,6 @@ target_include_directories(geometry-central PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/
 target_include_directories(geometry-central PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../deps/eigen-git-mirror")
 target_include_directories(geometry-central PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../deps/nanort/include")
 target_include_directories(geometry-central PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../deps/nanoflann/include")
-target_include_directories(geometry-central PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../deps/glm")
 target_include_directories(geometry-central PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../deps/happly")
 if(SUITESPARSE_FOUND)
   target_include_directories(geometry-central PUBLIC "${SUITESPARSE_INCLUDE_DIRS}")
