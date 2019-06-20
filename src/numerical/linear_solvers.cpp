@@ -1,6 +1,7 @@
 #include "geometrycentral/numerical/linear_solvers.h"
 
 #include "geometrycentral/numerical/linear_algebra_utilities.h"
+#include "geometrycentral/utilities/vector2.h"
 
 
 using namespace Eigen;
@@ -11,7 +12,7 @@ namespace geometrycentral {
 
 template class LinearSolver<double>;
 template class LinearSolver<float>;
-template class LinearSolver<Complex>;
+template class LinearSolver<Vector2>;
 
 
 } // namespace geometrycentral

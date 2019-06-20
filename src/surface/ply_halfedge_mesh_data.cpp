@@ -38,7 +38,9 @@ PlyHalfedgeMeshData::loadMeshAndData(std::string filename, bool verbose) {
   return std::make_tuple(std::move(mesh), std::move(data));
 }
 
-void PlyHalfedgeMeshData::addGeometry(const Geometry<Euclidean>& geometry) {
+void PlyHalfedgeMeshData::addGeometry(EmbeddedGeometryInterface& geometry) {
+
+  geometry.requireVertexPositions();
 
   // separate x/y/z coordinates
   VertexData<double> x = getVertexProperty<double>("x");
@@ -46,7 +48,7 @@ void PlyHalfedgeMeshData::addGeometry(const Geometry<Euclidean>& geometry) {
   VertexData<double> z = getVertexProperty<double>("z");
 
   for (Vertex v : mesh.vertices()) {
-    Vector3 p = geometry[v];
+    Vector3 p = geometry.vertexPositions[v];
     x[v] = p.x;
     y[v] = p.y;
     z[v] = p.z;
@@ -58,20 +60,20 @@ void PlyHalfedgeMeshData::addGeometry(const Geometry<Euclidean>& geometry) {
 }
 
 
-std::unique_ptr<Geometry<Euclidean>> PlyHalfedgeMeshData::getGeometry() {
-
-  // Get the vertex positions as a float or double
-  std::unique_ptr<Geometry<Euclidean>> geom(new Geometry<Euclidean>(mesh));
+std::unique_ptr<VertexPositionGeometry> PlyHalfedgeMeshData::getGeometry() {
 
   // Get x/y/z coordinates
   VertexData<double> x = getVertexProperty<double>("x");
   VertexData<double> y = getVertexProperty<double>("y");
   VertexData<double> z = getVertexProperty<double>("z");
 
+  VertexData<Vector3> positions(mesh);
   for (Vertex v : mesh.vertices()) {
-    (*geom)[v] = Vector3{x[v], y[v], z[v]};
+    positions[v] = Vector3{x[v], y[v], z[v]};
   }
 
+  // Return a new geometry object
+  std::unique_ptr<VertexPositionGeometry> geom(new VertexPositionGeometry(mesh, positions));
   return geom;
 }
 

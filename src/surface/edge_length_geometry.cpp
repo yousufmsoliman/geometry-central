@@ -1,7 +1,5 @@
 #include "geometrycentral/surface/edge_length_geometry.h"
 
-#include "geometrycentral/surface/discrete_operators.h"
-
 #include <fstream>
 #include <limits>
 

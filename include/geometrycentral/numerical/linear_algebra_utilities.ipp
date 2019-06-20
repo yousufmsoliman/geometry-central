@@ -21,7 +21,7 @@ void shiftDiagonal(Eigen::SparseMatrix<T>& m, T shiftAmount) {
 }
 
 
-inline Eigen::SparseMatrix<double> complexToReal(const Eigen::SparseMatrix<Complex>& m) {
+inline Eigen::SparseMatrix<double> complexToReal(const Eigen::SparseMatrix<std::complex<double>>& m) {
 
   size_t nRow = m.rows();
   size_t nCol = m.cols();
@@ -30,17 +30,17 @@ inline Eigen::SparseMatrix<double> complexToReal(const Eigen::SparseMatrix<Compl
   std::vector<Eigen::Triplet<double>> triplets;
 
   for (int k = 0; k < m.outerSize(); ++k) {
-    for (typename Eigen::SparseMatrix<Complex>::InnerIterator it(m, k); it; ++it) {
+    for (typename Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(m, k); it; ++it) {
 
 
-      Complex val = it.value();
+      std::complex<double> val = it.value();
       size_t iRow = it.row();
       size_t iCol = it.col();
 
-      triplets.emplace_back(2 * iRow + 0, 2 * iCol + 0, val.real());
-      triplets.emplace_back(2 * iRow + 0, 2 * iCol + 1, -val.imag());
-      triplets.emplace_back(2 * iRow + 1, 2 * iCol + 0, val.imag());
-      triplets.emplace_back(2 * iRow + 1, 2 * iCol + 1, val.real());
+      triplets.emplace_back(2 * iRow + 0, 2 * iCol + 0, val.x);
+      triplets.emplace_back(2 * iRow + 0, 2 * iCol + 1, -val.y);
+      triplets.emplace_back(2 * iRow + 1, 2 * iCol + 0, val.y);
+      triplets.emplace_back(2 * iRow + 1, 2 * iCol + 1, val.x);
     }
   }
 
@@ -55,9 +55,7 @@ template <typename T>
 inline void checkFinite(const Eigen::SparseMatrix<T>& m) {
   for (int k = 0; k < m.outerSize(); ++k) {
     for (typename Eigen::SparseMatrix<T>::InnerIterator it(m, k); it; ++it) {
-      // std::cout << "checking "
-      //<< " [" << it.row() << "," << it.col() << "] = " << it.value() << std::endl;
-      if (!std::isfinite(it.value())) {
+      if (!isfinite(it.value())) {
         std::cerr << std::endl
                   << "Uh oh. Non-finite matrix entry [" << it.row() << "," << it.col() << "] = " << it.value()
                   << std::endl
@@ -75,7 +73,7 @@ template <typename T, int R, int C>
 inline void checkFinite(const Eigen::Matrix<T, R, C>& m) {
   for (unsigned int i = 0; i < m.rows(); i++) {
     for (unsigned int j = 0; j < m.cols(); j++) {
-      if (!std::isfinite(m(i, j))) {
+      if (!isfinite(m(i, j))) {
         std::cerr << std::endl
                   << "Uh oh. Non-finite vector entry [" << i << "," << j << "] = " << m(i, j) << std::endl
                   << std::endl;
@@ -101,8 +99,9 @@ inline void checkFinite(const Eigen::Matrix<T, 1, C>& m) {
 // Specialization of checkFinite(Matrix m) for column vectors
 template <typename T, int R>
 inline void checkFinite(const Eigen::Matrix<T, R, 1>& m) {
+
   for (unsigned int i = 0; i < m.rows(); i++) {
-    if (!std::isfinite(m(i))) {
+    if (!isfinite(m(i))) {
       std::cerr << std::endl
                 << "Uh oh. Non-finite column vector entry [" << i << "] = " << m(i) << std::endl
                 << std::endl;
@@ -133,7 +132,7 @@ inline void checkHermitian(const Eigen::SparseMatrix<T>& m) {
       T thisVal = it.value();
       T otherVal = m.coeff(it.col(), it.row());
 
-      if (!approxEqualsAbsolute(thisVal, otherVal, eps)) {
+      if (std::abs(thisVal - otherVal) > eps) {
         std::cerr << std::endl
                   << "Uh oh. Non-symmtric matrix entry at [" << it.row() << "," << it.col() << "]." << std::endl
                   << "    [" << it.row() << "," << it.col() << "] = " << thisVal << std::endl
@@ -169,7 +168,7 @@ inline void checkHermitian(const Eigen::SparseMatrix<std::complex<double>>& m) {
       std::complex<double> thisVal = it.value();
       std::complex<double> otherVal = m.coeff(it.col(), it.row());
 
-      if (!approxEqualsAbsolute(thisVal, std::conj(otherVal), eps)) {
+      if (std::abs(thisVal - std::conj(otherVal)) > eps) {
         std::cerr << std::endl
                   << "Uh oh. Non-symmtric matrix entry at [" << it.row() << "," << it.col() << "]." << std::endl
                   << "    [" << it.row() << "," << it.col() << "] = " << thisVal << std::endl

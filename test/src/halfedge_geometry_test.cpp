@@ -31,6 +31,11 @@ class HalfedgeGeometrySuite : public MeshAssetSuite {};
 
 TEST_F(HalfedgeGeometrySuite, Refresh) {
   // TODO
+  //
+
+  // Hijacking
+  EXPECT_TRUE(std::is_pod<Vector2>::value);
+  EXPECT_TRUE(std::is_pod<Vector3>::value);
 }
 
 TEST_F(HalfedgeGeometrySuite, Purge) {
@@ -1015,5 +1020,17 @@ TEST_F(HalfedgeGeometrySuite, VertexTangentOrthonormal) {
       Vector3 crossV = cross(basisX, basisY);
       EXPECT_NEAR(norm(normal - crossV), 0., tol);
     }
+  }
+}
+
+// Ensure that a convex shape has all-positive diheral angles
+TEST_F(HalfedgeGeometrySuite, ConvexDiheralAngles) {
+  auto asset = getAsset("tet.obj");
+  HalfedgeMesh& mesh = *asset.mesh;
+  ExtrinsicGeometryInterface& geometry = *asset.geometry;
+
+  geometry.requireEdgeDihedralAngles();
+  for (Edge e : mesh.edges()) {
+    EXPECT_GT(geometry.edgeDihedralAngles[e], 0.);
   }
 }

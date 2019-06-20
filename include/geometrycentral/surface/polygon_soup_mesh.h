@@ -6,7 +6,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include "geometrycentral/surface/geometry.h"
 #include "geometrycentral/utilities/vector3.h"
 #include <geometrycentral/utilities/utilities.h>
 

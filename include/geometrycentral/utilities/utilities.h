@@ -64,16 +64,8 @@ T clamp(T val, T low, T high);
 
 double regularizeAngle(double theta); // Map theta in to [0,2pi)
 
-// Complex numbers are useful
-// TODO delete
-using Complex = ::std::complex<double>;
-const Complex IM_I(0.0, 1.0);
-inline double dot(Complex x, Complex y) { return x.real() * y.real() + x.imag() * y.imag(); }
-
-inline Complex inv(Complex c) { return ::std::conj(c) / ::std::norm(c); }
-inline Complex unit(Complex c) { return c / ::std::abs(c); }
-inline double cross(Complex u, Complex v) { return u.real() * v.imag() - u.imag() * v.real(); }
-
+// Missing isfinite function
+inline bool isfinite(const std::complex<double>& c) { return std::isfinite(c.real()) && std::isfinite(c.imag()); }
 
 // === Inline implementations
 template <typename T>

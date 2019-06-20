@@ -21,6 +21,7 @@ EmbeddedGeometryInterface::EmbeddedGeometryInterface(HalfedgeMesh& mesh_) :
   {}
 // clang-format on
 
+// === Overrides
 
 // Edge lengths
 void EmbeddedGeometryInterface::computeEdgeLengths() {
@@ -45,11 +46,14 @@ void EmbeddedGeometryInterface::computeEdgeDihedralAngles() {
     Vector3 N2 = faceNormals[e.halfedge().twin().face()];
     Vector3 pTail = vertexPositions[e.halfedge().vertex()];
     Vector3 pTip = vertexPositions[e.halfedge().twin().vertex()];
-    Vector3 edgeDir = unit(-pTip + pTail);
+    Vector3 edgeDir = unit(pTip - pTail);
 
     edgeDihedralAngles[e] = atan2(dot(edgeDir, cross(N1, N2)), dot(N1, N2));
   }
 }
+
+// === Quantities
+
 void EmbeddedGeometryInterface::requireVertexPositions() { vertexPositionsQ.require(); }
 void EmbeddedGeometryInterface::unrequireVertexPositions() { vertexPositionsQ.unrequire(); }
 

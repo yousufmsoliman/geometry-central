@@ -7,6 +7,7 @@
 #include <Eigen/Sparse>
 
 #include <iostream>
+#include <complex>
 
 // === Various helper functions and sanity checks which are useful for linear algebra code
 
@@ -28,7 +29,7 @@ Eigen::SparseMatrix<T> identityMatrix(size_t N);
 template <typename T>
 void shiftDiagonal(Eigen::SparseMatrix<T>& m, T shiftAmount = 1e-4);
 
-Eigen::SparseMatrix<double> complexToReal(const Eigen::SparseMatrix<Complex>& m);
+Eigen::SparseMatrix<double> complexToReal(const Eigen::SparseMatrix<std::complex<double>>& m);
 
 // ==== Sanity checks
 

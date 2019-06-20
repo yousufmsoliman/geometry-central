@@ -1,7 +1,5 @@
 #include "geometrycentral/surface/vertex_position_geometry.h"
 
-#include "geometrycentral/surface/discrete_operators.h"
-
 #include <fstream>
 #include <limits>
 
@@ -9,11 +7,12 @@ namespace geometrycentral {
 namespace surface {
 
 VertexPositionGeometry::VertexPositionGeometry(HalfedgeMesh& mesh_)
-    : EmbeddedGeometryInterface(mesh_), inputVertexPositions(mesh_, Vector3{
-                                                                        0.,
-                                                                        0.,
-                                                                        0,
-                                                                    }) {}
+    // clang-format off
+// formatter is having an outburst here...
+    : EmbeddedGeometryInterface(mesh_), inputVertexPositions(mesh_, Vector3{ 0., 0., 0, })
+// clang-format on
+
+{}
 
 VertexPositionGeometry::VertexPositionGeometry(HalfedgeMesh& mesh_, VertexData<Vector3>& inputVertexPositions_)
     : EmbeddedGeometryInterface(mesh_), inputVertexPositions(inputVertexPositions_) {}

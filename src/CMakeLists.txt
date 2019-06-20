@@ -20,10 +20,7 @@ SET(SRCS
   surface/embedded_geometry_interface.cpp
   surface/edge_length_geometry.cpp
   surface/vertex_position_geometry.cpp
-  surface/geometry.cpp
-  #surface/geometry_cache.cpp 
   #surface/mesh_graph_algorithms.cpp
-  #surface/discrete_operators.cpp
   #surface/detect_symmetry.cpp
   #surface/mesh_ray_tracer.cpp
   #surface/direction_fields.cpp
@@ -37,7 +34,6 @@ SET(SRCS
   #numerical/square_solvers.cpp
   #numerical/positive_definite_solvers.cpp
 
-  utilities/unit_vector3.cpp
   utilities/utilities.cpp
   utilities/quaternion.cpp
   utilities/disjoint_sets.cpp

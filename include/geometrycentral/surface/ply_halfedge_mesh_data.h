@@ -1,6 +1,7 @@
 #pragma once
 
-#include "geometrycentral/surface/geometry.h"
+#include "geometrycentral/surface/halfedge_mesh.h"
+#include "geometrycentral/surface/vertex_position_geometry.h"
 
 #include "happly.h"
 
@@ -78,7 +79,7 @@ public:
   // = Convenience getters
 
   // Creates vertex posititions from a geometry object with the file
-  std::unique_ptr<Geometry<Euclidean>> getGeometry();
+  std::unique_ptr<VertexPositionGeometry> getGeometry();
 
   // Looks for vertex colors, either as a uchar or a float
   VertexData<Vector3> getVertexColors();
@@ -112,7 +113,7 @@ public:
   // = Convenience setters
 
   // Registers vertex posititions from a geometry object with the file
-  void addGeometry(const Geometry<Euclidean>& geometry);
+  void addGeometry(EmbeddedGeometryInterface& geometry);
 
 
 private:

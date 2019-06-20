@@ -23,8 +23,8 @@ public:
 
   // Vertex positions
   VertexData<Vector3> vertexPositions;
-  inline void requireVertexPositions();
-  inline void unrequireVertexPositions();
+  void requireVertexPositions();
+  void unrequireVertexPositions();
   
   // Face normal
   FaceData<Vector3> faceNormals;

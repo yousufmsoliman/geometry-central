@@ -3,6 +3,9 @@
 
 #include "geometrycentral/utilities/utilities.h"
 
+#include <iostream>
+#include <complex>
+
 using std::cout;
 using std::endl;
 
@@ -111,7 +114,7 @@ cholmod_sparse* toCholmod(Eigen::SparseMatrix<float, Eigen::ColMajor>& A, Cholmo
 
 // Complex-valued sparse matrices
 template <>
-cholmod_sparse* toCholmod(Eigen::SparseMatrix<Complex, Eigen::ColMajor>& A, CholmodContext& context, SType stype) {
+cholmod_sparse* toCholmod(Eigen::SparseMatrix<std::complex<double>, Eigen::ColMajor>& A, CholmodContext& context, SType stype) {
 
   A.makeCompressed();
 
@@ -124,7 +127,7 @@ cholmod_sparse* toCholmod(Eigen::SparseMatrix<Complex, Eigen::ColMajor>& A, Chol
       cholmod_l_allocate_sparse(Nrows, Ncols, Nentries, true, true, flagForStype(stype), CHOLMOD_COMPLEX, context);
 
   // Pull out useful pointers
-  Complex* values = (Complex*)cMat->x;
+  std::complex<double>* values = (std::complex<double>*)cMat->x;
   SuiteSparse_long* rowIndices = (SuiteSparse_long*)cMat->i;
   SuiteSparse_long* colStart = (SuiteSparse_long*)cMat->p;
 
@@ -173,12 +176,12 @@ cholmod_dense* toCholmod(const Eigen::Matrix<float, Eigen::Dynamic, 1>& v, Cholm
 
 // Complex-valued vector
 template <>
-cholmod_dense* toCholmod(const Eigen::Matrix<Complex, Eigen::Dynamic, 1>& v, CholmodContext& context) {
+cholmod_dense* toCholmod(const Eigen::Matrix<std::complex<double>, Eigen::Dynamic, 1>& v, CholmodContext& context) {
 
   size_t N = v.rows();
 
   cholmod_dense* cVec = cholmod_l_allocate_dense(N, 1, N, CHOLMOD_COMPLEX, context);
-  Complex* cVecC = (Complex*)cVec->x;
+  std::complex<double>* cVecC = (std::complex<double>*)cVec->x;
   for (size_t i = 0; i < N; i++) {
     cVecC[i] = v(i);
   }
@@ -208,7 +211,7 @@ void toEigen(cholmod_dense* cVec, CholmodContext& context, Eigen::Matrix<T, Eige
 }
 template void toEigen(cholmod_dense* cVec, CholmodContext& context, Eigen::Matrix<double, Eigen::Dynamic, 1>& xOut);
 template void toEigen(cholmod_dense* cVec, CholmodContext& context, Eigen::Matrix<float, Eigen::Dynamic, 1>& xOut);
-template void toEigen(cholmod_dense* cVec, CholmodContext& context, Eigen::Matrix<Complex, Eigen::Dynamic, 1>& xOut);
+template void toEigen(cholmod_dense* cVec, CholmodContext& context, Eigen::Matrix<std::complex<double>, Eigen::Dynamic, 1>& xOut);
 
 } // namespace geometrycentral
 #endif

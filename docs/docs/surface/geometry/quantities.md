@@ -452,7 +452,7 @@ These quantities depend on extrinsic angles, but are still rotation-invariant, a
 
     ##### edge dihedral angle 
 
-    The dihedral angle at an edge, in radians. Defined to be $\pi$ if the edge is flat, $ < \pi$ at a convex edge, and $ > \pi$ at a nonconvex edge.
+    The dihedral angle at an edge, in radians. Defined to be the signed angle between the incident triangle normals: $0$ if the edge is flat, positive at a convex edge, and negative at a nonconvex edge.
 
     Only valid on triangular meshes.
 

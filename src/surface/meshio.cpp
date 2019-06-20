@@ -1,13 +1,14 @@
-#include <iostream>
-#include <limits>
+#include "geometrycentral/surface/meshio.h"
 
-#include "geometrycentral/surface/geometry.h"
 #include "geometrycentral/surface/halfedge_containers.h"
 #include "geometrycentral/surface/halfedge_factories.h"
-#include "geometrycentral/surface/meshio.h"
+#include "geometrycentral/surface/halfedge_mesh.h"
 #include "geometrycentral/surface/polygon_soup_mesh.h"
 
 #include "happly.h"
+
+#include <iostream>
+#include <limits>
 
 using std::cout;
 using std::endl;
@@ -20,7 +21,7 @@ namespace surface {
 // Mesh loader helpers
 namespace {
 std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<VertexPositionGeometry>> loadMesh_PLY(std::string filename,
-                                                                                      bool verbose) {
+                                                                                                bool verbose) {
 
   happly::PLYData plyData(filename);
 
@@ -41,14 +42,14 @@ std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<VertexPositionGeometry
 }
 
 std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<VertexPositionGeometry>> loadMesh_OBJ(std::string filename,
-                                                                                      bool verbose) {
+                                                                                                bool verbose) {
   PolygonSoupMesh soup(filename);
   return makeHalfedgeAndGeometry(soup.polygons, soup.vertexCoordinates, verbose);
 }
 } // namespace
 
-std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<VertexPositionGeometry>> loadMesh(std::string filename, bool verbose,
-                                                                                  std::string type) {
+std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<VertexPositionGeometry>>
+loadMesh(std::string filename, bool verbose, std::string type) {
 
   // Check if file exists
   std::ifstream testStream(filename);
