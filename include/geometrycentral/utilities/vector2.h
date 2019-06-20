@@ -86,6 +86,7 @@ double cross(const Vector2& u, const Vector2& v);
 Vector3 cross3(const Vector2& u, const Vector2& v); // assumes arguments are in x-y plane
 
 Vector2 unit(const Vector2& v);
+Vector2 clamp(const Vector2& val, const Vector2& low, const Vector2& high);
 
 bool isfinite(const Vector2& u); // break camel case rule to match std
 bool isDefined(const Vector2& u);

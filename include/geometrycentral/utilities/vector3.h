@@ -1,5 +1,7 @@
 #pragma once
 
+#include "geometrycentral/utilities/utilities.h"
+
 #include <array>
 #include <cmath>
 #include <iostream>
@@ -63,7 +65,8 @@ double angle(const Vector3& u, const Vector3& v);
 double angleInPlane(const Vector3& u, const Vector3& v, const Vector3& normal);
 double dot(const Vector3& u, const Vector3& v);
 bool isfinite(const Vector3& u); // break camel case rule to match std
-bool isDefined(const Vector3& u); 
+bool isDefined(const Vector3& u);
+Vector3 clamp(const Vector3& val, const Vector3& low, const Vector3& high);
 Vector3 componentwiseMin(const Vector3& u, const Vector3& v);
 Vector3 componentwiseMax(const Vector3& u, const Vector3& v);
 

@@ -38,7 +38,7 @@ Factory methods can construct a few common values:
 
 The three elements of the vector can be accessed as `vec.x` and `vec.y` and `vec.z`.
 
-Alternately, the two elements can be indexed as `vec[0]` and `vec[1]` and `vec[2]`.
+Alternately, the elements can be indexed as `vec[0]` and `vec[1]` and `vec[2]`.
 
 
 ### Conversion
@@ -120,6 +120,10 @@ These operations do not change the vector on which they are called.
 
     Returns the signed angle between two not-necessarily-unit vectors, measured in the plane defined by `normal` (which need not be a unit vector). Output is in the range $[-\pi, \pi]$, as in `atan2`.
 
+
+??? func "`#!cpp Vector3 clamp(Vector3 val, Vector3 low, Vector3 high)`"
+
+    Returns returns a a vector where each component has been clamped to be between the corresponding compnents of `low` and `high`.
 
 ??? func "`#!cpp Vector3 componentwiseMin(Vector3 u, Vector3 v)`"
 

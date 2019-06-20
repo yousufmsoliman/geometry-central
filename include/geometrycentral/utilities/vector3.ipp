@@ -1,8 +1,3 @@
-#include <geometrycentral/utilities/utilities.h>
-
-#include <cmath>
-#include <iostream>
-
 namespace geometrycentral {
 
 inline Vector3& Vector3::normalize() {
@@ -97,6 +92,14 @@ inline bool isfinite(const Vector3& v) { return v.isFinite(); }
 
 inline bool Vector3::isDefined() const { return (!::std::isnan(x)) && (!::std::isnan(y)) && (!::std::isnan(z)); }
 inline bool isDefined(const Vector3& v) { return v.isDefined(); }
+
+inline Vector3 clamp(const Vector3& val, const Vector3& low, const Vector3& high) {
+  Vector3 rVal;
+  for (int i = 0; i < 3; i++) {
+    rVal[i] = clamp(val[i], low[i], high[i]);
+  }
+  return rVal;
+}
 
 inline Vector3 componentwiseMin(const Vector3& u, const Vector3& v) {
   return Vector3{fmin(u.x, v.x), fmin(u.y, v.y), fmin(u.z, v.z)};

@@ -47,7 +47,7 @@ A vertex is a 0-dimensional point which serves as a node in the mesh.
     If the vertex is a boundary vertex, then it is guaranteed that the returned halfedge will be the unique interior halfedge along the boundary. That is the unique halfedge such that `vertex.halfedge().twin().isInterior() == false`.
 
 
-??? func "`#!cpp Corner Vertex::Corner()`"
+??? func "`#!cpp Corner Vertex::corner()`"
 
     Returns one of the corners incident on the vertex.
 
@@ -133,7 +133,7 @@ An _edge_ is a 1-dimensional element that connects two vertices in the mesh.
 
 **Traversal:**
 
-??? func "`#!cpp Halfedge Edge::Halfedge()`"
+??? func "`#!cpp Halfedge Edge::halfedge()`"
 
     Returns one of the two halfedges incident on this edge. If the edge is a boundary edge, it is guaranteed that the returned edge will be the interior one.
     
@@ -154,7 +154,7 @@ A _face_ is a 2-dimensional element formed by a loop of 3 or more edges. In gene
 
 **Traversal:**
 
-??? func "`#!cpp Halfedge Face::Halfedge()`"
+??? func "`#!cpp Halfedge Face::halfedge()`"
 
     Returns any one of the halfedges inside of this face.
 

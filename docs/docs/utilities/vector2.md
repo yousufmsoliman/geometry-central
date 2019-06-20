@@ -1,6 +1,6 @@
 `geometrycentral::Vector2` is the basic 2D vector type in geometry central. Like a good turkey sandwich, it aims to be unsurprising yet satisfying.
 
-Of particular interest, `Vector2` is used to encode 2D rotations, by supporting multiplication as a complex number. See [rotation](#rotations-and-complex-multiplication).
+Of particular interest, `Vector2` is also used to encode 2D rotations, by supporting multiplication as a complex number. See the [rotations section](#rotations-and-complex-multiplication).
 
 `#!cpp #include "geometrycentral/vector2.h"`
 
@@ -158,6 +158,10 @@ These operations do not change the vector on which they are called.
 ??? func "`#!cpp double angle(Vector2 u, Vector2 v)`"
 
     Returns the angle between two not-necessarily-unit vectors. Output in the range $[0, \pi]$.
+
+??? func "`#!cpp Vector2 clamp(Vector2 val, Vector2 low, Vector2 high)`"
+
+    Returns returns a a vector where each component has been clamped to be between the corresponding compnents of `low` and `high`.
 
 
 ??? func "`#!cpp Vector2 componentwiseMin(Vector2 u, Vector2 v)`"

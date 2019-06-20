@@ -8,9 +8,6 @@
 #include <string>
 #include <typeinfo>
 
-#include "geometrycentral/utilities/vector2.h"
-#include "geometrycentral/utilities/vector3.h"
-
 // Error checking macro. CONDITION should be true if life is good (like in assert(CONDITION))
 #ifdef NGC_SAFTEY_CHECKS
 #define GC_SAFETY_ASSERT(CONDITION, MSG)
@@ -64,7 +61,6 @@ std::string typeNameString(T* x) {
 // Clamp
 template <typename T>
 T clamp(T val, T low, T high);
-Vector3 clamp(Vector3 val, Vector3 low, Vector3 high); // TODO move to vector3
 
 double regularizeAngle(double theta); // Map theta in to [0,2pi)
 
