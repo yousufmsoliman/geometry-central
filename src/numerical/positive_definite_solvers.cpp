@@ -79,10 +79,10 @@ void PositiveDefiniteSolver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
   size_t N = this->mat.rows();
 
   // Check some sanity
-#ifndef GC_NLINALG_DEBUG
   if ((size_t)rhs.rows() != N) {
     throw std::logic_error("Vector is not the right length");
   }
+#ifndef GC_NLINALG_DEBUG
   checkFinite(rhs);
 #endif
 
@@ -124,7 +124,7 @@ void PositiveDefiniteSolver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
 }
 
 template <typename T>
-Vector<T> solvePositiveDefinite(const Eigen::SparseMatrix<T>& A, const Vector<T>& rhs) {
+Vector<T> solvePositiveDefinite(const SparseMatrix<T>& A, const Vector<T>& rhs) {
   PositiveDefiniteSolver<T> s(A);
   return s.solve(rhs);
 }
@@ -133,12 +133,13 @@ Vector<T> solvePositiveDefinite(const Eigen::SparseMatrix<T>& A, const Vector<T>
 // Explicit instantiations
 template class PositiveDefiniteSolver<double>;
 template class PositiveDefiniteSolver<float>;
-template class PositiveDefiniteSolver<Complex>;
+template class PositiveDefiniteSolver<std::complex<double>>;
 
-template Vector<float> solvePositiveDefinite<float>(const Eigen::SparseMatrix<float>& A, const Vector<float>& rhs);
-template Vector<double> solvePositiveDefinite<double>(const Eigen::SparseMatrix<double>& A, const Vector<double>& rhs);
-template Vector<Complex> solvePositiveDefinite<Complex>(const Eigen::SparseMatrix<Complex>& A,
-                                                        const Vector<Complex>& rhs);
+template Vector<float> solvePositiveDefinite<float>(const SparseMatrix<float>& A, const Vector<float>& rhs);
+template Vector<double> solvePositiveDefinite<double>(const SparseMatrix<double>& A, const Vector<double>& rhs);
+template Vector<std::complex<double>>
+solvePositiveDefinite<std::complex<double>>(const SparseMatrix<std::complex<double>>& A,
+                                            const Vector<std::complex<double>>& rhs);
 
 
 } // namespace geometrycentral

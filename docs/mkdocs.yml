@@ -32,6 +32,7 @@ nav:
   - Home: 'index.md'
   - Build: 
     - 'Building' : 'build/build.md'
+    - 'Dependencies' : 'build/dependencies.md'
     - 'Tests' : 'build/tests.md'
   - Surface:
     - Halfedge Mesh: 

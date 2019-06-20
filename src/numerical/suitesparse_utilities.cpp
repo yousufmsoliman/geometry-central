@@ -3,8 +3,8 @@
 
 #include "geometrycentral/utilities/utilities.h"
 
-#include <iostream>
 #include <complex>
+#include <iostream>
 
 using std::cout;
 using std::endl;
@@ -49,7 +49,7 @@ int flagForStype(SType s) {
 
 // double-valued sparse matrices
 template <>
-cholmod_sparse* toCholmod(Eigen::SparseMatrix<double, Eigen::ColMajor>& A, CholmodContext& context, SType stype) {
+cholmod_sparse* toCholmod(SparseMatrix<double, Eigen::ColMajor>& A, CholmodContext& context, SType stype) {
 
   A.makeCompressed();
 
@@ -82,7 +82,7 @@ cholmod_sparse* toCholmod(Eigen::SparseMatrix<double, Eigen::ColMajor>& A, Cholm
 // float-valued sparse matrices
 // CHOLMOD only uses CHOLMOD_REAL precision, so you always get one of those back regardless of float/double input)
 template <>
-cholmod_sparse* toCholmod(Eigen::SparseMatrix<float, Eigen::ColMajor>& A, CholmodContext& context, SType stype) {
+cholmod_sparse* toCholmod(SparseMatrix<float, Eigen::ColMajor>& A, CholmodContext& context, SType stype) {
 
   A.makeCompressed();
 
@@ -114,7 +114,8 @@ cholmod_sparse* toCholmod(Eigen::SparseMatrix<float, Eigen::ColMajor>& A, Cholmo
 
 // Complex-valued sparse matrices
 template <>
-cholmod_sparse* toCholmod(Eigen::SparseMatrix<std::complex<double>, Eigen::ColMajor>& A, CholmodContext& context, SType stype) {
+cholmod_sparse* toCholmod(SparseMatrix<std::complex<double>, Eigen::ColMajor>& A, CholmodContext& context,
+                          SType stype) {
 
   A.makeCompressed();
 
@@ -211,7 +212,8 @@ void toEigen(cholmod_dense* cVec, CholmodContext& context, Eigen::Matrix<T, Eige
 }
 template void toEigen(cholmod_dense* cVec, CholmodContext& context, Eigen::Matrix<double, Eigen::Dynamic, 1>& xOut);
 template void toEigen(cholmod_dense* cVec, CholmodContext& context, Eigen::Matrix<float, Eigen::Dynamic, 1>& xOut);
-template void toEigen(cholmod_dense* cVec, CholmodContext& context, Eigen::Matrix<std::complex<double>, Eigen::Dynamic, 1>& xOut);
+template void toEigen(cholmod_dense* cVec, CholmodContext& context,
+                      Eigen::Matrix<std::complex<double>, Eigen::Dynamic, 1>& xOut);
 
 } // namespace geometrycentral
 #endif

@@ -27,12 +27,13 @@ SET(SRCS
   #surface/exact_polyhedral_geodesics.cpp
   #surface/fast_marching_method.cpp
 
-  #numerical/suitesparse_utilities.cpp
-  #numerical/linear_solvers.cpp
-  #numerical/eigenproblem_solvers.cpp
-  #numerical/qr_solvers.cpp
-  #numerical/square_solvers.cpp
-  #numerical/positive_definite_solvers.cpp
+  numerical/linear_algebra_utilities.cpp
+  numerical/suitesparse_utilities.cpp
+  numerical/linear_solvers.cpp
+  numerical/eigenproblem_solvers.cpp
+  numerical/qr_solvers.cpp
+  numerical/square_solvers.cpp
+  numerical/positive_definite_solvers.cpp
 
   utilities/utilities.cpp
   utilities/quaternion.cpp

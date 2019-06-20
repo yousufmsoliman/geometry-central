@@ -13,6 +13,7 @@ struct Vector2 {
   static Vector2 zero() { return Vector2{0., 0.}; }
   static Vector2 constant(double c) { return Vector2{c, c}; }
   static Vector2 fromAngle(double theta) { return Vector2{std::cos(theta), std::sin(theta)}; }
+  static Vector2 fromAngle(std::complex<double> c) { return Vector2{c.real(), c.imag()}; }
   static Vector2 infinity() {
     const double inf = std::numeric_limits<double>::infinity();
     return Vector2{inf, inf};

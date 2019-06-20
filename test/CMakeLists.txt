@@ -100,6 +100,7 @@ set(TEST_SRCS
   src/load_test_meshes.cpp
   src/halfedge_mesh_test.cpp
   src/halfedge_geometry_test.cpp
+  src/linear_algebra_test.cpp
 )
 
 add_executable(geometry-central-test "${TEST_SRCS}")

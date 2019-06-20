@@ -12,7 +12,7 @@ namespace geometrycentral {
 
 template class LinearSolver<double>;
 template class LinearSolver<float>;
-template class LinearSolver<Vector2>;
+template class LinearSolver<std::complex<double>>;
 
 
 } // namespace geometrycentral

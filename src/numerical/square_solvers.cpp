@@ -56,7 +56,7 @@ void umfFactor<float>(size_t N, cholmod_sparse* mat, void*& symbolicFac, void*& 
   umfpack_dl_numeric(cMat_p, cMat_i, cMat_x, symbolicFac, &numericFac, NULL, NULL);
 }
 template <>
-void umfFactor<Complex>(size_t N, cholmod_sparse* mat, void*& symbolicFac, void*& numericFac) {
+void umfFactor<std::complex<double>>(size_t N, cholmod_sparse* mat, void*& symbolicFac, void*& numericFac) {
   SuiteSparse_long* cMat_p = (SuiteSparse_long*)mat->p;
   SuiteSparse_long* cMat_i = (SuiteSparse_long*)mat->i;
   double* cMat_x = (double*)mat->x;
@@ -87,10 +87,10 @@ void umfSolve<double>(size_t N, cholmod_sparse* mat, void* numericFac, Vector<do
   umfpack_dl_solve(UMFPACK_A, cMat_p, cMat_i, cMat_x, &(x[0]), &(rhs[0]), numericFac, NULL, NULL);
 }
 template <>
-void umfSolve<Complex>(size_t N, cholmod_sparse* mat, void* numericFac, Vector<Complex>& x,
-                       const Vector<Complex>& rhs) {
+void umfSolve<std::complex<double>>(size_t N, cholmod_sparse* mat, void* numericFac, Vector<std::complex<double>>& x,
+                                    const Vector<std::complex<double>>& rhs) {
   // Note: the ordering of std::complex is specified by the standard, so this certainly works
-  x = Vector<Complex>(N);
+  x = Vector<std::complex<double>>(N);
   SuiteSparse_long* cMat_p = (SuiteSparse_long*)mat->p;
   SuiteSparse_long* cMat_i = (SuiteSparse_long*)mat->i;
   double* cMat_x = (double*)mat->x;
@@ -188,7 +188,7 @@ void SquareSolver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
 }
 
 template <typename T>
-Vector<T> solveSquare(const Eigen::SparseMatrix<T>& A, const Vector<T>& rhs) {
+Vector<T> solveSquare(const SparseMatrix<T>& A, const Vector<T>& rhs) {
   SquareSolver<T> s(A);
   return s.solve(rhs);
 }
@@ -196,11 +196,12 @@ Vector<T> solveSquare(const Eigen::SparseMatrix<T>& A, const Vector<T>& rhs) {
 // Explicit instantiations
 template class SquareSolver<double>;
 template class SquareSolver<float>;
-template class SquareSolver<Complex>;
+template class SquareSolver<std::complex<double>>;
 
-template Vector<float> solveSquare(const Eigen::SparseMatrix<float>& A, const Vector<float>& rhs);
-template Vector<double> solveSquare(const Eigen::SparseMatrix<double>& A, const Vector<double>& rhs);
-template Vector<Complex> solveSquare(const Eigen::SparseMatrix<Complex>& A, const Vector<Complex>& rhs);
+template Vector<float> solveSquare(const SparseMatrix<float>& A, const Vector<float>& rhs);
+template Vector<double> solveSquare(const SparseMatrix<double>& A, const Vector<double>& rhs);
+template Vector<std::complex<double>> solveSquare(const SparseMatrix<std::complex<double>>& A,
+                                                  const Vector<std::complex<double>>& rhs);
 
 
 } // namespace geometrycentral

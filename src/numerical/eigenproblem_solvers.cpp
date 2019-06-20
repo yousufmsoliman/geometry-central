@@ -5,29 +5,30 @@
 
 using namespace Eigen;
 
-// Helper
 
+namespace geometrycentral {
+
+// Helper
 namespace {
 
 template <typename T>
-double norm(Vector<T>& x, Eigen::SparseMatrix<T>& massMatrix) {
+double norm(Vector<T>& x, SparseMatrix<T>& massMatrix) {
   return std::sqrt(std::abs((x.transpose() * massMatrix * x)[0]));
 }
 template double norm(Vector<double>& x, SparseMatrix<double>& massMatrix);
 template double norm(Vector<float>& x, SparseMatrix<float>& massMatrix);
-template double norm(Vector<geometrycentral::Complex>& x, SparseMatrix<geometrycentral::Complex>& massMatrix);
+template double norm(Vector<std::complex<double>>& x, SparseMatrix<std::complex<double>>& massMatrix);
 
 template <typename T>
-void normalize(Vector<T>& x, Eigen::SparseMatrix<T>& massMatrix) {
+void normalize(Vector<T>& x, SparseMatrix<T>& massMatrix) {
   double scale = norm(x, massMatrix);
   x /= scale;
 }
 template void normalize(Vector<double>& x, SparseMatrix<double>& massMatrix);
 template void normalize(Vector<float>& x, SparseMatrix<float>& massMatrix);
-template void normalize(Vector<geometrycentral::Complex>& x, SparseMatrix<geometrycentral::Complex>& massMatrix);
+template void normalize(Vector<std::complex<double>>& x, SparseMatrix<std::complex<double>>& massMatrix);
 } // namespace
 
-namespace geometrycentral {
 
 template <typename T>
 Vector<T> smallestEigenvectorPositiveDefinite(SparseMatrix<T>& energyMatrix, SparseMatrix<T>& massMatrix,
@@ -56,9 +57,8 @@ Vector<T> smallestEigenvectorPositiveDefinite(SparseMatrix<T>& energyMatrix, Spa
 }
 
 template <typename T>
-std::vector<Vector<T>> smallestKEigenvectorsPositiveDefinite(Eigen::SparseMatrix<T>& energyMatrix,
-                                                             Eigen::SparseMatrix<T>& massMatrix, size_t kEigenvalues,
-                                                             size_t nIterations) {
+std::vector<Vector<T>> smallestKEigenvectorsPositiveDefinite(SparseMatrix<T>& energyMatrix, SparseMatrix<T>& massMatrix,
+                                                             size_t kEigenvalues, size_t nIterations) {
 
   std::vector<Vector<T>> res;
 
@@ -120,8 +120,7 @@ Vector<T> smallestEigenvectorSquare(SparseMatrix<T>& energyMatrix, SparseMatrix<
 }
 
 template <typename T>
-Vector<T> largestEigenvector(Eigen::SparseMatrix<T>& energyMatrix, Eigen::SparseMatrix<T>& massMatrix,
-                             size_t nIterations) {
+Vector<T> largestEigenvector(SparseMatrix<T>& energyMatrix, SparseMatrix<T>& massMatrix, size_t nIterations) {
 
   size_t N = massMatrix.rows();
   PositiveDefiniteSolver<T> solver(massMatrix);
@@ -142,32 +141,36 @@ template Vector<double> smallestEigenvectorPositiveDefinite(SparseMatrix<double>
                                                             SparseMatrix<double>& massMatrix, size_t nIterations);
 template Vector<float> smallestEigenvectorPositiveDefinite(SparseMatrix<float>& energyMatrix,
                                                            SparseMatrix<float>& massMatrix, size_t nIterations);
-template Vector<Complex> smallestEigenvectorPositiveDefinite(SparseMatrix<Complex>& energyMatrix,
-                                                             SparseMatrix<Complex>& massMatrix, size_t nIterations);
+template Vector<std::complex<double>>
+smallestEigenvectorPositiveDefinite(SparseMatrix<std::complex<double>>& energyMatrix,
+                                    SparseMatrix<std::complex<double>>& massMatrix, size_t nIterations);
 
-template std::vector<Vector<float>> smallestKEigenvectorsPositiveDefinite(Eigen::SparseMatrix<float>& energyMatrix,
-                                                                          Eigen::SparseMatrix<float>& massMatrix,
+template std::vector<Vector<float>> smallestKEigenvectorsPositiveDefinite(SparseMatrix<float>& energyMatrix,
+                                                                          SparseMatrix<float>& massMatrix,
                                                                           size_t kEigenvalues, size_t nIterations);
-template std::vector<Vector<double>> smallestKEigenvectorsPositiveDefinite(Eigen::SparseMatrix<double>& energyMatrix,
-                                                                           Eigen::SparseMatrix<double>& massMatrix,
+template std::vector<Vector<double>> smallestKEigenvectorsPositiveDefinite(SparseMatrix<double>& energyMatrix,
+                                                                           SparseMatrix<double>& massMatrix,
                                                                            size_t kEigenvalues, size_t nIterations);
-template std::vector<Vector<Complex>> smallestKEigenvectorsPositiveDefinite(Eigen::SparseMatrix<Complex>& energyMatrix,
-                                                                            Eigen::SparseMatrix<Complex>& massMatrix,
-                                                                            size_t kEigenvalues, size_t nIterations);
+template std::vector<Vector<std::complex<double>>>
+smallestKEigenvectorsPositiveDefinite(SparseMatrix<std::complex<double>>& energyMatrix,
+                                      SparseMatrix<std::complex<double>>& massMatrix, size_t kEigenvalues,
+                                      size_t nIterations);
 
 template Vector<double> smallestEigenvectorSquare(SparseMatrix<double>& energyMatrix, SparseMatrix<double>& massMatrix,
                                                   size_t nIterations);
 template Vector<float> smallestEigenvectorSquare(SparseMatrix<float>& energyMatrix, SparseMatrix<float>& massMatrix,
                                                  size_t nIterations);
-template Vector<Complex> smallestEigenvectorSquare(SparseMatrix<Complex>& energyMatrix,
-                                                   SparseMatrix<Complex>& massMatrix, size_t nIterations);
+template Vector<std::complex<double>> smallestEigenvectorSquare(SparseMatrix<std::complex<double>>& energyMatrix,
+                                                                SparseMatrix<std::complex<double>>& massMatrix,
+                                                                size_t nIterations);
 
 template Vector<double> largestEigenvector(SparseMatrix<double>& energyMatrix, SparseMatrix<double>& massMatrix,
                                            size_t nIterations);
 template Vector<float> largestEigenvector(SparseMatrix<float>& energyMatrix, SparseMatrix<float>& massMatrix,
                                           size_t nIterations);
-template Vector<Complex> largestEigenvector(SparseMatrix<Complex>& energyMatrix, SparseMatrix<Complex>& massMatrix,
-                                            size_t nIterations);
+template Vector<std::complex<double>> largestEigenvector(SparseMatrix<std::complex<double>>& energyMatrix,
+                                                         SparseMatrix<std::complex<double>>& massMatrix,
+                                                         size_t nIterations);
 
 
 } // namespace geometrycentral

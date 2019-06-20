@@ -6,55 +6,61 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 
-#include <iostream>
 #include <complex>
+#include <iostream>
 
 // === Various helper functions and sanity checks which are useful for linear algebra code
 
-// Convenience typedef
-namespace {
-template <typename T>
-using Vector = Eigen::Matrix<T, Eigen::Dynamic, 1>;
-}
 
 namespace geometrycentral {
 
+// Convenience typedefs
+
+// Nicer name for dynamic matrix
+template <typename T>
+using Vector = Eigen::Matrix<T, Eigen::Dynamic, 1>;
+
+// Nicer name for sparse matrix
+template <typename T>
+using SparseMatrix = Eigen::SparseMatrix<T>;
 
 // ==== Simple utilities
 
 template <typename T>
-Eigen::SparseMatrix<T> identityMatrix(size_t N);
+SparseMatrix<T> identityMatrix(size_t N);
 
 // Shift the the diagonal of a matrix by a constant offset
 template <typename T>
-void shiftDiagonal(Eigen::SparseMatrix<T>& m, T shiftAmount = 1e-4);
+void shiftDiagonal(SparseMatrix<T>& m, T shiftAmount = 1e-4);
 
-Eigen::SparseMatrix<double> complexToReal(const Eigen::SparseMatrix<std::complex<double>>& m);
+// Blow up an NxM complex system to a 2Nx2M real system.
+SparseMatrix<double> complexToReal(const SparseMatrix<std::complex<double>>& m);
+Vector<double> complexToReal(const Vector<std::complex<double>>& v);
 
 // ==== Sanity checks
 
 
-// Verify that a matrix has finite entries, error out if not. Does nothing if NDEBUG is defined.
+// Verify that a matrix has finite entries, error out if not
 template <typename T>
-void checkFinite(const Eigen::SparseMatrix<T>& m);
+void checkFinite(const SparseMatrix<T>& m);
 
 template <typename T, int R, int C>
 void checkFinite(const Eigen::Matrix<T, R, C>& m);
 
 // Verify that a sparse matrix is symmetric (hermitian), error out if not. Does nothing if NDEBUG is defined.
 template <typename T>
-void checkHermitian(const Eigen::SparseMatrix<T>& m);
+void checkHermitian(const SparseMatrix<T>& m);
 
 
 // ==== Permutations and blocking
 
 // Build a permutation matrix
 // template <typename T>
-// Eigen::SparseMatrix<T> buildPermutationMatrix(const Vector<size_t>& p);
+// SparseMatrix<T> buildPermutationMatrix(const Vector<size_t>& p);
 
 // Apply a permutation to the rows and columns of a matrix
 // template <typename T>
-// void permute(const Eigen::SparseMatrix<T>& m, const Vector<size_t>& p);
+// void permute(const SparseMatrix<T>& m, const Vector<size_t>& p);
 
 
 // Block-decompose a square sparse matrix with interleaved index sets A and B
@@ -69,13 +75,13 @@ struct BlockDecompositionResult {
   Vector<bool> isA;
 
   // The four "block" matrices
-  Eigen::SparseMatrix<T> AA;
-  Eigen::SparseMatrix<T> AB;
-  Eigen::SparseMatrix<T> BA;
-  Eigen::SparseMatrix<T> BB;
+  SparseMatrix<T> AA;
+  SparseMatrix<T> AB;
+  SparseMatrix<T> BA;
+  SparseMatrix<T> BB;
 };
 template <typename T>
-BlockDecompositionResult<T> blockDecomposeSquare(const Eigen::SparseMatrix<T>& m, const Vector<bool>& Aset,
+BlockDecompositionResult<T> blockDecomposeSquare(const SparseMatrix<T>& m, const Vector<bool>& Aset,
                                                  bool buildBuildBside = true);
 
 // Apply a decomposition to a vector

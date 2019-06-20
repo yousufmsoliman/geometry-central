@@ -14,57 +14,51 @@
 #endif
 
 
-// This disables various safety chceks in linear algebra code and solvers
+// This disables various safety checks in linear algebra code and solvers
 // #define GC_NLINALG_DEBUG
 
 // Note: actual solvers implemented with explicit template instantiation in solvers.cpp
 
-// Utilitiy typedef
-namespace {
-template <typename T>
-using Vector = Eigen::Matrix<T, Eigen::Dynamic, 1>;
-}
-
 namespace geometrycentral {
 
-// Utility solvers, which use the classes below
+// === Utility solvers, which use the classes below
 
 // Returns smallest nontrivial eigenvector
 template <typename T>
-Vector<T> smallestEigenvectorPositiveDefinite(Eigen::SparseMatrix<T>& energyMatrix, Eigen::SparseMatrix<T>& massMatrix,
+Vector<T> smallestEigenvectorPositiveDefinite(SparseMatrix<T>& energyMatrix, SparseMatrix<T>& massMatrix,
                                               size_t nIterations = 50);
 
 template <typename T>
-std::vector<Vector<T>> smallestKEigenvectorsPositiveDefinite(Eigen::SparseMatrix<T>& energyMatrix,
-                                                             Eigen::SparseMatrix<T>& massMatrix, size_t kEigenvalues,
-                                                             size_t nIterations = 50);
+std::vector<Vector<T>> smallestKEigenvectorsPositiveDefinite(SparseMatrix<T>& energyMatrix, SparseMatrix<T>& massMatrix,
+                                                             size_t kEigenvalues, size_t nIterations = 50);
 
 // Returns smallest (positive-eigenvalued) nontirivial eigenvector
 template <typename T>
-Vector<T> smallestEigenvectorSquare(Eigen::SparseMatrix<T>& energyMatrix, Eigen::SparseMatrix<T>& massMatrix,
+Vector<T> smallestEigenvectorSquare(SparseMatrix<T>& energyMatrix, SparseMatrix<T>& massMatrix,
                                     size_t nIterations = 50);
 
 // Mass matrix must be positive definite
 template <typename T>
-Vector<T> largestEigenvector(Eigen::SparseMatrix<T>& energyMatrix, Eigen::SparseMatrix<T>& massMatrix,
-                             size_t nIterations = 50);
+Vector<T> largestEigenvector(SparseMatrix<T>& energyMatrix, SparseMatrix<T>& massMatrix, size_t nIterations = 50);
 
 // Quick and easy solvers which do not retain factorization
 template <typename T>
-Vector<T> solve(const Eigen::SparseMatrix<T>& matrix, const Vector<T>& rhs);
+Vector<T> solve(const SparseMatrix<T>& matrix, const Vector<T>& rhs);
 template <typename T>
-Vector<T> solveSquare(const Eigen::SparseMatrix<T>& matrix, const Vector<T>& rhs);
+Vector<T> solveSquare(const SparseMatrix<T>& matrix, const Vector<T>& rhs);
 template <typename T>
-Vector<T> solvePositiveDefinite(const Eigen::SparseMatrix<T>& matrix, const Vector<T>& rhs);
+Vector<T> solvePositiveDefinite(const SparseMatrix<T>& matrix, const Vector<T>& rhs);
+
+// Measure L2 residual
 template <typename T>
-double residual(const Eigen::SparseMatrix<T>& matrix, const Vector<T>& lhs, const Vector<T>& rhs);
+double residual(const SparseMatrix<T>& matrix, const Vector<T>& lhs, const Vector<T>& rhs);
 
 // Base class for all linear solvers
 template <typename T>
 class LinearSolver {
 
 public:
-  LinearSolver(const Eigen::SparseMatrix<T>& mat_) : mat(mat_) {}
+  LinearSolver(const SparseMatrix<T>& mat_) : mat(mat_) {}
 
   // Solve for a particular right hand side
   virtual Vector<T> solve(const Vector<T>& rhs) = 0;
@@ -75,10 +69,10 @@ public:
   // Compute the residual of a solve
   double residual(const Vector<T>& lhs, const Vector<T>& rhs);
 
-  const Eigen::SparseMatrix<T, Eigen::ColMajor>& getOperator() { return mat; }
+  const SparseMatrix<T>& getOperator() { return mat; }
 
 protected:
-  Eigen::SparseMatrix<T, Eigen::ColMajor> mat;
+  SparseMatrix<T> mat;
 };
 
 // General solver (uses QR)
@@ -88,7 +82,7 @@ template <typename T>
 class Solver final : public LinearSolver<T> {
 
 public:
-  Solver(const Eigen::SparseMatrix<T>& mat_) : LinearSolver<T>(mat_) { prepare(); }
+  Solver(const SparseMatrix<T>& mat_) : LinearSolver<T>(mat_) { prepare(); }
   ~Solver();
 
 #ifdef HAVE_SUITESPARSE
@@ -115,7 +109,7 @@ protected:
   SuiteSparseQR_factorization<typename Solver<T>::SOLVER_ENTRYTYPE>* factorization = nullptr;
   double zero_tolerance = -2; // (use default)
 #else
-  Eigen::SparseQR<Eigen::SparseMatrix<T>, Eigen::COLAMDOrdering<int>> solver;
+  Eigen::SparseQR<SparseMatrix<T>, Eigen::COLAMDOrdering<int>> solver;
 #endif
 };
 
@@ -123,7 +117,7 @@ template <typename T>
 class PositiveDefiniteSolver final : public LinearSolver<T> {
 
 public:
-  PositiveDefiniteSolver(const Eigen::SparseMatrix<T>& mat_) : LinearSolver<T>(mat_) { prepare(); }
+  PositiveDefiniteSolver(const SparseMatrix<T>& mat_) : LinearSolver<T>(mat_) { prepare(); }
   ~PositiveDefiniteSolver();
 
   // Solve!
@@ -139,7 +133,7 @@ protected:
   cholmod_sparse* cMat = nullptr;
   cholmod_factor* factorization = nullptr;
 #else
-  Eigen::SimplicialLDLT<Eigen::SparseMatrix<T>> solver;
+  Eigen::SimplicialLDLT<SparseMatrix<T>> solver;
 #endif
 };
 
@@ -147,7 +141,7 @@ template <typename T>
 class SquareSolver final : public LinearSolver<T> {
 
 public:
-  SquareSolver(const Eigen::SparseMatrix<T>& mat_) : LinearSolver<T>(mat_) { prepare(); }
+  SquareSolver(const SparseMatrix<T>& mat_) : LinearSolver<T>(mat_) { prepare(); }
   ~SquareSolver();
 
   // Solve!
@@ -164,7 +158,7 @@ protected:
   void* symbolicFactorization = nullptr;
   void* numericFactorization = nullptr;
 #else
-  Eigen::SparseLU<Eigen::SparseMatrix<T>> solver;
+  Eigen::SparseLU<SparseMatrix<T>> solver;
 #endif
 };
 

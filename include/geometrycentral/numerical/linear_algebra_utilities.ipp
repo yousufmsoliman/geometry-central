@@ -1,15 +1,13 @@
-#include <iostream>
-
 template <typename T>
-Eigen::SparseMatrix<T> identityMatrix(size_t N) {
-  Eigen::SparseMatrix<T> eye(N, N);
+SparseMatrix<T> identityMatrix(size_t N) {
+  SparseMatrix<T> eye(N, N);
   eye.setIdentity();
   return eye;
 }
 
 
 template <typename T>
-void shiftDiagonal(Eigen::SparseMatrix<T>& m, T shiftAmount) {
+void shiftDiagonal(SparseMatrix<T>& m, T shiftAmount) {
 
   // Check square
   size_t N = m.rows();
@@ -21,40 +19,11 @@ void shiftDiagonal(Eigen::SparseMatrix<T>& m, T shiftAmount) {
 }
 
 
-inline Eigen::SparseMatrix<double> complexToReal(const Eigen::SparseMatrix<std::complex<double>>& m) {
-
-  size_t nRow = m.rows();
-  size_t nCol = m.cols();
-
-  Eigen::SparseMatrix<double> realM(2 * nRow, 2 * nCol);
-  std::vector<Eigen::Triplet<double>> triplets;
-
-  for (int k = 0; k < m.outerSize(); ++k) {
-    for (typename Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(m, k); it; ++it) {
-
-
-      std::complex<double> val = it.value();
-      size_t iRow = it.row();
-      size_t iCol = it.col();
-
-      triplets.emplace_back(2 * iRow + 0, 2 * iCol + 0, val.x);
-      triplets.emplace_back(2 * iRow + 0, 2 * iCol + 1, -val.y);
-      triplets.emplace_back(2 * iRow + 1, 2 * iCol + 0, val.y);
-      triplets.emplace_back(2 * iRow + 1, 2 * iCol + 1, val.x);
-    }
-  }
-
-  realM.setFromTriplets(triplets.begin(), triplets.end());
-  realM.makeCompressed();
-
-  return realM;
-}
-
 
 template <typename T>
-inline void checkFinite(const Eigen::SparseMatrix<T>& m) {
+inline void checkFinite(const SparseMatrix<T>& m) {
   for (int k = 0; k < m.outerSize(); ++k) {
-    for (typename Eigen::SparseMatrix<T>::InnerIterator it(m, k); it; ++it) {
+    for (typename SparseMatrix<T>::InnerIterator it(m, k); it; ++it) {
       if (!isfinite(it.value())) {
         std::cerr << std::endl
                   << "Uh oh. Non-finite matrix entry [" << it.row() << "," << it.col() << "] = " << it.value()
@@ -111,13 +80,13 @@ inline void checkFinite(const Eigen::Matrix<T, R, 1>& m) {
 }
 
 template <typename T>
-inline void checkHermitian(const Eigen::SparseMatrix<T>& m) {
+inline void checkHermitian(const SparseMatrix<T>& m) {
 
   // Compute a scale factor for the matrix to use for closeness tests
   double sum = 0;
   size_t nEntries = 0;
   for (int k = 0; k < m.outerSize(); ++k) {
-    for (typename Eigen::SparseMatrix<T>::InnerIterator it(m, k); it; ++it) {
+    for (typename SparseMatrix<T>::InnerIterator it(m, k); it; ++it) {
       sum += std::abs(it.value());
       nEntries++;
     }
@@ -127,7 +96,7 @@ inline void checkHermitian(const Eigen::SparseMatrix<T>& m) {
 
   // Test each symmtric pair in the matrix (actually tests each twice)
   for (int k = 0; k < m.outerSize(); ++k) {
-    for (typename Eigen::SparseMatrix<T>::InnerIterator it(m, k); it; ++it) {
+    for (typename SparseMatrix<T>::InnerIterator it(m, k); it; ++it) {
 
       T thisVal = it.value();
       T otherVal = m.coeff(it.col(), it.row());
@@ -147,13 +116,13 @@ inline void checkHermitian(const Eigen::SparseMatrix<T>& m) {
 }
 
 template <>
-inline void checkHermitian(const Eigen::SparseMatrix<std::complex<double>>& m) {
+inline void checkHermitian(const SparseMatrix<std::complex<double>>& m) {
 
   // Compute a scale factor for the matrix to use for closeness tests
   double sum = 0;
   long long nEntries = 0;
   for (int k = 0; k < m.outerSize(); ++k) {
-    for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(m, k); it; ++it) {
+    for (SparseMatrix<std::complex<double>>::InnerIterator it(m, k); it; ++it) {
       sum += std::abs(it.value());
       nEntries++;
     }
@@ -163,7 +132,7 @@ inline void checkHermitian(const Eigen::SparseMatrix<std::complex<double>>& m) {
 
   // Test each symmtric pair in the matrix (actually tests each twice)
   for (int k = 0; k < m.outerSize(); ++k) {
-    for (Eigen::SparseMatrix<std::complex<double>>::InnerIterator it(m, k); it; ++it) {
+    for (SparseMatrix<std::complex<double>>::InnerIterator it(m, k); it; ++it) {
 
       std::complex<double> thisVal = it.value();
       std::complex<double> otherVal = m.coeff(it.col(), it.row());
@@ -184,7 +153,7 @@ inline void checkHermitian(const Eigen::SparseMatrix<std::complex<double>>& m) {
 
 
 template <typename T>
-BlockDecompositionResult<T> blockDecomposeSquare(const Eigen::SparseMatrix<T>& m, const Vector<bool>& Aset,
+BlockDecompositionResult<T> blockDecomposeSquare(const SparseMatrix<T>& m, const Vector<bool>& Aset,
                                                  bool buildBuildBside) {
 
 
@@ -208,14 +177,14 @@ BlockDecompositionResult<T> blockDecomposeSquare(const Eigen::SparseMatrix<T>& m
   r.newInds = Vector<size_t>(initSize);
   r.origIndsA = Vector<size_t>(Asize);
   r.origIndsB = Vector<size_t>(Bsize);
-  r.AA = Eigen::SparseMatrix<T>(Asize, Asize);
-  r.AB = Eigen::SparseMatrix<T>(Asize, Bsize);
+  r.AA = SparseMatrix<T>(Asize, Asize);
+  r.AB = SparseMatrix<T>(Asize, Bsize);
   if (buildBuildBside) {
-    r.BA = Eigen::SparseMatrix<T>(Bsize, Asize);
-    r.BB = Eigen::SparseMatrix<T>(Bsize, Bsize);
+    r.BA = SparseMatrix<T>(Bsize, Asize);
+    r.BB = SparseMatrix<T>(Bsize, Bsize);
   } else {
-    r.BA = Eigen::SparseMatrix<T>(0, 0);
-    r.BB = Eigen::SparseMatrix<T>(0, 0);
+    r.BA = SparseMatrix<T>(0, 0);
+    r.BB = SparseMatrix<T>(0, 0);
   }
 
   // Index
@@ -239,7 +208,7 @@ BlockDecompositionResult<T> blockDecomposeSquare(const Eigen::SparseMatrix<T>& m
   std::vector<Eigen::Triplet<T>> BAtrip;
   std::vector<Eigen::Triplet<T>> BBtrip;
   for (size_t k = 0; k < (size_t)m.outerSize(); k++) {
-    for (typename Eigen::SparseMatrix<T>::InnerIterator it(m, k); it; ++it) {
+    for (typename SparseMatrix<T>::InnerIterator it(m, k); it; ++it) {
 
       size_t rowInd = it.row();
       size_t colInd = it.col();

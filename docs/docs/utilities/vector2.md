@@ -30,6 +30,10 @@ Factory methods can construct a few common values:
 
     Returns the vector $(\cos(\theta), \sin(\theta))$.
 
+??? func "`#!cpp static Vector2 Vector2::fromComplex(std::complex<double> c)`"
+
+    Converts a `std::complex<double>` to a `Vector2`.
+
 ??? func "`#!cpp static Vector2 Vector2::infinity()`"
 
     Returns the infinite vector $(\infty, \infty)$.
