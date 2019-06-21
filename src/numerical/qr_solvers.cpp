@@ -14,24 +14,38 @@ using namespace Eigen;
 namespace geometrycentral {
 
 template <typename T>
+struct QRSolverInternals {
+  // Implementation-specific quantities
+#ifdef HAVE_SUITESPARSE
+  CholmodContext context;
+  cholmod_sparse* cMat = nullptr;
+  cholmod_sparse* cMatTrans = nullptr;
+  SuiteSparseQR_factorization<typename Solver<T>::SOLVER_ENTRYTYPE>* factorization = nullptr;
+  double zero_tolerance = -2; // (use default)
+#else
+  Eigen::SparseQR<SparseMatrix<T>, Eigen::COLAMDOrdering<int>> solver;
+#endif
+};
+
+template <typename T>
 Solver<T>::~Solver() {
 #ifdef HAVE_SUITESPARSE
-  if (cMat != nullptr) {
-    cholmod_l_free_sparse(&cMat, context);
-    cMat = nullptr;
+  if (internals->cMat != nullptr) {
+    cholmod_l_free_sparse(&internals->cMat, internals->context);
+    internals->cMat = nullptr;
   }
-  if (cMatTrans != nullptr) {
-    cholmod_l_free_sparse(&cMatTrans, context);
-    cMatTrans = nullptr;
+  if (internals->cMatTrans != nullptr) {
+    cholmod_l_free_sparse(&internals->cMatTrans, internals->context);
+    internals->cMatTrans = nullptr;
   }
-  if (factorization != nullptr) {
-    SuiteSparseQR_free(&factorization, context);
+  if (internals->factorization != nullptr) {
+    SuiteSparseQR_free(&(internals->factorization), internals->context);
   }
 #endif
 }
 
 template <typename T>
-Solver<T>::Solver(SparseMatrix<T>& mat) : LinearSolver<T>(mat) {
+Solver<T>::Solver(SparseMatrix<T>& mat) : LinearSolver<T>(mat), internals(new QRSolverInternals<T>()) {
 
   // Is the system underdetermined?
   if (this->nRows < this->nCols) {
@@ -53,15 +67,15 @@ Solver<T>::Solver(SparseMatrix<T>& mat) : LinearSolver<T>(mat) {
 
   // Convert suitesparse format
   // Either use A or A^T, depending on whether the system underdetermined
-  if (cMat != nullptr) {
-    cholmod_l_free_sparse(&cMat, context);
+  if (internals->cMat != nullptr) {
+    cholmod_l_free_sparse(&(internals->cMat), internals->context);
   }
-  cMat = toCholmod(mat, context);
+  internals->cMat = toCholmod(mat, internals->context);
   if (underdetermined) {
-    if (cMatTrans != nullptr) {
-      cholmod_l_free_sparse(&cMatTrans, context);
+    if (internals->cMatTrans != nullptr) {
+      cholmod_l_free_sparse(&(internals->cMatTrans), internals->context);
     }
-    cMatTrans = cholmod_l_transpose(cMat, 2, context);
+    internals->cMatTrans = cholmod_l_transpose(internals->cMat, 2, internals->context);
   }
 
   // Factor
@@ -76,32 +90,32 @@ Solver<T>::Solver(SparseMatrix<T>& mat) : LinearSolver<T>(mat) {
   //       7: SuiteSparseQR default (selects COLAMD, AMD, or METIS)
   const int ordering = 7;
 
-  if (factorization != nullptr) {
-    SuiteSparseQR_free(&factorization, context);
+  if (internals->factorization != nullptr) {
+    SuiteSparseQR_free(&(internals->factorization), internals->context);
   }
 
   if (underdetermined) {
-    factorization =
-        SuiteSparseQR_factorize<typename Solver<T>::SOLVER_ENTRYTYPE>(ordering, zero_tolerance, cMatTrans, context);
+    internals->factorization = SuiteSparseQR_factorize<typename Solver<T>::SOLVER_ENTRYTYPE>(
+        ordering, internals->zero_tolerance, internals->cMatTrans, internals->context);
   } else {
-    factorization =
-        SuiteSparseQR_factorize<typename Solver<T>::SOLVER_ENTRYTYPE>(ordering, zero_tolerance, cMat, context);
+    internals->factorization = SuiteSparseQR_factorize<typename Solver<T>::SOLVER_ENTRYTYPE>(
+        ordering, internals->zero_tolerance, internals->cMat, internals->context);
   }
 
-  if (factorization == nullptr) {
+  if (internals->factorization == nullptr) {
     throw std::logic_error("Factorization failed");
   }
 
 // Eigen version
 #else
-  if(underdetermined) {
+  if (underdetermined) {
     throw std::logic_error("Eigen's sparse QR solver doesn't like underdetermined systems");
   }
 
-  solver.setPivotThreshold(0.);
-  solver.compute(mat);
-  if (solver.info() != Eigen::Success) {
-    std::cerr << "Solver factorization error: " << solver.info() << std::endl;
+  internals->solver.setPivotThreshold(0.);
+  internals->solver.compute(mat);
+  if (internals->solver.info() != Eigen::Success) {
+    std::cerr << "Solver factorization error: " << internals->solver.info() << std::endl;
     throw std::invalid_argument("Solver factorization failed");
   }
 #endif
@@ -129,48 +143,50 @@ void Solver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
 #ifdef HAVE_SUITESPARSE
 
   // Convert input to suitesparse format
-  cholmod_dense* inVec = toCholmod(rhs, context);
+  cholmod_dense* inVec = toCholmod(rhs, internals->context);
   cholmod_dense* outVec;
 
   // Solve
-  // outVec = SuiteSparseQR<typename Solver<T>::SOLVER_ENTRYTYPE>(cMat, inVec, context);
+  // outVec = SuiteSparseQR<typename Solver<T>::SOLVER_ENTRYTYPE>(cMat, inVec, internals->context);
   // Note that the solve strategy is different for underdetermined systems
   if (underdetermined) {
 
     // solve y = R^-T b
-    cholmod_dense* y =
-        SuiteSparseQR_solve<typename Solver<T>::SOLVER_ENTRYTYPE>(SPQR_RTX_EQUALS_B, factorization, inVec, context);
+    cholmod_dense* y = SuiteSparseQR_solve<typename Solver<T>::SOLVER_ENTRYTYPE>(
+        SPQR_RTX_EQUALS_B, internals->factorization, inVec, internals->context);
 
     // compute x = Q*y
-    outVec = SuiteSparseQR_qmult<typename Solver<T>::SOLVER_ENTRYTYPE>(SPQR_QX, factorization, y, context);
-    cholmod_l_free_dense(&y, context);
+    outVec = SuiteSparseQR_qmult<typename Solver<T>::SOLVER_ENTRYTYPE>(SPQR_QX, internals->factorization, y,
+                                                                       internals->context);
+    cholmod_l_free_dense(&y, internals->context);
 
   } else {
 
     // compute y = Q^T b
-    cholmod_dense* y =
-        SuiteSparseQR_qmult<typename Solver<T>::SOLVER_ENTRYTYPE>(SPQR_QTX, factorization, inVec, context);
+    cholmod_dense* y = SuiteSparseQR_qmult<typename Solver<T>::SOLVER_ENTRYTYPE>(SPQR_QTX, internals->factorization,
+                                                                                 inVec, internals->context);
 
     // solve x = R^-1 y
     // TODO what is this E doing here?
-    outVec = SuiteSparseQR_solve<typename Solver<T>::SOLVER_ENTRYTYPE>(SPQR_RETX_EQUALS_B, factorization, y, context);
+    outVec = SuiteSparseQR_solve<typename Solver<T>::SOLVER_ENTRYTYPE>(SPQR_RETX_EQUALS_B, internals->factorization, y,
+                                                                       internals->context);
 
-    cholmod_l_free_dense(&y, context);
+    cholmod_l_free_dense(&y, internals->context);
   }
 
   // Convert back
-  toEigen(outVec, context, x);
+  toEigen(outVec, internals->context, x);
 
   // Free
-  cholmod_l_free_dense(&outVec, context);
-  cholmod_l_free_dense(&inVec, context);
+  cholmod_l_free_dense(&outVec, internals->context);
+  cholmod_l_free_dense(&inVec, internals->context);
 
 // Eigen version
 #else
   // Solve
-  x = solver.solve(rhs);
-  if (solver.info() != Eigen::Success) {
-    std::cerr << "Solver error: " << solver.info() << std::endl;
+  x = internals->solver.solve(rhs);
+  if (internals->solver.info() != Eigen::Success) {
+    std::cerr << "Solver error: " << internals->solver.info() << std::endl;
     // std::cerr << "Solver says: " << solver.lastErrorMessage() << std::endl;
     throw std::invalid_argument("Solve failed");
   }
@@ -187,9 +203,9 @@ Vector<T> solve(SparseMatrix<T>& A, const Vector<T>& rhs) {
 template <typename T>
 size_t Solver<T>::rank() {
 #ifdef HAVE_SUITESPARSE
-  return factorization->rank;
+  return internals->factorization->rank;
 #else
-  return solver.rank();
+  return internals->solver.rank();
 #endif
 }
 

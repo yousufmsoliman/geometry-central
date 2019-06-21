@@ -12,17 +12,29 @@ using namespace Eigen;
 namespace geometrycentral {
 
 template <typename T>
+struct SquareSolverInternals {
+#ifdef HAVE_SUITESPARSE
+  CholmodContext context;
+  cholmod_sparse* cMat = nullptr;
+  void* symbolicFactorization = nullptr;
+  void* numericFactorization = nullptr;
+#else
+  Eigen::SparseLU<SparseMatrix<T>> solver;
+#endif
+};
+
+template <typename T>
 SquareSolver<T>::~SquareSolver() {
 #ifdef HAVE_SUITESPARSE
-  if (cMat != nullptr) {
-    cholmod_l_free_sparse(&cMat, context);
-    cMat = nullptr;
+  if (internals->cMat != nullptr) {
+    cholmod_l_free_sparse(&internals->cMat, internals->context);
+    internals->cMat = nullptr;
   }
-  if (symbolicFactorization != nullptr) {
-    umfpack_dl_free_symbolic(&symbolicFactorization);
+  if (internals->symbolicFactorization != nullptr) {
+    umfpack_dl_free_symbolic(&internals->symbolicFactorization);
   }
-  if (numericFactorization != nullptr) {
-    umfpack_dl_free_numeric(&numericFactorization);
+  if (internals->numericFactorization != nullptr) {
+    umfpack_dl_free_numeric(&internals->numericFactorization);
   }
 #endif
 }
@@ -104,7 +116,7 @@ void umfSolve<std::complex<double>>(size_t N, cholmod_sparse* mat, void* numeric
 
 
 template <typename T>
-SquareSolver<T>::SquareSolver(SparseMatrix<T>& mat) : LinearSolver<T>(mat) {
+SquareSolver<T>::SquareSolver(SparseMatrix<T>& mat) : LinearSolver<T>(mat), internals(new SquareSolverInternals<T>()) {
 
   // Check some sanity
   if (this->nRows != this->nCols) {
@@ -119,20 +131,20 @@ SquareSolver<T>::SquareSolver(SparseMatrix<T>& mat) : LinearSolver<T>(mat) {
 // Suitesparse variant
 #ifdef HAVE_SUITESPARSE
   // Convert suitesparse format
-  if (cMat != nullptr) {
-    cholmod_l_free_sparse(&cMat, context);
+  if (internals->cMat != nullptr) {
+    cholmod_l_free_sparse(&internals->cMat, internals->context);
   }
-  cMat = toCholmod(mat, context);
+  internals->cMat = toCholmod(mat, internals->context);
 
   // Factor
-  umfFactor<T>(this->nRows, cMat, symbolicFactorization, numericFactorization);
+  umfFactor<T>(this->nRows, internals->cMat, internals->symbolicFactorization, internals->numericFactorization);
 
 
 // Eigen variant
 #else
-  solver.compute(mat);
-  if (solver.info() != Eigen::Success) {
-    std::cerr << "Solver factorization error: " << solver.info() << std::endl;
+  internals->solver.compute(mat);
+  if (internals->solver.info() != Eigen::Success) {
+    std::cerr << "Solver factorization error: " << internals->solver.info() << std::endl;
     throw std::invalid_argument("Solver factorization failed");
   }
 #endif
@@ -162,15 +174,15 @@ void SquareSolver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
 #ifdef HAVE_SUITESPARSE
 
   // Templated helper does all the hard work
-  umfSolve<T>(N, cMat, numericFactorization, x, rhs);
+  umfSolve<T>(N, internals->cMat, internals->numericFactorization, x, rhs);
 
   // Eigen version
 #else
   // Solve
-  x = solver.solve(rhs);
-  if (solver.info() != Eigen::Success) {
-    std::cerr << "Solver error: " << solver.info() << std::endl;
-    std::cerr << "Solver says: " << solver.lastErrorMessage() << std::endl;
+  x = internals->solver.solve(rhs);
+  if (internals->solver.info() != Eigen::Success) {
+    std::cerr << "Solver error: " << internals->solver.info() << std::endl;
+    std::cerr << "Solver says: " << internals->solver.lastErrorMessage() << std::endl;
     throw std::invalid_argument("Solve failed");
   }
 #endif

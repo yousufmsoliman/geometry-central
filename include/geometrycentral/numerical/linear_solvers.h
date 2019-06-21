@@ -4,8 +4,6 @@
 
 #include "Eigen/Sparse"
 
-#include <iostream>
-
 // Suitesparse includes, as needed
 #ifdef HAVE_SUITESPARSE
 #include "geometrycentral/numerical/suitesparse_utilities.h"
@@ -13,6 +11,8 @@
 #include <cholmod.h>
 #endif
 
+#include <iostream>
+#include <memory>
 
 // This disables various safety checks in linear algebra code and solvers
 // #define GC_NLINALG_DEBUG
@@ -74,6 +74,8 @@ protected:
 // Computes least-squares solution for overdetermined systems, minimum norm solution for underdetermined systems
 // TODO name is dumb
 template <typename T>
+struct QRSolverInternals; // hide implementation details
+template <typename T>
 class Solver final : public LinearSolver<T> {
 
 public:
@@ -94,18 +96,11 @@ public:
 
 protected:
   bool underdetermined;
-// Implementation-specific quantities
-#ifdef HAVE_SUITESPARSE
-  CholmodContext context;
-  cholmod_sparse* cMat = nullptr;
-  cholmod_sparse* cMatTrans = nullptr;
-  SuiteSparseQR_factorization<typename Solver<T>::SOLVER_ENTRYTYPE>* factorization = nullptr;
-  double zero_tolerance = -2; // (use default)
-#else
-  Eigen::SparseQR<SparseMatrix<T>, Eigen::COLAMDOrdering<int>> solver;
-#endif
+  std::unique_ptr<QRSolverInternals<T>> internals;
 };
 
+template <typename T>
+struct PSDSolverInternals; // hide implementation details
 template <typename T>
 class PositiveDefiniteSolver final : public LinearSolver<T> {
 
@@ -118,16 +113,11 @@ public:
   Vector<T> solve(const Vector<T>& rhs) override;
 
 protected:
-// Implementation-specific quantities
-#ifdef HAVE_SUITESPARSE
-  CholmodContext context;
-  cholmod_sparse* cMat = nullptr;
-  cholmod_factor* factorization = nullptr;
-#else
-  Eigen::SimplicialLDLT<SparseMatrix<T>> solver;
-#endif
+  std::unique_ptr<PSDSolverInternals<T>> internals;
 };
 
+template <typename T>
+struct SquareSolverInternals; // hide implementation details
 template <typename T>
 class SquareSolver final : public LinearSolver<T> {
 
@@ -141,14 +131,7 @@ public:
 
 protected:
 // Implementation-specific quantities
-#ifdef HAVE_SUITESPARSE
-  CholmodContext context;
-  cholmod_sparse* cMat = nullptr;
-  void* symbolicFactorization = nullptr;
-  void* numericFactorization = nullptr;
-#else
-  Eigen::SparseLU<SparseMatrix<T>> solver;
-#endif
+  std::unique_ptr<SquareSolverInternals<T>> internals;
 };
 
 } // namespace geometrycentral

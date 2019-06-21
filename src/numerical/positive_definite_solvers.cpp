@@ -13,20 +13,32 @@ using std::endl;
 namespace geometrycentral {
 
 template <typename T>
+struct PSDSolverInternals {
+#ifdef HAVE_SUITESPARSE
+  CholmodContext context;
+  cholmod_sparse* cMat = nullptr;
+  cholmod_factor* factorization = nullptr;
+#else
+  Eigen::SimplicialLDLT<SparseMatrix<T>> solver;
+#endif
+};
+
+template <typename T>
 PositiveDefiniteSolver<T>::~PositiveDefiniteSolver() {
 #ifdef HAVE_SUITESPARSE
-  if (cMat != nullptr) {
-    cholmod_l_free_sparse(&cMat, context);
-    cMat = nullptr;
+  if (internals->cMat != nullptr) {
+    cholmod_l_free_sparse(&internals->cMat, internals->context);
+    internals->cMat = nullptr;
   }
-  if (factorization != nullptr) {
-    cholmod_l_free_factor(&factorization, context);
+  if (internals->factorization != nullptr) {
+    cholmod_l_free_factor(&internals->factorization, internals->context);
   }
 #endif
 }
 
 template <typename T>
-PositiveDefiniteSolver<T>::PositiveDefiniteSolver(SparseMatrix<T>& mat) : LinearSolver<T>(mat) {
+PositiveDefiniteSolver<T>::PositiveDefiniteSolver(SparseMatrix<T>& mat)
+    : LinearSolver<T>(mat), internals(new PSDSolverInternals<T>()) {
 
 
   // Check some sanity
@@ -45,23 +57,23 @@ PositiveDefiniteSolver<T>::PositiveDefiniteSolver(SparseMatrix<T>& mat) : Linear
 #ifdef HAVE_SUITESPARSE
 
   // Convert suitesparse format
-  if (cMat != nullptr) {
-    cholmod_l_free_sparse(&cMat, context);
+  if (internals->cMat != nullptr) {
+    cholmod_l_free_sparse(&internals->cMat, internals->context);
   }
-  cMat = toCholmod(mat, context, SType::SYMMETRIC);
+  internals->cMat = toCholmod(mat, internals->context, SType::SYMMETRIC);
 
   // Factor
-  context.setSimplicial(); // must use simplicial for LDLt
-  context.setLDL();        // ensure we get an LDLt factorization
-  factorization = cholmod_l_analyze(cMat, context);
-  cholmod_l_factorize(cMat, factorization, context);
+  internals->context.setSimplicial(); // must use simplicial for LDLt
+  internals->context.setLDL();        // ensure we get an LDLt internals->factorization
+  internals->factorization = cholmod_l_analyze(internals->cMat, internals->context);
+  cholmod_l_factorize(internals->cMat, internals->factorization, internals->context);
 
   // Eigen version
 #else
-  solver.compute(mat);
-  if (solver.info() != Eigen::Success) {
-    std::cerr << "Solver factorization error: " << solver.info() << std::endl;
-    throw std::invalid_argument("Solver factorization failed");
+  internals->solver.compute(mat);
+  if (internals->solver.info() != Eigen::Success) {
+    std::cerr << "Solver internals->factorization error: " << internals->solver.info() << std::endl;
+    throw std::invalid_argument("Solver internals->factorization failed");
   }
 #endif
 };
@@ -91,24 +103,24 @@ void PositiveDefiniteSolver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
 #ifdef HAVE_SUITESPARSE
 
   // Convert input to suitesparse format
-  cholmod_dense* inVec = toCholmod(rhs, context);
+  cholmod_dense* inVec = toCholmod(rhs, internals->context);
 
   // Solve
-  cholmod_dense* outVec = cholmod_l_solve(CHOLMOD_A, factorization, inVec, context);
+  cholmod_dense* outVec = cholmod_l_solve(CHOLMOD_A, internals->factorization, inVec, internals->context);
 
   // Convert back
-  toEigen(outVec, context, x);
+  toEigen(outVec, internals->context, x);
 
   // Free
-  cholmod_l_free_dense(&outVec, context);
-  cholmod_l_free_dense(&inVec, context);
+  cholmod_l_free_dense(&outVec, internals->context);
+  cholmod_l_free_dense(&inVec, internals->context);
 
   // Eigen version
 #else
   // Solve
-  x = solver.solve(rhs);
-  if (solver.info() != Eigen::Success) {
-    std::cerr << "Solver error: " << solver.info() << std::endl;
+  x = internals->solver.solve(rhs);
+  if (internals->solver.info() != Eigen::Success) {
+    std::cerr << "Solver error: " << internals->solver.info() << std::endl;
     throw std::invalid_argument("Solve failed");
   }
 #endif
