@@ -339,11 +339,18 @@ TEST_F(LinearAlgebraTestSuite, BlockDecomposeTest) {
 
 TEST_F(LinearAlgebraTestSuite, TestLDLTSolvers) {
 
+  // Always useful to know
+#ifndef HAVE_SUITESPARSE
+  std::cout << "Testing with Suitesparse solvers" << std::endl;
+#elif
+  std::cout << "Testing with Eigen solvers" << std::endl;
+#endif
+
+
   { // float
     SparseMatrix<float> mat = buildSPDTestMatrix<float>();
     mat = mat.topLeftCorner(100, 100);
     Vector<float> rhs = randomVector<float>(mat.rows());
-
 
     // stateful
     PositiveDefiniteSolver<float> solver(mat);
