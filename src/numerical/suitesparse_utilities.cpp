@@ -49,7 +49,7 @@ int flagForStype(SType s) {
 
 // double-valued sparse matrices
 template <>
-cholmod_sparse* toCholmod(SparseMatrix<double, Eigen::ColMajor>& A, CholmodContext& context, SType stype) {
+cholmod_sparse* toCholmod(SparseMatrix<double>& A, CholmodContext& context, SType stype) {
 
   A.makeCompressed();
 
@@ -82,7 +82,7 @@ cholmod_sparse* toCholmod(SparseMatrix<double, Eigen::ColMajor>& A, CholmodConte
 // float-valued sparse matrices
 // CHOLMOD only uses CHOLMOD_REAL precision, so you always get one of those back regardless of float/double input)
 template <>
-cholmod_sparse* toCholmod(SparseMatrix<float, Eigen::ColMajor>& A, CholmodContext& context, SType stype) {
+cholmod_sparse* toCholmod(SparseMatrix<float>& A, CholmodContext& context, SType stype) {
 
   A.makeCompressed();
 
@@ -114,8 +114,7 @@ cholmod_sparse* toCholmod(SparseMatrix<float, Eigen::ColMajor>& A, CholmodContex
 
 // Complex-valued sparse matrices
 template <>
-cholmod_sparse* toCholmod(SparseMatrix<std::complex<double>, Eigen::ColMajor>& A, CholmodContext& context,
-                          SType stype) {
+cholmod_sparse* toCholmod(SparseMatrix<std::complex<double>>& A, CholmodContext& context, SType stype) {
 
   A.makeCompressed();
 

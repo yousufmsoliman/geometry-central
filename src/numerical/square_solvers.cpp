@@ -125,7 +125,7 @@ SquareSolver<T>::SquareSolver(SparseMatrix<T>& mat) : LinearSolver<T>(mat) {
   cMat = toCholmod(mat, context);
 
   // Factor
-  umfFactor<T>(N, cMat, symbolicFactorization, numericFactorization);
+  umfFactor<T>(this->nRows, cMat, symbolicFactorization, numericFactorization);
 
 
 // Eigen variant

@@ -10,6 +10,7 @@ These solvers provide a simple interface for solving sparse linear $Ax = b$.
 
 A key feature is that these solvers abstract over the underlying numerical library. In their most basic form, [Eigen's sparse solvers](https://eigen.tuxfamily.org/dox/group__TopicSparseSystems.html) will be used, and are always available. However, if present, the more-powerful [Suitesprase solvers](http://faculty.cse.tamu.edu/davis/suitesparse.html) will be used intead. See the [dependencies section](../../build/dependencies/#suitesparse) for instruction to build with Suitesparse support.
 
+As always, be sure to compile [with optimizations](../../build/build/#compiling-with-optimizations) for meaningful performance. In particular, Eigen's built-in solvers will be very slow in debug mode (though the Eigen QR solver is always slow).
 
 ### Quick solves
 
@@ -18,6 +19,8 @@ These are one-off routines for quick solves.
 ??? func "`#!cpp Vector<T> solve(SparseMatrix<T>& matrix, const Vector<T>& rhs)`"
 
     Solve a system with a general matrix. Uses a QR decomposition interally.
+
+    Warning: The Eigen built-in sparse QR solver is _very_ inefficient for many problems. Also, it doesn't work well for underdetermined systems.
 
 
 ??? func "`#!cpp Vector<T> solveSquare(SparseMatrix<T>& matrix, const Vector<T>& rhs)`"
@@ -60,6 +63,8 @@ std::cout << "matrix rank is " << solver.rank() << std::endl;
 ??? func "`#!cpp template <typename<T>> class Solver`"
     
     Solve a system with a general matrix. Uses a QR decomposition interally.
+
+    Warning: The Eigen built-in sparse QR solver is _very_ inefficient for many problems. Also, it doesn't work well for underdetermined systems.
 
 ??? func "`#!cpp template <typename<T>> class SquareSolver`"
     

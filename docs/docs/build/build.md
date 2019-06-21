@@ -2,3 +2,7 @@ This library uses git submodules to manage dependencies, so after cloning you sh
 
 Geometry-central itself does not build any excutables, it is a library upon which you create other programs. For a simple example program and build system using geometry-central, see TODO.
 
+
+### Compiling with optimizations
+
+TODO

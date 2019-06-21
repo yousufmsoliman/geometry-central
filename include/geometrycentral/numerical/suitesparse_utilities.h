@@ -1,5 +1,7 @@
 #pragma once
 
+#include "geometrycentral/numerical/linear_algebra_utilities.h"
+
 #include "Eigen/Sparse"
 
 // Suitesparse includes, as needed

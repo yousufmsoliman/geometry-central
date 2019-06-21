@@ -20,6 +20,78 @@ void shiftDiagonal(SparseMatrix<T>& m, T shiftAmount) {
 
 
 template <typename T>
+SparseMatrix<T> verticalStack(const std::vector<SparseMatrix<T>, Eigen::aligned_allocator<SparseMatrix<T>>>& mats) {
+  if (mats.size() == 0) throw std::logic_error("must have at least one matrix to stack");
+
+  std::vector<Eigen::Triplet<T>> triplets;
+  long nCols = mats[0].cols();
+
+  size_t nRowsTot = 0;
+
+  for (const SparseMatrix<T>& mat : mats) {
+
+    if(mat.cols() != nCols) throw std::logic_error("all matrices must have same column size");
+
+    // Copy entries
+    for (int k = 0; k < mat.outerSize(); ++k) {
+      for (typename SparseMatrix<T>::InnerIterator it(mat, k); it; ++it) {
+
+        T thisVal = it.value();
+        int i = it.row();
+        int j = it.col();
+
+        triplets.emplace_back(i + nRowsTot, j, thisVal);
+      }
+    }
+
+    nRowsTot += mat.rows();
+  }
+
+  // Build the matrix
+  SparseMatrix<T> result(nRowsTot, nCols);
+  result.setFromTriplets(triplets.begin(), triplets.end());
+
+  return result;
+}
+
+template <typename T>
+SparseMatrix<T> horizontalStack(const std::vector<SparseMatrix<T>, Eigen::aligned_allocator<SparseMatrix<T>>>& mats) {
+  if (mats.size() == 0) throw std::logic_error("must have at least one matrix to stack");
+
+  std::vector<Eigen::Triplet<T>> triplets;
+  long nRows = mats[0].rows();
+
+  size_t nColsTot = 0;
+
+  for (const SparseMatrix<T>& mat : mats) {
+    
+    if(mat.rows() != nRows) throw std::logic_error("all matrices must have same row size");
+
+    // Copy entries
+    for (int k = 0; k < mat.outerSize(); ++k) {
+      for (typename SparseMatrix<T>::InnerIterator it(mat, k); it; ++it) {
+
+        T thisVal = it.value();
+        int i = it.row();
+        int j = it.col();
+
+        triplets.emplace_back(i, j + nColsTot, thisVal);
+      }
+    }
+
+    nColsTot += mat.cols();
+  }
+
+  // Build the matrix
+  SparseMatrix<T> result(nRows, nColsTot);
+  result.setFromTriplets(triplets.begin(), triplets.end());
+
+  return result;
+}
+
+
+
+template <typename T>
 inline void checkFinite(const SparseMatrix<T>& m) {
   for (int k = 0; k < m.outerSize(); ++k) {
     for (typename SparseMatrix<T>::InnerIterator it(m, k); it; ++it) {

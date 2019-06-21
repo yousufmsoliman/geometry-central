@@ -341,15 +341,17 @@ TEST_F(LinearAlgebraTestSuite, TestLDLTSolvers) {
 
   { // float
     SparseMatrix<float> mat = buildSPDTestMatrix<float>();
-    Vector<float> rhs = randomVector<float>(mat.cols());
+    mat = mat.topLeftCorner(100, 100);
+    Vector<float> rhs = randomVector<float>(mat.rows());
+
+
+    // stateful
+    PositiveDefiniteSolver<float> solver(mat);
 
     // one-off
     Vector<float> x1 = solvePositiveDefinite(mat, rhs);
     EXPECT_LT(residual(mat, x1, rhs), 1e-3);
 
-
-    // stateful
-    PositiveDefiniteSolver<float> solver(mat);
 
     Vector<float> x2 = solver.solve(rhs);
     EXPECT_LT(residual(mat, x2, rhs), 1e-3);
@@ -361,7 +363,8 @@ TEST_F(LinearAlgebraTestSuite, TestLDLTSolvers) {
 
   { // double
     SparseMatrix<double> mat = buildSPDTestMatrix<double>();
-    Vector<double> rhs = randomVector<double>(mat.cols());
+    mat = mat.topLeftCorner(100, 100);
+    Vector<double> rhs = randomVector<double>(mat.rows());
 
     // one-off
     Vector<double> x1 = solvePositiveDefinite(mat, rhs);
@@ -381,7 +384,8 @@ TEST_F(LinearAlgebraTestSuite, TestLDLTSolvers) {
 
   { // std::complex<double>
     SparseMatrix<std::complex<double>> mat = buildSPDTestMatrix<std::complex<double>>();
-    Vector<std::complex<double>> rhs = randomVector<std::complex<double>>(mat.cols());
+    mat = mat.topLeftCorner(100, 100);
+    Vector<std::complex<double>> rhs = randomVector<std::complex<double>>(mat.rows());
 
     // one-off
     Vector<std::complex<double>> x1 = solvePositiveDefinite(mat, rhs);
@@ -406,8 +410,9 @@ TEST_F(LinearAlgebraTestSuite, TestSquareSolvers) {
   { // float
 
     SparseMatrix<float> mat = buildSPDTestMatrix<float>();
+    mat = mat.topLeftCorner(100, 100);
     mat.coeffRef(2, 3) += 0.5; // make non-symmetric
-    Vector<float> rhs = randomVector<float>(mat.cols());
+    Vector<float> rhs = randomVector<float>(mat.rows());
 
     // one-off
     Vector<float> x1 = solveSquare(mat, rhs);
@@ -427,8 +432,9 @@ TEST_F(LinearAlgebraTestSuite, TestSquareSolvers) {
 
   { // double
     SparseMatrix<double> mat = buildSPDTestMatrix<double>();
+    mat = mat.topLeftCorner(100, 100);
     mat.coeffRef(2, 3) += 0.5; // make non-symmetric
-    Vector<double> rhs = randomVector<double>(mat.cols());
+    Vector<double> rhs = randomVector<double>(mat.rows());
 
     // one-off
     Vector<double> x1 = solveSquare(mat, rhs);
@@ -448,8 +454,9 @@ TEST_F(LinearAlgebraTestSuite, TestSquareSolvers) {
 
   { // std::complex<double>
     SparseMatrix<std::complex<double>> mat = buildSPDTestMatrix<std::complex<double>>();
+    mat = mat.topLeftCorner(100, 100);
     mat.coeffRef(2, 3) += 0.5; // make non-symmetric
-    Vector<std::complex<double>> rhs = randomVector<std::complex<double>>(mat.cols());
+    Vector<std::complex<double>> rhs = randomVector<std::complex<double>>(mat.rows());
 
     // one-off
     Vector<std::complex<double>> x1 = solveSquare(mat, rhs);
@@ -471,10 +478,15 @@ TEST_F(LinearAlgebraTestSuite, TestSquareSolvers) {
 TEST_F(LinearAlgebraTestSuite, TestQRSolvers_square) {
 
   { // float
-    std::cout << "float" << std::endl;
     SparseMatrix<float> mat = buildSPDTestMatrix<float>();
+    mat = mat.topLeftCorner(100, 100);
+#ifndef HAVE_SUITESPARSE
+    // Eigen is really slow, so use a tiny matrix
+    mat = mat.topLeftCorner(10, 10);
+#endif
+
     mat.coeffRef(2, 3) += 0.5; // make non-symmetric
-    Vector<float> rhs = randomVector<float>(mat.cols());
+    Vector<float> rhs = randomVector<float>(mat.rows());
 
     // one-off
     Vector<float> x1 = solve(mat, rhs);
@@ -493,10 +505,14 @@ TEST_F(LinearAlgebraTestSuite, TestQRSolvers_square) {
   }
 
   { // double
-    std::cout << "double" << std::endl;
     SparseMatrix<double> mat = buildSPDTestMatrix<double>();
+    mat = mat.topLeftCorner(100, 100);
+#ifndef HAVE_SUITESPARSE
+    // Eigen is really slow, so use a tiny matrix
+    mat = mat.topLeftCorner(10, 10);
+#endif
     mat.coeffRef(2, 3) += 0.5; // make non-symmetric
-    Vector<double> rhs = randomVector<double>(mat.cols());
+    Vector<double> rhs = randomVector<double>(mat.rows());
 
     // one-off
     Vector<double> x1 = solve(mat, rhs);
@@ -515,10 +531,210 @@ TEST_F(LinearAlgebraTestSuite, TestQRSolvers_square) {
   }
 
   { // std::complex<double>
-    std::cout << "complex" << std::endl;
     SparseMatrix<std::complex<double>> mat = buildSPDTestMatrix<std::complex<double>>();
+    mat = mat.topLeftCorner(100, 100);
+#ifndef HAVE_SUITESPARSE
+    // Eigen is really slow, so use a tiny matrix
+    mat = mat.topLeftCorner(10, 10);
+#endif
     mat.coeffRef(2, 3) += 0.5; // make non-symmetric
-    Vector<std::complex<double>> rhs = randomVector<std::complex<double>>(mat.cols());
+    Vector<std::complex<double>> rhs = randomVector<std::complex<double>>(mat.rows());
+
+    // one-off
+    Vector<std::complex<double>> x1 = solve(mat, rhs);
+    EXPECT_LT(residual(mat, x1, rhs), 1e-4);
+
+
+    // stateful
+    Solver<std::complex<double>> solver(mat);
+
+    Vector<std::complex<double>> x2 = solver.solve(rhs);
+    EXPECT_LT(residual(mat, x2, rhs), 1e-4);
+
+    Vector<std::complex<double>> x3;
+    solver.solve(x3, rhs);
+    EXPECT_LT(residual(mat, x3, rhs), 1e-4);
+  }
+}
+
+
+TEST_F(LinearAlgebraTestSuite, TestQRSolvers_skinny) {
+
+  { // float
+    SparseMatrix<float> mat = buildSPDTestMatrix<float>();
+    mat = mat.topLeftCorner(100, 100);
+#ifndef HAVE_SUITESPARSE
+    // Eigen is really slow, so use a tiny matrix
+    mat = mat.topLeftCorner(10, 10);
+#endif
+
+    // Make it skinny
+    size_t initRows = mat.rows();
+    mat = verticalStack<float>({mat, mat});
+
+    // Set up an RHS that has an exact solution so its easy to verify
+    Vector<float> rhsHalf = randomVector<float>(initRows);
+    Vector<float> rhs(2 * initRows);
+    rhs << rhsHalf, rhsHalf;
+
+    // one-off
+    Vector<float> x1 = solve(mat, rhs);
+    EXPECT_LT(residual(mat, x1, rhs), 1e-3);
+
+    // stateful
+    Solver<float> solver(mat);
+
+    Vector<float> x2 = solver.solve(rhs);
+    EXPECT_LT(residual(mat, x2, rhs), 1e-3);
+
+    Vector<float> x3;
+    solver.solve(x3, rhs);
+    EXPECT_LT(residual(mat, x3, rhs), 1e-3);
+  }
+
+  { // double
+    SparseMatrix<double> mat = buildSPDTestMatrix<double>();
+    mat = mat.topLeftCorner(100, 100);
+#ifndef HAVE_SUITESPARSE
+    // Eigen is really slow, so use a tiny matrix
+    mat = mat.topLeftCorner(10, 10);
+#endif
+
+    // Make it skinny
+    size_t initRows = mat.rows();
+    mat = verticalStack<double>({mat, mat});
+
+    // Set up an RHS that has an exact solution so its easy to verify
+    Vector<double> rhsHalf = randomVector<double>(initRows);
+    Vector<double> rhs(2 * initRows);
+    rhs << rhsHalf, rhsHalf;
+
+    // one-off
+    Vector<double> x1 = solve(mat, rhs);
+    EXPECT_LT(residual(mat, x1, rhs), 1e-4);
+
+
+    // stateful
+    Solver<double> solver(mat);
+
+    Vector<double> x2 = solver.solve(rhs);
+    EXPECT_LT(residual(mat, x2, rhs), 1e-4);
+
+    Vector<double> x3;
+    solver.solve(x3, rhs);
+    EXPECT_LT(residual(mat, x3, rhs), 1e-4);
+  }
+
+  { // std::complex<double>
+    SparseMatrix<std::complex<double>> mat = buildSPDTestMatrix<std::complex<double>>();
+    mat = mat.topLeftCorner(100, 100);
+#ifndef HAVE_SUITESPARSE
+    // Eigen is really slow, so use a tiny matrix
+    mat = mat.topLeftCorner(10, 10);
+#endif
+
+    // Make it skinny
+    size_t initRows = mat.rows();
+    mat = verticalStack<std::complex<double>>({mat, mat});
+
+    // Set up an RHS that has an exact solution so its easy to verify
+    Vector<std::complex<double>> rhsHalf = randomVector<std::complex<double>>(initRows);
+    Vector<std::complex<double>> rhs(2 * initRows);
+    rhs << rhsHalf, rhsHalf;
+
+    // one-off
+    Vector<std::complex<double>> x1 = solve(mat, rhs);
+    EXPECT_LT(residual(mat, x1, rhs), 1e-4);
+
+
+    // stateful
+    Solver<std::complex<double>> solver(mat);
+
+    Vector<std::complex<double>> x2 = solver.solve(rhs);
+    EXPECT_LT(residual(mat, x2, rhs), 1e-4);
+
+    Vector<std::complex<double>> x3;
+    solver.solve(x3, rhs);
+    EXPECT_LT(residual(mat, x3, rhs), 1e-4);
+  }
+}
+
+
+TEST_F(LinearAlgebraTestSuite, TestQRSolvers_wide) {
+
+  // Our solvers probably can't be used reliably with underdetermined systems in Eigen (what about SuiteSparse?).
+  // http://eigen.tuxfamily.org/bz/show_bug.cgi?id=899
+
+#ifndef HAVE_SUITESPARSE
+  std::cerr << "Skipping TestQRSolvers_wide for Eigen" << std::endl;
+  return;
+#endif
+
+
+  { // float
+    SparseMatrix<float> mat = buildSPDTestMatrix<float>();
+    mat = mat.topLeftCorner(100, 100);
+#ifndef HAVE_SUITESPARSE
+    // Eigen is really slow, so use a tiny matrix
+    mat = mat.topLeftCorner(10, 10);
+#endif
+
+    mat = horizontalStack<float>({mat, mat});
+    Vector<float> rhs = randomVector<float>(mat.rows());
+
+    // one-off
+    Vector<float> x1 = solve(mat, rhs);
+    EXPECT_LT(residual(mat, x1, rhs), 1e-3);
+
+
+    // stateful
+    Solver<float> solver(mat);
+
+    Vector<float> x2 = solver.solve(rhs);
+    EXPECT_LT(residual(mat, x2, rhs), 1e-3);
+
+    Vector<float> x3;
+    solver.solve(x3, rhs);
+    EXPECT_LT(residual(mat, x3, rhs), 1e-3);
+  }
+
+  { // double
+    SparseMatrix<double> mat = buildSPDTestMatrix<double>();
+    mat = mat.topLeftCorner(100, 100);
+#ifndef HAVE_SUITESPARSE
+    // Eigen is really slow, so use a tiny matrix
+    mat = mat.topLeftCorner(10, 10);
+#endif
+
+    mat = horizontalStack<double>({mat, mat});
+    Vector<double> rhs = randomVector<double>(mat.rows());
+
+    // one-off
+    Vector<double> x1 = solve(mat, rhs);
+    EXPECT_LT(residual(mat, x1, rhs), 1e-4);
+
+
+    // stateful
+    Solver<double> solver(mat);
+
+    Vector<double> x2 = solver.solve(rhs);
+    EXPECT_LT(residual(mat, x2, rhs), 1e-4);
+
+    Vector<double> x3;
+    solver.solve(x3, rhs);
+    EXPECT_LT(residual(mat, x3, rhs), 1e-4);
+  }
+
+  { // std::complex<double>
+    SparseMatrix<std::complex<double>> mat = buildSPDTestMatrix<std::complex<double>>();
+    mat = mat.topLeftCorner(100, 100);
+#ifndef HAVE_SUITESPARSE
+    // Eigen is really slow, so use a tiny matrix
+    mat = mat.topLeftCorner(10, 10);
+#endif
+
+    mat = horizontalStack<std::complex<double>>({mat, mat});
+    Vector<std::complex<double>> rhs = randomVector<std::complex<double>>(mat.rows());
 
     // one-off
     Vector<std::complex<double>> x1 = solve(mat, rhs);

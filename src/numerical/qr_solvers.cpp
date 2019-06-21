@@ -33,6 +33,14 @@ Solver<T>::~Solver() {
 template <typename T>
 Solver<T>::Solver(SparseMatrix<T>& mat) : LinearSolver<T>(mat) {
 
+  // Is the system underdetermined?
+  if (this->nRows < this->nCols) {
+    underdetermined = true;
+  } else {
+    underdetermined = false;
+  }
+
+
 // Check some sanity
 #ifndef GC_NLINALG_DEBUG
   checkFinite(mat);
@@ -43,20 +51,12 @@ Solver<T>::Solver(SparseMatrix<T>& mat) : LinearSolver<T>(mat) {
 // Suitesparse version
 #ifdef HAVE_SUITESPARSE
 
-  // Is the system underdetermined?
-  if (this->nRows < this-> : w gnCols) {
-    underdetermined = true;
-    throw std::logic_error("is not well tested, be careful");
-  } else {
-    underdetermined = false;
-  }
-
   // Convert suitesparse format
   // Either use A or A^T, depending on whether the system underdetermined
   if (cMat != nullptr) {
     cholmod_l_free_sparse(&cMat, context);
   }
-  cMat = toCholmod(this->mat, context);
+  cMat = toCholmod(mat, context);
   if (underdetermined) {
     if (cMatTrans != nullptr) {
       cholmod_l_free_sparse(&cMatTrans, context);
@@ -94,6 +94,11 @@ Solver<T>::Solver(SparseMatrix<T>& mat) : LinearSolver<T>(mat) {
 
 // Eigen version
 #else
+  if(underdetermined) {
+    throw std::logic_error("Eigen's sparse QR solver doesn't like underdetermined systems");
+  }
+
+  solver.setPivotThreshold(0.);
   solver.compute(mat);
   if (solver.info() != Eigen::Success) {
     std::cerr << "Solver factorization error: " << solver.info() << std::endl;

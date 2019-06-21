@@ -5,6 +5,7 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
+#include <Eigen/StdVector>
 
 #include <complex>
 #include <iostream>
@@ -32,6 +33,12 @@ SparseMatrix<T> identityMatrix(size_t N);
 // Shift the the diagonal of a matrix by a constant offset
 template <typename T>
 void shiftDiagonal(SparseMatrix<T>& m, T shiftAmount = 1e-4);
+
+template <typename T>
+SparseMatrix<T> verticalStack(const std::vector<SparseMatrix<T>, Eigen::aligned_allocator<SparseMatrix<T>>>& mats);
+
+template <typename T>
+SparseMatrix<T> horizontalStack(const std::vector<SparseMatrix<T>, Eigen::aligned_allocator<SparseMatrix<T>>>& mats);
 
 // Blow up an NxM complex system to a 2N x2M real system.
 SparseMatrix<double> complexToReal(const SparseMatrix<std::complex<double>>& m);

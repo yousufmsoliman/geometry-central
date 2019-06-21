@@ -93,9 +93,9 @@ public:
   size_t rank();
 
 protected:
+  bool underdetermined;
 // Implementation-specific quantities
 #ifdef HAVE_SUITESPARSE
-  bool underdetermined;
   CholmodContext context;
   cholmod_sparse* cMat = nullptr;
   cholmod_sparse* cMatTrans = nullptr;

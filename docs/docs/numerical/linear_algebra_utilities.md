@@ -11,6 +11,30 @@
 
     Shift the diagonal of matrix, by adding `A + shiftDiagonal * identityMatrix()`.
 
+
+??? func "`#!cpp SparseMatrix<T> verticalStack(const std::vector<SparseMatrix<T>>& mats)`"
+
+    Vertically stack sparse matrices like
+
+    $$
+    A,B,C \to
+    \begin{bmatrix}
+    A \\
+    B \\
+    C
+    \end{bmatrix}
+    $$
+
+    all matrices must have the same number of columns.
+
+    Example:
+    ```cpp
+    SparseMatrix<double> matA = /* 35 x N */
+    SparseMatrix<double> matB = /* 10 x N */
+    SparseMatrix<double> matC = /* 2 x N */
+    SparseMatrix<double> stacked = verticalStack<double>({matA, matB, matC});
+    ```
+
 ??? func "`#!cpp SparseMatrix<double> complexToReal(const SparseMatrix<std::complex<double>>& m)`"
 
     Convert an `N x M` complex matrix to a `2N x 2M` real matrix, expanding each complex component in to a `2 x 2` to evaluate the complex product.
