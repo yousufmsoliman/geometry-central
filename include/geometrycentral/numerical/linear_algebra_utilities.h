@@ -33,7 +33,7 @@ SparseMatrix<T> identityMatrix(size_t N);
 template <typename T>
 void shiftDiagonal(SparseMatrix<T>& m, T shiftAmount = 1e-4);
 
-// Blow up an NxM complex system to a 2Nx2M real system.
+// Blow up an NxM complex system to a 2N x2M real system.
 SparseMatrix<double> complexToReal(const SparseMatrix<std::complex<double>>& m);
 Vector<double> complexToReal(const Vector<std::complex<double>>& v);
 
@@ -47,9 +47,13 @@ void checkFinite(const SparseMatrix<T>& m);
 template <typename T, int R, int C>
 void checkFinite(const Eigen::Matrix<T, R, C>& m);
 
-// Verify that a sparse matrix is symmetric (hermitian), error out if not. Does nothing if NDEBUG is defined.
+// Verify that a sparse matrix is symmetric, error out if not.
 template <typename T>
-void checkHermitian(const SparseMatrix<T>& m);
+void checkSymmetric(const SparseMatrix<T>& m, double absoluteEPS = -1.);
+
+// Verify that a sparse matrix is hermitian, error out if not.  For real matrices, coincides with checkSymmetric
+template <typename T>
+void checkHermitian(const SparseMatrix<T>& m, double absoluteEPS = -1.);
 
 
 // ==== Permutations and blocking

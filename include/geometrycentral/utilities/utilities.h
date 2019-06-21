@@ -3,10 +3,11 @@
 #include <cmath>
 #include <complex>
 #include <limits>
+#include <memory>
 #include <random>
 #include <string>
 #include <typeinfo>
-#include <memory>
+#include <iostream>
 
 // Error checking macro. CONDITION should be true if life is good (like in assert(CONDITION))
 #ifdef NGC_SAFTEY_CHECKS
@@ -65,7 +66,20 @@ T clamp(T val, T low, T high);
 double regularizeAngle(double theta); // Map theta in to [0,2pi)
 
 // Missing isfinite function
-inline bool isfinite(const std::complex<double>& c) { return std::isfinite(c.real()) && std::isfinite(c.imag()); }
+inline bool isfinite(const std::complex<double>& c) { 
+  //std::cout << "calling isfinite complex" << std::endl;  
+  return std::isfinite(c.real()) && std::isfinite(c.imag()); 
+}
+
+// Conjugate which does nothing to non-complex values
+template <typename T>
+inline T conj(T val) {
+  return val;
+}
+template <>
+inline std::complex<double> conj(std::complex<double> val) {
+  return std::conj(val);
+}
 
 // === Inline implementations
 template <typename T>

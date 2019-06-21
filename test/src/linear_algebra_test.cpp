@@ -61,6 +61,7 @@ protected:
     return std::complex<double>(randomFromRange<double>(low, high), randomFromRange<double>(low, high));
   }
 
+
   // == Random test matrices
   template <typename T>
   SparseMatrix<T> buildSPDTestMatrix() {
@@ -80,7 +81,7 @@ protected:
       tripletList.emplace_back(vA, vA, std::abs(w) + .1); // to make the matrix strictly positive definite
       tripletList.emplace_back(vB, vB, std::abs(w) + .1);
       tripletList.emplace_back(vA, vB, -w);
-      tripletList.emplace_back(vB, vA, -std::conj(w));
+      tripletList.emplace_back(vB, vA, -conj(w));
     }
 
     SparseMatrix<T> mat(N, N);
@@ -202,3 +203,135 @@ TEST_F(LinearAlgebraTestSuite, ComplexToRealTest) {
     EXPECT_NEAR(prod(i).imag(), prodR(2 * i + 1), 1e-6);
   }
 }
+
+TEST_F(LinearAlgebraTestSuite, CheckFiniteTest) {
+
+  { // float
+    SparseMatrix<float> mat = buildSPDTestMatrix<float>();
+    EXPECT_NO_THROW(checkFinite(mat));
+    mat.coeffRef(5, 5) = std::numeric_limits<float>::infinity();
+    EXPECT_THROW(checkFinite(mat), std::logic_error);
+  }
+
+
+  { // double
+    SparseMatrix<double> mat = buildSPDTestMatrix<double>();
+    EXPECT_NO_THROW(checkFinite(mat));
+    mat.coeffRef(5, 5) = std::numeric_limits<double>::infinity();
+    EXPECT_THROW(checkFinite(mat), std::logic_error);
+  }
+
+  { // std::complex<double>
+    SparseMatrix<std::complex<double>> mat = buildSPDTestMatrix<std::complex<double>>();
+    EXPECT_NO_THROW(checkFinite(mat));
+    mat.coeffRef(5, 5) = std::complex<double>(std::numeric_limits<double>::infinity(), 0.);
+    EXPECT_THROW(checkFinite(mat), std::logic_error);
+  }
+}
+
+
+TEST_F(LinearAlgebraTestSuite, CheckSymmetricTest) {
+
+  { // float
+    SparseMatrix<float> mat = buildSPDTestMatrix<float>();
+    EXPECT_NO_THROW(checkSymmetric(mat));
+    mat.coeffRef(5, 8) = 0.3;
+    EXPECT_THROW(checkSymmetric(mat), std::logic_error);
+  }
+
+
+  { // double
+    SparseMatrix<double> mat = buildSPDTestMatrix<double>();
+    EXPECT_NO_THROW(checkSymmetric(mat));
+    mat.coeffRef(5, 8) = 0.3;
+    EXPECT_THROW(checkSymmetric(mat), std::logic_error);
+  }
+
+  { // std::complex<double>
+    SparseMatrix<std::complex<double>> mat = buildSPDTestMatrix<std::complex<double>>();
+    EXPECT_THROW(checkSymmetric(mat), std::logic_error);
+    SparseMatrix<std::complex<double>> matT = mat.transpose();
+    SparseMatrix<std::complex<double>> smat = mat + matT;
+    EXPECT_NO_THROW(checkSymmetric(smat));
+  }
+}
+
+TEST_F(LinearAlgebraTestSuite, CheckHermitianTest) {
+
+  { // float
+    SparseMatrix<float> mat = buildSPDTestMatrix<float>();
+    EXPECT_NO_THROW(checkHermitian(mat));
+    mat.coeffRef(5, 8) = 0.3;
+    EXPECT_THROW(checkHermitian(mat), std::logic_error);
+  }
+
+
+  { // double
+    SparseMatrix<double> mat = buildSPDTestMatrix<double>();
+    EXPECT_NO_THROW(checkHermitian(mat));
+    mat.coeffRef(5, 8) = 0.3;
+    EXPECT_THROW(checkHermitian(mat), std::logic_error);
+  }
+
+  { // std::complex<double>
+    SparseMatrix<std::complex<double>> mat = buildSPDTestMatrix<std::complex<double>>();
+    EXPECT_NO_THROW(checkHermitian(mat));
+    mat.coeffRef(5, 8) = 0.3;
+    EXPECT_THROW(checkHermitian(mat), std::logic_error);
+  }
+}
+
+
+TEST_F(LinearAlgebraTestSuite, BlockDecomposeTest) {
+
+  SparseMatrix<double> mat = buildSPDTestMatrix<double>();
+
+  Vector<bool> split(mat.rows());
+  size_t nA = 0;
+  for (long int i = 0; i < split.rows(); i++) {
+    split(i) = (randomFromRange<double>(0., 1.) > 0.5);
+    if (split(i)) nA++;
+  }
+  size_t nB = mat.rows() - nA;
+
+  // Decompose
+  BlockDecompositionResult<double> decomp = blockDecomposeSquare(mat, split, true);
+
+  // Check sizes
+  EXPECT_EQ(decomp.AA.rows(), nA);
+  EXPECT_EQ(decomp.AA.cols(), nA);
+  EXPECT_EQ(decomp.AB.rows(), nA);
+  EXPECT_EQ(decomp.AB.cols(), nB);
+  EXPECT_EQ(decomp.BA.rows(), nB);
+  EXPECT_EQ(decomp.BA.cols(), nA);
+  EXPECT_EQ(decomp.BB.rows(), nB);
+  EXPECT_EQ(decomp.BB.cols(), nB);
+
+  // Hopefully all the entries made it through
+  EXPECT_NEAR(decomp.AA.sum() + decomp.BB.sum() + decomp.AB.sum() + decomp.BA.sum(), mat.sum(), 1e-6);
+
+  // Some data
+  Vector<double> x = randomVector<double>(mat.rows());
+
+  // Split up the vec vector
+  Vector<double> xA, xB;
+  decomposeVector(decomp, x, xA, xB);
+
+  EXPECT_EQ(xA.rows(), nA);
+  EXPECT_EQ(xB.rows(), nB);
+  EXPECT_NEAR(xA.sum() + xB.sum(), x.sum(), 1e-6);
+
+  // Do some arithmetic
+  Vector<double> y = mat * x;
+  Vector<double> yA = decomp.AA * xA + decomp.AB * xB;
+  Vector<double> yB = decomp.BA * xA + decomp.BB * xB;
+
+  // Recombine
+  Vector<double> yAssemb = reassembleVector(decomp, yA, yB);
+
+  // Should be very close
+  for (long int i = 0; i < mat.rows(); i++) {
+    EXPECT_NEAR(y(i), yAssemb(i), 1e-6);
+  }
+}
+

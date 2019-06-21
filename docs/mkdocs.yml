@@ -52,10 +52,10 @@ nav:
       - 'Direction Fields' : 'surface/algorithms/direction_fields.md'
       - 'Distance' : 'surface/algorithms/distance.md'
       - 'Mesh Graph Algorithms' : 'surface/algorithms/mesh_graph_algorithms.md'
-  - Linear Algebra: 
-    - 'Matrix Types' : 'linear_algebra/matrix_types.md'
-    - 'Utilities' : 'linear_algebra/utilities.md'
-    - 'Solvers' : 'linear_algebra/solvers.md'
+  - Numerical: 
+    - 'Matrix Types' : 'numerical/matrix_types.md'
+    - 'Linear Algebra Utilities' : 'numerical/linear_algebra_utilities.md'
+    - 'Linear Solvers' : 'numerical/linear_solvers.md'
   - Utilities: 
     - 'Miscellaneous' : 'utilities/miscellaneous.md'
     - 'Vector2' : 'utilities/vector2.md'

@@ -19,18 +19,16 @@ void shiftDiagonal(SparseMatrix<T>& m, T shiftAmount) {
 }
 
 
-
 template <typename T>
 inline void checkFinite(const SparseMatrix<T>& m) {
   for (int k = 0; k < m.outerSize(); ++k) {
     for (typename SparseMatrix<T>::InnerIterator it(m, k); it; ++it) {
       if (!isfinite(it.value())) {
-        std::cerr << std::endl
-                  << "Uh oh. Non-finite matrix entry [" << it.row() << "," << it.col() << "] = " << it.value()
-                  << std::endl
-                  << std::endl;
-
-        throw std::logic_error("Matrix has non-finite entries");
+        std::ostringstream msg;
+        msg << "checkFinite() failure: Non-finite matrix entry [" << it.row() << "," << it.col()
+            << "] = " << it.value();
+        // std::cerr << msg.str() << std::endl;
+        throw std::logic_error(msg.str());
       }
     }
   }
@@ -43,10 +41,10 @@ inline void checkFinite(const Eigen::Matrix<T, R, C>& m) {
   for (unsigned int i = 0; i < m.rows(); i++) {
     for (unsigned int j = 0; j < m.cols(); j++) {
       if (!isfinite(m(i, j))) {
-        std::cerr << std::endl
-                  << "Uh oh. Non-finite vector entry [" << i << "," << j << "] = " << m(i, j) << std::endl
-                  << std::endl;
-        throw std::logic_error("Matrix has non-finite entries");
+        std::ostringstream msg;
+        msg << "checkFinite() failure. Non-finite vector entry [" << i << "," << j << "] = " << m(i, j);
+        // std::cerr << msg.str() << std::endl;
+        throw std::logic_error(msg.str());
       }
     }
   }
@@ -58,8 +56,10 @@ template <typename T, int C>
 inline void checkFinite(const Eigen::Matrix<T, 1, C>& m) {
   for (unsigned int j = 0; j < m.cols(); j++) {
     if (!std::isfinite(m(1, j))) {
-      std::cerr << std::endl << "Uh oh. Non-finite row vector entry [" << j << "] = " << m(j) << std::endl << std::endl;
-      throw std::logic_error("Matrix has non-finite entries");
+      std::ostringstream msg;
+      msg << "checkFinite() failure. Non-finite row vector entry [" << j << "] = " << m(j);
+      // std::cerr << msg.str() << std::endl;
+      throw std::logic_error(msg.str());
     }
   }
 }
@@ -71,28 +71,31 @@ inline void checkFinite(const Eigen::Matrix<T, R, 1>& m) {
 
   for (unsigned int i = 0; i < m.rows(); i++) {
     if (!isfinite(m(i))) {
-      std::cerr << std::endl
-                << "Uh oh. Non-finite column vector entry [" << i << "] = " << m(i) << std::endl
-                << std::endl;
-      throw std::logic_error("Matrix has non-finite entries");
+      std::ostringstream msg;
+      msg << "checkFinite() failure. Non-finite row vector entry [" << i << "] = " << m(i);
+      // std::cerr << msg.str() << std::endl;
+      throw std::logic_error(msg.str());
     }
   }
 }
 
 template <typename T>
-inline void checkHermitian(const SparseMatrix<T>& m) {
+inline void checkSymmetric(const SparseMatrix<T>& m, double absoluteEPS) {
 
+  double eps = absoluteEPS;
   // Compute a scale factor for the matrix to use for closeness tests
-  double sum = 0;
-  size_t nEntries = 0;
-  for (int k = 0; k < m.outerSize(); ++k) {
-    for (typename SparseMatrix<T>::InnerIterator it(m, k); it; ++it) {
-      sum += std::abs(it.value());
-      nEntries++;
+  if (eps == -1.) {
+    double sum = 0;
+    size_t nEntries = 0;
+    for (int k = 0; k < m.outerSize(); ++k) {
+      for (typename SparseMatrix<T>::InnerIterator it(m, k); it; ++it) {
+        sum += std::abs(it.value());
+        nEntries++;
+      }
     }
+    double scale = sum / nEntries;
+    eps = scale * 1e-8;
   }
-  double scale = sum / nEntries;
-  double eps = scale * 1e-8;
 
   // Test each symmtric pair in the matrix (actually tests each twice)
   for (int k = 0; k < m.outerSize(); ++k) {
@@ -102,50 +105,50 @@ inline void checkHermitian(const SparseMatrix<T>& m) {
       T otherVal = m.coeff(it.col(), it.row());
 
       if (std::abs(thisVal - otherVal) > eps) {
-        std::cerr << std::endl
-                  << "Uh oh. Non-symmtric matrix entry at [" << it.row() << "," << it.col() << "]." << std::endl
-                  << "    [" << it.row() << "," << it.col() << "] = " << thisVal << std::endl
-                  << "    [" << it.col() << "," << it.row() << "] = " << otherVal << std::endl
-                  << std::endl
-                  << std::endl;
-
-        throw std::logic_error("Matrix has non-symmtric entries");
+        std::ostringstream msg;
+        msg << "checkSymmetric() error. Non-symmtric matrix entry at [" << it.row() << "," << it.col() << "]."
+            << "    [" << it.row() << "," << it.col() << "] = " << thisVal << "    [" << it.col() << "," << it.row()
+            << "] = " << otherVal;
+        // std::cerr << msg.str() << std::endl;
+        throw std::logic_error(msg.str());
       }
     }
   }
 }
 
-template <>
-inline void checkHermitian(const SparseMatrix<std::complex<double>>& m) {
 
+template <typename T>
+inline void checkHermitian(const SparseMatrix<T>& m, double absoluteEPS) {
+
+  double eps = absoluteEPS;
   // Compute a scale factor for the matrix to use for closeness tests
-  double sum = 0;
-  long long nEntries = 0;
-  for (int k = 0; k < m.outerSize(); ++k) {
-    for (SparseMatrix<std::complex<double>>::InnerIterator it(m, k); it; ++it) {
-      sum += std::abs(it.value());
-      nEntries++;
+  if (eps == -1.) {
+    double sum = 0;
+    size_t nEntries = 0;
+    for (int k = 0; k < m.outerSize(); ++k) {
+      for (typename SparseMatrix<T>::InnerIterator it(m, k); it; ++it) {
+        sum += std::abs(it.value());
+        nEntries++;
+      }
     }
+    double scale = sum / nEntries;
+    eps = scale * 1e-8;
   }
-  double scale = sum / nEntries;
-  double eps = scale * 1e-8;
 
   // Test each symmtric pair in the matrix (actually tests each twice)
   for (int k = 0; k < m.outerSize(); ++k) {
-    for (SparseMatrix<std::complex<double>>::InnerIterator it(m, k); it; ++it) {
+    for (typename SparseMatrix<T>::InnerIterator it(m, k); it; ++it) {
 
-      std::complex<double> thisVal = it.value();
-      std::complex<double> otherVal = m.coeff(it.col(), it.row());
+      T thisVal = it.value();
+      T otherVal = m.coeff(it.col(), it.row());
 
-      if (std::abs(thisVal - std::conj(otherVal)) > eps) {
-        std::cerr << std::endl
-                  << "Uh oh. Non-symmtric matrix entry at [" << it.row() << "," << it.col() << "]." << std::endl
-                  << "    [" << it.row() << "," << it.col() << "] = " << thisVal << std::endl
-                  << "    [" << it.col() << "," << it.row() << "] = " << otherVal << std::endl
-                  << std::endl
-                  << std::endl;
-
-        throw std::logic_error("Matrix has non-symmtric entries");
+      if (std::abs(thisVal - conj(otherVal)) > eps) {
+        std::ostringstream msg;
+        msg << "checkHermitian() error. Non-Hermitian matrix entry at [" << it.row() << "," << it.col() << "]."
+            << "    [" << it.row() << "," << it.col() << "] = " << thisVal << "    [" << it.col() << "," << it.row()
+            << "] = " << otherVal;
+        // std::cerr << msg.str() << std::endl;
+        throw std::logic_error(msg.str());
       }
     }
   }
