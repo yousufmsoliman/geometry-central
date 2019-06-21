@@ -22,7 +22,7 @@ Element types do not have constructors which should be called by the user. Inste
 - Traversing from a neighbor element `Face f = halfedge.face()`
 - Iterating around an element `for(Halfedge he : vertex.outgoingHalfedges())`
 
-Constructing a new element is covered in the [mutation section](mutation.md).
+Adding a new element to a mesh is covered in the [mutation section](mutation.md).
 
 #### Comparison & Hashing
 

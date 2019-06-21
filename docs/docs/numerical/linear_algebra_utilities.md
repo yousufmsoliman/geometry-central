@@ -21,7 +21,6 @@
     Convert an length `N` complex vector to a length `2N` real vector, expanding each complex component in to a consecutive real and imaginary component.
 
 
-
 ### Validate matrix properties
 
 ??? func "`#!cpp void checkFinite(const Eigen::Matrix<>& m)`"

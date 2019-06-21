@@ -43,11 +43,11 @@ Vector<T> largestEigenvector(SparseMatrix<T>& energyMatrix, SparseMatrix<T>& mas
 
 // Quick and easy solvers which do not retain factorization
 template <typename T>
-Vector<T> solve(const SparseMatrix<T>& matrix, const Vector<T>& rhs);
+Vector<T> solve(SparseMatrix<T>& matrix, const Vector<T>& rhs);
 template <typename T>
-Vector<T> solveSquare(const SparseMatrix<T>& matrix, const Vector<T>& rhs);
+Vector<T> solveSquare(SparseMatrix<T>& matrix, const Vector<T>& rhs);
 template <typename T>
-Vector<T> solvePositiveDefinite(const SparseMatrix<T>& matrix, const Vector<T>& rhs);
+Vector<T> solvePositiveDefinite(SparseMatrix<T>& matrix, const Vector<T>& rhs);
 
 // Measure L2 residual
 template <typename T>
@@ -58,7 +58,7 @@ template <typename T>
 class LinearSolver {
 
 public:
-  LinearSolver(const SparseMatrix<T>& mat_) : mat(mat_) {}
+  LinearSolver(const SparseMatrix<T>& mat) : nRows(mat.rows()), nCols(mat.cols()) {}
 
   // Solve for a particular right hand side
   virtual Vector<T> solve(const Vector<T>& rhs) = 0;
@@ -66,13 +66,8 @@ public:
   // Solve for a particular right hand side, and return in an existing vector objects
   virtual void solve(Vector<T>& x, const Vector<T>& rhs) = 0;
 
-  // Compute the residual of a solve
-  double residual(const Vector<T>& lhs, const Vector<T>& rhs);
-
-  const SparseMatrix<T>& getOperator() { return mat; }
-
 protected:
-  SparseMatrix<T> mat;
+  size_t nRows, nCols;
 };
 
 // General solver (uses QR)
@@ -82,7 +77,7 @@ template <typename T>
 class Solver final : public LinearSolver<T> {
 
 public:
-  Solver(const SparseMatrix<T>& mat_) : LinearSolver<T>(mat_) { prepare(); }
+  Solver(SparseMatrix<T>& mat);
   ~Solver();
 
 #ifdef HAVE_SUITESPARSE
@@ -98,8 +93,6 @@ public:
   size_t rank();
 
 protected:
-  void prepare();
-
 // Implementation-specific quantities
 #ifdef HAVE_SUITESPARSE
   bool underdetermined;
@@ -117,7 +110,7 @@ template <typename T>
 class PositiveDefiniteSolver final : public LinearSolver<T> {
 
 public:
-  PositiveDefiniteSolver(const SparseMatrix<T>& mat_) : LinearSolver<T>(mat_) { prepare(); }
+  PositiveDefiniteSolver(SparseMatrix<T>& mat);
   ~PositiveDefiniteSolver();
 
   // Solve!
@@ -125,8 +118,6 @@ public:
   Vector<T> solve(const Vector<T>& rhs) override;
 
 protected:
-  void prepare();
-
 // Implementation-specific quantities
 #ifdef HAVE_SUITESPARSE
   CholmodContext context;
@@ -141,7 +132,7 @@ template <typename T>
 class SquareSolver final : public LinearSolver<T> {
 
 public:
-  SquareSolver(const SparseMatrix<T>& mat_) : LinearSolver<T>(mat_) { prepare(); }
+  SquareSolver(SparseMatrix<T>& mat);
   ~SquareSolver();
 
   // Solve!
@@ -149,8 +140,6 @@ public:
   Vector<T> solve(const Vector<T>& rhs) override;
 
 protected:
-  void prepare();
-
 // Implementation-specific quantities
 #ifdef HAVE_SUITESPARSE
   CholmodContext context;

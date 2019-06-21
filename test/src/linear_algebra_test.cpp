@@ -1,6 +1,7 @@
 #include "geometrycentral/numerical/linear_algebra_utilities.h"
 #include "geometrycentral/numerical/linear_solvers.h"
 #include "geometrycentral/surface/meshio.h"
+#include "geometrycentral/utilities/timing.h"
 
 #include "load_test_meshes.h"
 
@@ -335,3 +336,203 @@ TEST_F(LinearAlgebraTestSuite, BlockDecomposeTest) {
   }
 }
 
+
+TEST_F(LinearAlgebraTestSuite, TestLDLTSolvers) {
+
+  { // float
+    SparseMatrix<float> mat = buildSPDTestMatrix<float>();
+    Vector<float> rhs = randomVector<float>(mat.cols());
+
+    // one-off
+    Vector<float> x1 = solvePositiveDefinite(mat, rhs);
+    EXPECT_LT(residual(mat, x1, rhs), 1e-3);
+
+
+    // stateful
+    PositiveDefiniteSolver<float> solver(mat);
+
+    Vector<float> x2 = solver.solve(rhs);
+    EXPECT_LT(residual(mat, x2, rhs), 1e-3);
+
+    Vector<float> x3;
+    solver.solve(x3, rhs);
+    EXPECT_LT(residual(mat, x3, rhs), 1e-3);
+  }
+
+  { // double
+    SparseMatrix<double> mat = buildSPDTestMatrix<double>();
+    Vector<double> rhs = randomVector<double>(mat.cols());
+
+    // one-off
+    Vector<double> x1 = solvePositiveDefinite(mat, rhs);
+    EXPECT_LT(residual(mat, x1, rhs), 1e-4);
+
+
+    // stateful
+    PositiveDefiniteSolver<double> solver(mat);
+
+    Vector<double> x2 = solver.solve(rhs);
+    EXPECT_LT(residual(mat, x2, rhs), 1e-4);
+
+    Vector<double> x3;
+    solver.solve(x3, rhs);
+    EXPECT_LT(residual(mat, x3, rhs), 1e-4);
+  }
+
+  { // std::complex<double>
+    SparseMatrix<std::complex<double>> mat = buildSPDTestMatrix<std::complex<double>>();
+    Vector<std::complex<double>> rhs = randomVector<std::complex<double>>(mat.cols());
+
+    // one-off
+    Vector<std::complex<double>> x1 = solvePositiveDefinite(mat, rhs);
+    EXPECT_LT(residual(mat, x1, rhs), 1e-4);
+
+
+    // stateful
+    PositiveDefiniteSolver<std::complex<double>> solver(mat);
+
+    Vector<std::complex<double>> x2 = solver.solve(rhs);
+    EXPECT_LT(residual(mat, x2, rhs), 1e-4);
+
+    Vector<std::complex<double>> x3;
+    solver.solve(x3, rhs);
+    EXPECT_LT(residual(mat, x3, rhs), 1e-4);
+  }
+}
+
+
+TEST_F(LinearAlgebraTestSuite, TestSquareSolvers) {
+
+  { // float
+
+    SparseMatrix<float> mat = buildSPDTestMatrix<float>();
+    mat.coeffRef(2, 3) += 0.5; // make non-symmetric
+    Vector<float> rhs = randomVector<float>(mat.cols());
+
+    // one-off
+    Vector<float> x1 = solveSquare(mat, rhs);
+    EXPECT_LT(residual(mat, x1, rhs), 1e-3);
+
+
+    // stateful
+    SquareSolver<float> solver(mat);
+
+    Vector<float> x2 = solver.solve(rhs);
+    EXPECT_LT(residual(mat, x2, rhs), 1e-3);
+
+    Vector<float> x3;
+    solver.solve(x3, rhs);
+    EXPECT_LT(residual(mat, x3, rhs), 1e-3);
+  }
+
+  { // double
+    SparseMatrix<double> mat = buildSPDTestMatrix<double>();
+    mat.coeffRef(2, 3) += 0.5; // make non-symmetric
+    Vector<double> rhs = randomVector<double>(mat.cols());
+
+    // one-off
+    Vector<double> x1 = solveSquare(mat, rhs);
+    EXPECT_LT(residual(mat, x1, rhs), 1e-4);
+
+
+    // stateful
+    SquareSolver<double> solver(mat);
+
+    Vector<double> x2 = solver.solve(rhs);
+    EXPECT_LT(residual(mat, x2, rhs), 1e-4);
+
+    Vector<double> x3;
+    solver.solve(x3, rhs);
+    EXPECT_LT(residual(mat, x3, rhs), 1e-4);
+  }
+
+  { // std::complex<double>
+    SparseMatrix<std::complex<double>> mat = buildSPDTestMatrix<std::complex<double>>();
+    mat.coeffRef(2, 3) += 0.5; // make non-symmetric
+    Vector<std::complex<double>> rhs = randomVector<std::complex<double>>(mat.cols());
+
+    // one-off
+    Vector<std::complex<double>> x1 = solveSquare(mat, rhs);
+    EXPECT_LT(residual(mat, x1, rhs), 1e-4);
+
+
+    // stateful
+    SquareSolver<std::complex<double>> solver(mat);
+
+    Vector<std::complex<double>> x2 = solver.solve(rhs);
+    EXPECT_LT(residual(mat, x2, rhs), 1e-4);
+
+    Vector<std::complex<double>> x3;
+    solver.solve(x3, rhs);
+    EXPECT_LT(residual(mat, x3, rhs), 1e-4);
+  }
+}
+
+TEST_F(LinearAlgebraTestSuite, TestQRSolvers_square) {
+
+  { // float
+    std::cout << "float" << std::endl;
+    SparseMatrix<float> mat = buildSPDTestMatrix<float>();
+    mat.coeffRef(2, 3) += 0.5; // make non-symmetric
+    Vector<float> rhs = randomVector<float>(mat.cols());
+
+    // one-off
+    Vector<float> x1 = solve(mat, rhs);
+    EXPECT_LT(residual(mat, x1, rhs), 1e-3);
+
+
+    // stateful
+    Solver<float> solver(mat);
+
+    Vector<float> x2 = solver.solve(rhs);
+    EXPECT_LT(residual(mat, x2, rhs), 1e-3);
+
+    Vector<float> x3;
+    solver.solve(x3, rhs);
+    EXPECT_LT(residual(mat, x3, rhs), 1e-3);
+  }
+
+  { // double
+    std::cout << "double" << std::endl;
+    SparseMatrix<double> mat = buildSPDTestMatrix<double>();
+    mat.coeffRef(2, 3) += 0.5; // make non-symmetric
+    Vector<double> rhs = randomVector<double>(mat.cols());
+
+    // one-off
+    Vector<double> x1 = solve(mat, rhs);
+    EXPECT_LT(residual(mat, x1, rhs), 1e-4);
+
+
+    // stateful
+    Solver<double> solver(mat);
+
+    Vector<double> x2 = solver.solve(rhs);
+    EXPECT_LT(residual(mat, x2, rhs), 1e-4);
+
+    Vector<double> x3;
+    solver.solve(x3, rhs);
+    EXPECT_LT(residual(mat, x3, rhs), 1e-4);
+  }
+
+  { // std::complex<double>
+    std::cout << "complex" << std::endl;
+    SparseMatrix<std::complex<double>> mat = buildSPDTestMatrix<std::complex<double>>();
+    mat.coeffRef(2, 3) += 0.5; // make non-symmetric
+    Vector<std::complex<double>> rhs = randomVector<std::complex<double>>(mat.cols());
+
+    // one-off
+    Vector<std::complex<double>> x1 = solve(mat, rhs);
+    EXPECT_LT(residual(mat, x1, rhs), 1e-4);
+
+
+    // stateful
+    Solver<std::complex<double>> solver(mat);
+
+    Vector<std::complex<double>> x2 = solver.solve(rhs);
+    EXPECT_LT(residual(mat, x2, rhs), 1e-4);
+
+    Vector<std::complex<double>> x3;
+    solver.solve(x3, rhs);
+    EXPECT_LT(residual(mat, x3, rhs), 1e-4);
+  }
+}

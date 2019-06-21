@@ -27,7 +27,7 @@ SquareSolver<T>::~SquareSolver() {
 #endif
 }
 
-// Helper functions to interface with umfpack without explicitly specializing all of prepare() and solve(). Different
+// Helper functions to interface with umfpack without explicitly specializing all of constructor and solve(). Different
 // function calls are needed for real vs. complex case.
 // Note that float case is identical to double; umfpack never uses single precision
 // Note that we use packed (interleaved) complex formats, rather than passing separate real and imaginary arrays
@@ -104,19 +104,17 @@ void umfSolve<std::complex<double>>(size_t N, cholmod_sparse* mat, void* numeric
 
 
 template <typename T>
-void SquareSolver<T>::prepare() {
+SquareSolver<T>::SquareSolver(SparseMatrix<T>& mat) : LinearSolver<T>(mat) {
 
-  size_t N = this->mat.rows();
-
-// Check some sanity
-#ifndef GC_NLINALG_DEBUG
-  if ((size_t)this->mat.cols() != N) {
+  // Check some sanity
+  if (this->nRows != this->nCols) {
     throw std::logic_error("Matrix must be square");
   }
-  checkFinite(this->mat);
+#ifndef GC_NLINALG_DEBUG
+  checkFinite(mat);
 #endif
 
-  this->mat.makeCompressed();
+  mat.makeCompressed();
 
 // Suitesparse variant
 #ifdef HAVE_SUITESPARSE
@@ -124,7 +122,7 @@ void SquareSolver<T>::prepare() {
   if (cMat != nullptr) {
     cholmod_l_free_sparse(&cMat, context);
   }
-  cMat = toCholmod(this->mat, context);
+  cMat = toCholmod(mat, context);
 
   // Factor
   umfFactor<T>(N, cMat, symbolicFactorization, numericFactorization);
@@ -132,7 +130,7 @@ void SquareSolver<T>::prepare() {
 
 // Eigen variant
 #else
-  solver.compute(this->mat);
+  solver.compute(mat);
   if (solver.info() != Eigen::Success) {
     std::cerr << "Solver factorization error: " << solver.info() << std::endl;
     throw std::invalid_argument("Solver factorization failed");
@@ -150,7 +148,7 @@ Vector<T> SquareSolver<T>::solve(const Vector<T>& rhs) {
 template <typename T>
 void SquareSolver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
 
-  size_t N = this->mat.rows();
+  size_t N = this->nRows;
 
   // Check some sanity
 #ifndef GC_NLINALG_DEBUG
@@ -176,19 +174,10 @@ void SquareSolver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
     throw std::invalid_argument("Solve failed");
   }
 #endif
-
-  // Compute residual to spot bad solves
-#ifndef GC_NLINALG_DEBUG
-  Matrix<T, Dynamic, 1> residual = this->mat * x - rhs;
-  double residualNorm = residual.norm();
-  double relativeResidualNorm = residualNorm / rhs.norm();
-  std::cout << "  -- Residual norm: " << residualNorm << "   relative residual norm: " << relativeResidualNorm
-            << std::endl;
-#endif
 }
 
 template <typename T>
-Vector<T> solveSquare(const SparseMatrix<T>& A, const Vector<T>& rhs) {
+Vector<T> solveSquare(SparseMatrix<T>& A, const Vector<T>& rhs) {
   SquareSolver<T> s(A);
   return s.solve(rhs);
 }
@@ -198,9 +187,9 @@ template class SquareSolver<double>;
 template class SquareSolver<float>;
 template class SquareSolver<std::complex<double>>;
 
-template Vector<float> solveSquare(const SparseMatrix<float>& A, const Vector<float>& rhs);
-template Vector<double> solveSquare(const SparseMatrix<double>& A, const Vector<double>& rhs);
-template Vector<std::complex<double>> solveSquare(const SparseMatrix<std::complex<double>>& A,
+template Vector<float> solveSquare(SparseMatrix<float>& A, const Vector<float>& rhs);
+template Vector<double> solveSquare(SparseMatrix<double>& A, const Vector<double>& rhs);
+template Vector<std::complex<double>> solveSquare(SparseMatrix<std::complex<double>>& A,
                                                   const Vector<std::complex<double>>& rhs);
 
 

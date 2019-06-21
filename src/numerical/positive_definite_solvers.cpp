@@ -26,20 +26,20 @@ PositiveDefiniteSolver<T>::~PositiveDefiniteSolver() {
 }
 
 template <typename T>
-void PositiveDefiniteSolver<T>::prepare() {
+PositiveDefiniteSolver<T>::PositiveDefiniteSolver(SparseMatrix<T>& mat) : LinearSolver<T>(mat) {
 
-  size_t N = this->mat.rows();
 
-// Check some sanity
-#ifndef GC_NLINALG_DEBUG
-  if ((size_t)this->mat.cols() != N) {
+  // Check some sanity
+  if (this->nRows != this->nCols) {
     throw std::logic_error("Matrix must be square");
   }
-  checkFinite(this->mat);
-  checkHermitian(this->mat);
+  size_t N = this->nRows;
+#ifndef GC_NLINALG_DEBUG
+  checkFinite(mat);
+  checkHermitian(mat);
 #endif
 
-  this->mat.makeCompressed();
+  mat.makeCompressed();
 
   // Suitesparse version
 #ifdef HAVE_SUITESPARSE
@@ -48,7 +48,7 @@ void PositiveDefiniteSolver<T>::prepare() {
   if (cMat != nullptr) {
     cholmod_l_free_sparse(&cMat, context);
   }
-  cMat = toCholmod(this->mat, context, SType::SYMMETRIC);
+  cMat = toCholmod(mat, context, SType::SYMMETRIC);
 
   // Factor
   context.setSimplicial(); // must use simplicial for LDLt
@@ -58,7 +58,7 @@ void PositiveDefiniteSolver<T>::prepare() {
 
   // Eigen version
 #else
-  solver.compute(this->mat);
+  solver.compute(mat);
   if (solver.info() != Eigen::Success) {
     std::cerr << "Solver factorization error: " << solver.info() << std::endl;
     throw std::invalid_argument("Solver factorization failed");
@@ -76,7 +76,7 @@ Vector<T> PositiveDefiniteSolver<T>::solve(const Vector<T>& rhs) {
 template <typename T>
 void PositiveDefiniteSolver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
 
-  size_t N = this->mat.rows();
+  size_t N = this->nRows;
 
   // Check some sanity
   if ((size_t)rhs.rows() != N) {
@@ -112,19 +112,10 @@ void PositiveDefiniteSolver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
     throw std::invalid_argument("Solve failed");
   }
 #endif
-
-  // Compute residual to spot bad solves
-#ifndef GC_NLINALG_DEBUG
-  Matrix<T, Dynamic, 1> residual = this->mat * x - rhs;
-  double residualNorm = residual.norm();
-  double relativeResidualNorm = residualNorm / rhs.norm();
-  std::cout << "  -- Residual norm: " << residualNorm << "   relative residual norm: " << relativeResidualNorm
-            << std::endl;
-#endif
 }
 
 template <typename T>
-Vector<T> solvePositiveDefinite(const SparseMatrix<T>& A, const Vector<T>& rhs) {
+Vector<T> solvePositiveDefinite(SparseMatrix<T>& A, const Vector<T>& rhs) {
   PositiveDefiniteSolver<T> s(A);
   return s.solve(rhs);
 }
@@ -135,10 +126,10 @@ template class PositiveDefiniteSolver<double>;
 template class PositiveDefiniteSolver<float>;
 template class PositiveDefiniteSolver<std::complex<double>>;
 
-template Vector<float> solvePositiveDefinite<float>(const SparseMatrix<float>& A, const Vector<float>& rhs);
-template Vector<double> solvePositiveDefinite<double>(const SparseMatrix<double>& A, const Vector<double>& rhs);
+template Vector<float> solvePositiveDefinite<float>(SparseMatrix<float>& A, const Vector<float>& rhs);
+template Vector<double> solvePositiveDefinite<double>(SparseMatrix<double>& A, const Vector<double>& rhs);
 template Vector<std::complex<double>>
-solvePositiveDefinite<std::complex<double>>(const SparseMatrix<std::complex<double>>& A,
+solvePositiveDefinite<std::complex<double>>(SparseMatrix<std::complex<double>>& A,
                                             const Vector<std::complex<double>>& rhs);
 
 

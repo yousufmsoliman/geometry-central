@@ -31,23 +31,20 @@ Solver<T>::~Solver() {
 }
 
 template <typename T>
-void Solver<T>::prepare() {
-
-  size_t Nrows = this->mat.rows();
-  size_t Ncols = this->mat.cols();
+Solver<T>::Solver(SparseMatrix<T>& mat) : LinearSolver<T>(mat) {
 
 // Check some sanity
 #ifndef GC_NLINALG_DEBUG
-  checkFinite(this->mat);
+  checkFinite(mat);
 #endif
 
-  this->mat.makeCompressed();
+  mat.makeCompressed();
 
 // Suitesparse version
 #ifdef HAVE_SUITESPARSE
 
   // Is the system underdetermined?
-  if (Nrows < Ncols) {
+  if (this->nRows < this-> : w gnCols) {
     underdetermined = true;
     throw std::logic_error("is not well tested, be careful");
   } else {
@@ -97,12 +94,11 @@ void Solver<T>::prepare() {
 
 // Eigen version
 #else
-  solver.compute(this->mat);
+  solver.compute(mat);
   if (solver.info() != Eigen::Success) {
     std::cerr << "Solver factorization error: " << solver.info() << std::endl;
     throw std::invalid_argument("Solver factorization failed");
   }
-  std::cout << "Eigen done factoring" << std::endl;
 #endif
 };
 
@@ -116,13 +112,11 @@ Vector<T> Solver<T>::solve(const Vector<T>& rhs) {
 template <typename T>
 void Solver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
 
-  size_t N = this->mat.rows();
-
-// Check some sanity
-#ifndef GC_NLINALG_DEBUG
-  if ((size_t)rhs.rows() != N) {
+  // Check some sanity
+  if ((size_t)rhs.rows() != this->nRows) {
     throw std::logic_error("Vector is not the right length");
   }
+#ifndef GC_NLINALG_DEBUG
   checkFinite(rhs);
 #endif
 
@@ -176,19 +170,10 @@ void Solver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
     throw std::invalid_argument("Solve failed");
   }
 #endif
-
-// Compute residual to spot bad solves
-#ifndef GC_NLINALG_DEBUG
-  Matrix<T, Dynamic, 1> residual = this->mat * x - rhs;
-  double residualNorm = residual.norm();
-  double relativeResidualNorm = residualNorm / rhs.norm();
-  std::cout << "  -- Residual norm: " << residualNorm << "   relative residual norm: " << relativeResidualNorm
-            << std::endl;
-#endif
 }
 
 template <typename T>
-Vector<T> solve(const SparseMatrix<T>& A, const Vector<T>& rhs) {
+Vector<T> solve(SparseMatrix<T>& A, const Vector<T>& rhs) {
   Solver<T> s(A);
   return s.solve(rhs);
 }
@@ -208,9 +193,9 @@ template class Solver<double>;
 template class Solver<float>;
 template class Solver<std::complex<double>>;
 
-template Vector<float> solve(const SparseMatrix<float>& A, const Vector<float>& rhs);
-template Vector<double> solve(const SparseMatrix<double>& A, const Vector<double>& rhs);
-template Vector<std::complex<double>> solve(const SparseMatrix<std::complex<double>>& A,
+template Vector<float> solve(SparseMatrix<float>& A, const Vector<float>& rhs);
+template Vector<double> solve(SparseMatrix<double>& A, const Vector<double>& rhs);
+template Vector<std::complex<double>> solve(SparseMatrix<std::complex<double>>& A,
                                             const Vector<std::complex<double>>& rhs);
 
 } // namespace geometrycentral
