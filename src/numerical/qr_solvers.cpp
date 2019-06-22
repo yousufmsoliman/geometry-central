@@ -2,7 +2,7 @@
 
 #include "geometrycentral/numerical/linear_algebra_utilities.h"
 
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
 #include "geometrycentral/numerical/suitesparse_utilities.h"
 #include <SuiteSparseQR.hpp>
 #include <cholmod.h>
@@ -16,11 +16,11 @@ namespace geometrycentral {
 template <typename T>
 struct QRSolverInternals {
   // Implementation-specific quantities
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
   CholmodContext context;
   cholmod_sparse* cMat = nullptr;
   cholmod_sparse* cMatTrans = nullptr;
-  SuiteSparseQR_factorization<typename Solver<T>::SOLVER_ENTRYTYPE>* factorization = nullptr;
+  SuiteSparseQR_factorization<typename SOLVER_ENTRYTYPE<T>::type>* factorization = nullptr;
   double zero_tolerance = -2; // (use default)
 #else
   Eigen::SparseQR<SparseMatrix<T>, Eigen::COLAMDOrdering<int>> solver;
@@ -29,7 +29,7 @@ struct QRSolverInternals {
 
 template <typename T>
 Solver<T>::~Solver() {
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
   if (internals->cMat != nullptr) {
     cholmod_l_free_sparse(&internals->cMat, internals->context);
     internals->cMat = nullptr;
@@ -63,7 +63,7 @@ Solver<T>::Solver(SparseMatrix<T>& mat) : LinearSolver<T>(mat), internals(new QR
   mat.makeCompressed();
 
 // Suitesparse version
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
 
   // Convert suitesparse format
   // Either use A or A^T, depending on whether the system underdetermined
@@ -95,10 +95,10 @@ Solver<T>::Solver(SparseMatrix<T>& mat) : LinearSolver<T>(mat), internals(new QR
   }
 
   if (underdetermined) {
-    internals->factorization = SuiteSparseQR_factorize<typename Solver<T>::SOLVER_ENTRYTYPE>(
+    internals->factorization = SuiteSparseQR_factorize<typename SOLVER_ENTRYTYPE<T>::type>(
         ordering, internals->zero_tolerance, internals->cMatTrans, internals->context);
   } else {
-    internals->factorization = SuiteSparseQR_factorize<typename Solver<T>::SOLVER_ENTRYTYPE>(
+    internals->factorization = SuiteSparseQR_factorize<typename SOLVER_ENTRYTYPE<T>::type>(
         ordering, internals->zero_tolerance, internals->cMat, internals->context);
   }
 
@@ -140,7 +140,7 @@ void Solver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
 #endif
 
 // Suitesparse version
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
 
   // Convert input to suitesparse format
   cholmod_dense* inVec = toCholmod(rhs, internals->context);
@@ -152,24 +152,24 @@ void Solver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
   if (underdetermined) {
 
     // solve y = R^-T b
-    cholmod_dense* y = SuiteSparseQR_solve<typename Solver<T>::SOLVER_ENTRYTYPE>(
+    cholmod_dense* y = SuiteSparseQR_solve<typename SOLVER_ENTRYTYPE<T>::type>(
         SPQR_RTX_EQUALS_B, internals->factorization, inVec, internals->context);
 
     // compute x = Q*y
-    outVec = SuiteSparseQR_qmult<typename Solver<T>::SOLVER_ENTRYTYPE>(SPQR_QX, internals->factorization, y,
-                                                                       internals->context);
+    outVec = SuiteSparseQR_qmult<typename SOLVER_ENTRYTYPE<T>::type>(SPQR_QX, internals->factorization, y,
+                                                                     internals->context);
     cholmod_l_free_dense(&y, internals->context);
 
   } else {
 
     // compute y = Q^T b
-    cholmod_dense* y = SuiteSparseQR_qmult<typename Solver<T>::SOLVER_ENTRYTYPE>(SPQR_QTX, internals->factorization,
-                                                                                 inVec, internals->context);
+    cholmod_dense* y = SuiteSparseQR_qmult<typename SOLVER_ENTRYTYPE<T>::type>(SPQR_QTX, internals->factorization,
+                                                                               inVec, internals->context);
 
     // solve x = R^-1 y
     // TODO what is this E doing here?
-    outVec = SuiteSparseQR_solve<typename Solver<T>::SOLVER_ENTRYTYPE>(SPQR_RETX_EQUALS_B, internals->factorization, y,
-                                                                       internals->context);
+    outVec = SuiteSparseQR_solve<typename SOLVER_ENTRYTYPE<T>::type>(SPQR_RETX_EQUALS_B, internals->factorization, y,
+                                                                     internals->context);
 
     cholmod_l_free_dense(&y, internals->context);
   }
@@ -202,7 +202,7 @@ Vector<T> solve(SparseMatrix<T>& A, const Vector<T>& rhs) {
 
 template <typename T>
 size_t Solver<T>::rank() {
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
   return internals->factorization->rank;
 #else
   return internals->solver.rank();

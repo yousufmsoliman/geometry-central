@@ -5,11 +5,14 @@
 #include "Eigen/Sparse"
 
 // Suitesparse includes, as needed
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
+#include "geometrycentral/numerical/suitesparse_utilities.h"
+#include <SuiteSparseQR.hpp>
 #include <cholmod.h>
 #else
 #error "USING SUITESPARSE FEATURES, BUT DON'T HAVE SUITESPARSE"
 #endif
+
 
 namespace geometrycentral {
 
@@ -38,6 +41,13 @@ public:
 
 protected:
   cholmod_common context;
+};
+
+
+  // Type helper. This type is 'double' if T == 'float', and T otherwise
+template<typename T>
+struct SOLVER_ENTRYTYPE {
+  typedef typename std::conditional<std::is_same<T, float>::value, double, T>::type type;
 };
 
 // === Conversion functions

@@ -2,7 +2,7 @@
 
 #include "geometrycentral/numerical/linear_algebra_utilities.h"
 
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
 #include "geometrycentral/numerical/suitesparse_utilities.h"
 #include <umfpack.h>
 #endif
@@ -13,7 +13,7 @@ namespace geometrycentral {
 
 template <typename T>
 struct SquareSolverInternals {
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
   CholmodContext context;
   cholmod_sparse* cMat = nullptr;
   void* symbolicFactorization = nullptr;
@@ -25,7 +25,7 @@ struct SquareSolverInternals {
 
 template <typename T>
 SquareSolver<T>::~SquareSolver() {
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
   if (internals->cMat != nullptr) {
     cholmod_l_free_sparse(&internals->cMat, internals->context);
     internals->cMat = nullptr;
@@ -46,7 +46,7 @@ SquareSolver<T>::~SquareSolver() {
 // TODO: The old SparseMatrix code in grand-central does seem to do this. Was is a bad bug, or am I missing something?
 namespace {
 
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
 // = Factorization
 template <typename T>
 void umfFactor(size_t N, cholmod_sparse* mat, void*& symbolicFac, void*& numericFac);
@@ -129,7 +129,7 @@ SquareSolver<T>::SquareSolver(SparseMatrix<T>& mat) : LinearSolver<T>(mat), inte
   mat.makeCompressed();
 
 // Suitesparse variant
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
   // Convert suitesparse format
   if (internals->cMat != nullptr) {
     cholmod_l_free_sparse(&internals->cMat, internals->context);
@@ -171,7 +171,7 @@ void SquareSolver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
 #endif
 
   // Suitesparse version
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
 
   // Templated helper does all the hard work
   umfSolve<T>(N, internals->cMat, internals->numericFactorization, x, rhs);

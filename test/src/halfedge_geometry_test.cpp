@@ -243,11 +243,12 @@ TEST_F(HalfedgeGeometrySuite, FaceAreaOverrides) {
   bool allExactSame = true;
   for (Face f : mesh.faces()) {
     EXPECT_NEAR(geometry.faceAreas[f], origGeometry.faceAreas[f], 1e-6);
-    
+
     allExactSame = allExactSame && (geometry.faceAreas[f] == origGeometry.faceAreas[f]);
   }
 
-  // Ensure that not all of the values are exactly the same to the bit-- this tell us that the type system is behaving nicely and the override version is actually being invoked.
+  // Ensure that not all of the values are exactly the same to the bit-- this tell us that the type system is behaving
+  // nicely and the override version is actually being invoked.
   EXPECT_FALSE(allExactSame);
 }
 
@@ -374,11 +375,12 @@ TEST_F(HalfedgeGeometrySuite, CornerAngleOverrides) {
   bool allExactSame = true;
   for (Corner c : mesh.corners()) {
     EXPECT_NEAR(geometry.cornerAngles[c], origGeometry.cornerAngles[c], 1e-6);
-    
+
     allExactSame = allExactSame && (geometry.cornerAngles[c] == origGeometry.cornerAngles[c]);
   }
 
-  // Ensure that not all of the values are exactly the same to the bit-- this tell us that the type system is behaving nicely and the override version is actually being invoked.
+  // Ensure that not all of the values are exactly the same to the bit-- this tell us that the type system is behaving
+  // nicely and the override version is actually being invoked.
   EXPECT_FALSE(allExactSame);
 }
 
@@ -417,6 +419,7 @@ TEST_F(HalfedgeGeometrySuite, VertexGaussianCurvatures) {
   geometry.requireVertexGaussianCurvatures();
   for (Vertex e : mesh.vertices()) {
     EXPECT_TRUE(std::isfinite(geometry.vertexGaussianCurvatures[e]));
+    //EXPECT_LT(std::abs(geometry.vertexGaussianCurvatures[e]), 100.);
   }
 }
 
@@ -499,14 +502,14 @@ TEST_F(HalfedgeGeometrySuite, HalfedgeCotanWeightOverrides) {
   bool allExactSame = true;
   for (Halfedge he : mesh.halfedges()) {
     EXPECT_NEAR(geometry.halfedgeCotanWeights[he], origGeometry.halfedgeCotanWeights[he], 1e-6);
-    
+
     allExactSame = allExactSame && (geometry.halfedgeCotanWeights[he] == origGeometry.halfedgeCotanWeights[he]);
   }
 
-  // Ensure that not all of the values are exactly the same to the bit-- this tell us that the type system is behaving nicely and the override version is actually being invoked.
+  // Ensure that not all of the values are exactly the same to the bit-- this tell us that the type system is behaving
+  // nicely and the override version is actually being invoked.
   EXPECT_FALSE(allExactSame);
 }
-
 
 
 TEST_F(HalfedgeGeometrySuite, EdgeCotanWeights) {
@@ -576,11 +579,12 @@ TEST_F(HalfedgeGeometrySuite, EdgeCotanWeightOverrides) {
   bool allExactSame = true;
   for (Edge e : mesh.edges()) {
     EXPECT_NEAR(geometry.edgeCotanWeights[e], origGeometry.edgeCotanWeights[e], 1e-6);
-    
+
     allExactSame = allExactSame && (geometry.edgeCotanWeights[e] == origGeometry.edgeCotanWeights[e]);
   }
 
-  // Ensure that not all of the values are exactly the same to the bit-- this tell us that the type system is behaving nicely and the override version is actually being invoked.
+  // Ensure that not all of the values are exactly the same to the bit-- this tell us that the type system is behaving
+  // nicely and the override version is actually being invoked.
   EXPECT_FALSE(allExactSame);
 }
 
@@ -824,7 +828,8 @@ TEST_F(HalfedgeGeometrySuite, VertexGaussianCurvaturesSum) {
     geometry.requireVertexGaussianCurvatures();
     double curvatureSum = 0.;
     for (Vertex e : mesh.vertices()) {
-      curvatureSum += geometry.vertexGaussianCurvatures[e];
+      double s = geometry.vertexGaussianCurvatures[e];
+      curvatureSum += s;
     }
 
     double gaussBonnetCurvature = 2. * PI * mesh.eulerCharacteristic();

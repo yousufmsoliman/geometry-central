@@ -4,13 +4,6 @@
 
 #include "Eigen/Sparse"
 
-// Suitesparse includes, as needed
-#ifdef HAVE_SUITESPARSE
-#include "geometrycentral/numerical/suitesparse_utilities.h"
-#include <SuiteSparseQR.hpp>
-#include <cholmod.h>
-#endif
-
 #include <iostream>
 #include <memory>
 
@@ -81,11 +74,6 @@ class Solver final : public LinearSolver<T> {
 public:
   Solver(SparseMatrix<T>& mat);
   ~Solver();
-
-#ifdef HAVE_SUITESPARSE
-  // Type wizardry. This type is 'double' if T == 'float', and T otherwise
-  typedef typename std::conditional<std::is_same<T, float>::value, double, T>::type SOLVER_ENTRYTYPE;
-#endif
 
   // Solve!
   void solve(Vector<T>& x, const Vector<T>& rhs) override;

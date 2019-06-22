@@ -1,4 +1,4 @@
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
 #include "geometrycentral/numerical/suitesparse_utilities.h"
 
 #include "geometrycentral/utilities/utilities.h"

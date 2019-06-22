@@ -23,6 +23,18 @@ using std::endl;
 // =============== General helpers
 // ============================================================
 
+template <typename T>
+T randomFromRangeD(double low, double high, std::mt19937& test_mersenne_twister) {
+  std::uniform_real_distribution<T> dist(low, high);
+  return dist(test_mersenne_twister);
+}
+template <>
+std::complex<double> randomFromRangeD(double low, double high, std::mt19937& test_mersenne_twister) {
+  return std::complex<double>(randomFromRangeD<double>(low, high, test_mersenne_twister),
+                              randomFromRangeD<double>(low, high, test_mersenne_twister));
+}
+
+
 class LinearAlgebraTestSuite : public ::testing::Test {
 protected:
   static void SetUpTestSuite() {
@@ -46,20 +58,8 @@ protected:
 
   // Generate a random in range [low, high]
   template <typename T>
-  T randomFromRange(double low, double high);
-  template <>
-  float randomFromRange(double low, double high) {
-    std::uniform_real_distribution<float> dist(low, high);
-    return dist(test_mersenne_twister);
-  };
-  template <>
-  double randomFromRange(double low, double high) {
-    std::uniform_real_distribution<double> dist(low, high);
-    return dist(test_mersenne_twister);
-  };
-  template <>
-  std::complex<double> randomFromRange(double low, double high) {
-    return std::complex<double>(randomFromRange<double>(low, high), randomFromRange<double>(low, high));
+  T randomFromRange(double low, double high) {
+    return randomFromRangeD<T>(low, high, test_mersenne_twister);
   }
 
 
@@ -340,9 +340,9 @@ TEST_F(LinearAlgebraTestSuite, BlockDecomposeTest) {
 TEST_F(LinearAlgebraTestSuite, TestLDLTSolvers) {
 
   // Always useful to know
-#ifndef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
   std::cout << "Testing with Suitesparse solvers" << std::endl;
-#elif
+#else
   std::cout << "Testing with Eigen solvers" << std::endl;
 #endif
 
@@ -487,7 +487,7 @@ TEST_F(LinearAlgebraTestSuite, TestQRSolvers_square) {
   { // float
     SparseMatrix<float> mat = buildSPDTestMatrix<float>();
     mat = mat.topLeftCorner(100, 100);
-#ifndef HAVE_SUITESPARSE
+#ifndef GC_HAVE_SUITESPARSE
     // Eigen is really slow, so use a tiny matrix
     mat = mat.topLeftCorner(10, 10);
 #endif
@@ -514,7 +514,7 @@ TEST_F(LinearAlgebraTestSuite, TestQRSolvers_square) {
   { // double
     SparseMatrix<double> mat = buildSPDTestMatrix<double>();
     mat = mat.topLeftCorner(100, 100);
-#ifndef HAVE_SUITESPARSE
+#ifndef GC_HAVE_SUITESPARSE
     // Eigen is really slow, so use a tiny matrix
     mat = mat.topLeftCorner(10, 10);
 #endif
@@ -540,7 +540,7 @@ TEST_F(LinearAlgebraTestSuite, TestQRSolvers_square) {
   { // std::complex<double>
     SparseMatrix<std::complex<double>> mat = buildSPDTestMatrix<std::complex<double>>();
     mat = mat.topLeftCorner(100, 100);
-#ifndef HAVE_SUITESPARSE
+#ifndef GC_HAVE_SUITESPARSE
     // Eigen is really slow, so use a tiny matrix
     mat = mat.topLeftCorner(10, 10);
 #endif
@@ -570,7 +570,7 @@ TEST_F(LinearAlgebraTestSuite, TestQRSolvers_skinny) {
   { // float
     SparseMatrix<float> mat = buildSPDTestMatrix<float>();
     mat = mat.topLeftCorner(100, 100);
-#ifndef HAVE_SUITESPARSE
+#ifndef GC_HAVE_SUITESPARSE
     // Eigen is really slow, so use a tiny matrix
     mat = mat.topLeftCorner(10, 10);
 #endif
@@ -602,7 +602,7 @@ TEST_F(LinearAlgebraTestSuite, TestQRSolvers_skinny) {
   { // double
     SparseMatrix<double> mat = buildSPDTestMatrix<double>();
     mat = mat.topLeftCorner(100, 100);
-#ifndef HAVE_SUITESPARSE
+#ifndef GC_HAVE_SUITESPARSE
     // Eigen is really slow, so use a tiny matrix
     mat = mat.topLeftCorner(10, 10);
 #endif
@@ -635,7 +635,7 @@ TEST_F(LinearAlgebraTestSuite, TestQRSolvers_skinny) {
   { // std::complex<double>
     SparseMatrix<std::complex<double>> mat = buildSPDTestMatrix<std::complex<double>>();
     mat = mat.topLeftCorner(100, 100);
-#ifndef HAVE_SUITESPARSE
+#ifndef GC_HAVE_SUITESPARSE
     // Eigen is really slow, so use a tiny matrix
     mat = mat.topLeftCorner(10, 10);
 #endif
@@ -672,7 +672,7 @@ TEST_F(LinearAlgebraTestSuite, TestQRSolvers_wide) {
   // Our solvers probably can't be used reliably with underdetermined systems in Eigen (what about SuiteSparse?).
   // http://eigen.tuxfamily.org/bz/show_bug.cgi?id=899
 
-#ifndef HAVE_SUITESPARSE
+#ifndef GC_HAVE_SUITESPARSE
   std::cerr << "Skipping TestQRSolvers_wide for Eigen" << std::endl;
   return;
 #endif
@@ -681,7 +681,7 @@ TEST_F(LinearAlgebraTestSuite, TestQRSolvers_wide) {
   { // float
     SparseMatrix<float> mat = buildSPDTestMatrix<float>();
     mat = mat.topLeftCorner(100, 100);
-#ifndef HAVE_SUITESPARSE
+#ifndef GC_HAVE_SUITESPARSE
     // Eigen is really slow, so use a tiny matrix
     mat = mat.topLeftCorner(10, 10);
 #endif
@@ -708,7 +708,7 @@ TEST_F(LinearAlgebraTestSuite, TestQRSolvers_wide) {
   { // double
     SparseMatrix<double> mat = buildSPDTestMatrix<double>();
     mat = mat.topLeftCorner(100, 100);
-#ifndef HAVE_SUITESPARSE
+#ifndef GC_HAVE_SUITESPARSE
     // Eigen is really slow, so use a tiny matrix
     mat = mat.topLeftCorner(10, 10);
 #endif
@@ -735,7 +735,7 @@ TEST_F(LinearAlgebraTestSuite, TestQRSolvers_wide) {
   { // std::complex<double>
     SparseMatrix<std::complex<double>> mat = buildSPDTestMatrix<std::complex<double>>();
     mat = mat.topLeftCorner(100, 100);
-#ifndef HAVE_SUITESPARSE
+#ifndef GC_HAVE_SUITESPARSE
     // Eigen is really slow, so use a tiny matrix
     mat = mat.topLeftCorner(10, 10);
 #endif

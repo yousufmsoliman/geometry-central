@@ -87,7 +87,6 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 set_property(TARGET gtest PROPERTY CXX_STANDARD 11)
 
 
-
 ### Set (hardcode) a variable for where to find the assets
 set(REL_ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets/")
 get_filename_component(ABS_ASSETS_DIR "${REL_ASSETS_DIR}" ABSOLUTE)
@@ -110,3 +109,7 @@ target_link_libraries(geometry-central-test gtest_main geometry-central)
 
 # Add geometry central as a subproject
 add_subdirectory(../ "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+if(GC_HAVE_SUITESPARSE)
+    add_definitions(-DGC_HAVE_SUITESPARSE)
+endif()
+

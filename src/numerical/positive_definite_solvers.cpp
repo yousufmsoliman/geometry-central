@@ -2,7 +2,7 @@
 
 #include "geometrycentral/numerical/linear_algebra_utilities.h"
 
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
 #include "geometrycentral/numerical/suitesparse_utilities.h"
 #endif
 
@@ -14,7 +14,7 @@ namespace geometrycentral {
 
 template <typename T>
 struct PSDSolverInternals {
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
   CholmodContext context;
   cholmod_sparse* cMat = nullptr;
   cholmod_factor* factorization = nullptr;
@@ -25,7 +25,7 @@ struct PSDSolverInternals {
 
 template <typename T>
 PositiveDefiniteSolver<T>::~PositiveDefiniteSolver() {
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
   if (internals->cMat != nullptr) {
     cholmod_l_free_sparse(&internals->cMat, internals->context);
     internals->cMat = nullptr;
@@ -54,7 +54,7 @@ PositiveDefiniteSolver<T>::PositiveDefiniteSolver(SparseMatrix<T>& mat)
   mat.makeCompressed();
 
   // Suitesparse version
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
 
   // Convert suitesparse format
   if (internals->cMat != nullptr) {
@@ -100,7 +100,7 @@ void PositiveDefiniteSolver<T>::solve(Vector<T>& x, const Vector<T>& rhs) {
 
 
   // Suitesparse version
-#ifdef HAVE_SUITESPARSE
+#ifdef GC_HAVE_SUITESPARSE
 
   // Convert input to suitesparse format
   cholmod_dense* inVec = toCholmod(rhs, internals->context);

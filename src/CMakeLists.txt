@@ -52,14 +52,14 @@ target_include_directories(geometry-central PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/
 target_include_directories(geometry-central PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../deps/nanort/include")
 target_include_directories(geometry-central PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../deps/nanoflann/include")
 target_include_directories(geometry-central PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../deps/happly")
-if(SUITESPARSE_FOUND)
+if(GC_HAVE_SUITESPARSE)
   target_include_directories(geometry-central PUBLIC "${SUITESPARSE_INCLUDE_DIRS}")
 endif()
 
 # If we (optionally) resolved suitesparse support, we want to link against that as well
-if(HAVE_SUITESPARSE)
+if(GC_HAVE_SUITESPARSE)
     target_link_libraries(geometry-central ${SUITESPARSE_LIBRARIES})
-endif(HAVE_SUITESPARSE)
+endif(GC_HAVE_SUITESPARSE)
 
 
 # Set compiler properties for the library
