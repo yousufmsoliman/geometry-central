@@ -63,7 +63,7 @@ endif (SUITESPARSE)
 # The SuiteSparse logic above doesn't look for UMFpack, but we need it.
 # This code attempts to find if by assuming that it will be in the same place
 # as cholmod
-if(SUITESPARSE_FOUND)
+if(SUITESPARSE AND SUITESPARSE_FOUND)
     string(REGEX REPLACE "cholmod" "umfpack" UMFPACK_LIBRARY ${CHOLMOD_LIBRARY})
     message("-- Guesstimated umfpack location as: ${UMFPACK_LIBRARY}")
     if(EXISTS ${UMFPACK_LIBRARY})
@@ -74,11 +74,14 @@ if(SUITESPARSE_FOUND)
     endif()
 endif()
 
-if(SUITESPARSE_FOUND)
-    SET(HAVE_SUITESPARSE TRUE)
-    SET(HAVE_SUITESPARSE TRUE PARENT_SCOPE)
-    add_definitions(-DHAVE_SUITESPARSE)
+if(SUITESPARSE AND SUITESPARSE_FOUND)
+    SET(GC_HAVE_SUITESPARSE TRUE)
+    SET(GC_HAVE_SUITESPARSE TRUE PARENT_SCOPE)
+    add_definitions(-DGC_HAVE_SUITESPARSE)
     include_directories(${SUITESPARSE_INCLUDE_DIRS})
+else()
+    SET(GC_HAVE_SUITESPARSE FALSE)
+    SET(GC_HAVE_SUITESPARSE FALSE PARENT_SCOPE)
 endif()
 
 ### Handle windows-specific fixes
