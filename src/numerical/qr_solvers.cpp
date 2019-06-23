@@ -76,6 +76,11 @@ Solver<T>::Solver(SparseMatrix<T>& mat) : LinearSolver<T>(mat), internals(new QR
       cholmod_l_free_sparse(&(internals->cMatTrans), internals->context);
     }
     internals->cMatTrans = cholmod_l_transpose(internals->cMat, 2, internals->context);
+
+    // free the non-transposed matrix, its not needed
+    if (internals->cMat != nullptr) {
+      cholmod_l_free_sparse(&(internals->cMat), internals->context);
+    }
   }
 
   // Factor

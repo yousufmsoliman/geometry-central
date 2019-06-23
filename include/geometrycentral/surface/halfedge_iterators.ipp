@@ -80,7 +80,7 @@ inline bool VertexOutgoingHalfedgeNavigator::isValid() const { return true; }
 inline Halfedge VertexOutgoingHalfedgeNavigator::getCurrent() const { return currE; }
 
 inline void VertexAdjacentCornerNavigator::advance() { currE = currE.twin().next(); }
-inline bool VertexAdjacentCornerNavigator::isValid() const { return true; }
+inline bool VertexAdjacentCornerNavigator::isValid() const { return currE.isInterior(); }
 inline Corner VertexAdjacentCornerNavigator::getCurrent() const { return currE.corner(); }
 
 inline void VertexAdjacentEdgeNavigator::advance() { currE = currE.twin().next(); }

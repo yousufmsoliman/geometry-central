@@ -759,3 +759,5 @@ TEST_F(LinearAlgebraTestSuite, TestQRSolvers_wide) {
     EXPECT_LT(residual(mat, x3, rhs), 1e-4);
   }
 }
+
+// TODO test eigenvalue routines

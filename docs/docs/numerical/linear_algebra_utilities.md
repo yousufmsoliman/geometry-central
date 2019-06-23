@@ -35,14 +35,35 @@
     SparseMatrix<double> stacked = verticalStack<double>({matA, matB, matC});
     ```
 
+??? func "`#!cpp SparseMatrix<T> horizontalStack(const std::vector<SparseMatrix<T>>& mats)`"
+
+    Vertically stack sparse matrices like
+
+    $$
+    A,B,C \to
+    \begin{bmatrix}
+    A & B & C
+    \end{bmatrix}
+    $$
+
+    all matrices must have the same number of rows..
+
+    Example:
+    ```cpp
+    SparseMatrix<double> matA = /* N x 35 */
+    SparseMatrix<double> matB = /* N x 10 */
+    SparseMatrix<double> matC = /* N x 2 */
+    SparseMatrix<double> stacked = horizontalStack<double>({matA, matB, matC});
+    ```
+
 ??? func "`#!cpp SparseMatrix<double> complexToReal(const SparseMatrix<std::complex<double>>& m)`"
 
-    Convert an `N x M` complex matrix to a `2N x 2M` real matrix, expanding each complex component in to a `2 x 2` to evaluate the complex product.
+    Convert an `N x M` complex matrix to a `2N x 2M` real matrix, expanding each complex component in to a `2 x 2` block to evaluate the complex product.
 
 
 ??? func "`#!cpp Vector<double> complexToReal(const Vector<std::complex<double>>& v)`"
 
-    Convert an length `N` complex vector to a length `2N` real vector, expanding each complex component in to a consecutive real and imaginary component.
+    Convert an length `N` complex vector to a length `2N` real vector, expanding each complex component in to consecutive real and imaginary components.
 
 
 ### Validate matrix properties
@@ -56,7 +77,7 @@
 
     Verify that a matrix is symmetric, throwing if not. Defined for all Eigen sparse matrix types.
 
-    `absoluteEPS` is an epsilon to use for the element-wise symmetric test. If the default value of `-1.` is given, a suitable epsilon is automatically  computed from the matrix entries.
+    `absoluteEPS` is an epsilon to use for the element-wise comparison test. If the default value of `-1` is given, a reasonable epsilon is automatically computed from the matrix entries.
 
 ??? func "`#!cpp void checkHermitian(const Eigen::SparseMatrix<>& m, double absoluteEPS=-1.)`"
 
@@ -64,7 +85,7 @@
 
     For real matrices, identical to check symmetric.
 
-    `absoluteEPS` is an epsilon to use for the element-wise symmetric test. If the default value of `-1.` is given, a suitable epsilon is automatically  computed from the matrix entries.
+    `absoluteEPS` is an epsilon to use for the element-wise comparison test. If the default value of `-1` is given, a reasonable epsilon is automatically computed from the matrix entries.
 
 
 ### Block decomposition

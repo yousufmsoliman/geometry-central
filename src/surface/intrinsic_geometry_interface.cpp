@@ -130,7 +130,7 @@ void IntrinsicGeometryInterface::unrequireCornerAngles() { cornerAnglesQ.unrequi
 void IntrinsicGeometryInterface::computeVertexAngleSums() {
   cornerAnglesQ.ensureHave();
 
-  vertexAngleSums = VertexData<double>(mesh);
+  vertexAngleSums = VertexData<double>(mesh, 0.);
   for (Corner c : mesh.corners()) {
     vertexAngleSums[c.vertex()] += cornerAngles[c];
   }

@@ -64,13 +64,32 @@ std::cout << "matrix rank is " << solver.rank() << std::endl;
     
     Solve a system with a general matrix. Uses a QR decomposition interally.
 
+    Supports methods:
+
+    - `#!cpp Sovler::Solver(SparseMatrix<T>& mat)` construct from  a matrix
+    - `#!cpp Vector<T> Sovler::solve(const Vector<T>& rhs)` solve and return result in new vector
+    - `#!cpp void Sovler::solve(Vector<T>& result, const Vector<T>& rhs)` solve and place result in existing vector
+    - `#!cpp size_t Sovler::rank()` report the rank of the matrix. Some solvers may give only an approximate rank.
+
     Warning: The Eigen built-in sparse QR solver is _very_ inefficient for many problems. Also, it doesn't work well for underdetermined systems.
 
 ??? func "`#!cpp template <typename<T>> class SquareSolver`"
     
     Solve a system with a _square_ matrix. Uses an LU decomposition interally.
+    
+    Supports methods:
+
+    - `#!cpp SquareSovler::Solver(SparseMatrix<T>& mat)` construct from  a matrix
+    - `#!cpp Vector<T> SquareSovler::solve(const Vector<T>& rhs)` solve and return result in new vector
+    - `#!cpp void SquareSovler::solve(Vector<T>& result, const Vector<T>& rhs)` solve and place result in existing vector
 
 ??? func "`#!cpp template <typename<T>> class PositiveDefiniteSolver`"
+    
+    Supports methods:
+
+    - `#!cpp PositiveDefiniteSolver::Solver(SparseMatrix<T>& mat)` construct from  a matrix
+    - `#!cpp Vector<T> PositiveDefiniteSolver::solve(const Vector<T>& rhs)` solve and return result in new vector
+    - `#!cpp void PositiveDefiniteSolver::solve(Vector<T>& result, const Vector<T>& rhs)` solve and place result in existing vector
     
     Solve a system with a _symmetric positive (semi-)definite_ matrix. Uses an LDLT decomposition interally.
 
@@ -82,22 +101,22 @@ These routines build on top of the direct solvers to solve eigenvalue problems u
 
 ??? func "`#!cpp Vector<T> smallestEigenvectorPositiveDefinite(SparseMatrix<T>& energyMatrix, SparseMatrix<T>& massMatrix, size_t nIterations = 50)`"
 
-    TODO.
+    Solves the eigenvector problem $A x = \lambda M x$ for the smallest-eigenvalue'd nontrivial eigenvector $x$ of a positive definite sparse matrix $A$.
 
 
 ??? func "`#!cpp std::vector<Vector<T>> smallestKEigenvectorsPositiveDefinite(SparseMatrix<T>& energyMatrix, SparseMatrix<T>& massMatrix, size_t kEigenvalues, size_t nIterations = 50)`"
 
-    TODO.
+    Solves the eigenvector problem $A x = \lambda M x$ for the first $k$ smallest-eigenvalue'd nontrivial eigenvectors $x$ of a positive definite sparse matrix $A$.
 
 
 ??? func "`#!cpp Vector<T> smallestEigenvectorSquare(SparseMatrix<T>& energyMatrix, SparseMatrix<T>& massMatrix, size_t nIterations = 50)`"
     
-    TODO.
+    Solves the eigenvector problem $A x = \lambda M x$ for the smallest-eigenvalue'd nontrivial eigenvector $x$ of a square matrix $A$.
 
 
 ??? func "`#!cpp Vector<T> largestEigenvector(SparseMatrix<T>& energyMatrix, SparseMatrix<T>& massMatrix, size_t nIterations = 50)`"
 
-    TODO.
+    Solves the eigenvector problem $A x = \lambda M x$ for the largest-eigenvalue'd nontrivial eigenvector $x$ of a square matrix $A$.
 
 
 ## Utilities
