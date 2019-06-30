@@ -35,5 +35,15 @@ protected:
 
 // TODO write halfedge mesh as a permutation, in binary format (for quicker loading/smaller files)
 
+
+// === Integrations with other libraries and formats
+
+// Generate the permutations which map geometry-central's indexing order to the Polyscope indexing order
+std::array<std::pair<std::vector<size_t>, size_t>, 5> polyscopePermutations(HalfedgeMesh& mesh);
+
+// Generate an booleans to communicate the canonical orientations of edges for 1form-valued data
+EdgeData<char> polyscopeEdgeOrientations(HalfedgeMesh& mesh);
+
+
 } // namespace surface
 } // namespace geometrycentral

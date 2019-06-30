@@ -252,6 +252,54 @@ void WavefrontOBJ::writeFaces(std::ofstream& out, Geometry<Euclidean>& geometry,
 }
 */
 
+std::array<std::pair<std::vector<size_t>, size_t>, 5> polyscopePermutations(HalfedgeMesh& mesh) {
+  std::array<std::pair<std::vector<size_t>, size_t>, 5> result;
+
+  // This works because of the iteration order that we we know these iterators obey. If iteration orders ever change,
+  // this will be broken.
+
+  { // Halfedges
+    std::vector<size_t>& halfedgePerm = result[3].first;
+    halfedgePerm.resize(mesh.nInteriorHalfedges());
+    result[3].second = mesh.nHalfedges();
+
+    HalfedgeData<size_t> halfedgeIndices = mesh.getHalfedgeIndices();
+    size_t i = 0;
+    for (Face f : mesh.faces()) {
+      for (Halfedge he : f.adjacentHalfedges()) {
+        halfedgePerm[i++] = halfedgeIndices[he];
+      }
+    }
+  }
+
+  { // Corners
+    std::vector<size_t>& cornerPerm = result[4].first;
+    cornerPerm.resize(mesh.nCorners());
+    result[4].second = mesh.nCorners();
+
+    CornerData<size_t> cornerIndices = mesh.getCornerIndices();
+    size_t i = 0;
+    for (Face f : mesh.faces()) {
+      for (Corner c : f.adjacentCorners()) {
+        cornerPerm[i++] = cornerIndices[c];
+      }
+    }
+  }
+
+  return result;
+}
+
+EdgeData<char> polyscopeEdgeOrientations(HalfedgeMesh& mesh) {
+
+  EdgeData<char> result(mesh);
+  VertexData<size_t> vertexIndices = mesh.getVertexIndices();
+
+  for (Edge e : mesh.edges()) {
+    result[e] = vertexIndices[e.halfedge().vertex()] < vertexIndices[e.halfedge().twin().vertex()];
+  }
+
+  return result;
+}
 
 } // namespace surface
 } // namespace geometrycentral
