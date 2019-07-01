@@ -19,15 +19,15 @@ namespace surface {
 //     Otherwise, computes the unit-norm solution
 //     t \in [0,1] controls the strength of alignment with principal directions
 
-VertexData<Complex> computeSmoothestVertexDirectionField(Geometry<Euclidean>* geometry, int nSym = 1,
+VertexData<Vector2> computeSmoothestVertexDirectionField(IntrinsicGeomeryInterface& geometry, int nSym = 1,
                                                          bool alignCurvature = false);
 
-FaceData<Complex> computeSmoothestFaceDirectionField(Geometry<Euclidean>* geometry, int nSym = 1,
+FaceData<Vector2> computeSmoothestFaceDirectionField(IntrinsicGeomeryInterface& geometry, int nSym = 1,
                                                      bool alignCurvature = false);
 
 // Find singularities in direction fields
-FaceData<int> computeFaceIndex(Geometry<Euclidean>* geometry, VertexData<Complex> directionField, int nSym = 1);
-VertexData<int> computeVertexIndex(Geometry<Euclidean>* geometry, FaceData<Complex> directionField, int nSym = 1);
+FaceData<int> computeFaceIndex(IntrinsicGeomeryInterface& geometry, const VertexData<Vector2>& directionField, int nSym = 1);
+VertexData<int> computeVertexIndex(IntrinsicGeomeryInterface& geometry, const FaceData<Complex>& directionField, int nSym = 1);
 
 } // namespace surface
 } // namespace geometrycentral

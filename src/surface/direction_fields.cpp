@@ -17,8 +17,9 @@ namespace surface {
 // Anonymous namespace for helper functions
 namespace {
 
-VertexData<Complex> computeSmoothestVertexDirectionField_noBoundary(Geometry<Euclidean>* geometry, int nSym,
+VertexData<Complex> computeSmoothestVertexDirectionField_noBoundary(IntrinsicGeomeryInterface& geometry, int nSym,
                                                                     bool alignCurvature) {
+
   HalfedgeMesh* mesh = geometry->getMesh();
   size_t N = mesh->nVertices();
 
@@ -121,9 +122,9 @@ VertexData<Complex> computeSmoothestVertexDirectionField_noBoundary(Geometry<Euc
   }
 
   return toReturn;
-}
+} // namespace
 
-VertexData<Complex> computeSmoothestVertexDirectionField_boundary(Geometry<Euclidean>* geometry, int nSym,
+VertexData<Complex> computeSmoothestVertexDirectionField_boundary(IntrinsicGeomeryInterface& geometry, int nSym,
                                                                   bool alignCurvature) {
   HalfedgeMesh* mesh = geometry->getMesh();
   size_t nInterior = mesh->nInteriorVertices();
@@ -297,8 +298,9 @@ VertexData<Complex> computeSmoothestVertexDirectionField(Geometry<Euclidean>* ge
 // Helpers for computing face-based direction fields
 namespace {
 
-FaceData<Complex> computeSmoothestFaceDirectionField_noBoundary(Geometry<Euclidean>* geometry, int nSym,
-                                                                bool alignCurvature) {
+FaceData<Complex> computeSmoothestFaceDirectionField_noBoundary(IntrinsicGeomeryInterface& geometry, int nSym = 1,
+                                                                bool alignCurvature = false) {
+
 
   HalfedgeMesh* mesh = geometry->getMesh();
   unsigned int N = mesh->nFaces();
@@ -416,8 +418,8 @@ FaceData<Complex> computeSmoothestFaceDirectionField_noBoundary(Geometry<Euclide
   return field;
 }
 
-FaceData<Complex> computeSmoothestFaceDirectionField_boundary(Geometry<Euclidean>* geometry, int nSym,
-                                                              bool alignCurvature) {
+FaceData<Complex> computeSmoothestFaceDirectionField_boundary(IntrinsicGeomeryInterface& geometry, int nSym = 1,
+                                                              bool alignCurvature = false) {
 
   HalfedgeMesh* mesh = geometry->getMesh();
 
@@ -613,7 +615,9 @@ FaceData<Complex> computeSmoothestFaceDirectionField(Geometry<Euclidean>* geomet
 }
 
 
-FaceData<int> computeFaceIndex(Geometry<Euclidean>* geometry, VertexData<Complex> directionField, int nSym) {
+FaceData<int> computeFaceIndex(IntrinsicGeomeryInterface& geometry, const VertexData<Vector2>& directionField,
+                               int nSym) {
+
   HalfedgeMesh* mesh = geometry->getMesh();
 
   GeometryCache<Euclidean>& gc = geometry->cache;
@@ -653,7 +657,7 @@ FaceData<int> computeFaceIndex(Geometry<Euclidean>* geometry, VertexData<Complex
 }
 
 
-VertexData<int> computeVertexIndex(Geometry<Euclidean>* geometry, FaceData<Complex> directionField, int nSym) {
+VertexData<int> computeVertexIndex(IntrinsicGeomeryInterface& geometry, const FaceData<Complex>& directionField, int nSym) {
 
   HalfedgeMesh* mesh = geometry->getMesh();
   GeometryCache<Euclidean>& gc = geometry->cache;
