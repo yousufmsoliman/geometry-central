@@ -67,24 +67,3 @@ TEST_F(HalfedgeMutationSuite, EdgeFlipClosedManyTest) {
     flipInd = (flipInd + 1) % mesh.nVertices();
   }
 }
-
-// Flip a lot of edges on one mesh with boundary
-TEST_F(HalfedgeMutationSuite, EdgeFlipClosedManyTest) {
-
-  auto asset = getAsset("sphere_small.ply");
-  HalfedgeMesh& mesh = *asset.mesh;
-
-  int count = 1000;
-  int indInc = static_cast<int>(std::ceil(mesh.nVertices() / static_cast<double>(count)));
-
-  int flipInd = 0;
-  for (int i = 0; i < count; i++) {
-
-    // Flip an edge
-    Edge eFlip = mesh.edge(flipInd);
-    mesh.flip(eFlip);
-    mesh.validateConnectivity();
-
-    flipInd = (flipInd + 1) % mesh.nVertices();
-  }
-}

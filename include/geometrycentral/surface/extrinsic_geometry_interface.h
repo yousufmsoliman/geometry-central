@@ -16,9 +16,9 @@ protected:
   // Constructor is protected, because this class is an interface which is not meant to be instantiated directly.
   // Instantiate it via some realization which encapsulates input data, like VertexPositionGeometry.
   ExtrinsicGeometryInterface(HalfedgeMesh& mesh_);
-  virtual ~ExtrinsicGeometryInterface() {}
 
 public:
+  virtual ~ExtrinsicGeometryInterface() {}
 
   // Edge dihedral angle
   EdgeData<double> edgeDihedralAngles;

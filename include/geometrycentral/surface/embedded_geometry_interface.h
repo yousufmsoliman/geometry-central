@@ -16,9 +16,10 @@ protected:
   // Constructor is protected, because this class is an interface which is not meant to be instantiated directly.
   // Instantiate it via some realization which encapsulates input data, like VertexPositionGeometry.
   EmbeddedGeometryInterface(HalfedgeMesh& mesh_);
-  virtual ~EmbeddedGeometryInterface() {}
 
 public:
+  virtual ~EmbeddedGeometryInterface() {}
+
   // == Quantities
 
   // Vertex positions
