@@ -94,32 +94,28 @@ TEST_F(HalfedgeMutationSuite, InsertVertexAlongEdgeTest) {
 // Insert a vertex along every edge and triangulate (not-quite subdivision)
 TEST_F(HalfedgeMutationSuite, InsertVertexAndTriangulateSubdivideTest) {
 
-  // for (MeshAsset& a : allMeshes()) {
-  MeshAsset a = getAsset("lego.ply");
-  a.printThyName();
+  for (MeshAsset& a : allMeshes()) {
+    a.printThyName();
 
-  // Split every edge
-  std::vector<Edge> origEdges;
-  for (Edge e : a.mesh->edges()) {
-    origEdges.push_back(e);
-  }
-  for (Edge e : origEdges) {
-    a.mesh->insertVertexAlongEdge(e);
-  }
-
-  a.mesh->validateConnectivity();
-
-  // Triangulate
-  // TODO this loops while modifying. Do we allow that?
-  for (Face f : a.mesh->faces()) {
-    if(f.isBoundaryLoop()) {
-      throw std::runtime_error("something has gone terribly wrong");
+    // Split every edge
+    std::vector<Edge> origEdges;
+    for (Edge e : a.mesh->edges()) {
+      origEdges.push_back(e);
     }
-    a.mesh->triangulate(f);
-  }
+    for (Edge e : origEdges) {
+      a.mesh->insertVertexAlongEdge(e);
+    }
 
-  a.mesh->validateConnectivity();
-  //}
+    a.mesh->validateConnectivity();
+
+    // Triangulate
+    // TODO this loops while modifying. Do we allow that?
+    for (Face f : a.mesh->faces()) {
+      a.mesh->triangulate(f);
+    }
+
+    a.mesh->validateConnectivity();
+  }
 }
 
 // Split every edge and then flip (regular subdivision)
