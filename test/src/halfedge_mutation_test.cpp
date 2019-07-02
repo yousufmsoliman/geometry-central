@@ -67,3 +67,115 @@ TEST_F(HalfedgeMutationSuite, EdgeFlipClosedManyTest) {
     flipInd = (flipInd + 1) % mesh.nVertices();
   }
 }
+
+// Split a few edges on a bunch of meshes
+TEST_F(HalfedgeMutationSuite, InsertVertexAlongEdgeTest) {
+
+  for (MeshAsset& a : allMeshes()) {
+    a.printThyName();
+
+    int count = 10;
+    int indInc = static_cast<int>(std::ceil(a.mesh->nVertices() / static_cast<double>(count)));
+
+    int ind = 0;
+    for (int i = 0; i < count; i++) {
+
+      // Insert along an edge
+      Edge e = a.mesh->edge(ind);
+      a.mesh->insertVertexAlongEdge(e);
+      a.mesh->validateConnectivity();
+
+      ind = (ind + indInc) % a.mesh->nVertices();
+    }
+  }
+}
+
+
+// Insert a vertex along every edge and triangulate (not-quite subdivision)
+TEST_F(HalfedgeMutationSuite, InsertVertexAndTriangulateSubdivideTest) {
+
+  // for (MeshAsset& a : allMeshes()) {
+  MeshAsset a = getAsset("lego.ply");
+  a.printThyName();
+
+  // Split every edge
+  std::vector<Edge> origEdges;
+  for (Edge e : a.mesh->edges()) {
+    origEdges.push_back(e);
+  }
+  for (Edge e : origEdges) {
+    a.mesh->insertVertexAlongEdge(e);
+  }
+
+  a.mesh->validateConnectivity();
+
+  // Triangulate
+  // TODO this loops while modifying. Do we allow that?
+  for (Face f : a.mesh->faces()) {
+    if(f.isBoundaryLoop()) {
+      throw std::runtime_error("something has gone terribly wrong");
+    }
+    a.mesh->triangulate(f);
+  }
+
+  a.mesh->validateConnectivity();
+  //}
+}
+
+// Split every edge and then flip (regular subdivision)
+TEST_F(HalfedgeMutationSuite, SplitFlipSubdivie) {
+
+  for (MeshAsset& a : allMeshes()) {
+    a.printThyName();
+
+    VertexData<char> isNewVertex(*a.mesh, false);
+    for (Vertex v : a.mesh->vertices()) {
+      isNewVertex[v] = true;
+    }
+
+    // Split every edge
+    std::vector<Edge> origEdges;
+    for (Edge e : a.mesh->edges()) {
+      origEdges.push_back(e);
+    }
+    for (Edge e : origEdges) {
+      a.mesh->splitEdge(e);
+    }
+    a.mesh->validateConnectivity();
+
+    // Flip edges between old and new
+    for (Edge e : a.mesh->edges()) {
+      if (isNewVertex[e.halfedge().vertex()] != isNewVertex[e.halfedge().twin().vertex()]) {
+        a.mesh->flip(e);
+      }
+    }
+    a.mesh->validateConnectivity();
+
+    // Should yield subdivision
+    for (Face f : a.mesh->faces()) {
+      EXPECT_TRUE(f.isTriangle());
+    }
+  }
+}
+
+// Split a few edges on a bunch of meshes
+TEST_F(HalfedgeMutationSuite, EdgeSplitTest) {
+
+  for (MeshAsset& a : allMeshes()) {
+    a.printThyName();
+
+    int count = 10;
+    int indInc = static_cast<int>(std::ceil(a.mesh->nVertices() / static_cast<double>(count)));
+
+    int splitInd = 0;
+    for (int i = 0; i < count; i++) {
+
+      // Split an edge
+      Edge eSplit = a.mesh->edge(splitInd);
+      a.mesh->splitEdge(eSplit);
+      a.mesh->validateConnectivity();
+
+      splitInd = (splitInd + indInc) % a.mesh->nVertices();
+    }
+  }
+}

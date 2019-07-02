@@ -12,7 +12,7 @@
 // NOTE: ipp includes at bottom of file
 
 namespace geometrycentral {
-namespace surface { 
+namespace surface {
 // Foward declare some return types from below
 // template<typename T> class VertexData;
 // template<> class VertexData<size_t>;
@@ -71,16 +71,13 @@ public:
 
   // Adds a vertex along an edge, increasing degree of faces. Returns ptr along the new edge, with he.vertex() as new
   // vertex and he.edge().halfedge() == he. Preserves canonical direction of edge.halfedge() for both halves of new
-  // edge.
+  // edge. The original edge is repurposed as one of the two new edges (same for original halfedges).
   Halfedge insertVertexAlongEdge(Edge e);
 
-  // Split an edge, also splitting adjacent faces. Returns new vertex.
-  Vertex splitEdge(Edge e);
-
-  // Split an edge, also splitting adjacent faces. Returns new halfedge which points TOWARDS the new vertex, and is the
-  // same direction as e.halfedge() on the original edge. The halfedge direction of the other part of the new split edge
-  // is also preserved, as in insertVertexAlongEdge().
-  Halfedge splitEdgeReturnHalfedge(Edge e);
+  // Split an edge, also splitting adjacent faces. Returns new halfedge which points away from the new vertex (so
+  // he.vertex() is new vertex), and is the same direction as e.halfedge() on the original edge. The halfedge
+  // direction of the other part of the new split edge is also preserved.
+  Halfedge splitEdge(Edge e);
 
   // Add vertex inside face and triangulate. Returns new vertex.
   Vertex insertVertex(Face f);
@@ -91,6 +88,10 @@ public:
 
   // Same as above. Faster if you know the face.
   Halfedge connectVertices(Face face, Vertex vA, Vertex vB);
+
+  // The workhorse version of connectVertices(). heA.vertex() will be connected to heB.vertex().
+  // Returns new halfedge with vA at tail. he.twin().face() is the new face.
+  Halfedge connectVertices(Halfedge heA, Halfedge heB);
 
   // Same as above, but if vertices do not contain shared face or are adajcent returns Halfedge() rather than
   // throwing.
@@ -186,7 +187,10 @@ public:
 
 
 private:
-  // Core arrays which hold the connectivity
+  // = Core arrays which hold the connectivity
+  // Note: it should always be true that heFace.size() == nHalfedgesCapacityCount, but any elements after
+  // nHalfedgesFillCount will be valid indices (in the std::vector sense), but contain uninitialized data. Similarly,
+  // any std::vector<> indices corresponding to deleted elements will hold meaningless values.
   std::vector<size_t> heNext;    // he.next()
   std::vector<size_t> heVertex;  // he.vertex()
   std::vector<size_t> heFace;    // he.face()
@@ -240,23 +244,29 @@ private:
   HalfedgeMesh(HalfedgeMesh&& other) = delete;
   HalfedgeMesh& operator=(HalfedgeMesh&& other) = delete;
 
+
+  // Implementation note: the getNew() and delete() functions below cannot operate on a single halfedge or edge. We must
+  // simultaneously create or delete the triple of an edge and both adjacent halfedges. This constraint arises because
+  // of the implicit indexing convention.
+
   // Used to resize the halfedge mesh. Expands and shifts vectors as necessary.
-  //Halfedge* getNewHalfedge(bool interior = true);
-  //Vertex* getNewVertex();
-  //Edge* getNewEdge();
-  //Face* getNewFace();
+  Vertex getNewVertex();
+  Halfedge getNewEdgeTriple(bool onBoundary); // returns e.halfedge() from the newly created edge
+  Face getNewFace();
+  BoundaryLoop getNewBoundaryLoop();
 
   // Detect dead elements
   bool vertexIsDead(size_t iV) const;
   bool halfedgeIsDead(size_t iHe) const;
   bool edgeIsDead(size_t iE) const;
   bool faceIsDead(size_t iF) const;
+  bool boundaryLoopIsDead(size_t iBl) const;
 
   // Deletes leave tombstones, which can be cleaned up with compress()
-  void deleteElement(Halfedge he);
-  void deleteElement(Edge e);
+  void deleteEdgeTriple(Halfedge he);
   void deleteElement(Vertex v);
   void deleteElement(Face f);
+  void deleteElement(BoundaryLoop bl);
 
   // Compression helpers
   void compressHalfedges();

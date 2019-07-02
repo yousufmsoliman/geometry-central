@@ -224,7 +224,7 @@ TEST_F(HalfedgeMeshSuite, PrevTest) {
   for (MeshAsset& a : allMeshes()) {
     a.printThyName();
 
-    for (Halfedge he : a.mesh.halfedges()) {
+    for (Halfedge he : a.mesh->halfedges()) {
       Halfedge next = he.next();
       EXPECT_EQ(next.prevOrbitFace(), he);
       EXPECT_EQ(next.prevOrbitVertex(), he);
