@@ -213,10 +213,22 @@ TEST_F(HalfedgeMeshSuite, ContainerMeshDestructTest) {
 
   } // scope block triggers testD delete
 
-  ASSERT_EQ(2+2, 4); // debugging is easier if failure isn't last
+  ASSERT_EQ(2 + 2, 4); // debugging is easier if failure isn't last
 }
 
 // ============================================================
 // =============== Navigators
 // ============================================================
+
+TEST_F(HalfedgeMeshSuite, PrevTest) {
+  for (MeshAsset& a : allMeshes()) {
+    a.printThyName();
+
+    for (Halfedge he : a.mesh.halfedges()) {
+      Halfedge next = he.next();
+      EXPECT_EQ(next.prevOrbitFace(), he);
+      EXPECT_EQ(next.prevOrbitVertex(), he);
+    }
+  }
+}
 

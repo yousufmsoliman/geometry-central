@@ -218,6 +218,27 @@ inline Edge Halfedge::edge() const      { return Edge(mesh, HalfedgeMesh::heEdge
 inline Face Halfedge::face() const      { return Face(mesh, mesh->heFace[ind]); }
 inline Corner Halfedge::corner() const  { return Corner(mesh, ind); }
 
+
+// Super-navigators
+inline Halfedge Halfedge::prevOrbitFace() const  { 
+  Halfedge currHe = *this;
+  while(true) {
+    Halfedge nextHe = currHe.next();
+    if(nextHe == *this) break;
+    currHe = nextHe;
+  }
+  return currHe;
+}
+inline Halfedge Halfedge::prevOrbitVertex() const  { 
+  Halfedge currHe = twin();
+  while(true) {
+    Halfedge nextHe = currHe.next();
+    if(nextHe == *this) break;
+    currHe = nextHe.twin();
+  }
+  return currHe;
+}
+
 // Properties
 inline bool Halfedge::isInterior() const { return  mesh->heIsInterior(ind); }
 

@@ -1,33 +1,39 @@
 #pragma once
 
-#include "geometrycentral/surface/geometry.h"
+#include "geometrycentral/surface/intrinsic_geometry_interface.h"
+#include "geometrycentral/surface/extrinsic_geometry_interface.h"
+#include "geometrycentral/surface/embedded_geometry_interface.h"
 
-#include <vector>
-
-
-// Compute useful geometric quantities relating to optimal (Levi-Civita) transport
-
-// Note: All of these functions implicitly follow the convention that angles in tangent space are measured against
-// vertex.halfedge.
 
 namespace geometrycentral {
 namespace surface {
 
-// === Completely compute direction fields
-//     If the mesh has boundary, imposes dirichlet boundary conditions to
-//     conform to the boundary.
-//     Otherwise, computes the unit-norm solution
-//     t \in [0,1] controls the strength of alignment with principal directions
+// Compute useful geometric quantities relating to optimal (Levi-Civita) transport
 
-VertexData<Vector2> computeSmoothestVertexDirectionField(IntrinsicGeomeryInterface& geometry, int nSym = 1,
-                                                         bool alignCurvature = false);
+// === Compute smoothest direction fields
 
-FaceData<Vector2> computeSmoothestFaceDirectionField(IntrinsicGeomeryInterface& geometry, int nSym = 1,
-                                                     bool alignCurvature = false);
+// Smoothest unit-norm direction field
+VertexData<Vector2> computeSmoothestVertexDirectionField(IntrinsicGeometryInterface& geometry, int nSym = 1);
+
+// Like above, but with Dirichlet boundary conditions to align to hte boundary
+VertexData<Vector2> computeSmoothestBoundaryAlignedVertexDirectionField(IntrinsicGeometryInterface& geometry, int nSym = 1);
+
+FaceData<Vector2> computeSmoothestFaceDirectionField(IntrinsicGeometryInterface& geometry, int nSym = 1);
+
+
+// Same as above, but aligned to curvatures
+VertexData<Vector2> computeCurvatureAlignedVertexDirectionField(ExtrinsicGeometryInterface& geometry, int nSym = 1);
+
+// Also curvature aligned, but using extrinsic Dirichlet strategy
+// TODO
+// FaceData<Vector2> computeCurvatureAlignedFaceDirectionField(EmbeddedGeometryInterface& geometry);
+
 
 // Find singularities in direction fields
-FaceData<int> computeFaceIndex(IntrinsicGeomeryInterface& geometry, const VertexData<Vector2>& directionField, int nSym = 1);
-VertexData<int> computeVertexIndex(IntrinsicGeomeryInterface& geometry, const FaceData<Complex>& directionField, int nSym = 1);
+FaceData<int> computeFaceIndex(IntrinsicGeometryInterface& geometry, const VertexData<Vector2>& directionField,
+                               int nSym = 1);
+VertexData<int> computeVertexIndex(IntrinsicGeometryInterface& geometry, const FaceData<Vector2>& directionField,
+                                   int nSym = 1);
 
 } // namespace surface
 } // namespace geometrycentral

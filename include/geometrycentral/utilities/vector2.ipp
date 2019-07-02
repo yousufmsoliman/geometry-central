@@ -87,6 +87,13 @@ inline Vector2& Vector2::rotate(double theta) {
   return *this;
 }
 
+inline Vector2& Vector2::rotate90() {
+  double cosTh = 0.;
+  double sinTh = 1.;
+  *this = Vector2{y, -x};
+  return *this;
+}
+
 inline Vector2& Vector2::pow(double p) {
   std::complex<double> c{x, y};
   c = std::pow(c, p);

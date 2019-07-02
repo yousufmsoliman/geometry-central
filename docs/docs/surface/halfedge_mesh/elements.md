@@ -113,6 +113,26 @@ A halfedge is a the basic building block of a halfedge mesh. As its name suggest
     Returns the corner at the tail of this halfedge.
 
 
+**Fancy Traversal:**
+
+??? func "`#!cpp Halfedge Halfedge::prevOrbitFace()`"
+
+    Returns the _previous_ halfedge, that is the halfedge such that `he.next() == *this`. This result is found by orbiting around the shared face.
+    
+    Because our halfedge mesh is singly-connected, this is not a simple $O(1)$ lookup, but must be computed by orbiting around the face. Be careful: calling `he.prevOrbitFace()` on each exterior halfedge can easily lead to $O(N^2)$ algorithm complexity, as each call walks all the way around a a boundary loop.
+    
+    Generally this operation can (and should) be avoided with proper code structure.
+
+??? func "`#!cpp Halfedge Halfedge::prevOrbitVertex()`"
+
+    Returns the _previous_ halfedge, that is the halfedge such that `he.next() == *this`. This result is found by orbiting around the shared vertex.
+    
+    Because our halfedge mesh is singly-connected, this is not a simple $O(1)$ lookup, but must be computed by orbiting around the vertex. Be careful: calling `he.prevOrbitVertex()` in a loop around a very high-degree vertex can easily lead to $O(N^2)$ algorithm complexity, as each call walks all the way around the vertex.
+    
+    Generally this operation can (and should) be avoided with proper code structure.
+
+
+
 **Utility:**
 
 ??? func "`#!cpp bool Halfedge::isInterior()`"

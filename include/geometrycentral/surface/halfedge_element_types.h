@@ -251,6 +251,10 @@ public:
   Edge edge() const;
   Face face() const;
 
+  // Super-navigators
+  Halfedge prevOrbitFace() const;
+  Halfedge prevOrbitVertex() const;
+
   // Properties
   bool isInterior() const;
 };

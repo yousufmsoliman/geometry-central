@@ -10,11 +10,11 @@ Example usage:
 using namespace geometrycentral::surface;
 
 std::unique_ptr<HalfedgeMesh> mesh;
-std::unique_ptr<Geometry> geometry;
+std::unique_ptr<VertexPositionGeometry> geometry;
 std::tie<mesh, geometry> = loadMesh("spot.obj"); 
 ```
 
-??? func "`#!cpp std::tuple<std::unique_ptr<HalfedgeMesh>,std::unique_ptr<Geometry>> loadMesh(std::string filename, std::string type="")`"
+??? func "`#!cpp std::tuple<std::unique_ptr<HalfedgeMesh>,std::unique_ptr<VertexPositionGeometry>> loadMesh(std::string filename, std::string type="")`"
 
     Load a mesh from file. Returns both a `HalfedgeMesh` representing the connectivity, and a `Geometry` representing the geometry. See example below to concisely unpack.
 
@@ -39,17 +39,17 @@ The `PlyHalfedgeMeshData` class is used to read and write these souped-up `.ply`
 
 Example usage:
 
+TODO
+
 ```cpp
 #include "geometrycentral/surface/ply_halfedge_mesh_data.h"
 using namespace geometrycentral::surface;
 
 // Open a file and load the mesh therein
 std::unique_ptr<HalfedgeMesh> mesh;
+std::unique_ptr<VertexPositionGeometry> geometry;
 std::unique_ptr<PlyHalfedgeMeshData> plyData;
 std::tie<mesh, geometry> = PlyHalfedgeMeshData::loadMeshAndData("archive.ply"); 
-
-// Get the corresponding geometry
-std::unique_ptr<Geometry<Euclidean>> geom = plyData->getGeometry();
 
 // Read a stored value
 FaceData<double> faceValues = plyData->getFaceProperty<double>("name_a");

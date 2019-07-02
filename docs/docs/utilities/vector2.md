@@ -93,6 +93,10 @@ These methods change the underlying `Vector2`, and also return a reference so th
 
     Rotate the vector by angle $\theta$ in the counter-clockwise direction.
 
+??? func "`#!cpp Vector2& Vector2::rotate90()`"
+
+    Rotate the vector by $90^{\circ}$ in the counter-clockwise direction.
+
 
 ??? func "`#!cpp Vector2& Vector2::pow(double p)`"
 
