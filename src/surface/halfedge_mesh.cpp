@@ -460,62 +460,62 @@ std::vector<std::vector<size_t>> HalfedgeMesh::getFaceVertexList() {
 // ==========================================================
 
 
-/*
 bool HalfedgeMesh::flip(Edge eFlip) {
-
-  Edge* e = eFlip.ptr;
+  if(eFlip.isBoundary()) return false;
 
   // Get halfedges of first face
-  Halfedge* ha1 = e->halfedge;
-  if (!ha1->isReal) return false; // don't flip boundary edges
-  Halfedge* ha2 = ha1->next;
-  Halfedge* ha3 = ha2->next;
-  if (ha3->next != ha1) return false; // not a triangle
+  Halfedge ha1 = eFlip.halfedge();
+  Halfedge ha2 = ha1.next();
+  Halfedge ha3 = ha2.next();
+  if (ha3.next() != ha1) return false; // not a triangle
 
   // Get halfedges of second face
-  Halfedge* hb1 = ha1->twin;
-  if (!hb1->isReal) return false; // don't flip boundary edges
-  Halfedge* hb2 = hb1->next;
-  Halfedge* hb3 = hb2->next;
-  if (hb3->next != hb1) return false; // not a triangle
+  Halfedge hb1 = ha1.twin();
+  Halfedge hb2 = hb1.next();
+  Halfedge hb3 = hb2.next();
+  if (hb3.next() != hb1) return false; // not a triangle
 
   if (ha2 == hb1 || hb2 == ha1) return false; // incident on degree 1 vertex
 
   // Get vertices and faces
-  Vertex* va = ha1->vertex;
-  Vertex* vb = hb1->vertex;
-  Vertex* vc = ha3->vertex;
-  Vertex* vd = hb3->vertex;
-  Face* fa = ha1->face;
-  Face* fb = hb1->face;
+  Vertex va = ha1.vertex();
+  Vertex vb = hb1.vertex();
+  Vertex vc = ha3.vertex();
+  Vertex vd = hb3.vertex();
+  Face fa = ha1.face();
+  Face fb = hb1.face();
 
   // Update vertex pointers
-  if (va->halfedge == ha1) va->halfedge = hb2;
-  if (vb->halfedge == hb1) vb->halfedge = ha2;
+  if (va.halfedge() == ha1) vHalfedge[va.getIndex()] = hb2.getIndex();
+  if (vb.halfedge() == hb1) vHalfedge[vb.getIndex()] = ha2.getIndex();
   // (vc and vd can't be invalidated by the flip)
 
   // Update edge pointers
   // (e still has the same halfedges)
 
   // Update face pointers
-  fa->halfedge = ha1;
-  fb->halfedge = hb1;
+  fHalfedge[fa.getIndex()] = ha1.getIndex();
+  fHalfedge[fb.getIndex()] = hb1.getIndex();
 
   // Update halfedge pointers
-  ha1->next = hb3;
-  hb3->next = ha2;
-  ha2->next = ha1;
-  hb1->next = ha3;
-  ha3->next = hb2;
-  hb2->next = hb1;
-  ha1->vertex = vc;
-  hb1->vertex = vd;
-  ha3->face = fb;
-  hb3->face = fa;
+  heNext[ha1.getIndex()] = hb3.getIndex();
+  heNext[hb3.getIndex()] = ha2.getIndex();
+  heNext[ha2.getIndex()] = ha1.getIndex();
+  heNext[hb1.getIndex()] = ha3.getIndex();
+  heNext[ha3.getIndex()] = hb2.getIndex();
+  heNext[hb2.getIndex()] = hb1.getIndex();
+
+  heVertex[ha1.getIndex()] = vc.getIndex();
+  heVertex[hb1.getIndex()] = vd.getIndex();
+
+  heFace[ha3.getIndex()] = fb.getIndex();
+  heFace[hb3.getIndex()] = fa.getIndex();
 
   isCanonicalFlag = false;
   return true;
 }
+
+/*
 
 Halfedge HalfedgeMesh::insertVertexAlongEdge(Edge eIn) {
 

@@ -19,9 +19,10 @@ protected:
   // Instantiate it via some realization which encapsulates input data, like EdgeLengthGeometry or
   // VertexPositionGeometry.
   IntrinsicGeometryInterface(HalfedgeMesh& mesh_);
-  virtual ~IntrinsicGeometryInterface() {}
 
 public:
+  virtual ~IntrinsicGeometryInterface() {}
+
   // == Lengths, areas, and angles
 
   // Edge lengths

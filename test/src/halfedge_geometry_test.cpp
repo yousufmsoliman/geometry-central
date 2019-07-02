@@ -25,17 +25,37 @@ using std::endl;
 
 class HalfedgeGeometrySuite : public MeshAssetSuite {};
 
+
+// ============================================================
+// =============== Misc test
+// ============================================================
+
+// TODO needs to move to utilities tests
+TEST_F(HalfedgeGeometrySuite, VectorPod) {
+  // Hijacking
+  EXPECT_TRUE(std::is_pod<Vector2>::value);
+  EXPECT_TRUE(std::is_pod<Vector3>::value);
+}
+
+// ============================================================
+// =============== Types
+// ============================================================
+
+// Make sure we can construct a pointer to all the geometries
+TEST_F(HalfedgeGeometrySuite, GeometryPointers) {
+
+  { std::unique_ptr<BaseGeometryInterface> deleteGeom(getAsset("bob_small.ply").geometry.release()); }
+  { std::unique_ptr<IntrinsicGeometryInterface> deleteGeom(getAsset("bob_small.ply").geometry.release()); }
+  { std::unique_ptr<ExtrinsicGeometryInterface> deleteGeom(getAsset("bob_small.ply").geometry.release()); }
+  { std::unique_ptr<EmbeddedGeometryInterface> deleteGeom(getAsset("bob_small.ply").geometry.release()); }
+}
+
 // ============================================================
 // =============== Quantity management tests
 // ============================================================
 
 TEST_F(HalfedgeGeometrySuite, Refresh) {
   // TODO
-  //
-
-  // Hijacking
-  EXPECT_TRUE(std::is_pod<Vector2>::value);
-  EXPECT_TRUE(std::is_pod<Vector3>::value);
 }
 
 TEST_F(HalfedgeGeometrySuite, Purge) {
@@ -419,7 +439,7 @@ TEST_F(HalfedgeGeometrySuite, VertexGaussianCurvatures) {
   geometry.requireVertexGaussianCurvatures();
   for (Vertex e : mesh.vertices()) {
     EXPECT_TRUE(std::isfinite(geometry.vertexGaussianCurvatures[e]));
-    //EXPECT_LT(std::abs(geometry.vertexGaussianCurvatures[e]), 100.);
+    // EXPECT_LT(std::abs(geometry.vertexGaussianCurvatures[e]), 100.);
   }
 }
 
