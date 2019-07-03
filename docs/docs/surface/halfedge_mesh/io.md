@@ -11,7 +11,7 @@ using namespace geometrycentral::surface;
 
 std::unique_ptr<HalfedgeMesh> mesh;
 std::unique_ptr<VertexPositionGeometry> geometry;
-std::tie<mesh, geometry> = loadMesh("spot.obj"); 
+std::tie(mesh, geometry) = loadMesh("spot.obj"); 
 ```
 
 ??? func "`#!cpp std::tuple<std::unique_ptr<HalfedgeMesh>,std::unique_ptr<VertexPositionGeometry>> loadMesh(std::string filename, std::string type="")`"
@@ -51,7 +51,7 @@ using namespace geometrycentral::surface;
 std::unique_ptr<HalfedgeMesh> mesh;
 std::unique_ptr<VertexPositionGeometry> geometry;
 std::unique_ptr<PlyHalfedgeMeshData> plyData;
-std::tie<mesh, geometry> = PlyHalfedgeMeshData::loadMeshAndData("archive.ply"); 
+std::tie(mesh, geometry) = PlyHalfedgeMeshData::loadMeshAndData("archive.ply"); 
 
 // Read a stored value
 FaceData<double> faceValues = plyData->getFaceProperty<double>("name_a");
