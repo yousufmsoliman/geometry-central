@@ -175,3 +175,162 @@ TEST_F(HalfedgeMutationSuite, EdgeSplitTest) {
     }
   }
 }
+
+// =====================================================
+// ========= Container tests
+// =====================================================
+
+TEST_F(HalfedgeMutationSuite, ContainerExpandTest) {
+
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  VertexPositionGeometry& origGeometry = *asset.geometry;
+
+  // Initial element counts
+  size_t nVertexOrig = mesh.nVertices();
+  size_t nHalfedgeOrig = mesh.nHalfedges();
+  size_t nCornerOrig = mesh.nCorners();
+  size_t nEdgeOrig = mesh.nEdges();
+  size_t nFaceOrig = mesh.nFaces();
+
+  // Some containers. Set a default value too.
+  VertexData<int> vData(mesh, 42);
+  HalfedgeData<int> heData(mesh, 42);
+  CornerData<int> cData(mesh, 42);
+  EdgeData<int> eData(mesh, 42);
+  FaceData<int> fData(mesh, 42);
+
+  // Set a different value for all existing element
+  // NOTE: does not test boundary loops
+  for (Vertex e : mesh.vertices()) vData[e] = 17;
+  for (Halfedge e : mesh.halfedges()) heData[e] = 17;
+  for (Corner e : mesh.corners()) cData[e] = 17;
+  for (Edge e : mesh.edges()) eData[e] = 17;
+  for (Face e : mesh.faces()) fData[e] = 17;
+
+  // Do just one opertation, to trigger a single resize
+  // (this adds at least one of each element type
+  mesh.splitEdge(mesh.edge(0));
+
+  // Be sure the mesh actually got bigger
+  EXPECT_LT(nVertexOrig, mesh.nVertices());
+  EXPECT_LT(nHalfedgeOrig, mesh.nHalfedges());
+  EXPECT_LT(nCornerOrig, mesh.nCorners());
+  EXPECT_LT(nEdgeOrig, mesh.nEdges());
+  EXPECT_LT(nFaceOrig, mesh.nFaces());
+
+  // == Index all containers to make sure they grew. Also, make sure new elements got the default value, not the value
+  // we set for existing elements.
+
+  { // vertices
+    size_t origValCount = 0;
+    for (Vertex e : mesh.vertices()) {
+      EXPECT_TRUE(vData[e] == 17 || vData[e] == 42);
+      if (vData[e] == 17) origValCount++;
+    }
+    EXPECT_EQ(origValCount, nVertexOrig);
+  }
+
+  { // halfedges
+    size_t origValCount = 0;
+    for (Halfedge e : mesh.halfedges()) {
+      EXPECT_TRUE(heData[e] == 17 || heData[e] == 42);
+      if (heData[e] == 17) origValCount++;
+    }
+    EXPECT_EQ(origValCount, nHalfedgeOrig);
+  }
+
+  { // corners
+    size_t origValCount = 0;
+    for (Corner e : mesh.corners()) {
+      EXPECT_TRUE(cData[e] == 17 || cData[e] == 42);
+      if (cData[e] == 17) origValCount++;
+    }
+    EXPECT_EQ(origValCount, nCornerOrig);
+  }
+
+  { // edges
+    size_t origValCount = 0;
+    for (Edge e : mesh.edges()) {
+      EXPECT_TRUE(eData[e] == 17 || eData[e] == 42);
+      if (eData[e] == 17) origValCount++;
+    }
+    EXPECT_EQ(origValCount, nEdgeOrig);
+  }
+
+  { // faces
+    size_t origValCount = 0;
+    for (Face e : mesh.faces()) {
+      EXPECT_TRUE(fData[e] == 17 || fData[e] == 42);
+      if (fData[e] == 17) origValCount++;
+    }
+    EXPECT_EQ(origValCount, nFaceOrig);
+  }
+
+
+  // Do a whole bunch of mesh operations, which should trigger several resizes
+  for (int i = 0; i < 2; i++) {
+    std::vector<Edge> origEdges;
+    for (Edge e : mesh.edges()) {
+      origEdges.push_back(e);
+    }
+    for (Edge e : origEdges) {
+      mesh.splitEdge(e);
+    }
+    mesh.validateConnectivity();
+    for (Face f : mesh.faces()) {
+      mesh.triangulate(f);
+    }
+  }
+
+  // Check the same expansion invariants as above again
+  { // vertices
+    size_t origValCount = 0;
+    for (Vertex e : mesh.vertices()) {
+      EXPECT_TRUE(vData[e] == 17 || vData[e] == 42);
+      if (vData[e] == 17) origValCount++;
+    }
+    EXPECT_EQ(origValCount, nVertexOrig);
+  }
+
+  { // halfedges
+    size_t origValCount = 0;
+    for (Halfedge e : mesh.halfedges()) {
+      EXPECT_TRUE(heData[e] == 17 || heData[e] == 42);
+      if (heData[e] == 17) origValCount++;
+    }
+    EXPECT_EQ(origValCount, nHalfedgeOrig);
+  }
+
+  { // corners
+    size_t origValCount = 0;
+    for (Corner e : mesh.corners()) {
+      EXPECT_TRUE(cData[e] == 17 || cData[e] == 42);
+      if (cData[e] == 17) origValCount++;
+    }
+    EXPECT_EQ(origValCount, nCornerOrig);
+  }
+
+  { // edges
+    size_t origValCount = 0;
+    for (Edge e : mesh.edges()) {
+      EXPECT_TRUE(eData[e] == 17 || eData[e] == 42);
+      if (eData[e] == 17) origValCount++;
+    }
+    EXPECT_EQ(origValCount, nEdgeOrig);
+  }
+
+  { // faces
+    size_t origValCount = 0;
+    for (Face e : mesh.faces()) {
+      EXPECT_TRUE(fData[e] == 17 || fData[e] == 42);
+      if (fData[e] == 17) origValCount++;
+    }
+    EXPECT_EQ(origValCount, nFaceOrig);
+  }
+}
+
+
+// =====================================================
+// ========= Mutation helper tests
+// =====================================================

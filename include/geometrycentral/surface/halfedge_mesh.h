@@ -61,8 +61,6 @@ public:
 
   // Methods that mutate the mesh. Note that these occasionally trigger a resize, which invaliates
   // any outstanding Vertex or MeshData<> objects. See the guide (currently in docs/mutable_mesh_docs.md).
-  // TODOs: support adding boundary
-
 
   // Flip an edge. Unlike all the other mutation routines, this _does not_ invalidate pointers, though it does break the
   // canonical ordering.
@@ -80,38 +78,21 @@ public:
   Halfedge splitEdge(Edge e);
 
   // Add vertex inside face and triangulate. Returns new vertex.
-  Vertex insertVertex(Face f);
-
-  // Add an edge connecting two vertices inside the same face. Returns new halfedge with vA at tail. he.twin().face() is
-  // the new face.
-  Halfedge connectVertices(Vertex vA, Vertex vB);
-
-  // Same as above. Faster if you know the face.
-  Halfedge connectVertices(Face face, Vertex vA, Vertex vB);
+  // Vertex insertVertex(Face f); TODO
 
   // The workhorse version of connectVertices(). heA.vertex() will be connected to heB.vertex().
   // Returns new halfedge with vA at tail. he.twin().face() is the new face.
   Halfedge connectVertices(Halfedge heA, Halfedge heB);
 
-  // Same as above, but if vertices do not contain shared face or are adajcent returns Halfedge() rather than
-  // throwing.
-  Halfedge tryConnectVertices(Vertex vA, Vertex vB);
-
-  // Same as above, but you can specify a face to work in
-  Halfedge tryConnectVertices(Vertex vA, Vertex vB, Face face);
-
   // Collapse an edge. Returns the vertex adjacent to that edge which still exists. Returns Vertex() if not
   // collapsible.
-  Vertex collapseEdge(Edge e);
+  // Vertex collapseEdge(Edge e); TODO
 
   // Remove a face which is adjacent to the boundary of the mesh (along with its edge on the boundary).
   // Face must have exactly one boundary edge.
   // Returns true if could remove
-  bool removeFaceAlongBoundary(Face f);
+  // bool removeFaceAlongBoundary(Face f); TODO
 
-
-  // Set e.halfedge() == he. he must be adjacent.
-  void setEdgeHalfedge(Edge e, Halfedge he);
 
   // Triangulate in a face, returns all subfaces
   std::vector<Face> triangulate(Face face);
@@ -220,7 +201,8 @@ private:
 
   // == Track the capacity and fill size of our buffers.
   // These give the capacity of the currently allocated buffer.
-  // Note that this is _not_ defined to be std::vector::capacity(), it's the largest size such that arr[i] is legal.
+  // Note that this is _not_ defined to be std::vector::capacity(), it's the largest size such that arr[i] is legal (aka
+  // arr.size()).
   size_t nVerticesCapacityCount = 0;
   size_t nHalfedgesCapacityCount = 0; // will always be even
   size_t nFacesCapacityCount = 0;     // capacity for faces _and_ boundary loops

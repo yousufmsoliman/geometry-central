@@ -583,144 +583,6 @@ Halfedge HalfedgeMesh::splitEdge(Edge e) {
   return he;
 }
 
-/*
-
-Halfedge HalfedgeMesh::splitEdgeReturnHalfedge(Edge e) {
-
-  // Validate that faces are triangular and real
-  if (e.isBoundary() || e.halfedge().face().degree() != 3 || e.halfedge().twin().face().degree() != 3 ||
-      e.halfedge().face() == e.halfedge().twin().face()) {
-    throw std::logic_error("Can only split non-boundary edge which borders two distinct triangular faces");
-    // note: if removing boundary restriction, need to fix return value below
-  }
-
-  // Save this
-  DynamicHalfedge heIn(e.halfedge(), this);
-
-  // First operation: insert a new vertex along the edge
-  Vertex newV = insertVertexAlongEdge(e).vertex();
-
-
-  // Second operation: connect both of the new faces
-  DynamicFace fOppA(newV.halfedge().face(), this);
-  DynamicVertex vOppA(newV.halfedge().next().next().vertex(), this);
-  DynamicFace fOppB(newV.halfedge().twin().face(), this);
-  DynamicVertex vOppB(newV.halfedge().twin().next().next().next().vertex(), this);
-
-  connectVertices(fOppA, vOppA, newV);
-  connectVertices(fOppB, vOppB, newV);
-
-  // Find the useful halfedge pointer to return using from the halfedge we saved
-  Halfedge toReturn = Halfedge(heIn).twin().next().twin().next().twin();
-
-  isCanonicalFlag = false;
-  return toReturn;
-}
-
-
-Halfedge HalfedgeMesh::connectVertices(Vertex vA, Vertex vB) {
-
-  // Find the shared face and call the main version
-  std::unordered_set<Face> aFaces;
-  for (Face f : vA.adjacentFaces()) {
-    aFaces.insert(f);
-  }
-  Face sharedFace = Face();
-  for (Face f : vB.adjacentFaces()) {
-    if (aFaces.find(f) != aFaces.end()) {
-      sharedFace = f;
-      break;
-    }
-  }
-
-  if (sharedFace == Face()) {
-    throw std::logic_error("Vertices do not contain shared face");
-  }
-
-  isCanonicalFlag = false;
-  return connectVertices(sharedFace, vA, vB);
-}
-
-Halfedge HalfedgeMesh::tryConnectVertices(Vertex vA, Vertex vB) {
-
-
-  // TODO much of the connectVertices() logic is O(N_VERTICES_IN_FACE) even though it doesn't really need to be.
-
-  // Early-out if same
-  if (vA == vB) {
-    return Halfedge();
-  }
-
-  // Find the shared face and call the main version
-  std::unordered_set<Face> aFaces;
-  for (Face f : vA.adjacentFaces()) {
-    aFaces.insert(f);
-  }
-  Face sharedFace = Face();
-  for (Face f : vB.adjacentFaces()) {
-    if (aFaces.find(f) != aFaces.end()) {
-      sharedFace = f;
-      break;
-    }
-  }
-
-  // Fail if no shared face
-  if (sharedFace == Face()) {
-    return Halfedge();
-  }
-
-  // Check if adjacent
-  for (Halfedge he : sharedFace.adjacentHalfedges()) {
-    if ((he.vertex() == vA && he.twin().vertex() == vB) || (he.vertex() == vB && he.twin().vertex() == vA)) {
-      return Halfedge();
-    }
-  }
-
-  isCanonicalFlag = false;
-  return connectVertices(sharedFace, vA, vB);
-}
-
-Halfedge HalfedgeMesh::tryConnectVertices(Vertex vA, Vertex vB, Face face) {
-
-
-  // TODO much of the connectVertices() logic is O(N_VERTICES_IN_FACE) even though it doesn't really need to be.
-
-  // Early-out if same
-  if (vA == vB) {
-    return Halfedge();
-  }
-
-  // Find the shared face and call the main version
-
-  // Check if adjacent
-  bool foundA = false;
-  bool foundB = false;
-  for (Halfedge he : face.adjacentHalfedges()) {
-    if ((he.vertex() == vA && he.twin().vertex() == vB) || (he.vertex() == vB && he.twin().vertex() == vA)) {
-      return Halfedge();
-    }
-
-    if (he.vertex() == vA) {
-      foundA = true;
-    }
-    if (he.vertex() == vB) {
-      foundB = true;
-    }
-  }
-
-  // One of the vertices isn't in the face we're supposed to work in
-  if (!foundA) {
-    return Halfedge();
-  }
-  if (!foundB) {
-    return Halfedge();
-  }
-
-  isCanonicalFlag = false;
-  return connectVertices(face, vA, vB);
-}
-
-*/
 
 Halfedge HalfedgeMesh::connectVertices(Halfedge heA, Halfedge heB) {
 
@@ -1321,8 +1183,6 @@ bool HalfedgeMesh::removeFaceAlongBoundary(Face f) {
   }
 }
 
-void HalfedgeMesh::setEdgeHalfedge(Edge e, Halfedge he) { e.ptr->halfedge = he.ptr; }
-
 */
 
 std::vector<Face> HalfedgeMesh::triangulate(Face f) {
@@ -1790,7 +1650,7 @@ Face HalfedgeMesh::getNewFace() {
       if (halfedgeIsDead(iHe)) {
         continue;
       }
-      if(heFace[iHe] >= nFacesFillCount) {
+      if (heFace[iHe] >= nFacesFillCount) {
         heFace[iHe] += (newCapacity - nFacesCapacityCount);
       }
     }
