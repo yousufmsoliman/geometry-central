@@ -306,6 +306,24 @@ std::array<std::pair<std::vector<size_t>, size_t>, 5> polyscopePermutations(Half
   // This works because of the iteration order that we we know these iterators obey. If iteration orders ever change,
   // this will be broken.
 
+  { // Edges
+    std::vector<size_t>& edgePerm = result[2].first;
+    edgePerm.resize(mesh.nEdges());
+    result[2].second = mesh.nEdges();
+
+    EdgeData<size_t> edgeIndices = mesh.getEdgeIndices();
+    EdgeData<char> edgeSeen(mesh, false);
+    size_t i = 0;
+    for (Face f : mesh.faces()) {
+      for (Edge e : f.adjacentEdges()) {
+        if (!edgeSeen[e]) {
+          edgePerm[i++] = edgeIndices[e];
+          edgeSeen[e] = true;
+        }
+      }
+    }
+  }
+
   { // Halfedges
     std::vector<size_t>& halfedgePerm = result[3].first;
     halfedgePerm.resize(mesh.nInteriorHalfedges());
