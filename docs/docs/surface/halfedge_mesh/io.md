@@ -11,12 +11,14 @@ using namespace geometrycentral::surface;
 
 std::unique_ptr<HalfedgeMesh> mesh;
 std::unique_ptr<VertexPositionGeometry> geometry;
-std::tie<mesh, geometry> = loadMesh("spot.obj"); 
+std::tie(mesh, geometry) = loadMesh("spot.obj"); 
 ```
 
 ??? func "`#!cpp std::tuple<std::unique_ptr<HalfedgeMesh>,std::unique_ptr<VertexPositionGeometry>> loadMesh(std::string filename, std::string type="")`"
 
     Load a mesh from file. Returns both a `HalfedgeMesh` representing the connectivity, and a `Geometry` representing the geometry. See example below to concisely unpack.
+
+    If the file includes vertices which do not appear in any face, they will be stripped from the vertex listing and ignored.
 
     The `type` parameter determines the type of file to load. For example, `type="ply"` will attempt to read the target file as a .ply file. If no type is given, the type will be inferred from the file name. 
 
@@ -49,7 +51,7 @@ using namespace geometrycentral::surface;
 std::unique_ptr<HalfedgeMesh> mesh;
 std::unique_ptr<VertexPositionGeometry> geometry;
 std::unique_ptr<PlyHalfedgeMeshData> plyData;
-std::tie<mesh, geometry> = PlyHalfedgeMeshData::loadMeshAndData("archive.ply"); 
+std::tie(mesh, geometry) = PlyHalfedgeMeshData::loadMeshAndData("archive.ply"); 
 
 // Read a stored value
 FaceData<double> faceValues = plyData->getFaceProperty<double>("name_a");
