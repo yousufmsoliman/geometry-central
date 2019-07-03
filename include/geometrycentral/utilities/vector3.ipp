@@ -1,13 +1,5 @@
 namespace geometrycentral {
 
-inline Vector3& Vector3::normalize() {
-  double r = 1. / sqrt(x * x + y * y + z * z);
-  x *= r;
-  y *= r;
-  z *= r;
-  return *this;
-}
-
 inline Vector3 Vector3::operator+(const Vector3& v) const { return Vector3{x + v.x, y + v.y, z + v.z}; }
 
 inline Vector3 Vector3::operator-(const Vector3& v) const { return Vector3{x - v.x, y - v.y, z - v.z}; }
@@ -21,7 +13,10 @@ inline Vector3 Vector3::operator/(double s) const {
 
 inline const Vector3 Vector3::operator-() const { return Vector3{-x, -y, -z}; }
 
-inline Vector3 operator*(const double s, const Vector3& v) { return Vector3{s * v.x, s * v.y, s * v.z}; }
+template <typename T>
+inline Vector3 operator*(const T s, const Vector3& v) {
+  return Vector3{s * v.x, s * v.y, s * v.z};
+}
 
 inline Vector3& Vector3::operator+=(const Vector3& other) {
   x += other.x;
@@ -55,9 +50,11 @@ inline bool Vector3::operator==(const Vector3& other) const { return x == other.
 
 inline bool Vector3::operator!=(const Vector3& other) const { return !(*this == other); }
 
-inline double norm(const Vector3& v) { return sqrt(v.x * v.x + v.y * v.y + v.z * v.z); }
+inline double Vector3::norm() const { return std::sqrt(x * x + y * y + z * z); }
+inline double norm(const Vector3& v) { return v.norm(); }
 
-inline double norm2(const Vector3& v) { return v.x * v.x + v.y * v.y + v.z * v.z; }
+inline double Vector3::norm2() const { return x * x + y * y + z * z; }
+inline double norm2(const Vector3& v) { return v.norm2(); }
 
 inline Vector3 unit(const Vector3& v) {
   double n = norm(v);
@@ -73,7 +70,9 @@ inline Vector3 cross(const Vector3& u, const Vector3& v) {
 
 inline double dot(const Vector3& u, const Vector3& v) { return u.x * v.x + u.y * v.y + u.z * v.z; }
 
-inline double angle(const Vector3& u, const Vector3& v) { return acos(fmax(-1., fmin(1., dot(unit(u), unit(v))))); }
+inline double angle(const Vector3& u, const Vector3& v) {
+  return std::acos(std::fmax(-1., std::fmin(1., dot(unit(u), unit(v)))));
+}
 
 inline double angleInPlane(const Vector3& u, const Vector3& v, const Vector3& normal) {
   // Put u in plane with the normal
@@ -102,37 +101,39 @@ inline Vector3 clamp(const Vector3& val, const Vector3& low, const Vector3& high
 }
 
 inline Vector3 componentwiseMin(const Vector3& u, const Vector3& v) {
-  return Vector3{fmin(u.x, v.x), fmin(u.y, v.y), fmin(u.z, v.z)};
+  return Vector3{std::fmin(u.x, v.x), std::fmin(u.y, v.y), std::fmin(u.z, v.z)};
 }
 
 inline Vector3 componentwiseMax(const Vector3& u, const Vector3& v) {
-  return Vector3{fmax(u.x, v.x), fmax(u.y, v.y), fmax(u.z, v.z)};
+  return Vector3{std::fmax(u.x, v.x), std::fmax(u.y, v.y), std::fmax(u.z, v.z)};
 }
 
-inline Vector3& Vector3::rotate_around(Vector3 axis, double theta) {
+inline Vector3 Vector3::rotateAround(Vector3 axis, double theta) const {
   Vector3 thisV = {x, y, z};
   Vector3 axisN = unit(axis);
   Vector3 parallelComp = axisN * dot(thisV, axisN);
   Vector3 tangentComp = thisV - parallelComp;
 
-  if (norm2(tangentComp) > 0.0) {
+  if (tangentComp.norm2() > 0.0) {
     Vector3 basisX = unit(tangentComp);
     Vector3 basisY = cross(axisN, basisX);
 
-    double tangentMag = norm(tangentComp);
+    double tangentMag = tangentComp.norm();
 
-    Vector3 rotatedV = tangentMag * (cos(theta) * basisX + sin(theta) * basisY);
-    *this = rotatedV + parallelComp;
+    Vector3 rotatedV = tangentMag * (std::cos(theta) * basisX + std::sin(theta) * basisY);
+    return rotatedV + parallelComp;
   } else {
-    *this = parallelComp;
+    return parallelComp;
   }
-  return *this;
 }
 
-inline Vector3& Vector3::removeComponent(const Vector3& unitDir) {
-  *this -= unitDir * dot(unitDir, *this);
-  return *this;
+inline Vector3 Vector3::normalize() const {
+  double r = 1. / std::sqrt(x * x + y * y + z * z);
+  return *this * r;
 }
+
+
+inline Vector3 Vector3::removeComponent(const Vector3& unitDir) const { return *this - unitDir * dot(unitDir, *this); }
 
 inline std::ostream& operator<<(std::ostream& output, const Vector3& v) {
   output << "<" << v.x << ", " << v.y << ", " << v.z << ">";

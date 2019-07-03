@@ -18,6 +18,8 @@ Things to not forget about:
 
 - vector2/3 clamp methods
 
+- probably get rid of canonicalize
+
 Test to write:
 
 - Make sure iterators work in empty case where possible. In particular, face.adjacentFaces() for single face

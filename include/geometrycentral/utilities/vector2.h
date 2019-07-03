@@ -50,18 +50,17 @@ struct Vector2 {
   // Conversion to std::complex
   operator std::complex<double>() const;
 
-  // Notice that all of these functions modify the vector in-place (but return a reference for chaining)
-  // The non-member functions below return a new vector
+  // The non-member functions below return a new object; they do not modify in-place.
 
-  Vector2& normalize();
-  Vector2& rotate(double theta);
-  Vector2& rotate90();
+  Vector2 normalize() const;
+  Vector2 rotate(double theta) const;
+  Vector2 rotate90() const;
 
   // Complex functions
-  Vector2& pow(double p);  // complex power
-  Vector2& pow(Vector2 p); // complex to complex power
-  Vector2& conj();
-  Vector2& inv();
+  Vector2 pow(double p) const;  // complex power
+  Vector2 pow(Vector2 p) const; // complex to complex power
+  Vector2 conj() const;
+  Vector2 inv() const;
 
   double arg() const;
   double norm() const;
@@ -71,7 +70,8 @@ struct Vector2 {
   bool isDefined() const;
 };
 
-Vector2 operator*(const double s, const Vector2& v);
+template<typename T>
+Vector2 operator*(const T s, const Vector2& v);
 
 ::std::ostream& operator<<(std::ostream& output, const Vector2& v);
 

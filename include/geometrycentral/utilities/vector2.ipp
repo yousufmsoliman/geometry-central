@@ -21,7 +21,10 @@ inline Vector2 Vector2::operator/(double s) const {
 
 inline const Vector2 Vector2::operator-() const { return Vector2{-x, -y}; }
 
-inline Vector2 operator*(const double s, const Vector2& v) { return Vector2{s * v.x, s * v.y}; }
+template <typename T>
+inline Vector2 operator*(const T s, const Vector2& v) {
+  return Vector2{s * v.x, s * v.y};
+}
 
 inline Vector2& Vector2::operator+=(const Vector2& other) {
   x += other.x;
@@ -64,15 +67,11 @@ inline bool Vector2::operator==(const Vector2& other) const { return x == other.
 inline bool Vector2::operator!=(const Vector2& other) const { return !(*this == other); }
 
 
-inline Vector2::operator std::complex<double>() const {
-  return std::complex<double>{x, y};
-}
+inline Vector2::operator std::complex<double>() const { return std::complex<double>{x, y}; }
 
-inline Vector2& Vector2::normalize() {
-  double r = 1. / sqrt(x * x + y * y);
-  x /= r;
-  y /= r;
-  return *this;
+inline Vector2 Vector2::normalize() const {
+  double r = 1. / std::sqrt(x * x + y * y);
+  return *this / r;
 }
 
 inline Vector2 unit(const Vector2& v) {
@@ -80,52 +79,36 @@ inline Vector2 unit(const Vector2& v) {
   return Vector2{v.x / n, v.y / n};
 }
 
-inline Vector2& Vector2::rotate(double theta) {
+inline Vector2 Vector2::rotate(double theta) const {
   double cosTh = std::cos(theta);
   double sinTh = std::sin(theta);
-  *this = Vector2{cosTh * x + sinTh * y, -sinTh * x + cosTh * y};
-  return *this;
+  return Vector2{cosTh * x + sinTh * y, -sinTh * x + cosTh * y};
 }
 
-inline Vector2& Vector2::rotate90() {
-  double cosTh = 0.;
-  double sinTh = 1.;
-  *this = Vector2{y, -x};
-  return *this;
-}
+inline Vector2 Vector2::rotate90() const { return Vector2{y, -x}; }
 
-inline Vector2& Vector2::pow(double p) {
+inline Vector2 Vector2::pow(double p) const {
   std::complex<double> c{x, y};
   c = std::pow(c, p);
-  x = c.real();
-  y = c.imag();
-  return *this;
+  return Vector2{c.real(), c.imag()};
 }
 
-inline Vector2& Vector2::pow(Vector2 p) {
+inline Vector2 Vector2::pow(Vector2 p) const {
   std::complex<double> c{x, y};
   std::complex<double> pc{p.x, p.y};
   c = std::pow(c, pc);
-  x = c.real();
-  y = c.imag();
-  return *this;
+  return Vector2{c.real(), c.imag()};
 }
 
-inline Vector2& Vector2::conj() {
-  y *= -1.;
-  return *this;
-}
+inline Vector2 Vector2::conj() const { return Vector2{x, -y}; }
 
-inline Vector2& Vector2::inv() {
-  *this = Vector2{1., 0.} / *this;
-  return *this;
-}
+inline Vector2 Vector2::inv() const { return Vector2{1., 0.} / *this; }
 
 inline double Vector2::arg() const { return std::atan2(y, x); }
 inline double arg(const Vector2& v) { return std::atan2(v.y, v.x); }
 
 inline double Vector2::norm() const { return std::sqrt(x * x + y * y); }
-inline double norm(const Vector2& v) { return sqrt(v.x * v.x + v.y * v.y); }
+inline double norm(const Vector2& v) { return std::sqrt(v.x * v.x + v.y * v.y); }
 
 inline double Vector2::norm2() const { return x * x + y * y; }
 inline double norm2(const Vector2& v) { return v.x * v.x + v.y * v.y; }
@@ -133,7 +116,9 @@ inline double norm2(const Vector2& v) { return v.x * v.x + v.y * v.y; }
 
 inline double dot(const Vector2& u, const Vector2& v) { return u.x * v.x + u.y * v.y; }
 
-inline double angle(const Vector2& u, const Vector2& v) { return acos(fmax(-1., fmin(1., dot(unit(u), unit(v))))); }
+inline double angle(const Vector2& u, const Vector2& v) {
+  return std::acos(std::fmax(-1., std::fmin(1., dot(unit(u), unit(v)))));
+}
 
 inline double cross(const Vector2& u, const Vector2& v) { return u.x * v.y - u.y * v.x; }
 inline Vector3 cross3(const Vector2& u, const Vector2& v) { return Vector3{0., 0., u.x * v.y - u.y * v.x}; }
@@ -150,8 +135,12 @@ inline bool isfinite(const Vector2& v) { return v.isFinite(); }
 inline bool Vector2::isDefined() const { return (!std::isnan(x)) && (!std::isnan(y)); }
 inline bool isDefined(const Vector2& v) { return v.isDefined(); }
 
-inline Vector2 componentwiseMin(const Vector2& u, const Vector2& v) { return Vector2{fmin(u.x, v.x), fmin(u.y, v.y)}; }
-inline Vector2 componentwiseMax(const Vector2& u, const Vector2& v) { return Vector2{fmax(u.x, v.x), fmax(u.y, v.y)}; }
+inline Vector2 componentwiseMin(const Vector2& u, const Vector2& v) {
+  return Vector2{std::fmin(u.x, v.x), std::fmin(u.y, v.y)};
+}
+inline Vector2 componentwiseMax(const Vector2& u, const Vector2& v) {
+  return Vector2{std::fmax(u.x, v.x), std::fmax(u.y, v.y)};
+}
 
 inline std::ostream& operator<<(std::ostream& output, const Vector2& v) {
   output << "<" << v.x << ", " << v.y << ">";

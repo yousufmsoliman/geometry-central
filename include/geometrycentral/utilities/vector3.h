@@ -44,15 +44,20 @@ struct Vector3 {
   const Vector3 operator-() const;
 
   // Other functions
-  Vector3& rotate_around(Vector3 axis, double theta);
-  Vector3& removeComponent(const Vector3& unitDir); // removes component in direction D
-  Vector3& normalize();
+  Vector3 rotateAround(Vector3 axis, double theta) const;
+  Vector3 removeComponent(const Vector3& unitDir) const; // removes component in direction D
+  Vector3 normalize() const;
+  
+  double norm() const;
+  double norm2() const;
 
   bool isFinite() const;
   bool isDefined() const;
 };
 
-Vector3 operator*(const double s, const Vector3& v);
+// Scalar multiplication
+template <typename T>
+Vector3 operator*(const T s, const Vector3& v);
 
 ::std::ostream& operator<<(::std::ostream& output, const Vector3& v);
 
