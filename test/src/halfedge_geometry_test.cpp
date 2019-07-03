@@ -54,9 +54,86 @@ TEST_F(HalfedgeGeometrySuite, GeometryPointers) {
 // =============== Quantity management tests
 // ============================================================
 
-TEST_F(HalfedgeGeometrySuite, Refresh) {
-  // TODO
+TEST_F(HalfedgeGeometrySuite, RefreshMutationTest) {
+  auto asset = getAsset("lego.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  VertexPositionGeometry& origGeometry = *asset.geometry;
+
+  // Initial element counts
+  size_t nVertexOrig = mesh.nVertices();
+  size_t nHalfedgeOrig = mesh.nHalfedges();
+  size_t nCornerOrig = mesh.nCorners();
+  size_t nEdgeOrig = mesh.nEdges();
+  size_t nFaceOrig = mesh.nFaces();
+
+  // Require some quantities
+  origGeometry.requireVertexGaussianCurvatures();
+  origGeometry.requireVertexPositions();
+  origGeometry.requireFaceAreas();
+
+  // Check that quantities are valid
+  double EPS = 1e-4;
+  for (Vertex v : mesh.vertices()) {
+    ASSERT_LT(std::abs(origGeometry.vertexGaussianCurvatures[v]), EPS);
+    ASSERT_TRUE(isfinite(origGeometry.vertexPositions[v]));
+  }
+  for (Face f : mesh.faces()) {
+    ASSERT_TRUE(std::isfinite(origGeometry.faceAreas[f]));
+  }
+
+  double totalAreaBefore = 0.;
+  for (Face f : mesh.faces()) {
+    totalAreaBefore += origGeometry.faceAreas[f];
+  }
+
+  // Split some edges
+  std::vector<Edge> origEdges;
+  for (Edge e : mesh.edges()) {
+    origEdges.push_back(e);
+  }
+  for (Edge e : origEdges) {
+    Vertex vA = e.halfedge().vertex();
+    Vertex vB = e.halfedge().twin().vertex();
+    Halfedge he = mesh.splitEdge(e);
+    origGeometry.inputVertexPositions[he.vertex()] =
+        0.5 * (origGeometry.inputVertexPositions[vA] + origGeometry.inputVertexPositions[vB]);
+  }
+  mesh.validateConnectivity();
+  for (Face f : mesh.faces()) {
+    mesh.triangulate(f);
+  }
+  mesh.validateConnectivity();
+
+  // Be sure the mesh actually got bigger
+  EXPECT_LT(nVertexOrig, mesh.nVertices());
+  EXPECT_LT(nHalfedgeOrig, mesh.nHalfedges());
+  EXPECT_LT(nCornerOrig, mesh.nCorners());
+  EXPECT_LT(nEdgeOrig, mesh.nEdges());
+  EXPECT_LT(nFaceOrig, mesh.nFaces());
+
+  // All important refresh
+  origGeometry.refreshQuantities();
+
+  // Check that our quantities are still valid after
+  for (Vertex v : mesh.vertices()) {
+    ASSERT_LT(std::abs(origGeometry.vertexGaussianCurvatures[v]), EPS);
+    ASSERT_TRUE(isfinite(origGeometry.vertexPositions[v]));
+  }
+
+  for (Face f : mesh.faces()) {
+    ASSERT_TRUE(std::isfinite(origGeometry.faceAreas[f]));
+    std::cout << std::endl;
+    for (Vertex v : f.adjacentVertices()) {
+      std::cout << origGeometry.vertexPositions[v] << std::endl;
+    }
+  }
+  double totalAreaAfter = 0.;
+  for (Face f : mesh.faces()) {
+    totalAreaAfter += origGeometry.faceAreas[f];
+  }
+  ASSERT_NEAR(totalAreaBefore, totalAreaAfter, EPS);
 }
+
 
 TEST_F(HalfedgeGeometrySuite, Purge) {
   auto asset = getAsset("bob_small.ply");
