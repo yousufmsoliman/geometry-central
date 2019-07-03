@@ -18,6 +18,51 @@ namespace surface {
 
 // ======= Input =======
 
+// strip unused vertices from face-vertex lists
+void stripUnusedVertices(std::vector<Vector3>& positions, std::vector<std::vector<size_t>>& faceIndices) {
+
+  size_t nVert = positions.size();
+
+  // Find any unused vertices
+  std::vector<size_t> vertexDegreeCount(nVert, 0);
+  size_t nUsedVerts = 0;
+  for (auto& f : faceIndices) {
+    for (auto& i : f) {
+      // Make sure we can safely index positions
+      GC_SAFETY_ASSERT(i < positions.size(),
+                       "face index list has a vertex index which is greater than the number of vertices");
+
+      vertexDegreeCount[i]++;
+      if (vertexDegreeCount[i] == 1) {
+        nUsedVerts++;
+      }
+    }
+  }
+
+  // Early exit if dense
+  if (nUsedVerts == nVert) {
+    return;
+  }
+
+  // Else: strip unused vertices and re-index faces
+  size_t nNewVertices = 0;
+  std::vector<size_t> oldToNewVertexInd(nVert);
+  for (size_t iV = 0; iV < nVert; iV++) {
+    if (vertexDegreeCount[iV] > 0) {
+      oldToNewVertexInd[iV] = nNewVertices;
+      positions[nNewVertices] = positions[iV];
+      nNewVertices++;
+    }
+  }
+  positions.resize(nNewVertices);
+  for (auto& f : faceIndices) {
+    for (auto& i : f) {
+      i = oldToNewVertexInd[i];
+    }
+  }
+}
+
+
 // Mesh loader helpers
 namespace {
 std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<VertexPositionGeometry>> loadMesh_PLY(std::string filename,
@@ -37,6 +82,8 @@ std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<VertexPositionGeometry
   // Get face list
   std::vector<std::vector<size_t>> faceIndices = plyData.getFaceIndices();
 
+  stripUnusedVertices(vertexPositions, faceIndices);
+
   // === Build the mesh objects
   return makeHalfedgeAndGeometry(faceIndices, vertexPositions, verbose);
 }
@@ -44,6 +91,7 @@ std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<VertexPositionGeometry
 std::tuple<std::unique_ptr<HalfedgeMesh>, std::unique_ptr<VertexPositionGeometry>> loadMesh_OBJ(std::string filename,
                                                                                                 bool verbose) {
   PolygonSoupMesh soup(filename);
+  stripUnusedVertices(soup.vertexCoordinates, soup.polygons);
   return makeHalfedgeAndGeometry(soup.polygons, soup.vertexCoordinates, verbose);
 }
 } // namespace

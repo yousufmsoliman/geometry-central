@@ -145,7 +145,6 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
     heNext[prevHeInd] = firstHeInd; // hook up the first next() pointer, which we missed in the loop above
   }
 
-
   // Ensure that each boundary neighborhood is either a disk or a half-disk. Harder to diagnose if we wait until the
   // boundary walk below.
 #ifndef NGC_SAFTEY_CHECKS
@@ -225,7 +224,6 @@ HalfedgeMesh::HalfedgeMesh(const std::vector<std::vector<size_t>>& polygons, boo
   nBoundaryLoopsFillCount = nBoundaryLoopsCount;
   isCanonicalFlag = true;
   isCompressedFlag = true;
-
 
 #ifndef NGC_SAFTEY_CHECKS
   { // Check that the input was manifold in the sense that each vertex has a single connected loop of faces around it.
