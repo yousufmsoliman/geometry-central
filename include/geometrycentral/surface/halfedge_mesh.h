@@ -69,7 +69,7 @@ public:
   // Return true if the edge was actually flipped (can't flip boundary or non-triangular edges)
   bool flip(Edge e);
 
-  // Adds a vertex along an edge, increasing degree of faces. Returns ptr along the new edge, with he.vertex() as new
+  // Adds a vertex along an edge, increasing degree of faces. Returns ptr along the edge, with he.vertex() as new
   // vertex and he.edge().halfedge() == he. Preserves canonical direction of edge.halfedge() for both halves of new
   // edge. The original edge is repurposed as one of the two new edges (same for original halfedges).
   Halfedge insertVertexAlongEdge(Edge e);
@@ -77,7 +77,7 @@ public:
   // Split an edge, also splitting adjacent faces. Returns new halfedge which points away from the new vertex (so
   // he.vertex() is new vertex), and is the same direction as e.halfedge() on the original edge. The halfedge
   // direction of the other part of the new split edge is also preserved.
-  Halfedge splitEdge(Edge e);
+  Halfedge splitEdgeTriangular(Edge e);
 
   // Add vertex inside face and triangulate. Returns new vertex.
   // Vertex insertVertex(Face f); TODO

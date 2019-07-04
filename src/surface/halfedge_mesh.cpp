@@ -567,16 +567,28 @@ Halfedge HalfedgeMesh::insertVertexAlongEdge(Edge e) {
 }
 
 
-Halfedge HalfedgeMesh::splitEdge(Edge e) {
+Halfedge HalfedgeMesh::splitEdgeTriangular(Edge e) {
+
+  // Check triangular assumption
+  GC_SAFETY_ASSERT(e.halfedge().face().isTriangle(), "splitEdgeTriangular requires triangular faces");
+  GC_SAFETY_ASSERT(e.isBoundary() || e.halfedge().twin().face().isTriangle(),
+                   "splitEdgeTriangular requires triangular faces");
 
   // First operation: insert a new vertex along the edge
   Halfedge he = insertVertexAlongEdge(e);
 
-  triangulate(he.face());
-  if (he.twin().isInterior()) {
-    triangulate(he.twin().face());
+  { // primary face
+    Halfedge heOther = he.next().next();
+    connectVertices(he, heOther);
   }
 
+  if (he.twin().isInterior()) { // secondary face
+    Halfedge heFirst = he.twin().next();
+    Halfedge heOther = heFirst.next().next();
+    connectVertices(heFirst, heOther);
+  }
+
+  validateConnectivity();
   isCanonicalFlag = false;
   return he;
 }
