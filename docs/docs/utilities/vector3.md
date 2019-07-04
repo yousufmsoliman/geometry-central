@@ -58,27 +58,42 @@ Alternately, the elements can be indexed as `vec[0]` and `vec[1]` and `vec[2]`.
 Vector3 supports the element-wise addition, subraction, and scalar multiplication you would probably expect.
 
 
-### Mutations
+### Member operations
 
-These methods change the underlying `Vector3`, and also return a reference so they can be chained together.
+These methods _do not_ change the underlying `Vector3`, but return a new `Vector3`.
+```cpp
+Vector3 vec{1., 2., 3.};
+vec.normalize();        // does nothing
+vec = vec.normalize();  // much better
+```
 
-??? func "`#!cpp Vector3& Vector3::normalize()`"
+??? func "`#!cpp Vector3 Vector3::normalize()`"
 
-    Makes the vector a unit vector. If the input is the zero vector, the result will contain NaNs.
+    Returns a unit-norm vector pointing in the same direction. If the input is the zero vector, the result will contain NaNs.
 
-
-??? func "`#!cpp Vector3& Vector3::rotate_around(Vector3 axis, double theta)`"
+??? func "`#!cpp Vector3 Vector3::rotateAround(Vector3 axis, double theta)`"
 
     Rotate the vector by angle $\theta$ around `axis` in the right-handed direction. `axis` need not be a unit vector.
 
-
-??? func "`#!cpp Vector3& Vector3::removeComponent(Vector3 unitDir)`"
+??? func "`#!cpp Vector3 Vector3::removeComponent(Vector3 unitDir)`"
 
     Removes any component of this vector in the direction `unitDir`, making the result orthogonal to `unitDir`. As the name suggests, `unitDir` must be a unit vector.
 
+??? func "`#!cpp double Vector3::norm()`"
+
+    Returns the magnitude of the vector.
+
+    Also available as `norm(v)`.
 
 
-### Operations
+??? func "`#!cpp double Vector3::norm2()`"
+
+    Returns the squared magnitude of the vector.
+
+    Also available as `norm2(v)`.
+
+
+### Function operations
 
 These operations do not change the vector on which they are called.
 
@@ -93,7 +108,7 @@ These operations do not change the vector on which they are called.
 
     Returns the squared magnitude of the vector.
 
-    Also available as `v.norm()`.
+    Also available as `v.norm2()`.
 
 
 ??? func "`#!cpp Vector3 unit(Vector3 v)`"

@@ -131,11 +131,11 @@ void EmbeddedGeometryInterface::computeFaceTangentBasis() {
     for (Halfedge heF : f.adjacentHalfedges()) {
 
       Vector3 eVec = vertexPositions[heF.twin().vertex()] - vertexPositions[heF.vertex()];
-      eVec.removeComponent(N);
+      eVec = eVec.removeComponent(N);
 
       // TODO can surely do this with less trig
       double angle = halfedgeVectorsInFace[heF].arg();
-      Vector3 eVecX = eVec.rotate_around(N, -angle);
+      Vector3 eVecX = eVec.rotateAround(N, -angle);
 
       basisXSum += eVecX;
 
@@ -168,11 +168,11 @@ void EmbeddedGeometryInterface::computeVertexTangentBasis() {
     for (Halfedge he : v.outgoingHalfedges()) {
 
       Vector3 eVec = vertexPositions[he.twin().vertex()] - vertexPositions[he.vertex()];
-      eVec.removeComponent(N);
+      eVec = eVec.removeComponent(N);
 
       // TODO can surely do this with less trig
       double angle = halfedgeVectorsInVertex[he].arg();
-      Vector3 eVecX = eVec.rotate_around(N, -angle);
+      Vector3 eVecX = eVec.rotateAround(N, -angle);
 
       basisXSum += eVecX;
     }

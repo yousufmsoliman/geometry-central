@@ -122,10 +122,6 @@ TEST_F(HalfedgeGeometrySuite, RefreshMutationTest) {
 
   for (Face f : mesh.faces()) {
     ASSERT_TRUE(std::isfinite(origGeometry.faceAreas[f]));
-    std::cout << std::endl;
-    for (Vertex v : f.adjacentVertices()) {
-      std::cout << origGeometry.vertexPositions[v] << std::endl;
-    }
   }
   double totalAreaAfter = 0.;
   for (Face f : mesh.faces()) {

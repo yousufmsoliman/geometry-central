@@ -26,14 +26,6 @@ Factory methods can construct a few common values:
 
     Returns a vector with all components set to $c$
 
-??? func "`#!cpp static Vector2 Vector2::fromAngle(double theta)`"
-
-    Returns the vector $(\cos(\theta), \sin(\theta))$.
-
-??? func "`#!cpp static Vector2 Vector2::fromComplex(std::complex<double> c)`"
-
-    Converts a `std::complex<double>` to a `Vector2`.
-
 ??? func "`#!cpp static Vector2 Vector2::infinity()`"
 
     Returns the infinite vector $(\infty, \infty)$.
@@ -41,6 +33,16 @@ Factory methods can construct a few common values:
 ??? func "`#!cpp static Vector2 Vector2::undefined()`"
 
     Returns the undefined vector `(NaN, NaN)`.
+
+And serve as constructors:
+
+??? func "`#!cpp static Vector2 Vector2::fromAngle(double theta)`"
+
+    Returns the vector $(\cos(\theta), \sin(\theta))$.
+
+??? func "`#!cpp static Vector2 Vector2::fromComplex(std::complex<double> c)`"
+
+    Converts a `std::complex<double>` to a `Vector2`.
 
 ### Access
 
@@ -80,45 +82,45 @@ Vector2 vRot = r * v;
 This is fundamentally no different from using 2x2 rotation matrices, but leads to much cleaner code (try using division to compute relative rotations!).
 
 
-### Mutations
+### Member operations
 
-These methods change the underlying `Vector2`, and also return a reference so they can be chained together.
+These methods _do not_ change the underlying `Vector2`, but return a new `Vector2`.
+```cpp
+Vector2 vec{1., 2.};
+vec.rotate90();         // does nothing
+vec = vec.rotate90();   // much better
+```
 
-??? func "`#!cpp Vector2& Vector2::normalize()`"
+??? func "`#!cpp Vector2 Vector2::normalize()`"
 
-    Makes the vector a unit vector. If the input is the zero vector, the result will contain NaNs.
+    Returns a unit-norm vector with the same direction. If the input is the zero vector, the result will contain NaNs.
 
-
-??? func "`#!cpp Vector2& Vector2::rotate(double theta)`"
+??? func "`#!cpp Vector2 Vector2::rotate(double theta)`"
 
     Rotate the vector by angle $\theta$ in the counter-clockwise direction.
 
-??? func "`#!cpp Vector2& Vector2::rotate90()`"
+??? func "`#!cpp Vector2 Vector2::rotate90()`"
 
     Rotate the vector by $90^{\circ}$ in the counter-clockwise direction.
 
-
-??? func "`#!cpp Vector2& Vector2::pow(double p)`"
+??? func "`#!cpp Vector2 Vector2::pow(double p)`"
 
     Raise the vector to a real power, in the sense of complex arithmetic. (see [std::pow](https://en.cppreference.com/w/cpp/numeric/complex/pow))
 
-
-??? func "`#!cpp Vector2& Vector2::pow(Vector2 p)`"
+??? func "`#!cpp Vector2 Vector2::pow(Vector2 p)`"
 
     Raise the vector to a complex power, in the sense of complex arithmetic. (see [std::pow](https://en.cppreference.com/w/cpp/numeric/complex/pow))
 
-
-??? func "`#!cpp Vector2& Vector2::conj()`"
+??? func "`#!cpp Vector2 Vector2::conj()`"
 
     Transform the vector to its complex conjugate, negating the `y` component.
 
-??? func "`#!cpp Vector2& Vector2::inv()`"
+??? func "`#!cpp Vector2 Vector2::inv()`"
 
-    Invert the vector, in the sense of complex arithmetic. Equivalent to `v = Vector2{1., 0.} / v`.
+    Invert the vector, in the sense of complex arithmetic. Equivalent to `Vector2{1., 0.} / v`.
 
 
-
-### Operations
+### Function operations
 
 These operations do not change the vector on which they are called.
 
