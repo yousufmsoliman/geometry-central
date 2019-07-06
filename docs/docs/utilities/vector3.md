@@ -55,7 +55,7 @@ Alternately, the elements can be indexed as `vec[0]` and `vec[1]` and `vec[2]`.
 
 ### Arithmetic
 
-Vector3 supports the element-wise addition, subraction, and scalar multiplication you would probably expect.
+Vector3 supports the element-wise addition, subtraction, and scalar multiplication you would probably expect.
 
 
 ### Member operations
