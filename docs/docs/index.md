@@ -10,17 +10,22 @@ Features include:
 - A coherent set of sparse **linear algebra tools**, based on Eigen and augmented to automatically utilize better solvers if available on your system.
 
 
-**Examples:**
+**Sample:**
 
 ```cpp
 // Load a mesh
 std::unique_ptr<HalfedgeMesh> mesh;
 std::unique_ptr<VertexPositionGeometry> geometry;
-std::tie<mesh, geometry> = loadMesh("spot.obj"); 
+std::tie(mesh, geometry) = loadMesh("spot.obj"); 
 
-// Access canonical quantities
-
-
+// Compute vertex areas
+VertexData<double> vertArea(*mesh, 0.);
+geometry->requireFaceAreas();
+for(Vertex v : mesh->vertices()) {
+  for(Face f : v.adjacentVertices()) {
+    vertArea[v] += geometry->faceAreas[f] / f.degree();
+  }
+}
 ```
 
 For more, see the [tutorials](../tutorials/load_mesh). To get started with the code, see [building](../build/build).
@@ -42,7 +47,7 @@ For more, see the [tutorials](../tutorials/load_mesh). To get started with the c
 
 **Credits**
 
-Geometry-central is led by [Nicholas Sharp](http://nmwsharp.com), with contributions from 
+Geometry-central is developed primarily by [Nicholas Sharp](http://nmwsharp.com), with contributions from 
 [Keenan Crane](http://keenan.is/here), 
 [Yousuf Soliman](http://www.its.caltech.edu/~ysoliman/),
 [Rohan Sawhney](http://rohansawhney.io/), and many others.
