@@ -1,9 +1,5 @@
 site_name: Geometry Central
-theme:
-  name: 'material'
-  palette:
-    primary: 'yellow'
-    accent: 'red'
+
 markdown_extensions:
   - codehilite
   - admonition
@@ -19,11 +15,23 @@ extra:
   search:
     tokenizer: '[\s\-\.::]+'
 
+theme:
+  name: 'material'
+  palette:
+    primary: 'deep orange'
+    accent: 'red'
+  font:
+    text: 'Merriweather'
+    #text: 'Libre Baskerville'
+    code: 'Inconsolata'
+
 extra_css:
   - extras.css
 
 extra_javascript:
   - 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'
+
+google_analytics: ['UA-58346315-3', - auto']
 
 repo_name: 'nmwsharp/geometry-central'
 repo_url: 'https://github.com/nmwsharp/geometry-central'

@@ -1,6 +1,6 @@
 # Welcome to Geometry Central
 
-Geometry Central is a modern C++ library of data structures and algorithms for geometry processing, with a particular focus on surface meshes.
+Geometry-central is a modern C++ library of data structures and algorithms for geometry processing, with a particular focus on surface meshes.
 
 Features include:
 
@@ -28,7 +28,7 @@ For more, see the [tutorials](../tutorials/load_mesh). To get started with the c
 **What is geometry-central not?**
 
 - **A user interface**. Geometry-central does not include any facilities for user interaction; it is an algorithms and data structures library on which you might build user-facing tools. This philosphy keeps the library lightweight, and avoids dependencies on rendering and windowing systems. For a UI that interoperates well with geometry-central, see [Polyscope](https://polyscope.run).
-- **A research code dump**. Geometry Central was built by researchers, and is used to prototype research projects. However, we strive to ensure that this library contains only polished & tested, broadly useful algorithms.
+- **A research code dump**. Geometry-central was built by researchers, and is used to prototype research projects. However, we strive to ensure that this library contains only polished & tested, broadly useful algorithms.
 
 
 **Related alternatives:** 
@@ -50,7 +50,7 @@ Geometry-central is led by [Nicholas Sharp](http://nmwsharp.com), with contribut
 If geometry-central contributes to an academic publication, cite it as:
 ```bib
 @misc{geometrycentral,
-  title = {Geometry-Central},
+  title = {geometry-central},
   author = {Nicholas Sharp and Keenan Crane and others},
   note = {www.geometry-central.net},
   year = {2019}
