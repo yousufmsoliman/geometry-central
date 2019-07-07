@@ -22,8 +22,9 @@ theme:
     accent: 'red'
   font:
     text: 'Merriweather'
-    #text: 'Libre Baskerville'
     code: 'Inconsolata'
+  logo:
+    icon: 'home'
 
 extra_css:
   - extras.css
