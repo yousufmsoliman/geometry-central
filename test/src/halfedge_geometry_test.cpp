@@ -94,7 +94,7 @@ TEST_F(HalfedgeGeometrySuite, RefreshMutationTest) {
   for (Edge e : origEdges) {
     Vertex vA = e.halfedge().vertex();
     Vertex vB = e.halfedge().twin().vertex();
-    Halfedge he = mesh.splitEdge(e);
+    Halfedge he = mesh.splitEdgeTriangular(e);
     origGeometry.inputVertexPositions[he.vertex()] =
         0.5 * (origGeometry.inputVertexPositions[vA] + origGeometry.inputVertexPositions[vB]);
   }

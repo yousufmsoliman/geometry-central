@@ -108,3 +108,13 @@ std::vector<MeshAsset> MeshAssetSuite::boundaryMeshes(bool includeNoGeom) {
   }
   return result;
 }
+
+std::vector<MeshAsset> MeshAssetSuite::triangularMeshes(bool includeNoGeom) {
+  std::vector<MeshAsset> result;
+  for (MeshAsset& a : allMeshAssets) {
+    if (a.isTriangular) {
+      if (includeNoGeom || a.geometry) result.push_back(a.copy());
+    }
+  }
+  return result;
+}

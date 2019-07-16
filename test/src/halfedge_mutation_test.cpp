@@ -119,9 +119,9 @@ TEST_F(HalfedgeMutationSuite, InsertVertexAndTriangulateSubdivideTest) {
 }
 
 // Split every edge and then flip (regular subdivision)
-TEST_F(HalfedgeMutationSuite, SplitFlipSubdivie) {
+TEST_F(HalfedgeMutationSuite, SplitFlipSubdivide) {
 
-  for (MeshAsset& a : allMeshes()) {
+  for (MeshAsset& a : triangularMeshes()) {
     a.printThyName();
 
     VertexData<char> isNewVertex(*a.mesh, false);
@@ -135,7 +135,7 @@ TEST_F(HalfedgeMutationSuite, SplitFlipSubdivie) {
       origEdges.push_back(e);
     }
     for (Edge e : origEdges) {
-      a.mesh->splitEdge(e);
+      a.mesh->splitEdgeTriangular(e);
     }
     a.mesh->validateConnectivity();
 
@@ -157,7 +157,7 @@ TEST_F(HalfedgeMutationSuite, SplitFlipSubdivie) {
 // Split a few edges on a bunch of meshes
 TEST_F(HalfedgeMutationSuite, EdgeSplitTest) {
 
-  for (MeshAsset& a : allMeshes()) {
+  for (MeshAsset& a : triangularMeshes()) {
     a.printThyName();
 
     int count = 10;
@@ -168,7 +168,7 @@ TEST_F(HalfedgeMutationSuite, EdgeSplitTest) {
 
       // Split an edge
       Edge eSplit = a.mesh->edge(splitInd);
-      a.mesh->splitEdge(eSplit);
+      a.mesh->splitEdgeTriangular(eSplit);
       a.mesh->validateConnectivity();
 
       splitInd = (splitInd + indInc) % a.mesh->nVertices();
@@ -210,7 +210,7 @@ TEST_F(HalfedgeMutationSuite, ContainerExpandTest) {
 
   // Do just one opertation, to trigger a single resize
   // (this adds at least one of each element type
-  mesh.splitEdge(mesh.edge(0));
+  mesh.splitEdgeTriangular(mesh.edge(0));
 
   // Be sure the mesh actually got bigger
   EXPECT_LT(nVertexOrig, mesh.nVertices());
@@ -275,7 +275,7 @@ TEST_F(HalfedgeMutationSuite, ContainerExpandTest) {
       origEdges.push_back(e);
     }
     for (Edge e : origEdges) {
-      mesh.splitEdge(e);
+      mesh.splitEdgeTriangular(e);
     }
     mesh.validateConnectivity();
     for (Face f : mesh.faces()) {

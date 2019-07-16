@@ -588,7 +588,6 @@ Halfedge HalfedgeMesh::splitEdgeTriangular(Edge e) {
     connectVertices(heFirst, heOther);
   }
 
-  validateConnectivity();
   isCanonicalFlag = false;
   return he;
 }

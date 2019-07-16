@@ -50,6 +50,7 @@ For more, see the [tutorials](../tutorials/load_mesh). To get started with the c
 Geometry-central is developed primarily by [Nicholas Sharp](http://nmwsharp.com), with contributions from 
 [Keenan Crane](http://keenan.is/here), 
 [Yousuf Soliman](http://www.its.caltech.edu/~ysoliman/),
+[Mark Gillespie](http://markjgillespie.com/),
 [Rohan Sawhney](http://rohansawhney.io/), and many others.
 
 If geometry-central contributes to an academic publication, cite it as:
