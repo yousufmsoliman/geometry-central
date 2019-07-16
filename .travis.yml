@@ -1,0 +1,21 @@
+branches:
+  only:
+  - v1 
+
+language: cpp
+
+os:
+ - linux
+ - osx
+
+compiler:
+  - gcc
+  - clang
+
+before_script:
+  - cd test
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_BUILD_TYPE=Debug ..
+
+script: make && ./geometry-central-test
