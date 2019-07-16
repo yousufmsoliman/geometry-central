@@ -18,4 +18,4 @@ before_script:
   - cd build
   - cmake -DCMAKE_BUILD_TYPE=Debug ..
 
-script: make && ./geometry-central-test
+script: make && ./bin/geometry-central-test
