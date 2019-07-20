@@ -42,6 +42,11 @@ void PlyHalfedgeMeshData::addElementProperty(std::string propertyName, const Mes
 
   std::string eName = plyElementName<E>();
 
+  // Make sure the element exists
+  if (!plyData.hasElement(eName)) {
+    plyData.addElement(eName, nElements<E>(&mesh));
+  }
+
   std::vector<T> vec;
   vec.reserve(nElements<E>(&mesh));
   for (E e : iterateElements<E>(&mesh)) {
