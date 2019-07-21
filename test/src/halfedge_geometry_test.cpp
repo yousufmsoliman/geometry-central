@@ -7,6 +7,7 @@
 #include "geometrycentral/surface/embedded_geometry_interface.h"
 #include "geometrycentral/surface/extrinsic_geometry_interface.h"
 #include "geometrycentral/surface/intrinsic_geometry_interface.h"
+#include "geometrycentral/surface/surface_point.h"
 #include "geometrycentral/surface/vertex_position_geometry.h"
 
 #include "load_test_meshes.h"
@@ -1130,5 +1131,96 @@ TEST_F(HalfedgeGeometrySuite, ConvexDiheralAngles) {
   geometry.requireEdgeDihedralAngles();
   for (Edge e : mesh.edges()) {
     EXPECT_GT(geometry.edgeDihedralAngles[e], 0.);
+  }
+}
+
+
+// ============================================================
+// =============== Surface point tests
+// ============================================================
+
+TEST_F(HalfedgeGeometrySuite, SurfacePointVertexInSomeFaceTest) {
+
+  auto asset = getAsset("bob_small.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  VertexPositionGeometry& geom = *asset.geometry;
+
+  double EPS = 1e-4;
+
+  // Test vertex points
+  for (Vertex v : mesh.vertices()) {
+    SurfacePoint p(v);
+    Vector3 posOrig = p.interpolate(geom.inputVertexPositions);
+    p.validate();
+
+    SurfacePoint pEquiv = p.inSomeFace();
+    pEquiv.validate();
+    Vector3 posEquiv = pEquiv.interpolate(geom.inputVertexPositions);
+
+    double dist = (posOrig - posEquiv).norm();
+
+    EXPECT_LT(dist, EPS);
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, SurfacePointEdgeInSomeFaceTest) {
+
+  auto asset = getAsset("bob_small.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  VertexPositionGeometry& geom = *asset.geometry;
+
+  double EPS = 1e-4;
+  std::mt19937 mt(42);
+
+  // Test edge points
+  auto unitRand = [&]() {
+    std::uniform_real_distribution<double> dist(0.0, 1.0);
+    return dist(mt);
+  };
+
+  for (Edge e : mesh.edges()) {
+    SurfacePoint p(e, unitRand());
+    Vector3 posOrig = p.interpolate(geom.inputVertexPositions);
+    p.validate();
+
+    SurfacePoint pEquiv = p.inSomeFace();
+    Vector3 posEquiv = pEquiv.interpolate(geom.inputVertexPositions);
+
+    double dist = (posOrig - posEquiv).norm();
+    EXPECT_LT(dist, EPS);
+  }
+}
+
+TEST_F(HalfedgeGeometrySuite, SurfacePointFaceInSomeFaceTest) {
+
+  auto asset = getAsset("bob_small.ply");
+  HalfedgeMesh& mesh = *asset.mesh;
+  VertexPositionGeometry& geom = *asset.geometry;
+
+  double EPS = 1e-4;
+  std::mt19937 mt(42);
+
+  // Test face points
+  auto unitRand = [&]() {
+    std::uniform_real_distribution<double> dist(0.0, 1.0);
+    return dist(mt);
+  };
+  auto unitBary = [&]() {
+    std::uniform_real_distribution<double> dist(0.0, 1.0);
+    Vector3 res{unitRand(), unitRand(), unitRand()};
+    res /= (res.x + res.y + res.z);
+    return res;
+  };
+
+  for (Face f : mesh.faces()) {
+    SurfacePoint p(f, unitBary());
+    Vector3 posOrig = p.interpolate(geom.inputVertexPositions);
+    p.validate();
+
+    SurfacePoint pEquiv = p.inSomeFace();
+    Vector3 posEquiv = pEquiv.interpolate(geom.inputVertexPositions);
+
+    double dist = (posOrig - posEquiv).norm();
+    EXPECT_LT(dist, EPS);
   }
 }
