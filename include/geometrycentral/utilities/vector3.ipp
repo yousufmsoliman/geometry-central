@@ -148,4 +148,11 @@ inline std::size_t std::hash<geometrycentral::Vector3>::operator()(const geometr
          (std::hash<double>{}(v.z) + (std::hash<double>{}(v.z) << 4));
 }
 
+inline std::string to_string(geometrycentral::Vector3 vec) {
+  ostringstream output;
+  output << vec;
+  return output.str();
+}
+
+
 } // namespace std
