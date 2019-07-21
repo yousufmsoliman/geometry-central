@@ -66,7 +66,16 @@ PositiveDefiniteSolver<T>::PositiveDefiniteSolver(SparseMatrix<T>& mat)
   internals->context.setSimplicial(); // must use simplicial for LDLt
   internals->context.setLDL();        // ensure we get an LDLt internals->factorization
   internals->factorization = cholmod_l_analyze(internals->cMat, internals->context);
-  cholmod_l_factorize(internals->cMat, internals->factorization, internals->context);
+  bool success = (bool)cholmod_l_factorize(internals->cMat, internals->factorization, internals->context);
+
+  if(!success) {
+    throw std::runtime_error("failure in cholmod_l_factorize");
+  }
+  if(internals->context.context.status == CHOLMOD_NOT_POSDEF) {
+    throw std::runtime_error("matrix is not positive definite");
+  }
+
+  
 
   // Eigen version
 #else

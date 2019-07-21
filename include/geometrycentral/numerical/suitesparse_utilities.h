@@ -39,7 +39,6 @@ public:
   // allows CholmodContext to be treated as a cholmod_common*
   operator cholmod_common*(void);
 
-protected:
   cholmod_common context;
 };
 
