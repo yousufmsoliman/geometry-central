@@ -52,13 +52,15 @@ nav:
       - 'Boundaries' : 'surface/halfedge_mesh/boundaries.md'
       - 'Navigation and Iteration' : 'surface/halfedge_mesh/navigation.md'
       - 'Containers' : 'surface/halfedge_mesh/containers.md'
-      - 'I/O' : 'surface/halfedge_mesh/io.md'
       - 'Mutation' : 'surface/halfedge_mesh/mutation.md'
       - 'Delta Complexes' : 'surface/halfedge_mesh/delta_complex.md'
       - 'Internals' : 'surface/halfedge_mesh/internals.md'
     - Geometry: 
       - 'Overview' : 'surface/geometry/geometry.md'
       - 'Quantities' : 'surface/geometry/quantities.md'
+    - Utilities: 
+      - 'I/O' : 'surface/utilities/io.md'
+      - 'Surface Point' : 'surface/utilities/surface_point.md'
     - Algorithms: 
       - 'Direction Fields' : 'surface/algorithms/direction_fields.md'
       - 'Distance' : 'surface/algorithms/distance.md'

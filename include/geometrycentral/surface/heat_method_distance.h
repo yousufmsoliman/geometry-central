@@ -13,8 +13,8 @@
 namespace geometrycentral {
 namespace surface {
 
-// One-off function to compute distance
-// TODO
+// One-off function to compute distance from a vertex
+VertexData<double> heatMethodDistance(IntrinsicGeometryInterface& geom, Vertex v);
 
 
 // Stateful class. Allows efficient repeated solves

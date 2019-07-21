@@ -21,6 +21,7 @@ SET(SRCS
   surface/edge_length_geometry.cpp
   surface/vertex_position_geometry.cpp
   surface/direction_fields.cpp
+  surface/heat_method_distance.cpp
   #surface/mesh_graph_algorithms.cpp
   #surface/detect_symmetry.cpp
   #surface/mesh_ray_tracer.cpp

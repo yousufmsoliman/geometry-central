@@ -7,6 +7,9 @@
 namespace geometrycentral {
 namespace surface {
 
+VertexData<double> heatMethodDistance(IntrinsicGeometryInterface& geom, Vertex v) {
+	return HeatMethodDistanceSolver(geom).computeDistance(v);
+}
 
 HeatMethodDistanceSolver::HeatMethodDistanceSolver(IntrinsicGeometryInterface& geom_, double tCoef_)
     : tCoef(tCoef_), mesh(geom_.mesh), geom(geom_)
