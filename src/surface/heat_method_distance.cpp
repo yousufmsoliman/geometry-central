@@ -23,7 +23,7 @@ HeatMethodDistanceSolver::HeatMethodDistanceSolver(IntrinsicGeometryInterface& g
     meanEdgeLength += geom.edgeLengths[e];
   }
   meanEdgeLength /= mesh.nEdges();
-  shortTime = tCoef * meanEdgeLength;
+  shortTime = tCoef * meanEdgeLength * meanEdgeLength;
 
 
   // === Build & factor the linear systems
