@@ -13,6 +13,7 @@ VectorHeatMethodSolver::VectorHeatMethodSolver(IntrinsicGeometryInterface& geom_
 {
   geom.requireEdgeLengths();
   geom.requireVertexGalerkinMassMatrix();
+  geom.requireVertexLumpedMassMatrix();
 
   // Compute mean edge length and set shortTime
   double meanEdgeLength = 0.;
@@ -23,9 +24,11 @@ VectorHeatMethodSolver::VectorHeatMethodSolver(IntrinsicGeometryInterface& geom_
   shortTime = tCoef * meanEdgeLength * meanEdgeLength;
 
   // We always want the mass matrix
-  massMat = geom.vertexGalerkinMassMatrix;
+  // massMat = geom.vertexGalerkinMassMatrix; TODO
+  massMat = geom.vertexLumpedMassMatrix;
 
 
+  geom.unrequireVertexLumpedMassMatrix();
   geom.unrequireVertexGalerkinMassMatrix();
   geom.unrequireEdgeLengths();
 }
@@ -73,7 +76,22 @@ void VectorHeatMethodSolver::ensureHavePoissonSolver() {
   geom.unrequireCotanLaplacian();
 }
 
+VertexData<double> VectorHeatMethodSolver::extendScalar(const std::vector<std::tuple<Vertex, double>>& sources) {
+
+  std::vector<std::tuple<SurfacePoint, double>> sourcePoints;
+  for (auto tup : sources) {
+    sourcePoints.emplace_back(SurfacePoint(std::get<0>(tup)), std::get<1>(tup));
+  }
+
+  // call general version
+  return extendScalar(sourcePoints);
+}
+
 VertexData<double> VectorHeatMethodSolver::extendScalar(const std::vector<std::tuple<SurfacePoint, double>>& sources) {
+  if (sources.size() == 0) {
+    return VertexData<double>(mesh, std::numeric_limits<double>::quiet_NaN());
+  }
+
   ensureHaveScalarHeatSolver();
 
   geom.requireVertexIndices();
@@ -96,7 +114,7 @@ VertexData<double> VectorHeatMethodSolver::extendScalar(const std::vector<std::t
       indicatorRHS[vInd] += w;
     }
     he = he.next();
-    
+
     { // Second adjacent vertex
       size_t vInd = geom.vertexIndices[he.vertex()];
       double w = facePoint.faceCoords.y;
@@ -104,10 +122,10 @@ VertexData<double> VectorHeatMethodSolver::extendScalar(const std::vector<std::t
       indicatorRHS[vInd] += w;
     }
     he = he.next();
-    
+
     { // Third adjacent vertex
       size_t vInd = geom.vertexIndices[he.vertex()];
-      double w = facePoint.faceCoords.y;
+      double w = facePoint.faceCoords.z;
       dataRHS[vInd] += w * value;
       indicatorRHS[vInd] += w;
     }
@@ -128,6 +146,119 @@ VertexData<double> VectorHeatMethodSolver::extendScalar(const std::vector<std::t
   return result;
 }
 
+
+VertexData<Vector2>
+VectorHeatMethodSolver::transportTangentVectors(const std::vector<std::tuple<SurfacePoint, Vector2>>& sources) {
+  if (sources.size() == 0) {
+    return VertexData<Vector2>(mesh, Vector2::undefined());
+  }
+
+  geom.requireVertexIndices();
+
+
+  // === Setup work
+
+  // Don't need to do magnitude solve with a single source
+  bool singleVec = sources.size() == 1;
+
+  // Make sure systems have been built and factored
+  ensureHaveVectorHeatSolver();
+  if (!singleVec) {
+    ensureHaveScalarHeatSolver();
+  }
+
+
+  // === Build the RHS
+
+  Vector<std::complex<double>> dirRHS = Vector<std::complex<double>>::Zero(mesh.nVertices());
+
+  // Accumulate magnitude data for scalar problem
+  std::vector<std::tuple<SurfacePoint, double>> magnitudeSources;
+
+  for (auto tup : sources) {
+    SurfacePoint point = std::get<0>(tup);
+    Vector2 vec = std::get<1>(tup);
+    std::complex<double> unitVec = Vector2::fromComplex(vec).normalize();
+
+    // Add to the list of magnitudes for magnitude interpolation
+    magnitudeSources.emplace_back(point, vec.norm());
+
+    SurfacePoint facePoint = point.inSomeFace();
+    Halfedge he = facePoint.face.halfedge();
+
+    { // First adjacent vertex
+      size_t vInd = geom.vertexIndices[he.vertex()];
+      double w = facePoint.faceCoords.x;
+      dirRHS[vInd] += w * unitVec;
+    }
+    he = he.next();
+
+
+    { // Second adjacent vertex
+      size_t vInd = geom.vertexIndices[he.vertex()];
+      double w = facePoint.faceCoords.y;
+      dirRHS[vInd] += w * unitVec;
+    }
+    he = he.next();
+
+
+    { // Third adjacent vertex
+      size_t vInd = geom.vertexIndices[he.vertex()];
+      double w = facePoint.faceCoords.z;
+      dirRHS[vInd] += w * unitVec;
+    }
+  }
+
+  auto vectorQ = polyscope::getSurfaceMesh()->addVertexIntrinsicVectorQuantity("rhs vectors", dirRHS);
+
+
+  // == Solve the system
+
+  Vector<std::complex<double>> vecSolution = vectorHeatSolver->solve(dirRHS);
+
+
+  // == Get the magnitude right
+
+  VertexData<Vector2> result(mesh);
+  if (singleVec) {
+    // For one sources, can just normalize and project
+    double targetNorm = std::get<1>(sources[0]).norm();
+    std::cout << "target norm = " << targetNorm << std::endl;
+
+    // for (size_t i = 0; i < (size_t)vecSolution.rows(); i++) {
+    // std::cout << "i = " << i << " sol = " << vecSolution[i] << " sol.abs() = " << std::abs(vecSolution[i])
+    //<< " sol norm = " << vecSolution[i] / std::abs(vecSolution[i])
+    //<< " sol norm mag = " << std::abs(vecSolution[i] / std::abs(vecSolution[i])) << std::endl;
+    //}
+
+    vecSolution = (vecSolution.array() / vecSolution.array().abs()) * targetNorm;
+    // for (size_t i = 0; i < (size_t)vecSolution.rows(); i++) {
+    // std::cout << "i = " << i << " sol = " << vecSolution[i] << " sol.abs() = " << std::abs(vecSolution[i])
+    //<< std::endl;
+    //}
+
+    // Copy to output vector
+    for (Vertex v : mesh.vertices()) {
+      result[v] = Vector2::fromComplex(vecSolution[geom.vertexIndices[v]]);
+      std::cout << "v = " << v << " sol = " << result[v] << " sol.abs() = " << norm(result[v]) << std::endl;
+    }
+  } else {
+    // For multiple sources, need to interpolate magnitudes
+
+    // === Perform scalar interpolation
+    VertexData<double> interpMags = extendScalar(magnitudeSources);
+
+    // Scale and copy to result
+    for (Vertex v : mesh.vertices()) {
+      Vector2 dir = Vector2::fromComplex(vecSolution[geom.vertexIndices[v]]).normalize();
+      result[v] = dir * interpMags[v];
+    }
+  }
+
+
+  geom.unrequireVertexIndices();
+  return result;
+}
 
 
 } // namespace surface

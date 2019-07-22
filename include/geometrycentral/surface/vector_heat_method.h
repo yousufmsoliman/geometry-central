@@ -33,8 +33,8 @@ public:
 
   // === Tangent Vector Extension
   VertexData<Vector2> transportTangentVector(Vertex sourceVert, Vector2 sourceVec);
-  VertexData<Vector2> transportTangentVector(const std::vector<std::tuple<Vertex, Vector2>>& sources);
-  VertexData<Vector2> transportTangentVector(const std::vector<std::tuple<SurfacePoint, Vector2>>& sources);
+  VertexData<Vector2> transportTangentVectors(const std::vector<std::tuple<Vertex, Vector2>>& sources);
+  VertexData<Vector2> transportTangentVectors(const std::vector<std::tuple<SurfacePoint, Vector2>>& sources);
 
 
   // === The Logarithmic map

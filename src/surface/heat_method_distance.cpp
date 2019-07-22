@@ -1,9 +1,6 @@
 #include "geometrycentral/surface/heat_method_distance.h"
 
 
-#include "polyscope/polyscope.h"
-#include "polyscope/surface_mesh.h"
-
 namespace geometrycentral {
 namespace surface {
 
@@ -89,13 +86,10 @@ VertexData<double> HeatMethodDistanceSolver::computeDistance(const std::vector<S
   }
   Vector<double> rhsVec = rhs.toVector();
 
-  polyscope::getSurfaceMesh()->addVertexScalarQuantity("rhs", rhsVec);
-
 
   // === Solve heat
   Vector<double> heatVec = heatSolver->solve(rhsVec);
 
-  polyscope::getSurfaceMesh()->addVertexScalarQuantity("heat", heatVec);
 
   // === Normalize in each face and evaluate divergence
   Vector<double> divergenceVec = Vector<double>::Zero(mesh.nVertices());
@@ -117,8 +111,6 @@ VertexData<double> HeatMethodDistanceSolver::computeDistance(const std::vector<S
       divergenceVec[geom.vertexIndices[he.twin().vertex()]] += -val;
     }
   }
-
-  polyscope::getSurfaceMesh()->addFaceIntrinsicVectorQuantity("gradU", gradU);
 
   // === Integrate divergence to get distance
   Vector<double> distVec = poissonSolver->solve(divergenceVec);
