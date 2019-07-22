@@ -489,7 +489,7 @@ void IntrinsicGeometryInterface::computeVertexConnectionLaplacian() {
     size_t iTip = vertexIndices[he.twin().vertex()];
 
     double weight = edgeCotanWeights[he.edge()];
-    Vector2 rot = transportVectorsAlongHalfedge[he];
+    Vector2 rot = transportVectorsAlongHalfedge[he.twin()];
 
     triplets.emplace_back(iTail, iTail, weight);
     triplets.emplace_back(iTail, iTip, -weight * rot);
