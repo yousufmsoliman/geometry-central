@@ -38,7 +38,7 @@ public:
 
 
   // === The Logarithmic map
-  VertexData<Vector2> computeLogMap(const Vertex& sourceVert);
+  VertexData<Vector2> computeLogMap(const Vertex& sourceVert, double vertexDistanceShift = 0.);
   VertexData<Vector2> computeLogMap(const SurfacePoint& sourceP);
 
 
@@ -72,6 +72,8 @@ private:
   void ensureHaveScalarHeatSolver();
   void ensureHaveVectorHeatSolver();
   void ensureHavePoissonSolver();
+
+  void addVertexOutwardBall(Vertex v, Vector<std::complex<double>>& distGradRHS);
 };
 
 

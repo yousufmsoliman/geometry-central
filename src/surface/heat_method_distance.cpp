@@ -93,7 +93,6 @@ VertexData<double> HeatMethodDistanceSolver::computeDistance(const std::vector<S
 
   // === Normalize in each face and evaluate divergence
   Vector<double> divergenceVec = Vector<double>::Zero(mesh.nVertices());
-  FaceData<Vector2> gradU(mesh);
   for (Face f : mesh.faces()) {
 
     Vector2 gradUDir = Vector2::zero(); // warning, wrong magnitude because we don't care
@@ -103,7 +102,6 @@ VertexData<double> HeatMethodDistanceSolver::computeDistance(const std::vector<S
     }
 
     gradUDir = gradUDir.normalize();
-    gradU[f] = gradUDir;
 
     for (Halfedge he : f.adjacentHalfedges()) {
       double val = -geom.halfedgeCotanWeights[he] * dot(geom.halfedgeVectorsInFace[he], gradUDir);

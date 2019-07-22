@@ -1,9 +1,5 @@
 #include "geometrycentral/surface/vector_heat_method.h"
 
-
-#include "polyscope/polyscope.h"
-#include "polyscope/surface_mesh.h"
-
 namespace geometrycentral {
 namespace surface {
 
@@ -57,7 +53,8 @@ void VectorHeatMethodSolver::ensureHaveVectorHeatSolver() {
 
   // Build the operator
   SparseMatrix<std::complex<double>> vectorOp = massMat.cast<std::complex<double>>() + shortTime * Lconn;
-  vectorHeatSolver.reset(new PositiveDefiniteSolver<std::complex<double>>(vectorOp));
+  vectorHeatSolver.reset(new SquareSolver<std::complex<double>>(vectorOp)); // not necessarily SPD without Delaunay
+  // vectorHeatSolver.reset(new PositiveDefiniteSolver<std::complex<double>>(vectorOp));
 
   geom.unrequireVertexConnectionLaplacian();
 }
@@ -209,8 +206,6 @@ VectorHeatMethodSolver::transportTangentVectors(const std::vector<std::tuple<Sur
     }
   }
 
-  auto vectorQ = polyscope::getSurfaceMesh()->addVertexIntrinsicVectorQuantity("rhs vectors", dirRHS);
-
 
   // == Solve the system
 
@@ -223,24 +218,12 @@ VectorHeatMethodSolver::transportTangentVectors(const std::vector<std::tuple<Sur
   if (singleVec) {
     // For one sources, can just normalize and project
     double targetNorm = std::get<1>(sources[0]).norm();
-    std::cout << "target norm = " << targetNorm << std::endl;
-
-    // for (size_t i = 0; i < (size_t)vecSolution.rows(); i++) {
-    // std::cout << "i = " << i << " sol = " << vecSolution[i] << " sol.abs() = " << std::abs(vecSolution[i])
-    //<< " sol norm = " << vecSolution[i] / std::abs(vecSolution[i])
-    //<< " sol norm mag = " << std::abs(vecSolution[i] / std::abs(vecSolution[i])) << std::endl;
-    //}
 
     vecSolution = (vecSolution.array() / vecSolution.array().abs()) * targetNorm;
-    // for (size_t i = 0; i < (size_t)vecSolution.rows(); i++) {
-    // std::cout << "i = " << i << " sol = " << vecSolution[i] << " sol.abs() = " << std::abs(vecSolution[i])
-    //<< std::endl;
-    //}
 
     // Copy to output vector
     for (Vertex v : mesh.vertices()) {
       result[v] = Vector2::fromComplex(vecSolution[geom.vertexIndices[v]]);
-      std::cout << "v = " << v << " sol = " << result[v] << " sol.abs() = " << norm(result[v]) << std::endl;
     }
   } else {
     // For multiple sources, need to interpolate magnitudes
@@ -258,6 +241,150 @@ VectorHeatMethodSolver::transportTangentVectors(const std::vector<std::tuple<Sur
 
   geom.unrequireVertexIndices();
   return result;
+}
+
+
+VertexData<Vector2> VectorHeatMethodSolver::computeLogMap(const Vertex& sourceVert, double vertexDistanceShift) {
+  geom.requireFaceAreas();
+  geom.requireEdgeLengths();
+  geom.requireCornerAngles();
+  geom.requireEdgeCotanWeights();
+  geom.requireHalfedgeVectorsInVertex();
+  geom.requireTransportVectorsAlongHalfedge();
+  geom.requireVertexIndices();
+
+
+  // Make sure systems have been built and factored
+  ensureHaveVectorHeatSolver();
+  ensureHavePoissonSolver();
+
+  // === Solve for "radial" field
+
+  // Build rhs
+  Vector<std::complex<double>> radialRHS = Vector<std::complex<double>>::Zero(mesh.nVertices());
+  addVertexOutwardBall(sourceVert, radialRHS);
+
+  // Solve
+  Vector<std::complex<double>> radialSol = vectorHeatSolver->solve(radialRHS);
+
+  // Normalize
+  radialSol = (radialSol.array() / radialSol.array().abs());
+
+
+  // === Solve for "horizontal" field
+
+  // Build rhs
+  Vector<std::complex<double>> horizontalRHS = Vector<std::complex<double>>::Zero(mesh.nVertices());
+  horizontalRHS[geom.vertexIndices[sourceVert]] += 1.0;
+
+  // Solve
+  Vector<std::complex<double>> horizontalSol = vectorHeatSolver->solve(horizontalRHS);
+
+  // Normalize
+  horizontalSol = (horizontalSol.array() / horizontalSol.array().abs());
+
+
+  // === Integrate radial field to get distance
+
+  // Build the right hand sign (divergence term)
+  Vector<double> divergenceVec = Vector<double>::Zero(mesh.nVertices());
+  for (Halfedge he : mesh.halfedges()) {
+
+    // Build the vector which is the average vector along the edge, in the basis of the tail vertex
+    Vector2 radAtTail = Vector2::fromComplex(radialSol[geom.vertexIndices[he.vertex()]]);
+    Vector2 radAtTip = Vector2::fromComplex(radialSol[geom.vertexIndices[he.twin().vertex()]]);
+    Vector2 radTipAtTail = geom.transportVectorsAlongHalfedge[he.twin()] * radAtTip;
+
+    // Integrate the edge vector along the edge
+    Vector2 vectAtEdge = 0.5 * (radAtTail + radTipAtTail);
+    double fieldAlongEdge = dot(vectAtEdge, geom.halfedgeVectorsInVertex[he]);
+
+    // Contrbution to divergence is cotan times that integral
+    // (negative since we want negative divergence due to Laplacian sign)
+    double weight = geom.edgeCotanWeights[he.edge()];
+    divergenceVec[geom.vertexIndices[he.vertex()]] += -weight * fieldAlongEdge;
+  }
+
+  // Integrate to get distance
+  Vector<double> distance = poissonSolver->solve(divergenceVec);
+
+  // Shift distance to be zero at the source
+  distance = distance.array() + (vertexDistanceShift - distance[geom.vertexIndices[sourceVert]]);
+
+
+  // Combine distance and angle to get cartesian result
+  VertexData<Vector2> result(mesh);
+  for(Vertex v : mesh.vertices()) {
+    size_t vInd = geom.vertexIndices[v];
+
+    std::complex<double> logDir = radialSol[vInd] / horizontalSol[vInd];
+    Vector2 logCoord = Vector2::fromComplex(logDir) * distance[vInd];
+    result[v] = logCoord;
+  }
+
+  return result;
+}
+
+
+void VectorHeatMethodSolver::addVertexOutwardBall(Vertex vert, Vector<std::complex<double>>& distGradRHS) {
+
+  // see Vector Heat Method, Appendix A
+
+  // Height of triangle with tip at he.vertex()
+  auto heightInTriangle = [&](Halfedge he) {
+    double area = geom.faceAreas[he.face()];
+    double base = geom.edgeLengths[he.next().edge()];
+    return 2.0 * area / base;
+  };
+
+  // Contribution to distance gradient right hand side
+
+  size_t vInd = geom.vertexIndices[vert];
+  for (Halfedge he : vert.outgoingHalfedges()) {
+    Vertex vn = he.twin().vertex();
+    size_t vnInd = geom.vertexIndices[vn];
+
+
+    // he side
+    if (he.isInterior()) {
+      double h = heightInTriangle(he.next());
+      // double theta = halfedgeOppositeAngles[he.next()];
+      double theta = geom.cornerAngles[he.corner()];
+
+      Vector2 valInEdgeBasis{-theta * std::sin(theta) / (2.0 * h),
+                             (theta * std::cos(theta) - std::sin(theta)) / (2.0 * h)};
+
+
+      distGradRHS[vnInd] += static_cast<std::complex<double>>(valInEdgeBasis * geom.halfedgeVectorsInVertex[he.twin()].normalize());
+    }
+
+    // he.twin() side
+    if (he.twin().isInterior()) {
+      double h = heightInTriangle(he.twin());
+      // double theta = halfedgeOppositeAngles[he.twin().next().next()];
+      double theta = geom.cornerAngles[he.twin().next().corner()];
+
+      Vector2 valInEdgeBasis{-theta * std::sin(theta) / (2.0 * h),
+                             -(theta * std::cos(theta) - std::sin(theta)) / (2.0 * h)};
+
+      distGradRHS[vnInd] += static_cast<std::complex<double>>(valInEdgeBasis * geom.halfedgeVectorsInVertex[he.twin()].normalize());
+    }
+
+    // Contribution  to center vert
+    if (he.isInterior()) {
+      double h = heightInTriangle(he);
+      double theta = geom.cornerAngles[he.corner()];
+      double gamma = geom.cornerAngles[he.next().corner()];
+      double alpha = M_PI / 2.0 - gamma;
+
+
+      Vector2 valInEdgeBasis{-(theta * std::cos(alpha) + std::cos(alpha - theta) * std::sin(theta)) / (2.0 * h),
+                             -(std::cos(alpha) - std::cos(alpha - 2 * theta) + 2 * theta * std::sin(alpha)) /
+                                 (4.0 * h)};
+
+      distGradRHS[vInd] += static_cast<std::complex<double>>(valInEdgeBasis * geom.halfedgeVectorsInVertex[he].normalize());
+    }
+  }
 }
 
 
