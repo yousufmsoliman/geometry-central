@@ -26,18 +26,18 @@ struct SurfacePoint {
 
 
   // === Identifying data
-  const SurfacePointType type;
+  SurfacePointType type = SurfacePointType::Vertex;
 
   // if vertex
-  const Vertex vertex;
+  Vertex vertex = Vertex();
 
   // if edge
-  const Edge edge;
-  const double tEdge = std::numeric_limits<double>::quiet_NaN();
+  Edge edge = Edge();
+  double tEdge = std::numeric_limits<double>::quiet_NaN();
 
   // if face
-  const Face face;
-  const Vector3 faceCoords = Vector3::undefined();
+  Face face = Face();
+  Vector3 faceCoords = Vector3::undefined();
 
 
   // === Methods
@@ -46,6 +46,9 @@ struct SurfacePoint {
   // returns one of the equivalent surface points in a face (chosen arbitrarily). If this point is a face point, the
   // output is a copy of this point.
   inline SurfacePoint inSomeFace() const;
+  
+  // Return the nearest vertex to this surface point
+  inline Vertex nearestVertex() const;
 
 
   // Linearly interpolate data at vertices to this point.

@@ -85,7 +85,7 @@ inline Vector2 Vector2::rotate(double theta) const {
   return Vector2{cosTh * x + sinTh * y, -sinTh * x + cosTh * y};
 }
 
-inline Vector2 Vector2::rotate90() const { return Vector2{y, -x}; }
+inline Vector2 Vector2::rotate90() const { return Vector2{-y, x}; }
 
 inline Vector2 Vector2::pow(double p) const {
   std::complex<double> c{x, y};

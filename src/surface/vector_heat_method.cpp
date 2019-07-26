@@ -8,7 +8,6 @@ VectorHeatMethodSolver::VectorHeatMethodSolver(IntrinsicGeometryInterface& geom_
 
 {
   geom.requireEdgeLengths();
-  geom.requireVertexGalerkinMassMatrix();
   geom.requireVertexLumpedMassMatrix();
 
   // Compute mean edge length and set shortTime
@@ -20,12 +19,9 @@ VectorHeatMethodSolver::VectorHeatMethodSolver(IntrinsicGeometryInterface& geom_
   shortTime = tCoef * meanEdgeLength * meanEdgeLength;
 
   // We always want the mass matrix
-  // massMat = geom.vertexGalerkinMassMatrix; TODO
   massMat = geom.vertexLumpedMassMatrix;
 
-
   geom.unrequireVertexLumpedMassMatrix();
-  geom.unrequireVertexGalerkinMassMatrix();
   geom.unrequireEdgeLengths();
 }
 
@@ -314,7 +310,7 @@ VertexData<Vector2> VectorHeatMethodSolver::computeLogMap(const Vertex& sourceVe
 
   // Combine distance and angle to get cartesian result
   VertexData<Vector2> result(mesh);
-  for(Vertex v : mesh.vertices()) {
+  for (Vertex v : mesh.vertices()) {
     size_t vInd = geom.vertexIndices[v];
 
     std::complex<double> logDir = radialSol[vInd] / horizontalSol[vInd];
@@ -355,7 +351,8 @@ void VectorHeatMethodSolver::addVertexOutwardBall(Vertex vert, Vector<std::compl
                              (theta * std::cos(theta) - std::sin(theta)) / (2.0 * h)};
 
 
-      distGradRHS[vnInd] += static_cast<std::complex<double>>(valInEdgeBasis * geom.halfedgeVectorsInVertex[he.twin()].normalize());
+      distGradRHS[vnInd] +=
+          static_cast<std::complex<double>>(valInEdgeBasis * geom.halfedgeVectorsInVertex[he.twin()].normalize());
     }
 
     // he.twin() side
@@ -367,7 +364,8 @@ void VectorHeatMethodSolver::addVertexOutwardBall(Vertex vert, Vector<std::compl
       Vector2 valInEdgeBasis{-theta * std::sin(theta) / (2.0 * h),
                              -(theta * std::cos(theta) - std::sin(theta)) / (2.0 * h)};
 
-      distGradRHS[vnInd] += static_cast<std::complex<double>>(valInEdgeBasis * geom.halfedgeVectorsInVertex[he.twin()].normalize());
+      distGradRHS[vnInd] +=
+          static_cast<std::complex<double>>(valInEdgeBasis * geom.halfedgeVectorsInVertex[he.twin()].normalize());
     }
 
     // Contribution  to center vert
@@ -382,11 +380,77 @@ void VectorHeatMethodSolver::addVertexOutwardBall(Vertex vert, Vector<std::compl
                              -(std::cos(alpha) - std::cos(alpha - 2 * theta) + 2 * theta * std::sin(alpha)) /
                                  (4.0 * h)};
 
-      distGradRHS[vInd] += static_cast<std::complex<double>>(valInEdgeBasis * geom.halfedgeVectorsInVertex[he].normalize());
+      distGradRHS[vInd] +=
+          static_cast<std::complex<double>>(valInEdgeBasis * geom.halfedgeVectorsInVertex[he].normalize());
     }
   }
 }
 
+VertexData<Vector2> VectorHeatMethodSolver::computeLogMap(const SurfacePoint& sourceP) {
+  geom.requireHalfedgeVectorsInVertex();
+  geom.requireHalfedgeVectorsInFace();
+
+  switch (sourceP.type) {
+  case SurfacePointType::Vertex: {
+
+    return computeLogMap(sourceP.vertex);
+    break;
+  }
+  case SurfacePointType::Edge: {
+    geom.requireHalfedgeVectorsInVertex();
+
+    // Compute logmaps at both adjacent vertices
+    Halfedge he = sourceP.edge.halfedge();
+    VertexData<Vector2> logmapTail = computeLogMap(he.vertex());
+    VertexData<Vector2> logmapTip = computeLogMap(he.twin().vertex());
+
+    // Changes of basis
+    Vector2 tailRot = geom.halfedgeVectorsInVertex[he].inv().normalize();
+    Vector2 tipRot = -geom.halfedgeVectorsInVertex[he.twin()].inv().normalize();
+
+    // Blend result and store in edge basis
+    VertexData<Vector2> resultMap(mesh, Vector2::zero());
+    double tBlend = sourceP.tEdge;
+    for (Vertex v : mesh.vertices()) {
+      resultMap[v] = (1. - tBlend) * logmapTail[v] * tailRot + tBlend * logmapTip[v] * tipRot;
+    }
+
+    geom.unrequireHalfedgeVectorsInVertex();
+    break;
+  }
+  case SurfacePointType::Face: {
+    geom.requireHalfedgeVectorsInVertex();
+    geom.requireHalfedgeVectorsInFace();
+
+    // Accumulate result from adjcent halfedges
+    VertexData<Vector2> resultMap(mesh, Vector2::zero());
+    int iC = 0;
+    for (Halfedge he : sourceP.face.adjacentHalfedges()) {
+
+      // Commpute logmap at vertex
+      VertexData<Vector2> logmapVert = computeLogMap(he.vertex());
+
+      // Compute change of basis to bring it back to the face
+      Vector2 rot = (geom.halfedgeVectorsInFace[he] / geom.halfedgeVectorsInVertex[he]).normalize();
+
+      // Accumulate in face fesult
+      for (Vertex v : mesh.vertices()) {
+        resultMap[v] += sourceP.faceCoords[iC] * rot * logmapVert[v];
+      }
+      iC++;
+    }
+
+
+    geom.unrequireHalfedgeVectorsInVertex();
+    geom.unrequireHalfedgeVectorsInFace();
+    return resultMap;
+    break;
+  }
+  }
+
+  throw std::logic_error("bad switch");
+  return VertexData<Vector2>();
+}
 
 } // namespace surface
 } // namespace geometrycentral

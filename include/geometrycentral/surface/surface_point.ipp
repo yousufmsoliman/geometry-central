@@ -84,6 +84,34 @@ inline SurfacePoint SurfacePoint::inSomeFace() const {
 }
 
 
+inline Vertex SurfacePoint::nearestVertex() const {
+
+  switch (type) {
+  case SurfacePointType::Vertex: {
+    return vertex;
+    break;
+  }
+  case SurfacePointType::Edge: {
+    if (tEdge < .5) return edge.halfedge().vertex();
+    return edge.halfedge().twin().vertex();
+    break;
+  }
+  case SurfacePointType::Face: {
+    if (faceCoords.x >= faceCoords.y && faceCoords.x >= faceCoords.z) {
+      return face.halfedge().vertex();
+    }
+    if (faceCoords.y >= faceCoords.x && faceCoords.y >= faceCoords.z) {
+      return face.halfedge().next().vertex();
+    }
+    return face.halfedge().next().next().vertex();
+    break;
+  }
+  }
+
+  throw std::logic_error("bad switch");
+  return vertex;
+}
+
 template <typename T>
 inline T SurfacePoint::interpolate(const VertexData<T>& data) const {
 

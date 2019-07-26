@@ -23,6 +23,8 @@ SET(SRCS
   surface/direction_fields.cpp
   surface/heat_method_distance.cpp
   surface/vector_heat_method.cpp
+  surface/trace_geodesic.cpp
+  surface/surface_centers.cpp
   #surface/mesh_graph_algorithms.cpp
   #surface/detect_symmetry.cpp
   #surface/mesh_ray_tracer.cpp
