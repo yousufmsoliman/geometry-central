@@ -3,6 +3,7 @@ site_name: Geometry Central
 markdown_extensions:
   - codehilite
   - admonition
+  - attr_list
   - markdown.extensions.footnotes
   - markdown.extensions.smarty
   - pymdownx.superfences
@@ -63,7 +64,9 @@ nav:
       - 'Surface Point' : 'surface/utilities/surface_point.md'
     - Algorithms: 
       - 'Direction Fields' : 'surface/algorithms/direction_fields.md'
-      - 'Distance' : 'surface/algorithms/distance.md'
+      - 'Geodesic Distance' : 'surface/algorithms/geodesic_distance.md'
+      - 'Vector Heat Method' : 'surface/algorithms/vector_heat_method.md'
+      - 'Surface Centers' : 'surface/algorithms/surface_centers.md'
       - 'Mesh Graph Algorithms' : 'surface/algorithms/mesh_graph_algorithms.md'
   - Numerical: 
     - 'Matrix Types' : 'numerical/matrix_types.md'
