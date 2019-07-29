@@ -71,7 +71,7 @@ inline Vector2::operator std::complex<double>() const { return std::complex<doub
 
 inline Vector2 Vector2::normalize() const {
   double r = 1. / std::sqrt(x * x + y * y);
-  return *this / r;
+  return *this * r;
 }
 
 inline Vector2 unit(const Vector2& v) {
@@ -85,7 +85,7 @@ inline Vector2 Vector2::rotate(double theta) const {
   return Vector2{cosTh * x + sinTh * y, -sinTh * x + cosTh * y};
 }
 
-inline Vector2 Vector2::rotate90() const { return Vector2{y, -x}; }
+inline Vector2 Vector2::rotate90() const { return Vector2{-y, x}; }
 
 inline Vector2 Vector2::pow(double p) const {
   std::complex<double> c{x, y};
@@ -148,3 +148,19 @@ inline std::ostream& operator<<(std::ostream& output, const Vector2& v) {
 }
 
 } // namespace geometrycentral
+
+namespace std {
+inline std::size_t std::hash<geometrycentral::Vector2>::operator()(const geometrycentral::Vector2& v) const {
+  return std::hash<double>{}(v.x) ^ (std::hash<double>{}(v.y) + (std::hash<double>{}(v.y) << 2)) ^
+         (std::hash<double>{}(v.x) + (std::hash<double>{}(v.x) << 4));
+}
+
+inline std::string to_string(geometrycentral::Vector2 vec) {
+  ostringstream output;
+  output << vec;
+  return output.str();
+}
+
+
+} // namespace std
+

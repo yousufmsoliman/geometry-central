@@ -6,6 +6,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <sstream>
 
 namespace geometrycentral {
 
@@ -47,7 +48,7 @@ struct Vector3 {
   Vector3 rotateAround(Vector3 axis, double theta) const;
   Vector3 removeComponent(const Vector3& unitDir) const; // removes component in direction D
   Vector3 normalize() const;
-  
+
   double norm() const;
   double norm2() const;
 
@@ -59,6 +60,7 @@ struct Vector3 {
 template <typename T>
 Vector3 operator*(const T s, const Vector3& v);
 
+// Printing
 ::std::ostream& operator<<(::std::ostream& output, const Vector3& v);
 
 double norm(const Vector3& v);
@@ -83,6 +85,10 @@ template <>
 struct hash<geometrycentral::Vector3> {
   std::size_t operator()(const geometrycentral::Vector3& v) const;
 };
+
+// overload for std string
+std::string to_string(geometrycentral::Vector3 value);
+
 } // namespace std
 
 #include "vector3.ipp"

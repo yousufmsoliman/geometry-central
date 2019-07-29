@@ -1,8 +1,12 @@
 #pragma once
 
 #include "geometrycentral/utilities/vector3.h"
+
+#include <array>
 #include <cmath>
 #include <iostream>
+#include <limits>
+#include <sstream>
 
 namespace geometrycentral {
 
@@ -70,7 +74,7 @@ struct Vector2 {
   bool isDefined() const;
 };
 
-template<typename T>
+template <typename T>
 Vector2 operator*(const T s, const Vector2& v);
 
 ::std::ostream& operator<<(std::ostream& output, const Vector2& v);
@@ -96,5 +100,17 @@ Vector2 componentwiseMin(const Vector2& u, const Vector2& v);
 Vector2 componentwiseMax(const Vector2& u, const Vector2& v);
 
 } // namespace geometrycentral
+
+namespace std {
+template <>
+struct hash<geometrycentral::Vector2> {
+  std::size_t operator()(const geometrycentral::Vector2& v) const;
+};
+
+// overload for std string
+std::string to_string(geometrycentral::Vector2 value);
+
+} // namespace std
+
 
 #include "geometrycentral/utilities/vector2.ipp"

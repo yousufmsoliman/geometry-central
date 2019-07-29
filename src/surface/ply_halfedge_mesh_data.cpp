@@ -43,9 +43,9 @@ void PlyHalfedgeMeshData::addGeometry(EmbeddedGeometryInterface& geometry) {
   geometry.requireVertexPositions();
 
   // separate x/y/z coordinates
-  VertexData<double> x = getVertexProperty<double>("x");
-  VertexData<double> y = getVertexProperty<double>("y");
-  VertexData<double> z = getVertexProperty<double>("z");
+  VertexData<double> x(mesh);
+  VertexData<double> y(mesh);
+  VertexData<double> z(mesh);
 
   for (Vertex v : mesh.vertices()) {
     Vector3 p = geometry.vertexPositions[v];

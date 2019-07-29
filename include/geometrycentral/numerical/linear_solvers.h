@@ -52,6 +52,7 @@ class LinearSolver {
 
 public:
   LinearSolver(const SparseMatrix<T>& mat) : nRows(mat.rows()), nCols(mat.cols()) {}
+  virtual ~LinearSolver() {}
 
   // Solve for a particular right hand side
   virtual Vector<T> solve(const Vector<T>& rhs) = 0;
