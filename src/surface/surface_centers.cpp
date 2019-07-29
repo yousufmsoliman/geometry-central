@@ -41,6 +41,12 @@ SurfacePoint findCenter(IntrinsicGeometryInterface& geom, const VertexData<doubl
 
 SurfacePoint findCenter(IntrinsicGeometryInterface& geom, VectorHeatMethodSolver& solver,
                         const VertexData<double>& distribution, int p) {
+
+  if (p != 1 && p != 2) {
+    throw std::logic_error("only p=1 or p=2 is supported");
+  }
+
+
   HalfedgeMesh& mesh = geom.mesh;
 
   geom.requireFaceAreas();
