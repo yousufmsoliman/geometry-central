@@ -23,21 +23,21 @@ enum class SType { UNSYMMETRIC = 0, SYMMETRIC };
 class CholmodContext {
 public:
   // constructor
-  CholmodContext(void);
+  CholmodContext();
 
   // destructor
-  ~CholmodContext(void);
+  ~CholmodContext();
 
   // set mode for Cholesky factorization
-  void setSimplicial(void);
-  void setSupernodal(void);
+  void setSimplicial();
+  void setSupernodal();
 
   // set LL vs LDL mode
-  void setLL(void);
-  void setLDL(void);
+  void setLL();
+  void setLDL();
 
   // allows CholmodContext to be treated as a cholmod_common*
-  operator cholmod_common*(void);
+  operator cholmod_common*();
 
   cholmod_common context;
 };

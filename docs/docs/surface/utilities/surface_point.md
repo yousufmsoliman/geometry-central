@@ -22,8 +22,14 @@ Surface points have a few useful utility methods:
     Given data of tempalte type `T` defined at vertices, linearly interpolates to a value at this location.
 
 
-??? func "`#!cpp inline SurfacePoint SurfacePoint::inSomeFace()`"
+??? func "`#!cpp SurfacePoint SurfacePoint::inSomeFace()`"
 
     All surface points (vertex, edge, face) have an equivalent point in one or many adjacent faces. For instance, a vertex could be equivalently a point in any of the incident faces, with a single `1` barycentric coordinate, or a point on an edge could be a point in either of the two adjacent faces.
 
     This function returns one of the equivalent surface points in a face (chosen arbitrarily). If this point is a face point, the output is a copy of this point.
+
+??? func "`#!cpp Vertex SurfacePoint::nearestVertex()`"
+
+    Returns the nearest vertex which is adjacent to this point.
+
+    For surface points which are vertices, it will return the same vertex.  For surface points which are along edges, it will return one of the two incident vertices.  For surface points which are inside faces, it will return one of the three incident vertices.
