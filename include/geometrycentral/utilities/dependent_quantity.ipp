@@ -56,6 +56,12 @@ void clearBuffer(Eigen::SparseMatrix<F>* buffer) {
   *buffer = Eigen::SparseMatrix<F>();
 }
 
+// Eigen dense matrices
+template <typename F>
+void clearBuffer(Eigen::Matrix<F,-1,1,0,-1,1>* buffer) {
+  *buffer = Eigen::Matrix<F,-1,1,0,-1,1>();
+}
+
 // Array of any otherwise clearable type
 template <typename A, size_t N>
 void clearBuffer(std::array<A*, N>* buffer) {
