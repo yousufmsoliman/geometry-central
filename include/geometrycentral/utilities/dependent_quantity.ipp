@@ -7,6 +7,8 @@ inline void DependentQuantity::ensureHaveIfRequired() {
 }
 
 inline void DependentQuantity::ensureHave() {
+  if( s.size() > 0 )
+    std::cout << s << " -- " << requireCount << " -- " << computed << std::endl;
 
   // If the quantity is already populated, early out
   if (computed) {
@@ -17,6 +19,8 @@ inline void DependentQuantity::ensureHave() {
   evaluateFunc();
 
   computed = true;
+  if( s.size() > 0 )
+    std::cout << s << " -- " << requireCount << " -- " << computed << std::endl;
 };
 
 inline void DependentQuantity::require() {
@@ -76,6 +80,8 @@ void clearBuffer(std::array<A*, N>* buffer) {
 
 template <typename D>
 void DependentQuantityD<D>::clearIfNotRequired() {
+  if( s.size() > 0 )
+    std::cout << s << " -CLEAR- " << requireCount << " -- " << computed << std::endl;
   if (requireCount <= 0 && dataBuffer != nullptr && computed) {
     clearBuffer(dataBuffer);
     computed = false;

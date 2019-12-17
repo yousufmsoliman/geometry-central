@@ -20,9 +20,17 @@ public:
     listToJoin.push_back(this);
   }
 
+  DependentQuantity(std::function<void()> evaluateFunc_, std::vector<DependentQuantity*>& listToJoin, std::string s_)
+      : evaluateFunc(evaluateFunc_), s(s_) {
+    listToJoin.push_back(this);
+  }
+
+
   virtual ~DependentQuantity(){};
 
   std::function<void()> evaluateFunc;
+  std::string s;
+
   bool computed = false;
   int requireCount = 0;
 
@@ -53,6 +61,9 @@ public:
 
   DependentQuantityD(D* dataBuffer_, std::function<void()> evaluateFunc_, std::vector<DependentQuantity*>& listToJoin)
       : DependentQuantity(evaluateFunc_, listToJoin), dataBuffer(dataBuffer_) {}
+
+  DependentQuantityD(D* dataBuffer_, std::function<void()> evaluateFunc_, std::vector<DependentQuantity*>& listToJoin, std::string s_)
+      : DependentQuantity(evaluateFunc_, listToJoin, s_), dataBuffer(dataBuffer_) {}
 
   D* dataBuffer = nullptr;
 
