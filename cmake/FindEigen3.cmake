@@ -10,12 +10,8 @@
 #  EIGEN3_INCLUDE_DIR - the eigen include directory
 #  EIGEN3_VERSION - eigen version
 #
-# and the following imported target:
-#
-#  Eigen3::Eigen - The header-only Eigen library
-#
-# This module reads hints about search locations from 
-# the following environment variables:
+# This module reads hints about search locations from
+# the following enviroment variables:
 #
 # EIGEN3_ROOT
 # EIGEN3_ROOT_DIR
@@ -40,11 +36,7 @@ if(NOT Eigen3_FIND_VERSION)
 endif(NOT Eigen3_FIND_VERSION)
 
 macro(_eigen3_check_version)
-
-  # Outer if(EXISTS) check is an edit by Nick to handle case where file doesn't exist, 
-  # since find_package() below is returning bogus results. This may be obscuring a real
-  # bug causing bad returns from find_package(), but I can't find any such thing.
-  if(EXISTS "${EIGEN3_INCLUDE_DIR}/Eigen/src/Core/util/Macros.h") 
+  if(EXISTS "${EIGEN3_INCLUDE_DIR}/Eigen/src/Core/util/Macros.h")
     file(READ "${EIGEN3_INCLUDE_DIR}/Eigen/src/Core/util/Macros.h" _eigen3_version_header)
 
     string(REGEX MATCH "define[ \t]+EIGEN_WORLD_VERSION[ \t]+([0-9]+)" _eigen3_world_version_match "${_eigen3_version_header}")
@@ -66,6 +58,11 @@ macro(_eigen3_check_version)
       message(STATUS "Eigen3 version ${EIGEN3_VERSION} found in ${EIGEN3_INCLUDE_DIR}, "
                      "but at least version ${Eigen3_FIND_VERSION} is required")
     endif(NOT EIGEN3_VERSION_OK)
+  else()
+    # Purge EIGEN3_INCLUDE_DIR value since it's invalid
+    # Required so find_path will actually search instead of defaulting
+    set(EIGEN3_INCLUDE_DIR "EIGEN3_INCLUDE_DIR-NOTFOUND")
+    set(EIGEN3_VERSION_OK FALSE)
   endif()
 endmacro(_eigen3_check_version)
 
@@ -74,10 +71,9 @@ if (EIGEN3_INCLUDE_DIR)
   # in cache already
   _eigen3_check_version()
   set(EIGEN3_FOUND ${EIGEN3_VERSION_OK})
-  set(Eigen3_FOUND ${EIGEN3_VERSION_OK})
 
 else (EIGEN3_INCLUDE_DIR)
-  
+
   # search first if an Eigen3Config.cmake is available in the system,
   # if successful this would set EIGEN3_INCLUDE_DIR and the rest of
   # the script will work as usual
@@ -86,7 +82,7 @@ else (EIGEN3_INCLUDE_DIR)
   if(NOT EIGEN3_INCLUDE_DIR)
     find_path(EIGEN3_INCLUDE_DIR NAMES signature_of_eigen3_matrix_library
         HINTS
-        ENV EIGEN3_ROOT 
+        ENV EIGEN3_ROOT
         ENV EIGEN3_ROOT_DIR
         PATHS
         ${CMAKE_INSTALL_PREFIX}/include
@@ -105,9 +101,3 @@ else (EIGEN3_INCLUDE_DIR)
   mark_as_advanced(EIGEN3_INCLUDE_DIR)
 
 endif(EIGEN3_INCLUDE_DIR)
-
-if(EIGEN3_FOUND AND NOT TARGET Eigen3::Eigen)
-  add_library(Eigen3::Eigen INTERFACE IMPORTED)
-  set_target_properties(Eigen3::Eigen PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES "${EIGEN3_INCLUDE_DIR}")
-endif()
